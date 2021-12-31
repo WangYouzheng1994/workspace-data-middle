@@ -1,0 +1,7 @@
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\app\func\TableProcessFunction.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\app\BaseDBApp.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\util\GmallConfig.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\util\KafkaUtil.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\util\MysqlUtil.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\bean\TableProcess.java
+D:\workspace-data-middle\biz-module-realtime\src\main\java\com\yqwl\datamiddle\realtime\FlinkCDC.java
