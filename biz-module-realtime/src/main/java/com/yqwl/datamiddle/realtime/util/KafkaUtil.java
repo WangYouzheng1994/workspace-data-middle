@@ -8,7 +8,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 /**
  * @Description: kafka读写工具
@@ -42,13 +41,13 @@ public class KafkaUtil {
         return new FlinkKafkaProducer<T>(DEFAULT_TOPIC, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
     }
 
-    public static String getKafkaDDL(String topic,String groupId){
-        String ddl="'connector' = 'kafka', " +
-                " 'topic' = '"+topic+"',"   +
-                " 'properties.bootstrap.servers' = '"+ KAFKA_SERVER +"', " +
-                " 'properties.group.id' = '"+groupId+ "', " +
+    public static String getKafkaDDL(String topic, String groupId) {
+        String ddl = "'connector' = 'kafka', " +
+                " 'topic' = '" + topic + "'," +
+                " 'properties.bootstrap.servers' = '" + KAFKA_SERVER + "', " +
+                " 'properties.group.id' = '" + groupId + "', " +
                 "  'format' = 'json', " +
                 "  'scan.startup.mode' = 'latest-offset'  ";
-        return  ddl;
+        return ddl;
     }
 }

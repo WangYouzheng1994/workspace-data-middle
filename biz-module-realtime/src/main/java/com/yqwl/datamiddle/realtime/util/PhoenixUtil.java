@@ -15,7 +15,7 @@ import java.util.List;
 public class PhoenixUtil {
     private static Connection conn = null;
 
-    public static void init(){
+    public static void init() {
         try {
             //注册驱动
             Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
@@ -30,8 +30,8 @@ public class PhoenixUtil {
 
     // 从Phoenix中查询数据
     // select * from 表 where XXX=xxx
-    public static <T> List<T> queryList(String sql,Class<T> clazz){
-        if(conn == null){
+    public static <T> List<T> queryList(String sql, Class<T> clazz) {
+        if (conn == null) {
             init();
         }
         List<T> resultList = new ArrayList<>();
@@ -45,11 +45,11 @@ public class PhoenixUtil {
             //通过结果集对象获取元数据信息
             ResultSetMetaData metaData = rs.getMetaData();
             //处理结果集
-            while (rs.next()){
+            while (rs.next()) {
                 //声明一个对象，用于封装查询的一条结果集
                 T rowData = clazz.newInstance();
                 for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                    BeanUtils.setProperty(rowData,metaData.getColumnName(i),rs.getObject(i));
+                    BeanUtils.setProperty(rowData, metaData.getColumnName(i), rs.getObject(i));
                 }
                 resultList.add(rowData);
             }

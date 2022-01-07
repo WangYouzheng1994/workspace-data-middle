@@ -55,6 +55,9 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
         }, 5000, 5000);
     }
 
+    /**
+     * 初始化分流配置集合
+     */
     private void initTableProcessMap() {
         System.out.println("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
@@ -76,6 +79,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
             tableProcessMap.put(key, tableProcess);
             //如果是向 Hbase 中保存的表，那么判断在内存中维护的 Set 集合中是否存在
             if ("insert".equals(operateType) && "hbase".equals(sinkType)) {
+                // 通过add方法的返回值判定是否存在该表
                 boolean notExist = existsTables.add(sourceTable);
                 //如果表信息数据不存在内存,则在 Phoenix 中创建新的表
                 if (notExist) {
@@ -89,6 +93,14 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
         }
     }
 
+    /**
+     * 判定hbase是否存在此表，不存在进行pheonix建表语句的拼接，进行建表动作。
+     *
+     * @param tableName
+     * @param fields
+     * @param pk
+     * @param ext
+     */
     private void checkTable(String tableName, String fields, String pk, String ext) {
         //主键不存在,则给定默认值
         if (pk == null) {
@@ -164,6 +176,12 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
         }
     }
 
+    /**
+     * 根据配置过滤要抽取的字段
+     *
+     * @param data
+     * @param sinkColumns
+     */
     private void filterColumn(JSONObject data, String sinkColumns) {
         String[] cols = StringUtils.split(sinkColumns, ",");
         Set<Map.Entry<String, Object>> entries = data.entrySet();

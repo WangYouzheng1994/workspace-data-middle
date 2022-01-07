@@ -5,7 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * @Description:
+ * @Description: 订单主表
  * @Author: WangYouzheng
  * @Date: 2022/1/7 9:38
  * @Version: V1.0

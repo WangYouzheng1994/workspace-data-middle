@@ -68,12 +68,10 @@ public class DimSink extends RichSinkFunction<JSONObject> {
             }
 
             //如果当前做的是更新操作，需要将Redis中缓存的数据清除掉
-            if(jsonObj.getString("type").equals("update")){
-                DimUtil.deleteCached(tableName,dataJsonObj.getString("id"));
+            if (jsonObj.getString("type").equals("update")) {
+                DimUtil.deleteCached(tableName, dataJsonObj.getString("id"));
             }
         }
-
-
     }
 
     // 根据data属性和值  生成向Phoenix中插入数据的sql语句

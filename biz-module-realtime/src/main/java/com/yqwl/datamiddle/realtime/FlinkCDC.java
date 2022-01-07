@@ -6,8 +6,6 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import java.sql.Savepoint;
-
 /**
  * @Description:
  * @Author: WangYouzheng

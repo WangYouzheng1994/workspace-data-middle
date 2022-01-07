@@ -13,10 +13,10 @@ import java.math.BigDecimal;
 @Data
 public class OrderWide {
     Long detail_id;
-    Long order_id ;
+    Long order_id;
     Long sku_id;
-    BigDecimal order_price ;
-    Long sku_num ;
+    BigDecimal order_price;
+    Long sku_num;
     String sku_name;
     Long province_id;
     String order_status;
