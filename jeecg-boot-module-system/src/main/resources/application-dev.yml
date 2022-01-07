@@ -219,7 +219,7 @@ jeecg :
     #数据字典是否进行saas数据隔离，自己看自己的字典
     saas: false
     #是否需要校验token
-    is_verify_token: true
+    is_verify_token: false
     #必须校验方法
     verify_methods: remove,delete,save,add,update
   #Wps在线文档
