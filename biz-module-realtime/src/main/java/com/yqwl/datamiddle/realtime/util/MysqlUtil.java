@@ -33,8 +33,8 @@ public class MysqlUtil {
             Class.forName("com.mysql.jdbc.Driver");
             //建立连接
             conn = DriverManager.getConnection(
-                    "jdbc:mysql://192.168.3.4:3306/data_middle?characterEncoding=utf-8&useSSL=false",
-                    "fengqiwulian", "fengqiwulian");
+                    "jdbc:mysql://192.168.74.100:3306/fdsa?characterEncoding=utf-8&useSSL=false",
+                    "root", "root-password");
             //创建数据库操作对象
             ps = conn.prepareStatement(sql);
             //执行 SQL 语句

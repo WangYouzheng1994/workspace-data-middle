@@ -22,7 +22,7 @@ public class RedisUtil {
             jedisPoolConfig.setMinIdle(5); //最小闲置连接数
             jedisPoolConfig.setTestOnBorrow(true); //取连接的时候进行一下测试 ping pong
 
-            jedisPool = new JedisPool(jedisPoolConfig, "hadoop202", 6379, 10000);
+            jedisPool = new JedisPool(jedisPoolConfig, "hadoop100", 6379, 10000);
         }
         return jedisPool.getResource();
     }

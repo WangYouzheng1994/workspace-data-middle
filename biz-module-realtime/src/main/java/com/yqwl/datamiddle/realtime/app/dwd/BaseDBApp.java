@@ -34,10 +34,15 @@ public class BaseDBApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(4);
         //设置 CK 相关参数
-        env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
+/*        env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
         env.getCheckpointConfig().setCheckpointTimeout(60000);
         env.setStateBackend(new FsStateBackend("hdfs://192.168.74.100:8020/gmall/flink/checkpoint"));
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "root");*/
+        //重启策略
+        // 如果说没有开启重启Checkpoint，那么重启策略就是noRestart
+        // 如果说没有开Checkpoint，那么重启策略会尝试自动帮你进行重启   重启Integer.MaxValue
+        //env.setRestartStrategy(RestartStrategies.noRestart());
+
         //TODO 1.接收 Kafka 数据，过滤空值数据
         //定义消费者组以及指定消费主题
         String topic = "ods_base_db_m";

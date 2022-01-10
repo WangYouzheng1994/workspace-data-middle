@@ -41,6 +41,11 @@ public class KafkaUtil {
         return new FlinkKafkaProducer<T>(DEFAULT_TOPIC, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
     }
 
+    //封装FlinkKafkaProducer
+    public static FlinkKafkaProducer<String> getKafkaSink(String topic) {
+        return new FlinkKafkaProducer<String>(KAFKA_SERVER, topic, new SimpleStringSchema());
+    }
+
     public static String getKafkaDDL(String topic, String groupId) {
         String ddl = "'connector' = 'kafka', " +
                 " 'topic' = '" + topic + "'," +
