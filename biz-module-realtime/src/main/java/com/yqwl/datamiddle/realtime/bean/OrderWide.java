@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import java.math.BigDecimal;
 
 /**
- * @Description:
+ * @Description: 订单宽表实体类
  * @Author: WangYouzheng
  * @Date: 2022/1/7 9:46
  * @Version: V1.0
@@ -56,12 +56,21 @@ public class OrderWide {
     String tm_name;
     String category3_name;
 
+    /**
+     * 合并订单表和明细表的数据
+     * @param orderInfo
+     * @param orderDetail
+     */
     public OrderWide(OrderInfo orderInfo, OrderDetail orderDetail){
         mergeOrderInfo(orderInfo);
         mergeOrderDetail(orderDetail);
-
     }
 
+    /**
+     * 合并订单数据
+     *
+     * @param orderInfo
+     */
     public void  mergeOrderInfo(OrderInfo orderInfo  )  {
         if (orderInfo != null) {
             this.order_id = orderInfo.id;
@@ -78,6 +87,11 @@ public class OrderWide {
         }
     }
 
+    /**
+     * 合并设置明细数据
+     *
+     * @param orderDetail
+     */
     public void mergeOrderDetail(OrderDetail orderDetail  )  {
         if (orderDetail != null) {
             this.detail_id = orderDetail.id;

@@ -168,6 +168,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
             }
             if (tableProcess != null &&
                     TableProcess.SINK_TYPE_HBASE.equalsIgnoreCase(tableProcess.getSinkType())) {
+                // 如果是hbase的 那么把这个数据和outputTag打标挂钩。
                 ctx.output(outputTag, jsonObj);
             } else if (tableProcess != null &&
                     TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType())) {

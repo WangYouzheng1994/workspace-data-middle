@@ -112,6 +112,14 @@ public class OrderWideApp {
                         sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     }
 
+                    /**
+                     * 转换。 用RichMapFunction的就是为了open里面定义一次SimpleDateFormat。减少资源浪费。
+                     * TODO: 线程安全吗？
+                     *
+                     * @param jsonStr
+                     * @return
+                     * @throws Exception
+                     */
                     @Override
                     public OrderInfo map(String jsonStr) throws Exception {
                         OrderInfo orderInfo = JSON.parseObject(jsonStr, OrderInfo.class);
@@ -134,7 +142,7 @@ public class OrderWideApp {
                     @Override
                     public OrderDetail map(String jsonStr) throws Exception {
                         OrderDetail orderDetail = JSON.parseObject(jsonStr, OrderDetail.class);
-                        orderDetail.setCreate_ts(sdf.parse(orderDetail.getCreate_time()).getTime());
+                        orderDetail.setCreate_ts(sdf.parse(orderDetail.getCreate_time()).getTime()); // 转时间戳
                         return orderDetail;
                     }
                 }
@@ -146,8 +154,7 @@ public class OrderWideApp {
         //TODO 4. 指定事件时间字段
         //4.1 订单指定事件时间字段
         SingleOutputStreamOperator<OrderInfo> orderInfoWithTsDS = orderInfoDS.assignTimestampsAndWatermarks(
-                WatermarkStrategy
-                        .<OrderInfo>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                WatermarkStrategy.<OrderInfo>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<OrderInfo>() {
                             @Override
                             public long extractTimestamp(OrderInfo orderInfo, long recordTimestamp) {
@@ -170,25 +177,30 @@ public class OrderWideApp {
 
 
         //TODO 5.按照订单id进行分组  指定关联的key
+        // 订单表根据订单id分组
         KeyedStream<OrderInfo, Long> orderInfoKeyedDS = orderInfoWithTsDS.keyBy(OrderInfo::getId);
+        // 明细表根据订单id分组
         KeyedStream<OrderDetail, Long> orderDetailKeyedDS = orderDetailWithTsDS.keyBy(OrderDetail::getOrder_id);
 
         //TODO 6.使用intervalJoin对订单和订单明细进行关联
+        // 使用orderInfoKeyedDs join orderDetailKeyedDS，并设置时间范围，这个时间的边界需要进行实际情况调整~
         SingleOutputStreamOperator<OrderWide> orderWideDS = orderInfoKeyedDS
-                .intervalJoin(orderDetailKeyedDS)
+                .intervalJoin(orderDetailKeyedDS) // 双流合并
                 .between(Time.milliseconds(-5), Time.milliseconds(5))
                 .process(
+                        // 流合并后的动作。 每个连接上的数据，会调用这个ProcessElement
                         new ProcessJoinFunction<OrderInfo, OrderDetail, OrderWide>() {
                             @Override
                             public void processElement(OrderInfo orderInfo, OrderDetail orderDetail, Context ctx, Collector<OrderWide> out) throws Exception {
+                                // 订单和明细拉宽
                                 out.collect(new OrderWide(orderInfo, orderDetail));
                             }
                         }
                 );
+        // 测试合并结果
+        orderWideDS.print("orderWide>>>>");
 
-        //orderWideDS.print("orderWide>>>>");
-
-        //TODO 7.关联用户维度
+       /* //TODO 7.关联用户维度
         SingleOutputStreamOperator<OrderWide> orderWideWithUserDS = AsyncDataStream.unorderedWait(
                 orderWideDS,
                 new DimAsyncFunction<OrderWide>("DIM_USER_INFO") {
@@ -332,7 +344,7 @@ public class OrderWideApp {
                         orderWide -> JSON.toJSONString(orderWide)
                 )
                 .addSink(KafkaUtil.getKafkaSink(orderWideSinkTopic));
-
+*/
         env.execute();
     }
 }

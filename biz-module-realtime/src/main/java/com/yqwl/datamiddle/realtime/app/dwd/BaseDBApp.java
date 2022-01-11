@@ -50,6 +50,8 @@ public class BaseDBApp {
 
         //从 Kafka 主题中读取数据
         FlinkKafkaConsumer<String> kafkaSource = KafkaUtil.getKafkaSource(topic, groupId);
+
+        // flink获取source
         DataStream<String> jsonDstream = env.addSource(kafkaSource);
 
         //jsonDstream.print("data json:::::::");
@@ -78,7 +80,7 @@ public class BaseDBApp {
         SingleOutputStreamOperator<JSONObject> kafkaDS = filteredDS.process(
                 new TableProcessFunction(hbaseTag)
         );
-        //5.3获取侧输出流    写到Hbase的数据
+        //5.3获取侧输出流 通过hbaseTag得到需要写到Hbase的数据
         DataStream<JSONObject> hbaseDS = kafkaDS.getSideOutput(hbaseTag);
 
         kafkaDS.print("事实>>>>");
@@ -95,10 +97,16 @@ public class BaseDBApp {
                         System.out.println("kafka序列化");
                     }
 
+                    /**
+                     * @param jsonObj 传递给这个生产者的源数据 即flink的流数据
+                     * @param timestamp
+                     * @return
+                     */
                     @Override
                     public ProducerRecord<byte[], byte[]> serialize(JSONObject jsonObj, @Nullable Long timestamp) {
                         String sinkTopic = jsonObj.getString("sink_table");
                         JSONObject dataJsonObj = jsonObj.getJSONObject("data");
+                        // 从数据中获取到要输出的主题名称  以及转换成字节
                         return new ProducerRecord<>(sinkTopic, dataJsonObj.toString().getBytes());
                     }
                 }

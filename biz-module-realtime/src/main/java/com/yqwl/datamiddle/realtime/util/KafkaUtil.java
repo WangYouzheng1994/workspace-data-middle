@@ -33,6 +33,13 @@ public class KafkaUtil {
         return new FlinkKafkaConsumer<String>(topic, new SimpleStringSchema(), prop);
     }
 
+    /**
+     * 获取指定主题的生产者。。  通过制定序列化方案的方式
+     *
+     * @param kafkaSerializationSchema
+     * @param <T>
+     * @return
+     */
     public static <T> FlinkKafkaProducer<T> getKafkaSinkBySchema(KafkaSerializationSchema<T> kafkaSerializationSchema) {
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
@@ -41,7 +48,9 @@ public class KafkaUtil {
         return new FlinkKafkaProducer<T>(DEFAULT_TOPIC, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
     }
 
-    //封装FlinkKafkaProducer
+    /**
+     * 通过主题，封装FlinkKafkaProducer
+     */
     public static FlinkKafkaProducer<String> getKafkaSink(String topic) {
         return new FlinkKafkaProducer<String>(KAFKA_SERVER, topic, new SimpleStringSchema());
     }
