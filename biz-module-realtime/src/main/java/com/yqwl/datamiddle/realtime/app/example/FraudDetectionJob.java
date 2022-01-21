@@ -26,7 +26,10 @@ import org.apache.flink.walkthrough.common.sink.AlertSink;
 import org.apache.flink.walkthrough.common.source.TransactionSource;
 
 /**
- * Skeleton code for the datastream walkthrough
+ *    Skeleton code for the datastream walkthrough
+ *
+ *   网址: https://nightlies.apache.org/flink/flink-docs-release-1.14/zh/docs/try-flink/datastream/
+ *   案例说明
  */
 public class FraudDetectionJob {
     public static void main(String[] args) throws Exception {
