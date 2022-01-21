@@ -13,7 +13,7 @@ public class WordCount {
         DataStream<String> text = env.fromElements(WordCountData.WORDS);
         DataStream<Tuple2<String, Integer>> counts = ((DataStream) text).flatMap(new LineSplitter()).keyBy(0).sum(1);
 
-        System.out.println("Printing result to stdout. Use --output to specify output path.");
+        System.out.println("Printing result to stdout. ");
         counts.print();
 
         env.execute("Streaming WordCount");
