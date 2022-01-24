@@ -79,7 +79,8 @@ public class PhoenixUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(queryList("select * from DIM_BASE_TRADEMARK", JSONObject.class));
-    }
+        System.out.println(queryList("select * from DIM_ACTIVITY_INFO", JSONObject.class));
 
+        System.out.println(queryList("select * from DIM_ACTIVITY_INFO", JSONObject.class));
+    }
 }
