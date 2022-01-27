@@ -6,7 +6,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 /**
- * @Description:
+ * @Description: source transfer sink
  * @Author: WangYouzheng
  * @Date: 2022/1/21 14:22
  * @Version: V1.0
