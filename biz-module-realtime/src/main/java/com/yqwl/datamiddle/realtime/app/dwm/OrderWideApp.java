@@ -200,7 +200,10 @@ public class OrderWideApp {
         // 测试合并结果
         orderWideDS.print("orderWide>>>>");
 
-       /* //TODO 7.关联用户维度
+        // 依次把宽表的流orderWideDs传入给要关联的维度。
+
+        // 使用的是unorderedWait 这个东西 会导致输入的数据输出后变成无序的 也就是不保证输入和输出是同一个顺序，性能最高，开销最小。。
+       //TODO 7.关联用户维度
         SingleOutputStreamOperator<OrderWide> orderWideWithUserDS = AsyncDataStream.unorderedWait(
                 orderWideDS,
                 new DimAsyncFunction<OrderWide>("DIM_USER_INFO") {
@@ -344,7 +347,7 @@ public class OrderWideApp {
                         orderWide -> JSON.toJSONString(orderWide)
                 )
                 .addSink(KafkaUtil.getKafkaSink(orderWideSinkTopic));
-*/
+
         env.execute();
     }
 }

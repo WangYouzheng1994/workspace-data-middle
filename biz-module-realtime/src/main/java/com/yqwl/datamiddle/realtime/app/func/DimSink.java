@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * @Description: hbase写入
+ * @Description: hbase写入  维度表数据。
  * @Author: WangYouzheng
  * @Date: 2022/1/7 10:16
  * @Version: V1.0
@@ -67,7 +67,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
                 }
             }
 
-            //如果当前做的是更新操作，需要将Redis中缓存的数据清除掉
+            // 如果当前做的是更新操作，需要将Redis中缓存的数据清除掉
             if (jsonObj.getString("type").equals("update")) {
                 DimUtil.deleteCached(tableName, dataJsonObj.getString("id"));
             }

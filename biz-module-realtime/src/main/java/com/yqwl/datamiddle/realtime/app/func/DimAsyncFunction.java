@@ -76,4 +76,16 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T,T> impleme
             }
         );
     }
+
+    /**
+     * timeout超时后的方法
+     *
+     * @param input
+     * @param resultFuture
+     * @throws Exception
+     */
+    @Override
+    public void timeout(T input, ResultFuture<T> resultFuture) throws Exception {
+        super.timeout(input, resultFuture);
+    }
 }

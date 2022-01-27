@@ -14,7 +14,9 @@ import java.util.List;
  * select * from dim_base_trademark where id=10 and name=zs;
  */
 public class DimUtil {
-    //从Phoenix中查询数据，没有使用缓存
+    /**
+     * 从Phoenix中查询数据，没有使用缓存
+     */
     public static JSONObject getDimInfoNoCache(String tableName, Tuple2<String, String>... cloNameAndValue) {
         //拼接查询条件
         String whereSql = " where ";
@@ -68,7 +70,13 @@ public class DimUtil {
         dim:dim_base_trademark:13_zz
     */
 
-
+    /**
+     * 获取 维度数据 先去缓存找，缓存找不到 就去hbase找。 随后把得到的结果放入到redis中。 有效期24小时。
+     *
+     * @param tableName 表名
+     * @param cloNameAndValue
+     * @return
+     */
     public static JSONObject getDimInfo(String tableName, Tuple2<String, String>... cloNameAndValue) {
         //拼接查询条件
         String whereSql = " where ";
@@ -129,7 +137,9 @@ public class DimUtil {
         return dimJsonObj;
     }
 
-    //根据key让Redis中的缓存失效
+    /**
+     * 根据key让Redis中的缓存失效
+     */
     public static void deleteCached(String tableName, String id) {
         String key = "dim:" + tableName.toLowerCase() + ":" + id;
         try {
