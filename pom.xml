@@ -59,6 +59,7 @@
         <module>biz-module-admin</module>
         <module>biz-module-config</module>
         <module>biz-module-realtime</module>
+        <module>biz-module-flink-demo</module>
 	</modules>
 
 	<distributionManagement>
