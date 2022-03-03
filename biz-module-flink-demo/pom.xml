@@ -28,6 +28,19 @@
     </properties>
 
     <dependencies>
+        <!--   Flink CDC 4 Oracle     -->
+        <dependency>
+            <groupId>com.ververica</groupId>
+            <artifactId>flink-connector-oracle-cdc</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <!--   Flink CDC 4 MySql     -->
+        <dependency>
+            <groupId>com.ververica</groupId>
+            <artifactId>flink-connector-mysql-cdc</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-java-bridge_${scala.version}</artifactId>
