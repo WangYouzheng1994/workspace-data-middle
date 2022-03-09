@@ -90,7 +90,7 @@ public class BaseDBApp {
         hbaseDS.addSink(new DimSink());
 
         //TODO 7.将事实数据写回到kafka的dwd层
-        FlinkKafkaProducer<JSONObject> kafkaSink = KafkaUtil.getKafkaSinkBySchema(
+        FlinkKafkaProducer<JSONObject> kafkaSink = KafkaUtil.getKafkaProductBySchema(
                 new KafkaSerializationSchema<JSONObject>() {
                     @Override
                     public void open(SerializationSchema.InitializationContext context) throws Exception {

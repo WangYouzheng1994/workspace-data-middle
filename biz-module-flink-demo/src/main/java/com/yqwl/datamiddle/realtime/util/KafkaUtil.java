@@ -1,12 +1,15 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import com.sun.istack.internal.Nullable;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
@@ -34,13 +37,46 @@ public class KafkaUtil {
     }
 
     /**
+     * 获取序列化器
+     *
+     * @param topic
+     * @return
+     */
+    public static KafkaSerializationSchema<String> getKafkaSerializationSchema(String topic) {
+        return new KafkaSerializationSchema<String>() {
+            @Override
+            public ProducerRecord<byte[], byte[]> serialize(String element, @Nullable Long timestamp) {
+                return new ProducerRecord<>(
+                        topic, // target topic
+                        element.getBytes(StandardCharsets.UTF_8)); // record contents
+            }
+        };
+
+    }
+
+    /**
      * 获取指定主题的生产者。。  通过制定序列化方案的方式
      *
      * @param kafkaSerializationSchema
      * @param <T>
      * @return
      */
-    public static <T> FlinkKafkaProducer<T> getKafkaSinkBySchema(KafkaSerializationSchema<T> kafkaSerializationSchema) {
+    public static <T> FlinkKafkaProducer<T> getKafkaProductBySchema(String server, String topic, KafkaSerializationSchema<T> kafkaSerializationSchema) {
+        Properties props = new Properties();
+        props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
+        //设置生产数据的超时时间
+        props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 15 * 60 * 1000 + "");
+        return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
+    }
+
+    /**
+     * 获取指定主题的生产者。。  通过制定序列化方案的方式
+     *
+     * @param kafkaSerializationSchema
+     * @param <T>
+     * @return
+     */
+    public static <T> FlinkKafkaProducer<T> getKafkaProductBySchema(KafkaSerializationSchema<T> kafkaSerializationSchema) {
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
         //设置生产数据的超时时间
@@ -51,8 +87,15 @@ public class KafkaUtil {
     /**
      * 通过主题，封装FlinkKafkaProducer
      */
+    public static FlinkKafkaProducer<String> getKafkaSink(String server, String topic) {
+        return new FlinkKafkaProducer<String>(server, topic, new SimpleStringSchema());
+    }
+
+    /**
+     * 通过主题，封装FlinkKafkaProducer
+     */
     public static FlinkKafkaProducer<String> getKafkaSink(String topic) {
-        return new FlinkKafkaProducer<String>(KAFKA_SERVER, topic, new SimpleStringSchema());
+        return new FlinkKafkaProducer<String>(DEFAULT_TOPIC, topic, new SimpleStringSchema());
     }
 
     public static String getKafkaDDL(String topic, String groupId) {

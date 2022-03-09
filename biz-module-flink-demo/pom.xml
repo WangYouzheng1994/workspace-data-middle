@@ -127,6 +127,12 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.25</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.0</version>
+        </dependency>
         <!--
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -182,6 +188,26 @@
             <version>8.0.19</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc6 -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.4</version>
+        </dependency>
+
+
+
+        <!-- https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.20</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.ivi.opensource</groupId>
+            <artifactId>flink-clickhouse-sink</artifactId>
+            <version>1.2.0</version>
+        </dependency>
 
         <!--     phoenix   -->
         <dependency>
