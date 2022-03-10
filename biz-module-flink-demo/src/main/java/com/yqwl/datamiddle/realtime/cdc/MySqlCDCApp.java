@@ -11,6 +11,7 @@ import com.yqwl.datamiddle.realtime.util.StrUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -45,6 +46,8 @@ public class MySqlCDCApp {
         // enable checkpoint
         env.enableCheckpointing(3000);
         env.setStateBackend(new FsStateBackend("hdfs://hadoop95:8020/demo/cdc/checkpoint"));
+        env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
+        System.setProperty("HADOOP_USER_NAME", "root");
 
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
         //source.print();
