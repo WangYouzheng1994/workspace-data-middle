@@ -1,6 +1,5 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import com.sun.istack.internal.Nullable;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -45,7 +44,7 @@ public class KafkaUtil {
     public static KafkaSerializationSchema<String> getKafkaSerializationSchema(String topic) {
         return new KafkaSerializationSchema<String>() {
             @Override
-            public ProducerRecord<byte[], byte[]> serialize(String element, @Nullable Long timestamp) {
+            public ProducerRecord<byte[], byte[]> serialize(String element, Long timestamp) {
                 return new ProducerRecord<>(
                         topic, // target topic
                         element.getBytes(StandardCharsets.UTF_8)); // record contents

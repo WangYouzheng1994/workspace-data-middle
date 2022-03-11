@@ -25,7 +25,7 @@ public class OracleCDCApp {
                 .tableList(StrUtil.getStrList(props.getStr("oracle.table.list"), ",")) // monitor products table
                 .username(props.getStr("oracle.username"))
                 .password(props.getStr("oracle.password"))
-                .deserializer(new JsonDebeziumDeserializationSchema()) // converts SourceRecord to JSON String
+                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

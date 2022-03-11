@@ -296,12 +296,12 @@
 	</dependencyManagement>
 
 	<build>
-		<plugins>
-			<!--<plugin>
+<!--		<plugins>
+			&lt;!&ndash;<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			 指定JDK编译版本 -->
+			 指定JDK编译版本 &ndash;&gt;
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -311,7 +311,7 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-            <!-- 打包跳过测试 -->
+            &lt;!&ndash; 打包跳过测试 &ndash;&gt;
             <plugin>
 		        <groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-surefire-plugin</artifactId>
@@ -319,7 +319,7 @@
 		          <skipTests>true</skipTests>
 		        </configuration>
 	        </plugin>
-	         <!-- 避免font文件的二进制文件格式压缩破坏 -->
+	         &lt;!&ndash; 避免font文件的二进制文件格式压缩破坏 &ndash;&gt;
 	         <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -333,7 +333,7 @@
                     </nonFilteredFileExtensions>
                 </configuration>
             </plugin>
-		</plugins>
+		</plugins>-->
 		<resources>
 			<resource>
                 <directory>src/main/resources</directory>
