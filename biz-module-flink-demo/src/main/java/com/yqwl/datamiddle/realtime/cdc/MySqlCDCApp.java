@@ -44,8 +44,8 @@ public class MySqlCDCApp {
        // source.print();
 
         FlinkKafkaProducer<String> productByOrders = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
-                KafkaTopicConst.mysql_topic_name,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.mysql_topic_name));
+                KafkaTopicConst.MYSQL_TOPIC_NAME,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
         source.addSink(productByOrders).uid("mysql-sink");
 
         env.execute("Print-MySQL-Binlog");

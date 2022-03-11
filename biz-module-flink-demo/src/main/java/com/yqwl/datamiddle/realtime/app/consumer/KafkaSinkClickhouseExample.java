@@ -54,7 +54,7 @@ public class KafkaSinkClickhouseExample {
         //kafka source
         KafkaSource<String> kafkaBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.mysql_topic_name)
+                .setTopics(KafkaTopicConst.MYSQL_TOPIC_NAME)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
