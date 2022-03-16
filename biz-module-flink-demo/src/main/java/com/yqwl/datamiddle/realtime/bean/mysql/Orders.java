@@ -11,9 +11,10 @@ public class Orders {
     private Integer id;
     private String orderNo;
     private Integer status;
-    private BigDecimal discountAmount;
-    private BigDecimal totalAmount;
-    private BigDecimal paymentAmount;
-    private Date createTime;
+    private Integer discountAmount;
+    private Integer totalAmount;
+    private Integer paymentAmount;
+    private Long createTime;
+    private Integer userId;
 
 }

@@ -2,6 +2,7 @@ package com.yqwl.datamiddle.realtime.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import redis.clients.jedis.Jedis;
 
@@ -45,8 +46,8 @@ public class DimUtil {
     }
 
     //在做维度关联的时候，大部分场景都是通过id进行关联，所以提供一个方法，只需要将id的值作为参数传进来即可
-    public static JSONObject getDimInfo(String tableName, String id) {
-        return getDimInfo(tableName, Tuple2.of("id", id));
+    public static JSONObject getDimInfo(String tableName, String columnName, Object value) {
+        return getDimInfo(tableName, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
     }
 
     /*
@@ -73,23 +74,27 @@ public class DimUtil {
     /**
      * 获取 维度数据 先去缓存找，缓存找不到 就去hbase找。 随后把得到的结果放入到redis中。 有效期24小时。
      *
-     * @param tableName 表名
+     * @param tableName       表名
      * @param cloNameAndValue
      * @return
      */
-    public static JSONObject getDimInfo(String tableName, Tuple2<String, String>... cloNameAndValue) {
+    public static JSONObject getDimInfo(String tableName, Tuple2<String, Object>... cloNameAndValue) {
         //拼接查询条件
         String whereSql = " where ";
         String redisKey = "dim:" + tableName.toLowerCase() + ":";
         for (int i = 0; i < cloNameAndValue.length; i++) {
-            Tuple2<String, String> tuple2 = cloNameAndValue[i];
+            Tuple2<String, Object> tuple2 = cloNameAndValue[i];
             String filedName = tuple2.f0;
-            String fieldValue = tuple2.f1;
+            Object fieldValue = tuple2.f1;
             if (i > 0) {
                 whereSql += " and ";
                 redisKey += "_";
             }
-            whereSql += filedName + "='" + fieldValue + "'";
+            if (fieldValue instanceof Integer) {
+                whereSql += filedName + "=" + fieldValue;
+            } else {
+                whereSql += filedName + "='" + fieldValue + "'";
+            }
             redisKey += fieldValue;
         }
 
@@ -99,7 +104,8 @@ public class DimUtil {
         String dimJsonStr = null;
         //维度数据的json对象形式
         JSONObject dimJsonObj = null;
-        try {
+
+/*        try {
             //获取jedis客户端
             jedis = RedisUtil.getJedis();
             //根据key到Redis中查询
@@ -107,7 +113,7 @@ public class DimUtil {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("从redis中查询维度失败");
-        }
+        }*/
 
         //判断是否从Redis中查询到了数据
         if (dimJsonStr != null && dimJsonStr.length() > 0) {
@@ -158,8 +164,8 @@ public class DimUtil {
         //System.out.println(PhoenixUtil.queryList("select * from DIM_BASE_TRADEMARK", JSONObject.class));
         //JSONObject dimInfo = DimUtil.getDimInfoNoCache("DIM_BASE_TRADEMARK", Tuple2.of("id", "14"));
 
-        JSONObject dimInfo = DimUtil.getDimInfo("DIM_BASE_TRADEMARK", "14");
+        //JSONObject dimInfo = DimUtil.getDimInfo("DIM_BASE_TRADEMARK", "user_id", "14");
 
-        System.out.println(dimInfo);
+        //System.out.println(dimInfo);
     }
 }

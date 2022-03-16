@@ -57,6 +57,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
             List<Field> afterFields = afterSchema.fields();
             for (Field field : afterFields) {
                 Object afterValue = after.get(field);
+                System.out.println("输出值：" + afterValue);
                 afterJson.put(field.name(), afterValue);
             }
         }

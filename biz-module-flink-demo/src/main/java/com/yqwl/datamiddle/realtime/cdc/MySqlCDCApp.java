@@ -10,6 +10,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
@@ -36,17 +37,21 @@ public class MySqlCDCApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
         // enable checkpoint
+        //2.4 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
+        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         env.setStateBackend(new FsStateBackend("hdfs://192.168.3.95:8020/demo/cdc/checkpoint"));
         env.enableCheckpointing(5000, CheckpointingMode.EXACTLY_ONCE);
         System.setProperty("HADOOP_USER_NAME", "root");
 
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
-       // source.print();
+        source.print();
 
+/*
         FlinkKafkaProducer<String> productByOrders = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.MYSQL_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
         source.addSink(productByOrders).uid("mysql-sink");
+*/
 
         env.execute("Print-MySQL-Binlog");
     }

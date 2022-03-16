@@ -1,11 +1,13 @@
 package com.yqwl.datamiddle.realtime.util;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.val;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Author: Felix
@@ -20,7 +22,10 @@ public class PhoenixUtil {
             //注册驱动
             Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
             //获取Phoenix的连接
-            conn = DriverManager.getConnection(GmallConfig.PHOENIX_SERVER);
+            Properties props = new Properties();
+            //避免namespace相关问题，添加上配置即可
+            props.put("phoenix.schema.isNamespaceMappingEnabled", "true");
+            conn = DriverManager.getConnection(GmallConfig.PHOENIX_SERVER, props);
             //指定操作的表空间
             conn.setSchema(GmallConfig.HBASE_SCHEMA);
         } catch (Exception e) {

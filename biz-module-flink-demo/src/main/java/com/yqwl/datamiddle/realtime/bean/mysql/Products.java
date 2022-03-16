@@ -2,41 +2,21 @@ package com.yqwl.datamiddle.realtime.bean.mysql;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
+/**
+ * 注意：
+ *      类中属性的排列顺序一定要和clickhouse中表中字段属性顺序保持一致
+ *      clickhouse 接受的数据格式为 csv 格式
+ *   事例如下：
+ *      (1, '小米手环6 全面彩屏', 654, 200)
+ *
+ */
 @Data
 public class Products {
 
     private Integer productId;
     private String productName;
-    private BigDecimal productAmount;
     private Integer productStock;
+    private Integer productAmount;
 
-
-    // Java Bean 必须实现的方法，信息通过字符串进行拼接
-    public static String convertToCsv(Products model) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("(");
-
-
-        builder.append(model.getProductId());
-        builder.append(", ");
-
-
-        builder.append("'");
-        builder.append(model.getProductName());
-        builder.append("', ");
-
-
-        //builder.append("'");
-        builder.append(model.getProductStock());
-        builder.append(", ");
-
-
-        builder.append(model.getProductAmount());
-
-        builder.append(" )");
-        return builder.toString();
-    }
 
 }

@@ -11,8 +11,8 @@ public class OrdersDetail {
     private Integer id;
     private String orderNo;
     private Integer productId;
-    private BigDecimal productAmount;
-    private Date createTime;
-
+    private Integer productAmount;
+    private Integer productCount;
+    private Long createTime;
 
 }
