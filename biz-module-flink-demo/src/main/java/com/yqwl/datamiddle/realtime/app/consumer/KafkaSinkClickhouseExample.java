@@ -247,7 +247,7 @@ public class KafkaSinkClickhouseExample {
         propSink.put(ClickHouseSinkConst.MAX_BUFFER_SIZE, "10000");
         ClickHouseSink sink = new ClickHouseSink(propSink);
         sinkSource.addSink(sink);
-        sinkSource.print();
+        //sinkSource.print();
         try {
             env.execute("KafkaSinkClickhouse");
         } catch (Exception e) {
