@@ -48,12 +48,12 @@ public class MySqlCDCApp {
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
         //source.print();
 
-        FlinkKafkaProducer<String> productByOrders = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.MYSQL_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
-        source.addSink(productByOrders).uid("mysql-sink").name("mysql-sink");
+        source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 
 
-        env.execute("Print-MySQL-Binlog");
+        env.execute("mysql-cdc-kafka");
     }
 }
