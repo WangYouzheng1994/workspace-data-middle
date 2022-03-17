@@ -125,10 +125,17 @@
             <artifactId>hutool-all</artifactId>
             <version>5.7.20</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/ru.yandex.clickhouse/clickhouse-jdbc -->
         <dependency>
-            <groupId>ru.ivi.opensource</groupId>
-            <artifactId>flink-clickhouse-sink</artifactId>
-            <version>1.2.0</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-jdbc_${scala.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.yandex.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+            <version>0.3.1</version>
         </dependency>
 
         <!--     phoenix   -->

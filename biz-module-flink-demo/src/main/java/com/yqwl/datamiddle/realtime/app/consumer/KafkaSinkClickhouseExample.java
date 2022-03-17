@@ -6,14 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.mysql.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.BeanUtil;
+import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -28,14 +27,8 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.ivi.opensource.flinkclickhousesink.ClickHouseSink;
-import ru.ivi.opensource.flinkclickhousesink.model.ClickHouseClusterSettings;
-import ru.ivi.opensource.flinkclickhousesink.model.ClickHouseSinkConst;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaSinkClickhouseExample {
@@ -54,22 +47,6 @@ public class KafkaSinkClickhouseExample {
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Props props = PropertiesUtil.getProps("cdc.properties");
-        Map<String, String> globalParameters = new HashMap<>();
-        // ClickHouse cluster properties
-        globalParameters.put(ClickHouseClusterSettings.CLICKHOUSE_HOSTS, props.getStr("clickhouse.hostname"));
-        //globalParameters.put(ClickHouseClusterSettings.CLICKHOUSE_USER, ...);
-        //globalParameters.put(ClickHouseClusterSettings.CLICKHOUSE_PASSWORD, ...);
-        // sink common
-        globalParameters.put(ClickHouseSinkConst.TIMEOUT_SEC, "1");
-        globalParameters.put(ClickHouseSinkConst.FAILED_RECORDS_PATH, "/home/clickhouse/failed");
-        globalParameters.put(ClickHouseSinkConst.NUM_WRITERS, "2");
-        globalParameters.put(ClickHouseSinkConst.NUM_RETRIES, "2");
-        globalParameters.put(ClickHouseSinkConst.QUEUE_MAX_CAPACITY, "2");
-        globalParameters.put(ClickHouseSinkConst.IGNORING_CLICKHOUSE_SENDING_EXCEPTION_ENABLED, "false");
-
-        ParameterTool parameters = ParameterTool.fromMap(globalParameters);
-        env.getConfig().setGlobalJobParameters(parameters);
-
         //kafka source
         KafkaSource<String> kafkaBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
@@ -234,18 +211,8 @@ public class KafkaSinkClickhouseExample {
                 },
                 60, TimeUnit.SECONDS).uid("orderWideWithUserDS").name("orderWideWithUserDS");
 
-        SingleOutputStreamOperator<String> sinkSource = orderWideWithUserDS.map(new MapFunction<OrderDetailWide, String>() {
-            @Override
-            public String map(OrderDetailWide orderDetailWide) throws Exception {
-                return BeanUtil.transferFieldToCsv(orderDetailWide);
-            }
-        }).uid("sinkSource").name("sinkSource");
-        // create props for sink
-        Properties propSink = new Properties();
-        propSink.put(ClickHouseSinkConst.TARGET_TABLE_NAME, "default.order_detail_dwd");
-        propSink.put(ClickHouseSinkConst.MAX_BUFFER_SIZE, "10000");
-        ClickHouseSink sink = new ClickHouseSink(propSink);
-        sinkSource.addSink(sink);
+
+        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"));
         //sinkSource.print();
         try {
             env.execute("KafkaSinkClickhouse");

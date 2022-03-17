@@ -1,7 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
 import com.alibaba.fastjson.JSONObject;
-import lombok.val;
+import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.sql.*;
@@ -20,14 +20,14 @@ public class PhoenixUtil {
     public static void init() {
         try {
             //注册驱动
-            Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+            Class.forName(PhoenixConfig.PHOENIX_DRIVER);
             //获取Phoenix的连接
             Properties props = new Properties();
             //避免namespace相关问题，添加上配置即可
-            props.put("phoenix.schema.isNamespaceMappingEnabled", "true");
-            conn = DriverManager.getConnection(GmallConfig.PHOENIX_SERVER, props);
+            props.put(PhoenixConfig.NAMESPACE_MAPPING_ENABLED, "true");
+            conn = DriverManager.getConnection(PhoenixConfig.PHOENIX_SERVER, props);
             //指定操作的表空间
-            conn.setSchema(GmallConfig.HBASE_SCHEMA);
+            conn.setSchema(PhoenixConfig.HBASE_SCHEMA);
         } catch (Exception e) {
             e.printStackTrace();
         }

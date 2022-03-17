@@ -2,7 +2,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
-import com.yqwl.datamiddle.realtime.util.GmallConfig;
+import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
@@ -29,7 +29,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
-        conn = DriverManager.getConnection(GmallConfig.PHOENIX_SERVER);
+        conn = DriverManager.getConnection(PhoenixConfig.PHOENIX_SERVER);
     }
 
     /**
@@ -86,7 +86,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
         //"upsert into 表空间.表名(列名.....) values (值....)"
         Set<String> keys = dataJsonObj.keySet();
         Collection<Object> values = dataJsonObj.values();
-        String upsertSql = "upsert into " + GmallConfig.HBASE_SCHEMA + "." + tableName + "(" +
+        String upsertSql = "upsert into " + PhoenixConfig.HBASE_SCHEMA + "." + tableName + "(" +
                 StringUtils.join(keys, ",") + ")";
 
         String valueSql = " values ('" + StringUtils.join(values, "','") + "')";

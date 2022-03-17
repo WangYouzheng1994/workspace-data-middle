@@ -2,7 +2,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
-import com.yqwl.datamiddle.realtime.util.GmallConfig;
+import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
@@ -42,7 +42,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
     public void open(Configuration parameters) throws Exception {
         //初始化 Phoenix 连接
         Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
-        connection = DriverManager.getConnection(GmallConfig.PHOENIX_SERVER);
+        connection = DriverManager.getConnection(PhoenixConfig.PHOENIX_SERVER);
         //初始化配置表信息
         initTableProcessMap();
         //开启定时任务,用于不断读取配置表信息 从现在起过 delay 毫秒以后，每隔 period 更新一次
@@ -112,7 +112,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
         }
         //创建字符串拼接对象,用于拼接建表语句 SQL
         StringBuilder createSql = new StringBuilder("create table if not exists " +
-                GmallConfig.HBASE_SCHEMA + "." + tableName + "(");
+                PhoenixConfig.HBASE_SCHEMA + "." + tableName + "(");
         //将列做切分,并拼接至建表语句 SQL 中
         String[] fieldsArr = fields.split(",");
         for (int i = 0; i < fieldsArr.length; i++) {
