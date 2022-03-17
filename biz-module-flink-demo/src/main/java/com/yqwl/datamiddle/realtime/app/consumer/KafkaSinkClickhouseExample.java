@@ -4,9 +4,6 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
-import com.yqwl.datamiddle.realtime.bean.OrderDetail;
-import com.yqwl.datamiddle.realtime.bean.OrderInfo;
-import com.yqwl.datamiddle.realtime.bean.OrderWide;
 import com.yqwl.datamiddle.realtime.bean.mysql.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.BeanUtil;
@@ -35,9 +32,7 @@ import ru.ivi.opensource.flinkclickhousesink.ClickHouseSink;
 import ru.ivi.opensource.flinkclickhousesink.model.ClickHouseClusterSettings;
 import ru.ivi.opensource.flinkclickhousesink.model.ClickHouseSinkConst;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -50,10 +45,14 @@ public class KafkaSinkClickhouseExample {
         // 创建环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
-        //2.4 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
-        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        env.enableCheckpointing(10000, CheckpointingMode.EXACTLY_ONCE);
-        //设置clickhouse全局属性
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(10000);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
+        //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        System.setProperty("HADOOP_USER_NAME", "root");
+
         Props props = PropertiesUtil.getProps("cdc.properties");
         Map<String, String> globalParameters = new HashMap<>();
         // ClickHouse cluster properties
@@ -251,7 +250,7 @@ public class KafkaSinkClickhouseExample {
         try {
             env.execute("KafkaSinkClickhouse");
         } catch (Exception e) {
-            logger.error("An error occurred.", e);
+            logger.error("stream invoke error", e);
         }
     }
 
