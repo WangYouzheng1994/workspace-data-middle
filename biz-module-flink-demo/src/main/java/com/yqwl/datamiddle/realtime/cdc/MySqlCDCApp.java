@@ -37,10 +37,12 @@ public class MySqlCDCApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(1);
         // enable checkpoint
-        //2.4 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
-        env.getCheckpointConfig().enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        env.setStateBackend(new FsStateBackend("hdfs://192.168.3.95:8020/demo/cdc/checkpoint"));
-        env.enableCheckpointing(10000, CheckpointingMode.EXACTLY_ONCE);
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(10000);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
+        //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
 
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
