@@ -24,7 +24,6 @@ public class ClickHouseUtil {
                             // 获取所有的属性信息
                             Field[] fields = t.getClass().getDeclaredFields();
                             // 遍历字段
-                            int offset = 0;
                             for (int i = 0; i < fields.length; i++) {
                                 // 获取字段
                                 Field field = fields[i];
@@ -33,7 +32,7 @@ public class ClickHouseUtil {
                                 // 获取值
                                 Object value = field.get(t);
                                 // 给预编译SQL对象赋值
-                                preparedStatement.setObject(i + 1 - offset, value);
+                                preparedStatement.setObject(i + 1, value);
                             }
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
