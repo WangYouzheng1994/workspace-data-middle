@@ -121,31 +121,10 @@ public class KafkaSinkClickhouseExample {
             }
         }).uid("mapProducts").name("mapProducts");
 
-        //对数据中进行过滤，用户表
-        SingleOutputStreamOperator<String> filterUser = kafkaSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                if (jo.getString("database").equals("datasource_kafka") && jo.getString("tableName").equals("users")) {
-                    return true;
-                }
-                return false;
-            }
-        }).uid("filterUser").name("filterUser");
-        //用户表过滤后进行实体类转换
-        SingleOutputStreamOperator<Users> mapUsers = filterUser.map(new MapFunction<String, Users>() {
-            @Override
-            public Users map(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                Users users = jo.getObject("after", Users.class);
-                return users;
-            }
-        }).uid("mapUsers").name("mapUsers");
 
         mapOrder.print("order表转换成实体类后输出数据");
         mapOrderDetail.print("OrdersDetail明细表转换成实体类后输出数据");
         mapProducts.print("products表转换成实体类后输出数据");
-        mapUsers.print("users表转换成实体类后输出数据");
         //4.1 订单指定事件时间字段
         SingleOutputStreamOperator<Orders> orderInfoWithTsDS = mapOrder.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofMinutes(5))
