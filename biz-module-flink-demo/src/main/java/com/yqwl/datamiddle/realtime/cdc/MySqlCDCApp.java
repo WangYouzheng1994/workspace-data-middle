@@ -7,7 +7,6 @@ import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.runtime.state.filesystem.FsStateBackend;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -30,7 +29,6 @@ public class MySqlCDCApp {
                 .tableList(StrUtil.getStrList(props.getStr("mysql.table.list"), ",")) // set captured table
                 .username(props.getStr("mysql.username"))
                 .password(props.getStr("mysql.password"))
-                //.deserializer(new JsonDebeziumDeserializationSchema()) // converts SourceRecord to JSON String
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .build();
 
