@@ -33,7 +33,7 @@ public class MySqlCDCApp {
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
+        env.setParallelism(2);
         // enable checkpoint
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
