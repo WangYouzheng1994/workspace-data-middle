@@ -4,7 +4,9 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
-import com.yqwl.datamiddle.realtime.bean.mysql.*;
+import com.yqwl.datamiddle.realtime.bean.mysql.OrderDetailWide;
+import com.yqwl.datamiddle.realtime.bean.mysql.Orders;
+import com.yqwl.datamiddle.realtime.bean.mysql.OrdersDetail;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
@@ -100,31 +102,8 @@ public class KafkaSinkClickhouseExample {
             }
         }).uid("mapOrderDetail").name("mapOrderDetail");
 
-        //对数据中进行过滤，产品表
-        SingleOutputStreamOperator<String> filterProducts = kafkaSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                if (jo.getString("database").equals("datasource_kafka") && jo.getString("tableName").equals("products")) {
-                    return true;
-                }
-                return false;
-            }
-        }).uid("filterProducts").name("filterProducts");
-        //产品表过滤后进行实体类转换
-        SingleOutputStreamOperator<Products> mapProducts = filterProducts.map(new MapFunction<String, Products>() {
-            @Override
-            public Products map(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                Products products = jo.getObject("after", Products.class);
-                return products;
-            }
-        }).uid("mapProducts").name("mapProducts");
-
-
         mapOrder.print("order表转换成实体类后输出数据");
         mapOrderDetail.print("OrdersDetail明细表转换成实体类后输出数据");
-        mapProducts.print("products表转换成实体类后输出数据");
         //4.1 订单指定事件时间字段
         SingleOutputStreamOperator<Orders> orderInfoWithTsDS = mapOrder.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofMinutes(5))
@@ -145,7 +124,6 @@ public class KafkaSinkClickhouseExample {
                                                }
                         )
         ).uid("orderDetailWithTsDS").name("orderDetailWithTsDS");
-
 
         // 按照订单号进行分组  指定关联的key
         // 订单表根据订单号分组
@@ -191,7 +169,8 @@ public class KafkaSinkClickhouseExample {
                 60, TimeUnit.SECONDS).uid("orderWideWithUserDS").name("orderWideWithUserDS");
 
         //宽表数据写入clickhouse
-        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"));
+        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"))
+        .uid("sinkClickhouse").name("sinkClickhouse");
         //sinkSource.print();
         try {
             env.execute("KafkaSinkClickhouse");
