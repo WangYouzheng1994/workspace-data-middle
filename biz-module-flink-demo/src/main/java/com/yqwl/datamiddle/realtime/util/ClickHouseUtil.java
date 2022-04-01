@@ -40,7 +40,7 @@ public class ClickHouseUtil {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5)
+                        .withBatchSize(5000)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withDriverName(ClickhouseConfig.CLICKHOUSE_DRIVER)
