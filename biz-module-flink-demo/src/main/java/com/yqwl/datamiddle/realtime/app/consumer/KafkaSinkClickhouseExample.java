@@ -34,7 +34,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaSinkClickhouseExample {
-    private static final Logger logger = LogManager.getLogger(KafkaSinkClickhouseExample.class);
+    private static final Logger LOGGER = LogManager.getLogger(KafkaSinkClickhouseExample.class);
 
     public static void main(String[] args) {
         // 创建环境
@@ -101,9 +101,8 @@ public class KafkaSinkClickhouseExample {
                 return ordersDetail;
             }
         }).uid("mapOrderDetail").name("mapOrderDetail");
-
-        mapOrder.print("order表转换成实体类后输出数据");
-        mapOrderDetail.print("OrdersDetail明细表转换成实体类后输出数据");
+        LOGGER.info("order表转换成实体类后输出数据");
+        LOGGER.info("OrdersDetail明细表转换成实体类后输出数据");
         //4.1 订单指定事件时间字段
         SingleOutputStreamOperator<Orders> orderInfoWithTsDS = mapOrder.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofMinutes(5))
@@ -148,8 +147,7 @@ public class KafkaSinkClickhouseExample {
                         }
                 ).uid("orderWideDS").name("orderWideDS");
         // 测试合并结果
-        orderWideDS.print("Orders and OrderDetail  Wide 拓宽后数据");
-
+        LOGGER.info("Orders and OrderDetail  Wide 拓宽后数据");
         //关联用户维度 从hbase中获取
         SingleOutputStreamOperator<OrderDetailWide> orderWideWithUserDS = AsyncDataStream.unorderedWait(
                 orderWideDS,
@@ -175,7 +173,7 @@ public class KafkaSinkClickhouseExample {
         try {
             env.execute("KafkaSinkClickhouse");
         } catch (Exception e) {
-            logger.error("stream invoke error", e);
+            LOGGER.error("stream invoke error", e);
         }
     }
 

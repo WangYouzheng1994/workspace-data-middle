@@ -11,6 +11,10 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 public class RedisUtil {
     private static JedisPool jedisPool;
+    private static final String hostname = "hadoop95";
+    private static final Integer port = 6379;
+    private static final Integer timeout = 10000;
+    private static final String password = "fqwl!123";
 
     public static Jedis getJedis() {
         if (jedisPool == null) {
@@ -21,8 +25,7 @@ public class RedisUtil {
             jedisPoolConfig.setMaxIdle(5); //最大闲置连接数
             jedisPoolConfig.setMinIdle(5); //最小闲置连接数
             jedisPoolConfig.setTestOnBorrow(true); //取连接的时候进行一下测试 ping pong
-
-            jedisPool = new JedisPool(jedisPoolConfig, "hadoop100", 6379, 10000);
+            jedisPool = new JedisPool(jedisPoolConfig, hostname, port, timeout, password);
         }
         return jedisPool.getResource();
     }

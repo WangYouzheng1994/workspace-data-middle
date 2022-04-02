@@ -105,7 +105,7 @@ public class DimUtil {
         //维度数据的json对象形式
         JSONObject dimJsonObj = null;
 
-/*        try {
+        try {
             //获取jedis客户端
             jedis = RedisUtil.getJedis();
             //根据key到Redis中查询
@@ -113,7 +113,7 @@ public class DimUtil {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("从redis中查询维度失败");
-        }*/
+        }
 
         //判断是否从Redis中查询到了数据
         if (dimJsonStr != null && dimJsonStr.length() > 0) {

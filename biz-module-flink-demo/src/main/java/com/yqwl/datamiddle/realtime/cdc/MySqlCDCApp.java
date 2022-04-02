@@ -12,6 +12,8 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @Description:
@@ -20,7 +22,9 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
  * @Version: V1.0
  */
 public class MySqlCDCApp {
+    private static final Logger LOGGER = LogManager.getLogger(MySqlCDCApp.class);
     public static void main(String[] args) throws Exception {
+
         Props props = PropertiesUtil.getProps("cdc.properties");
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("mysql.hostname"))
@@ -50,8 +54,7 @@ public class MySqlCDCApp {
                 KafkaTopicConst.MYSQL_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
         source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
-
-
         env.execute("mysql-cdc-kafka");
+        LOGGER.info("mysql-cdc-kafka 正常执行");
     }
 }
