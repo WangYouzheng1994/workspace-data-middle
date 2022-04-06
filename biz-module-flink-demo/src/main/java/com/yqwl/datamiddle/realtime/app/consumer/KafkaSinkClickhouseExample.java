@@ -49,30 +49,18 @@ public class KafkaSinkClickhouseExample {
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Props props = PropertiesUtil.getProps("cdc.properties");
+
         //kafka source
-        KafkaSource<String> kafkaBuild = KafkaSource.<String>builder()
+        KafkaSource<String> kafkaOrder = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setTopics(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
-
-        DataStreamSource<String> kafkaSource = env.fromSource(kafkaBuild, WatermarkStrategy.noWatermarks(), "kafka-source");
-
-        //kafkaSource.print();
+        DataStreamSource<String> kafkaStreamOrder = env.fromSource(kafkaOrder, WatermarkStrategy.noWatermarks(), "kafka-source");
         //对数据中进行过滤，订单表
-        SingleOutputStreamOperator<String> filterOrder = kafkaSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                if (jo.getString("database").equals("datasource_kafka") && jo.getString("tableName").equals("orders")) {
-                    return true;
-                }
-                return false;
-            }
-        }).uid("filterOrder").name("filterOrder");
         //订单表过滤后进行实体类转换
-        SingleOutputStreamOperator<Orders> mapOrder = filterOrder.map(new MapFunction<String, Orders>() {
+        SingleOutputStreamOperator<Orders> mapOrder = kafkaStreamOrder.map(new MapFunction<String, Orders>() {
             @Override
             public Orders map(String data) throws Exception {
                 JSONObject jo = JSON.parseObject(data);
@@ -81,19 +69,18 @@ public class KafkaSinkClickhouseExample {
             }
         }).uid("mapOrder").name("mapOrder");
 
-        //过滤出订单详情表数据
-        SingleOutputStreamOperator<String> filterOrderDetail = kafkaSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String data) throws Exception {
-                JSONObject jo = JSON.parseObject(data);
-                if (jo.getString("database").equals("datasource_kafka") && jo.getString("tableName").equals("orders_detail")) {
-                    return true;
-                }
-                return false;
-            }
-        }).uid("filterOrderDetail").name("filterOrderDetail");
+
+        //kafka source
+        KafkaSource<String> kafkaOrderDetail = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
+                .setStartingOffsets(OffsetsInitializer.latest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();
+        DataStreamSource<String> kafkaStreamOrderDetail = env.fromSource(kafkaOrderDetail, WatermarkStrategy.noWatermarks(), "kafka-source");
+
         //订单详情过滤后进行实体类转换
-        SingleOutputStreamOperator<OrdersDetail> mapOrderDetail = filterOrderDetail.map(new MapFunction<String, OrdersDetail>() {
+        SingleOutputStreamOperator<OrdersDetail> mapOrderDetail = kafkaStreamOrderDetail.map(new MapFunction<String, OrdersDetail>() {
             @Override
             public OrdersDetail map(String data) throws Exception {
                 JSONObject jo = JSON.parseObject(data);

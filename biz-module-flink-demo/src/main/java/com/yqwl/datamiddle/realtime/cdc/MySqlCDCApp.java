@@ -1,14 +1,18 @@
 package com.yqwl.datamiddle.realtime.cdc;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -48,12 +52,40 @@ public class MySqlCDCApp {
         System.setProperty("HADOOP_USER_NAME", "root");
 
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
-        //source.print();
+        SingleOutputStreamOperator<String> orderFilter = source.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String data) throws Exception {
+                JSONObject jo = JSON.parseObject(data);
+                if (jo.getString("tableName").equals("orders")) {
+                    return true;
+                }
+                return false;
+            }
+        }).uid("orderFilter").name("orderFilter");
 
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
-                KafkaTopicConst.MYSQL_TOPIC_NAME,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
-        source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        SingleOutputStreamOperator<String> orderDetailFilter = source.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String data) throws Exception {
+                JSONObject jo = JSON.parseObject(data);
+                if (jo.getString("tableName").equals("orders_detail")) {
+                    return true;
+                }
+                return false;
+            }
+        }).uid("orderDetailFilter").name("orderDetailFilter");
+
+        //order表一个topic
+        FlinkKafkaProducer<String> sinkKafkaOrder = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
+                KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME));
+        orderFilter.addSink(sinkKafkaOrder).uid("sinkKafkaOrder").name("sinkKafkaOrder");
+
+        //orders_detail表一个topic
+        FlinkKafkaProducer<String> sinkKafkaOrderDetail = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
+                KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME));
+        orderDetailFilter.addSink(sinkKafkaOrderDetail).uid("sinkKafkaOrderDetail").name("sinkKafkaOrderDetail");
+
         env.execute("mysql-cdc-kafka");
         LOGGER.info("mysql-cdc-kafka 正常执行");
     }
