@@ -167,7 +167,7 @@ public class KafkaSinkClickhouseExample {
                 60, TimeUnit.SECONDS).uid("orderWideWithUserDS").name("orderWideWithUserDS");
 
         //宽表数据写入clickhouse
-        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"))
+        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd2 values (?,?,?,?,?,?,?,?,?)"))
         .uid("sinkClickhouse").name("sinkClickhouse");
         //sinkSource.print();
         try {
