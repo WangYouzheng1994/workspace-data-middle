@@ -18,7 +18,7 @@ public class ThreadPoolUtil {
             synchronized (ThreadPoolUtil.class) {
                 if (pool == null) {
                     pool = new ThreadPoolExecutor(
-                            5, 20, 300, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(Integer.MAX_VALUE)
+                            20, 20, 300, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(Integer.MAX_VALUE)
                     );
                 }
             }
