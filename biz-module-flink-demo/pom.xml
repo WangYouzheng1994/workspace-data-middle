@@ -178,7 +178,7 @@
                         </goals>
                         <configuration>
 <!--                            <finalName>KafkaCdc</finalName>-->
-                            <finalName>SimKafkaConsumer</finalName>
+                            <finalName>kafkaConsumer</finalName>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
