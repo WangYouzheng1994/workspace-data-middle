@@ -46,7 +46,13 @@ public class MySqlCDCApp {
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
+        //ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
+        //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
+        ck.setCheckpointTimeout(60000);
+        //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
+        ck.setMinPauseBetweenCheckpoints(500);
+        //同一时间只允许进行一个检查点
+        ck.setMaxConcurrentCheckpoints(1);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
