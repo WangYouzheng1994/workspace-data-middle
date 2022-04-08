@@ -39,7 +39,6 @@ public class KafkaSinkClickhouseExample {
     public static void main(String[] args) {
         // 创建环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
         CheckpointConfig ck = env.getCheckpointConfig();
         //触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
         ck.setCheckpointInterval(1000);
@@ -63,7 +62,7 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrder = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.committedOffsets())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStreamSource<String> kafkaStreamOrder = env.fromSource(kafkaOrder, WatermarkStrategy.noWatermarks(), "kafka-source");
@@ -83,7 +82,7 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrderDetail = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.committedOffsets())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStreamSource<String> kafkaStreamOrderDetail = env.fromSource(kafkaOrderDetail, WatermarkStrategy.noWatermarks(), "kafka-source");
@@ -164,7 +163,7 @@ public class KafkaSinkClickhouseExample {
 
         //宽表数据写入clickhouse
         orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"))
-        .uid("sinkClickhouse").name("sinkClickhouse");
+                .uid("sinkClickhouse").name("sinkClickhouse");
         //sinkSource.print();
         try {
             env.execute("KafkaSinkClickhouse");
