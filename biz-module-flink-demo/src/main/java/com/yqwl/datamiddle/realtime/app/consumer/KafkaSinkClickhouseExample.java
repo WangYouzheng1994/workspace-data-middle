@@ -27,6 +27,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +63,7 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrder = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.committedOffsets())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStreamSource<String> kafkaStreamOrder = env.fromSource(kafkaOrder, WatermarkStrategy.noWatermarks(), "kafka-source");
@@ -82,7 +83,7 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrderDetail = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.committedOffsets())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStreamSource<String> kafkaStreamOrderDetail = env.fromSource(kafkaOrderDetail, WatermarkStrategy.noWatermarks(), "kafka-source");
