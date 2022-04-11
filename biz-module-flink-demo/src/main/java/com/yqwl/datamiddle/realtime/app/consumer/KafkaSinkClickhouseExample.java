@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class KafkaSinkClickhouseExample {
@@ -63,9 +64,10 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrder = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
+
         DataStreamSource<String> kafkaStreamOrder = env.fromSource(kafkaOrder, WatermarkStrategy.noWatermarks(), "kafka-source");
         //对数据中进行过滤，订单表
         //订单表过滤后进行实体类转换
@@ -83,7 +85,7 @@ public class KafkaSinkClickhouseExample {
         KafkaSource<String> kafkaOrderDetail = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         DataStreamSource<String> kafkaStreamOrderDetail = env.fromSource(kafkaOrderDetail, WatermarkStrategy.noWatermarks(), "kafka-source");
@@ -101,7 +103,8 @@ public class KafkaSinkClickhouseExample {
         LOGGER.info("OrdersDetail明细表转换成实体类后输出数据");
         //4.1 订单指定事件时间字段
         SingleOutputStreamOperator<Orders> orderInfoWithTsDS = mapOrder.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                //水印延迟时间5s
+                WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofSeconds(2))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Orders>() {
                             @Override
                             public long extractTimestamp(Orders orderInfo, long recordTimestamp) {
@@ -110,7 +113,8 @@ public class KafkaSinkClickhouseExample {
                         })).uid("orderInfoWithTsDS").name("orderInfoWithTsDS");
         //4.2 订单详细表指定事件时间字段
         SingleOutputStreamOperator<OrdersDetail> orderDetailWithTsDS = mapOrderDetail.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<OrdersDetail>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                //水印延迟时间5s
+                WatermarkStrategy.<OrdersDetail>forBoundedOutOfOrderness(Duration.ofSeconds(2))
                         .withTimestampAssigner(new SerializableTimestampAssigner<OrdersDetail>() {
                                                    @Override
                                                    public long extractTimestamp(OrdersDetail orderDetail, long recordTimestamp) {
@@ -131,7 +135,7 @@ public class KafkaSinkClickhouseExample {
         SingleOutputStreamOperator<OrderDetailWide> orderWideDS = orderInfoKeyedDS
                 .intervalJoin(orderDetailKeyedDS) // 双流合并
                 //设置时间范围，这个时间的边界需要进行实际情况调整~
-                .between(Time.minutes(-5), Time.minutes(5))
+                .between(Time.seconds(-2), Time.seconds(2))
                 .process(
                         // 流合并后的动作。 每个连接上的数据，会调用这个ProcessElement
                         new ProcessJoinFunction<Orders, OrdersDetail, OrderDetailWide>() {
@@ -163,9 +167,9 @@ public class KafkaSinkClickhouseExample {
                 60, TimeUnit.SECONDS).uid("orderWideWithUserDS").name("orderWideWithUserDS");
 
         //宽表数据写入clickhouse
-        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"))
-                .uid("sinkClickhouse").name("sinkClickhouse");
-        //sinkSource.print();
+      /*  orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd values (?,?,?,?,?,?,?,?,?)"))
+                .uid("sinkClickhouse").name("sinkClickhouse");*/
+        orderWideWithUserDS.print();
         try {
             env.execute("KafkaSinkClickhouse");
         } catch (Exception e) {
