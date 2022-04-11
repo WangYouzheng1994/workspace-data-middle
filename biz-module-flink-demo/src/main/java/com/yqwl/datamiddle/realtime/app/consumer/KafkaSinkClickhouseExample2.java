@@ -114,73 +114,7 @@ public class KafkaSinkClickhouseExample2 {
 
         LOGGER.info("order表转换成实体类后输出数据");
         LOGGER.info("OrdersDetail明细表转换成实体类后输出数据");
-        //4.1 订单指定事件时间字段
-     /*   SingleOutputStreamOperator<Orders> orderInfoWithTsDS = mapOrder.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<Orders>forBoundedOutOfOrderness(Duration.ofMinutes(5))
-                        .withTimestampAssigner(new SerializableTimestampAssigner<Orders>() {
-                            @Override
-                            public long extractTimestamp(Orders orderInfo, long recordTimestamp) {
-                                return orderInfo.getCreateTime();
-                            }
-                        })).uid("orderInfoWithTsDS").name("orderInfoWithTsDS");
-        //4.2 订单详细表指定事件时间字段
-        SingleOutputStreamOperator<OrdersDetail> orderDetailWithTsDS = mapOrderDetail.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<OrdersDetail>forBoundedOutOfOrderness(Duration.ofMinutes(5))
-                        .withTimestampAssigner(new SerializableTimestampAssigner<OrdersDetail>() {
-                                                   @Override
-                                                   public long extractTimestamp(OrdersDetail orderDetail, long recordTimestamp) {
-                                                       return orderDetail.getCreateTime();
-                                                   }
-                                               }
-                        )
-        ).uid("orderDetailWithTsDS").name("orderDetailWithTsDS");
 
-        // 按照订单号进行分组  指定关联的key
-        // 订单表根据订单号分组
-        KeyedStream<Orders, String> orderInfoKeyedDS = orderInfoWithTsDS.keyBy(Orders::getOrderNo);
-        // 明细表根据订单号分组
-        KeyedStream<OrdersDetail, String> orderDetailKeyedDS = orderDetailWithTsDS.keyBy(OrdersDetail::getOrderNo);
-
-        // 使用intervalJoin对订单和订单明细进行关联
-        // 使用orderInfoKeyedDs join orderDetailKeyedDS
-        SingleOutputStreamOperator<OrderDetailWide> orderWideDS = orderInfoKeyedDS
-                .intervalJoin(orderDetailKeyedDS) // 双流合并
-                //设置时间范围，这个时间的边界需要进行实际情况调整~
-                .between(Time.minutes(-5), Time.minutes(5))
-                .process(
-                        // 流合并后的动作。 每个连接上的数据，会调用这个ProcessElement
-                        new ProcessJoinFunction<Orders, OrdersDetail, OrderDetailWide>() {
-                            @Override
-                            public void processElement(Orders orderInfo, OrdersDetail orderDetail, Context ctx, Collector<OrderDetailWide> out) throws Exception {
-                                // 订单和明细拉宽
-                                out.collect(new OrderDetailWide(orderInfo, orderDetail));
-                            }
-                        }
-                ).uid("orderWideDS").name("orderWideDS");
-        // 测试合并结果
-        LOGGER.info("Orders and OrderDetail  Wide 拓宽后数据");
-        //关联用户维度 从hbase中获取
-        SingleOutputStreamOperator<OrderDetailWide> orderWideWithUserDS = AsyncDataStream.unorderedWait(
-                orderWideDS,
-                new DimAsyncFunction<OrderDetailWide>("USERS", "USER_ID") {
-
-                    @Override
-                    public Object getKey(OrderDetailWide orderWide) {
-                        return orderWide.getUserId();
-                    }
-
-                    @Override
-                    public void join(OrderDetailWide orderWide, JSONObject dimInfoJsonObj) throws Exception {
-                        //将维度中 用户表中username 设置给订单宽表中的属性
-                        orderWide.setUsername(dimInfoJsonObj.getString("USERNAME"));
-                    }
-                },
-                60, TimeUnit.SECONDS).uid("orderWideWithUserDS").name("orderWideWithUserDS");
-
-        //宽表数据写入clickhouse
-        orderWideWithUserDS.addSink(ClickHouseUtil.<OrderDetailWide>getSink("insert into order_detail_dwd2 values (?,?,?,?,?,?,?,?,?)"))
-        .uid("sinkClickhouse").name("sinkClickhouse");*/
-        //sinkSource.print();
         try {
             env.execute("KafkaSinkClickhouse2");
         } catch (Exception e) {
