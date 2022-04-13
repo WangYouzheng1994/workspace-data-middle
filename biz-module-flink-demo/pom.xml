@@ -18,7 +18,7 @@
         <hbase.profile>2.4</hbase.profile>
         <phoenix.version>5.1.2</phoenix.version>
         <flink.version>1.14.3</flink.version>
-        <scala.version>2.12</scala.version>
+        <scala.version>2.11</scala.version>
         <hadoop.version>3.0.0</hadoop.version>
         <oracle.cdc.version>2.2.0</oracle.cdc.version>
         <mysql.cdc.version>2.2.0</mysql.cdc.version>
