@@ -15,6 +15,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
+import java.util.Properties;
+
 /**
  * @Description:
  * @Author: WangYouzheng
@@ -24,6 +26,8 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 public class OracleCDCApp {
     public static void main(String[] args) throws Exception {
         Props props = PropertiesUtil.getProps("cdc.properties");
+        Properties properties = new Properties();
+        properties.put("database.tablename.case.insensitive", "false");
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("oracle.hostname"))
                 .port(props.getInt("oracle.port"))
@@ -34,6 +38,7 @@ public class OracleCDCApp {
                 .password(props.getStr("oracle.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .startupOptions(StartupOptions.initial())
+                .debeziumProperties(properties)
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

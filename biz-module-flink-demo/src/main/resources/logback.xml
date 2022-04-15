@@ -5,6 +5,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+        <Encoding>UTF-8</Encoding>
     </appender>
 
     <root level="debug">
