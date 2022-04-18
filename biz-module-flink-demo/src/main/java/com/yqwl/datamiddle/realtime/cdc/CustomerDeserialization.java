@@ -48,7 +48,9 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
                 beforeJson.put(field.name(), beforeValue);
             }
         }
-
+//Struct{after=Struct{ID=Struct{scale=0,value=[B@1da5996c},NAME=222,AGE=Struct{scale=0,value=[B@7b5fa09d},CREATE_TIME=1650015242000},
+// source=Struct{version=1.5.4.Final,connector=oracle,name=oracle_logminer,ts_ms=1650000249859,snapshot=true,db=ORCL,schema=FLINKUSER,table=TEST_A,scn=9011397},op=r,ts_ms=1650000249862}
+//{"database":"FLINKUSER","before":{},"after":{"ID":{},"CREATE_TIME":1650015242000,"NAME":"222","AGE":{}},"type":"read","tableName":"TEST_A","ts":1649999915669}
         // 4. 获取“after”数据
         Struct after = value.getStruct("after");
         JSONObject afterJson = new JSONObject();
