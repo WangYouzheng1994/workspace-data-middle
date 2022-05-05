@@ -60,6 +60,7 @@
         <module>biz-module-config</module>
         <module>biz-module-realtime</module>
         <module>biz-module-flink-demo</module>
+        <module>biz-module-flink-pro</module>
 	</modules>
 
 	<distributionManagement>
