@@ -2,7 +2,6 @@ package com.yqwl.datamiddle.realtime.util;
 
 import cn.hutool.setting.dialect.Props;
 
-import java.io.File;
 
 public class PropertiesUtil {
 
