@@ -54,8 +54,8 @@
         <module>jeecg-boot-module-demo</module>
         <module>jeecg-boot-module-system</module>
         <!--需要微服务，请打开-->
-        <module>jeecg-boot-starter</module>
-        <module>jeecg-cloud-module</module>
+<!--        <module>jeecg-boot-starter</module>
+        <module>jeecg-cloud-module</module>-->
         <module>biz-module-admin</module>
         <module>biz-module-config</module>
         <module>biz-module-realtime</module>
@@ -104,8 +104,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.12</version>
-			<scope>provided</scope>
+<!--			<version>1.18.16</version>-->
+<!--			<scope>provided</scope>-->
 		</dependency>
 		<!-- json -->
 		<dependency>
@@ -385,13 +385,13 @@
                 <!--配置文件前缀-->
                 <prefix.name>jeecg</prefix.name>
                 <!--Nacos配置中心地址-->
-                <config.server-addr>127.0.0.1:8848</config.server-addr>
+                <config.server-addr>192.168.3.197:30000</config.server-addr>
                 <!--Nacos配置中心命名空间,用于支持多环境.这里必须使用ID，不能使用名称,默认为空-->
-                <config.namespace></config.namespace>
+                <config.namespace>73f41fa4-81de-43bf-98b6-1bcb84223ccd</config.namespace>
                 <!--Nacos配置分组名称-->
                 <config.group>DEFAULT_GROUP</config.group>
                 <!--Nacos服务发现地址-->
-                <discovery.server-addr>127.0.0.1:8848</discovery.server-addr>
+                <discovery.server-addr>192.168.3.197:30000</discovery.server-addr>
             </properties>
         </profile>
         <!-- 生产 -->
@@ -403,13 +403,13 @@
                 <!--配置文件前缀-->
                 <prefix.name>jeecg</prefix.name>
                 <!--Nacos配置中心地址-->
-                <config.server-addr>127.0.0.1:8848</config.server-addr>
+                <config.server-addr>127.0.0.1:88481</config.server-addr>
                 <!--Nacos配置中心命名空间,用于支持多环境.这里必须使用ID，不能使用名称,默认为空-->
                 <config.namespace></config.namespace>
                 <!--Nacos配置分组名称-->
                 <config.group>DEFAULT_GROUP</config.group>
                 <!--Nacos服务发现地址-->
-                <discovery.server-addr>127.0.0.1:8848</discovery.server-addr>
+                <discovery.server-addr>127.0.0.1:88481</discovery.server-addr>
             </properties>
         </profile>
     </profiles>
