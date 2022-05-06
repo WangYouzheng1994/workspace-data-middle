@@ -99,7 +99,7 @@ spring:
   datasource:
     druid:
       stat-view-servlet:
-        enabled: true
+        enabled: false
         loginUsername: admin
         loginPassword: 123456
         allow:
