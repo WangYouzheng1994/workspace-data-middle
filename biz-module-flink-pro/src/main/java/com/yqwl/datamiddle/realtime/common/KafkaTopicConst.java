@@ -9,4 +9,26 @@ public class KafkaTopicConst {
 
 
 
+    //ods topic
+    //source 表sysc07 cdc kafka topic name
+    public static final String ODS_VLMS_SYSC07 = "ods_vlms_sysc07";
+
+
+    //dim topic
+    //
+    public static final String DIM_VLMS_SYS_SYSC07SYSC08 = "dim_vlms_sys_sysc07sysc08";
+
+
+    //dwd topic
+
+
+
+    //dwm topic
+
+
+
+    //dws topic
+
+
+
 }
