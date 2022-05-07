@@ -2,8 +2,7 @@ package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-import java.util.Date;
+
 
 @Data
 public class Orders {

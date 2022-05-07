@@ -1,10 +1,10 @@
 package com.yqwl.datamiddle.realtime.bean;
 import lombok.Data;
 
-import javax.persistence.*;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.Objects;
+
 
 @Data
 public class Spti32 {
