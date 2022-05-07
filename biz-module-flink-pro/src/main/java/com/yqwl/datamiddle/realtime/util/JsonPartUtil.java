@@ -105,6 +105,16 @@ public class JsonPartUtil {
     }
 
     /**
+     * 获取after部分数据
+     *
+     * @param json
+     * @return
+     */
+    public static JSONObject getBeforeObj(JSONObject json) {
+        return json.getJSONObject(BEFORE);
+    }
+
+    /**
      * 获取before部分数据将其转化为对象
      *
      * @param json
@@ -135,6 +145,16 @@ public class JsonPartUtil {
      */
     public static String getAfterStr(JSONObject json) {
         return json.getString(AFTER);
+    }
+
+    /**
+     * 获取after部分数据
+     *
+     * @param json
+     * @return
+     */
+    public static JSONObject getAfterObj(JSONObject json) {
+        return json.getJSONObject(AFTER);
     }
 
     /**
