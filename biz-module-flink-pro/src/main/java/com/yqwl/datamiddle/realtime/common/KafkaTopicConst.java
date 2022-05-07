@@ -8,6 +8,8 @@ public class KafkaTopicConst {
     public static final String ORDER_DETAIL_PREFIX = "orders_detail_";
 
 
+    //groupid
+    public static final String ODS_VLMS_SPTC34_GROUP = "ods_vlms_sptc34_group";
 
     //ods topic
     //source 表sysc07 cdc kafka topic name
