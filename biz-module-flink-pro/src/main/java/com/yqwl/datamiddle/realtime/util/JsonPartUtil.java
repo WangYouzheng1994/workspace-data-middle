@@ -14,7 +14,7 @@ public class JsonPartUtil {
     private static final String AFTER = "after";
     private static final String TYPE = "type";
     private static final String TABLE_NAME = "tableName";
-    private static final String ts = "ts";
+    private static final String TS = "ts";
 
     /**
      * query:
@@ -104,6 +104,17 @@ public class JsonPartUtil {
         return json.getString(BEFORE);
     }
 
+    /**
+     * 获取before部分数据将其转化为对象
+     *
+     * @param json
+     * @return
+     */
+    public static <T> T getBeforeObj(String json, Class<T> clazz) {
+        JSONObject jsonObj = toJsonObj(json);
+        String beforeStr = jsonObj.getString(BEFORE);
+        return JSON.parseObject(beforeStr, clazz);
+    }
 
     /**
      * 获取after部分数据
@@ -124,6 +135,18 @@ public class JsonPartUtil {
      */
     public static String getAfterStr(JSONObject json) {
         return json.getString(AFTER);
+    }
+
+    /**
+     * 获取after部分数据将其转化为对象
+     *
+     * @param json
+     * @return
+     */
+    public static <T> T getAfterObj(String json, Class<T> clazz) {
+        JSONObject jsonObj = toJsonObj(json);
+        String afterStr = jsonObj.getString(AFTER);
+        return JSON.parseObject(afterStr, clazz);
     }
 
     /**
@@ -176,7 +199,7 @@ public class JsonPartUtil {
      */
     public static String getTsStr(String json) {
         JSONObject jsonObj = toJsonObj(json);
-        return jsonObj.getString(ts);
+        return jsonObj.getString(TS);
     }
 
     /**
@@ -186,7 +209,7 @@ public class JsonPartUtil {
      * @return
      */
     public static String getTsStr(JSONObject json) {
-        return json.getString(ts);
+        return json.getString(TS);
     }
 
 
@@ -198,7 +221,9 @@ public class JsonPartUtil {
         String typeStr = JsonPartUtil.getTypeStr(json);
         //{"order_no":"20220303855787","create_time":1647859623000,"product_count":2,"product_id":39,"id":300007,"product_amount":4453}
         String afterStr = JsonPartUtil.getAfterStr(json);
+        String beforeStr = JsonPartUtil.getBeforeStr(json);
         Mdac01 mdac01 = JSON.parseObject(afterStr, Mdac01.class);
+
 
     }
 
