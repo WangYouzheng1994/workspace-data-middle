@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 @Data
 public class BaseStationData {
 
+    private  int IDNUM;
     private String msgId;
 
     private Long sampleUTC;
