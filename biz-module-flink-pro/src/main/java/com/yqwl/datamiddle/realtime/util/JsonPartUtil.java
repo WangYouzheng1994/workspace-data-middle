@@ -2,6 +2,7 @@ package com.yqwl.datamiddle.realtime.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.yqwl.datamiddle.realtime.bean.Mdac01;
 
 /**
  * 对传输数据json各部分进行分别获取
@@ -16,6 +17,16 @@ public class JsonPartUtil {
     private static final String ts = "ts";
 
     /**
+     * query:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{},
+     * "after":{"order_no":"20220303911728","create_time":1649412632000,"product_count":1,"product_id":434,"id":297118,"product_amount":3426},
+     * "type":"query",
+     * "tableName":"orders_detail",
+     * "ts":1651830021955
+     * }
+     * <p>
      * insert:
      * {
      * "database":"datasource_kafka",
@@ -25,8 +36,27 @@ public class JsonPartUtil {
      * "tableName":"orders_detail",
      * "ts":1651830458870
      * }
+     * <p>
+     * update:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":38,"id":1008,"product_amount":4443},
+     * "after":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":3878,"id":1008,"product_amount":4443},
+     * "type":"update",
+     * "tableName":"orders_detail",
+     * "ts":1651830576944
+     * }
+     * <p>
+     * delete:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":3878,"id":1008,"product_amount":4443},
+     * "after":{},
+     * "type":"delete",
+     * "tableName":"orders_detail",
+     * "ts":1651830662880
+     * }
      */
-
     private static JSONObject toJsonObj(String json) {
         return JSON.parseObject(json);
     }
@@ -157,6 +187,19 @@ public class JsonPartUtil {
      */
     public static String getTsStr(JSONObject json) {
         return json.getString(ts);
+    }
+
+
+    public static void main(String[] args) {
+        String json = "{}";
+        JSONObject jsonObject = JSON.parseObject(json);
+        String tableNameStr = JsonPartUtil.getTableNameStr(json);
+        //操作类型  query insert update delete
+        String typeStr = JsonPartUtil.getTypeStr(json);
+        //{"order_no":"20220303855787","create_time":1647859623000,"product_count":2,"product_id":39,"id":300007,"product_amount":4453}
+        String afterStr = JsonPartUtil.getAfterStr(json);
+        Mdac01 mdac01 = JSON.parseObject(afterStr, Mdac01.class);
+
     }
 
 }
