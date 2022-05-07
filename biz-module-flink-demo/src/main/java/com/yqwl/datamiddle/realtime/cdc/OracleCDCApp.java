@@ -14,6 +14,10 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Properties;
 
 /**
  * @Description:
@@ -22,8 +26,22 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
  * @Version: V1.0
  */
 public class OracleCDCApp {
+    private static final Logger LOGGER = LogManager.getLogger(OracleCDCApp.class);
     public static void main(String[] args) throws Exception {
+//        'debezium.log.mining.strategy'='online_catalog',
+//                'debezium.log.mining.continuous.mine'='true'
         Props props = PropertiesUtil.getProps("cdc.properties");
+        Properties properties = new Properties();
+        properties.put("database.tablename.case.insensitive", "false");
+        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+//        properties.put("database.serverTimezone", "GMT%2B8");
+        properties.put("database.serverTimezone", "Asia/Shanghai");
+//        properties.put("useTimezone","true");
+//        useTimezone=true&serverTimezone=GMT%2B8
+
+
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("oracle.hostname"))
                 .port(props.getInt("oracle.port"))
@@ -34,6 +52,7 @@ public class OracleCDCApp {
                 .password(props.getStr("oracle.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .startupOptions(StartupOptions.initial())
+                .debeziumProperties(properties)
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -49,12 +68,10 @@ public class OracleCDCApp {
         DataStreamSource<String> source = env.addSource(oracleSource);// use parallelism 1 for sink to keep message ordering
         source.print();
 
-       /*
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.ORACLE_TOPIC_NAME,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.MYSQL_TOPIC_NAME));
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORACLE_TOPIC_NAME));
         source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
-        */
         env.execute("oracle-cdc-kafka");
     }
 }

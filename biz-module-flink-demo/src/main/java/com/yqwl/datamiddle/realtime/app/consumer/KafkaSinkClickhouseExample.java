@@ -37,6 +37,7 @@ public class KafkaSinkClickhouseExample {
     private static final Logger LOGGER = LogManager.getLogger(KafkaSinkClickhouseExample.class);
 
     public static void main(String[] args) {
+        LOGGER.info("开始了!");
         // 创建环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(2);

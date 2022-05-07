@@ -151,7 +151,29 @@
             <artifactId>jedis</artifactId>
             <version>3.3.0</version>
         </dependency>
+
+
+        <dependency>
+            <groupId>com.sizatn</groupId>
+            <artifactId>sz-codegenerate</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner_2.12</artifactId>
+            <version>1.14.3</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.nacos</groupId>
+            <artifactId>nacos-config</artifactId>
+            <version>1.4.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
+
+
 
     <build>
         <plugins>
