@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Spti32 {
+    private  int IDNUM;
     private String cqssqdm;
     private String cqscsdm;
     private String cmbsqdm;

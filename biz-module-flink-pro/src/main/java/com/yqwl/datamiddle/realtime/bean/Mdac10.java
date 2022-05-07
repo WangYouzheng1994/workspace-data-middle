@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 @Data
 public class Mdac10 {
 
+    private  int IDNUM;
     private String cpp;
 
     private String vppsm;

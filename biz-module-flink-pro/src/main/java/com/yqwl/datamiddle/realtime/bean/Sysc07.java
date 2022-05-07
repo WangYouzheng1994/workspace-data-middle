@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Sysc07 {
+    private  int IDNUM;
     private String csqdm;
     private String vsqmc;
     private String cdqdm;

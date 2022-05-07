@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Spti32RailSea {
+    private  int IDNUM;
     private String czjgsdm;
     private String vysfs;
     private String cqsztdm;

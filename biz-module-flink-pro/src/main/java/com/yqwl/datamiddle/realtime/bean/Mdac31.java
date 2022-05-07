@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Mdac31 {
+    private  int IDNUM;
     private String ccysdm;
     private String vcysmc;
     private String clxr;

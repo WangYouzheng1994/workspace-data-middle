@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Sptb02RailseaRk {
+    private  int IDNUM;
     private String cjsdbh;
     private String vvin;
     private String vwlckdm;

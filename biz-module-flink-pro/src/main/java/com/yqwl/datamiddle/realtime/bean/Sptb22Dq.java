@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Sptb22Dq {
+    private  int IDNUM;
     private int id;
     private String cpzh;
     private String vwz;

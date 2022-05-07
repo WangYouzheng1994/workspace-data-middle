@@ -6,6 +6,7 @@ import java.util.Objects;
 
 @Data
 public class Sptb23Dq {
+    private  int IDNUM;
     private Long id;
     private String cpzdbh;
     private String cjhdh;

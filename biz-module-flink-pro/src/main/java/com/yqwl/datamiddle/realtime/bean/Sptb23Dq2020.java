@@ -9,6 +9,7 @@ import java.util.Objects;
 
 @Data
 public class Sptb23Dq2020 {
+    private  int IDNUM;
     private String vin;
     private String ch;
     private String jjdh;

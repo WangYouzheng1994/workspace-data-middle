@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 @Data
 public class LcSpecConfig {
 
+    private  int IDNUM;
     private Integer versionCode;
 
     private String hostComCode;

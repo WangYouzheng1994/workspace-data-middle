@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Spti32Dz {
+    private  int IDNUM;
     private String vysfs;
     private String ctype;
     private String vmzl;

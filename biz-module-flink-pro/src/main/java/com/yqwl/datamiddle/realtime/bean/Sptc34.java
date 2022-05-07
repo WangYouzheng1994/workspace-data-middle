@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 @Data
 public class Sptc34 {
+    private  int IDNUM;
     private String vwlckdm;
     private String vwlckmc;
     private String czt;

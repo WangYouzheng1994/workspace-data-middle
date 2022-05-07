@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class SptbXl01 {
+    private  int IDNUM;
     private String cxllx;
     private String cxldm;
     private String vxlmc;

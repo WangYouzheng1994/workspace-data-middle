@@ -7,6 +7,7 @@ import java.util.Objects;
 
 @Data
 public class Spti30 {
+    private  int IDNUM;
     private String cddy;
     private String cqwh;
     private String cczydm;

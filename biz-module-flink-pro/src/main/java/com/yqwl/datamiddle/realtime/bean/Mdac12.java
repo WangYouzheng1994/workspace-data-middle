@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 @Data
 public class Mdac12 {
 
+    private  int IDNUM;
     private String ccpdm;
 
     private String vcpmc;

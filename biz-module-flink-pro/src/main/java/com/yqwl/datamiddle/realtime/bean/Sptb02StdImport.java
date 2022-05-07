@@ -8,6 +8,7 @@ import java.util.Objects;
 
 @Data
 public class Sptb02StdImport{
+    private  int IDNUM;
     private int id;
     private String cjsdbh;
     private String cpzdbh;

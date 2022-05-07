@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 @Data
 public class Spti15{
+    private  int IDNUM;
     private String cddy;
     private String cyysdm;
     private Long dczrq;
