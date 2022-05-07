@@ -14,8 +14,15 @@ import org.apache.kafka.connect.source.SourceRecord;
 import java.util.List;
 
 public class CustomerDeserialization implements DebeziumDeserializationSchema<String> {
+
+    private static final String READ_TYPE = "read";
+    private static final String CREATE_TYPE = "create";
+    private static final String INSERT_TYPE = "insert";
+    private static final String QUERY_TYPE = "query";
+
+
     /**
-     * 封装的数据格式
+     * 序列化后封装的统一数据结构格式
      * {
      * "database":"",
      * "tableName":"",
@@ -23,6 +30,47 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
      * "before":{"":"","":""....},
      * "after":{"":"","":""....},
      * "ts": timestamp
+     * }
+     */
+    /**
+     * read:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{},
+     * "after":{"order_no":"20220303911728","create_time":1649412632000,"product_count":1,"product_id":434,"id":297118,"product_amount":3426},
+     * "type":"read",
+     * "tableName":"orders_detail",
+     * "ts":1651830021955
+     * }
+     * <p>
+     * insert:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{},
+     * "after":{"order_no":"20220303855787","create_time":1647859623000,"product_count":2,"product_id":39,"id":300007,"product_amount":4453},
+     * "type":"insert",
+     * "tableName":"orders_detail",
+     * "ts":1651830458870
+     * }
+     * <p>
+     * update:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":38,"id":1008,"product_amount":4443},
+     * "after":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":3878,"id":1008,"product_amount":4443},
+     * "type":"update",
+     * "tableName":"orders_detail",
+     * "ts":1651830576944
+     * }
+     * <p>
+     * delete:
+     * {
+     * "database":"datasource_kafka",
+     * "before":{"order_no":"20220303855786","create_time":1647859623000,"product_count":1,"product_id":3878,"id":1008,"product_amount":4443},
+     * "after":{},
+     * "type":"delete",
+     * "tableName":"orders_detail",
+     * "ts":1651830662880
      * }
      */
     @Override
@@ -48,9 +96,10 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
                 beforeJson.put(field.name(), beforeValue);
             }
         }
+//cdc读取的原始数据结构格式
 //Struct{after=Struct{ID=Struct{scale=0,value=[B@1da5996c},NAME=222,AGE=Struct{scale=0,value=[B@7b5fa09d},CREATE_TIME=1650015242000},
-// source=Struct{version=1.5.4.Final,connector=oracle,name=oracle_logminer,ts_ms=1650000249859,snapshot=true,db=ORCL,schema=FLINKUSER,table=TEST_A,scn=9011397},op=r,ts_ms=1650000249862}
-//{"database":"FLINKUSER","before":{},"after":{"ID":{},"CREATE_TIME":1650015242000,"NAME":"222","AGE":{}},"type":"read","tableName":"TEST_A","ts":1649999915669}
+//source=Struct{version=1.5.4.Final,connector=oracle,name=oracle_logminer,ts_ms=1650000249859,snapshot=true,db=ORCL,schema=FLINKUSER,table=TEST_A,scn=9011397},op=r,ts_ms=1650000249862}
+
         // 4. 获取“after”数据
         Struct after = value.getStruct("after");
         JSONObject afterJson = new JSONObject();
@@ -63,11 +112,13 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
             }
         }
 
-        // 5. 获取操作类型    CREATE  UPDATE  DELETE
+        // 5. 获取操作类型  read create update delete
         Envelope.Operation operation = Envelope.operationFor(sourceRecord);
         String type = operation.toString().toLowerCase();
-        if ("create".equals(type)) {
-            type = "insert";
+        if (READ_TYPE.equals(type)) {
+            type = QUERY_TYPE;
+        } else if (CREATE_TYPE.equals(type)) {
+            type = INSERT_TYPE;
         }
 
         // 6. 获取进入cdc时间
@@ -80,7 +131,6 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         result.put("after", afterJson);
         result.put("type", type);
         result.put("ts", tsMs);
-
 
 
         // 8. 输出数据
