@@ -51,6 +51,10 @@ public class DatasourceConfig implements Serializable {
 	@Excel(name = "密码", width = 15)
     @ApiModelProperty(value = "密码")
     private String password;
+    /**驱动类名*/
+    @Excel(name = "驱动类名", width = 15)
+    @ApiModelProperty(value = "驱动类名")
+    private java.lang.String driver;
 	/**删除状态*/
 	@Excel(name = "删除状态", width = 15)
     @ApiModelProperty(value = "删除状态")

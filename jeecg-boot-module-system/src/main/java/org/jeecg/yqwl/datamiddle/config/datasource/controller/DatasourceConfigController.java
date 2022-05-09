@@ -1,5 +1,8 @@
 package org.jeecg.yqwl.datamiddle.config.datasource.controller;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.system.vo.DynamicDataSourceModel;
 import org.jeecg.common.util.oConvertUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -168,4 +172,41 @@ public class DatasourceConfigController extends JeecgController<DatasourceConfig
         return super.importExcel(request, response, DatasourceConfig.class);
     }
 
+
+	 @PostMapping({"/testConnection"})
+	 public Result testConnection(@RequestBody DatasourceConfig var1) {
+		 Connection var2 = null;
+
+		 Result var4;
+		 try {
+			 Class.forName(var1.getDriver());
+			 var2 = DriverManager.getConnection(var1.getDatasourceUrl(), var1.getAccount(), var1.getPassword());
+			 Result var3;
+			 if (var2 != null) {
+				 var3 = Result.ok("数据库连接成功");
+				 return var3;
+			 }
+
+			 var3 = Result.ok("数据库连接失败：错误未知");
+			 return var3;
+		 } catch (ClassNotFoundException var17) {
+			 log.error(var17.toString());
+			 var4 = Result.error("数据库连接失败：驱动类不存在");
+		 } catch (Exception var18) {
+			 log.error(var18.toString());
+			 var4 = Result.error("数据库连接失败：" + var18.getMessage());
+			 return var4;
+		 } finally {
+			 try {
+				 if (var2 != null && !var2.isClosed()) {
+					 var2.close();
+				 }
+			 } catch (SQLException var16) {
+				 log.error(var16.toString());
+			 }
+
+		 }
+
+		 return var4;
+	 }
 }
