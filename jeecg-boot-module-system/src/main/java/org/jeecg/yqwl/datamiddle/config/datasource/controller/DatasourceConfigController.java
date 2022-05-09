@@ -44,7 +44,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
  */
 @Api(tags="datasource_config")
 @RestController
-@RequestMapping("/org.jeecg.yqwl.datamiddle/datasourceConfig")
+@RequestMapping("/config/datasourceConfig")
 @Slf4j
 public class DatasourceConfigController extends JeecgController<DatasourceConfig, IDatasourceConfigService> {
 	@Autowired
