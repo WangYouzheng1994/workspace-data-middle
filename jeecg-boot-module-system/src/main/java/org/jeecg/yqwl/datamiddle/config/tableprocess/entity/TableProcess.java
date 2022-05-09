@@ -1,4 +1,4 @@
-package org.jeecg.yqwl.datamiddle.config.entity;
+package org.jeecg.yqwl.datamiddle.config.tableprocess.entity;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
