@@ -37,12 +37,14 @@ public class JDBCSink {
                                 field.setAccessible(true);
                                 // 获取值
                                 Object value = field.get(t);
+
                                 // 给预编译SQL对象赋值
                                 try {
                                     preparedStatement.setObject(paramIndex + 1, value);
                                 } catch (SQLException e) {
                                     e.printStackTrace();
                                 }
+                                paramIndex++;
                             }
 
                            /*  for (int i = 0; i < fields.length; i++) {
