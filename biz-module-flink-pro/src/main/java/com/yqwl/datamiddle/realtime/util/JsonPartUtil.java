@@ -162,7 +162,9 @@ public class JsonPartUtil {
     }
 
     /**
-     * 获取after部分数据将其转化为对象
+     * 获取after部分数据将其转化为对象，
+     * 如果源属性值为null，填充默认值，具体详见
+     * @see {@link JsonPartUtil#getBean} Add By Qingsong 2022年5月10日14:21:54
      *
      * @param json
      * @return
@@ -174,6 +176,20 @@ public class JsonPartUtil {
     }
 
 
+    /**
+     * 传入对象 填充默认值。规则如下：
+     * Integer：0
+     * String: ""
+     * Double: 0
+     * Long: 0L
+     * Date: date
+     *
+     * @author QingSong
+     * @param object
+     * @param <T>
+     * @version 2022年5月10日14:23:57
+     * @return
+     */
     private static <T> T getBean(T object) {
         T objectCopy = null;
         try {
