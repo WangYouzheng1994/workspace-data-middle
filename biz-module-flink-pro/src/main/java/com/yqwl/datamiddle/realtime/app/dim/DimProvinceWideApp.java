@@ -29,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class DimProvinceWideApp {
@@ -242,12 +243,12 @@ public class DimProvinceWideApp {
                 }).uid("mergeWide07mdac01").name("mergeWide07mdac01");
 
         provincesWide.print();
-/*        SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
+        SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
                 provincesWide,
                 new DimAsyncFunction<ProvincesWide>("ods_vlms_sysc09", "cdsdm,csqdm") {
                     @Override
                     public Object getKey(ProvincesWide wide) {
-                        return wide.getCdsdm08();
+                        return Arrays.asList(wide.getCdsdm08(),wide.getCsqdm() );
                     }
                     @Override
                     public void join(ProvincesWide wide, JSONObject dimInfoJsonObj) throws Exception {
@@ -267,7 +268,7 @@ public class DimProvinceWideApp {
                     }
                 }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
 
-        provincesWideWithSysc09.print("WIDE");*/
+        provincesWideWithSysc09.print("WIDE");
 
 
 

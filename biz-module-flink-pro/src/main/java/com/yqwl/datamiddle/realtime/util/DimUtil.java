@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import redis.clients.jedis.Jedis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,8 @@ public class DimUtil {
 
         String sql = "select * from " + tableName + whereSql;
         System.out.println("查询维度的SQL:" + sql);
-        List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+//        List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+        List<JSONObject> dimList = MysqlUtil.queryList(sql, JSONObject.class,false);
         JSONObject dimJsonObj = null;
         //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
         if (dimList != null && dimList.size() > 0) {
@@ -47,7 +49,18 @@ public class DimUtil {
 
     //在做维度关联的时候，大部分场景都是通过id进行关联，所以提供一个方法，只需要将id的值作为参数传进来即可
     public static JSONObject getDimInfo(String tableName, String columnName, Object value) {
-        return getDimInfo(tableName, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
+        // 判定是否有多个列,约定 用,号分割
+        if (value instanceof List) {
+            String[] columnArr = StringUtils.split(columnName, ",");
+            List<Tuple2<String, Object>> tupleList = new ArrayList();
+            for (int i = 0; i < columnArr.length; i++) {
+                tupleList.add(Tuple2.of(columnArr[i], ((List)value).get(i)));
+            }
+            return getDimInfo(tableName, tupleList.toArray(new Tuple2[]{}));
+
+        } else {
+            return getDimInfo(tableName, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
+        }
     }
 
     /*
@@ -122,7 +135,8 @@ public class DimUtil {
             //如果在Redis中没有查到数据，需要到Phoenix中查询
             String sql = "select * from " + tableName + whereSql;
             System.out.println("查询维度的SQL:" + sql);
-            List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+//            List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+            List<JSONObject> dimList = MysqlUtil.queryList(sql, JSONObject.class,false);
             //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
             if (dimList != null && dimList.size() > 0) {
                 dimJsonObj = dimList.get(0);

@@ -44,9 +44,9 @@ public class ProvincesWide {
 
     private String cwlbmSq;
 
-    private Timestamp createTime;
+    private Long createTime;
 
-    private Timestamp updateTime;
+    private Long updateTime;
 
 
     //新加kafka的ts时间戳
