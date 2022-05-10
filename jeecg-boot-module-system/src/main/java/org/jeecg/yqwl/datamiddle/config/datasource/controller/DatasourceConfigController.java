@@ -175,38 +175,39 @@ public class DatasourceConfigController extends JeecgController<DatasourceConfig
 
 	 @PostMapping({"/testConnection"})
 	 public Result testConnection(@RequestBody DatasourceConfig var1) {
- 		 Connection var2 = null;
+ 		 Connection conn = null;
 
-		 Result var4;
+		 Result result;
 		 try {
-			 Class.forName(var1.getDriver());
-			 var2 = DriverManager.getConnection(var1.getDatasourceUrl(), var1.getAccount(), var1.getPassword());
-			 Result var3;
-			 if (var2 != null) {
-				 var3 = Result.ok("数据库连接成功");
-				 return var3;
+			 //注册驱动
+			 Class.forName("com.mysql.jdbc.Driver");
+			 // Class.forName(var1.getDriver());
+			 // jdbc:mysql://192.168.3.4:3306/data_middle fengqiwulian
+			 conn = DriverManager.getConnection(var1.getDatasourceUrl(), var1.getAccount(), var1.getPassword());
+			 if (conn != null) {
+				 result = Result.OK("数据库连接成功");
+				 return result;
 			 }
 
-			 var3 = Result.ok("数据库连接失败：错误未知");
-			 return var3;
-		 } catch (ClassNotFoundException var17) {
-			 log.error(var17.toString());
-			 var4 = Result.error("数据库连接失败：驱动类不存在");
-		 } catch (Exception var18) {
-			 log.error(var18.toString());
-			 var4 = Result.error("数据库连接失败：" + var18.getMessage());
-			 return var4;
+			 result = Result.OK("数据库连接失败：错误未知");
+			 return result;
+		 } catch (ClassNotFoundException e) {
+			 log.error(e.toString());
+			 result = Result.error("数据库连接失败：驱动类不存在");
+		 } catch (Exception e) {
+			 log.error(e.toString());
+			 result = Result.error("数据库连接失败：" + e.getMessage());
+			 return result;
 		 } finally {
 			 try {
-				 if (var2 != null && !var2.isClosed()) {
-					 var2.close();
+				 if (conn != null && !conn.isClosed()) {
+					 conn.close();
 				 }
 			 } catch (SQLException var16) {
 				 log.error(var16.toString());
 			 }
-
 		 }
 
-		 return var4;
+		 return result;
 	 }
 }
