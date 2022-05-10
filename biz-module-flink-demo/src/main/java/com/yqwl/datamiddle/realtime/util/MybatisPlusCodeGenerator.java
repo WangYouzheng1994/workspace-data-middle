@@ -33,10 +33,10 @@ public class MybatisPlusCodeGenerator {
     private static String moduleName = "sptb02";
 
     //要生成的表名
-    private static String[] tables = {"dwd_vlms_sptb02"};
+    private static String[] tables = {"ods_vlms_sptb02"};
 
     //table前缀
-    private static String prefix = "";
+    private static String prefix = "ods_vlms_";
 
     //数据库类型
     private static DbType dbType = DbType.MYSQL;
@@ -57,7 +57,8 @@ public class MybatisPlusCodeGenerator {
          * 获取项目路径
          */
 		try {
-			canonicalPath = new File("").getCanonicalPath();
+		    //需要修改成自己项目所有目录
+			canonicalPath = new File("D:\\source\\data-middle\\biz-module-flink-demo").getCanonicalPath();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

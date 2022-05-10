@@ -1,31 +1,61 @@
-
 package com.yqwl.datamiddle.realtime.bean;
+
 import lombok.Data;
-import java.sql.Timestamp;
 
+import java.io.Serializable;
+/**
+ * <p>
+ * 
+ * </p>
+ *
+ * @author yiqi
+ * @since 2022-05-10
+ */
 @Data
-public class Mdac11 {
+public class Mdac11 implements Serializable {
 
-    private Integer  idnum;
+    private static final long serialVersionUID = 1L;
+
+      private Long idnum;
+
+      /**
+     * 20190406 30-50
+     */
+          
     private String ccxdm;
 
+        
     private String ccxdl;
 
+        
     private String vcxsm;
 
+        
     private String ctybs;
 
+        
     private Long dtyrq;
 
+        
     private String cpp;
 
+        
     private String cjscx;
 
+        
     private Integer id;
 
-    private Timestamp createTime;
+      /**
+     * 创建时间
+     */
+          
+    private Long warehouseCreatetime;
 
-    private Timestamp updateTime;
+      /**
+     * 更新时间
+     */
+          
+    private Long warehouseUpdatetime;
 
 
 }
