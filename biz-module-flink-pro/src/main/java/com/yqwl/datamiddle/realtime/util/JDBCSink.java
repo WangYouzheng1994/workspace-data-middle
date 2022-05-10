@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
 import com.yqwl.datamiddle.realtime.common.JDBCConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
@@ -25,6 +26,11 @@ public class JDBCSink {
                             for (int i = 0; i < fields.length; i++) {
                                 // 获取字段
                                 Field field = fields[i];
+                                String fieldName = field.getName();
+                                // 序列化id不处理
+                                if ( StringUtils.equalsAny(fieldName, "serialVersionUID", "idnum")) {
+                                    continue;
+                                }
                                 // 设置私有属性可访问
                                 field.setAccessible(true);
                                 // 获取值
