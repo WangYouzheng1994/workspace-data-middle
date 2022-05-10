@@ -2,11 +2,13 @@ package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Sptc34Wide extends Sptc34{
 
     private Integer  idnum;

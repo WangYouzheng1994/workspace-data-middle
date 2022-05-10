@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.connect.data.Decimal;
 import scala.annotation.meta.field;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -206,13 +208,13 @@ public class JsonPartUtil {
      * @return <T>
      */
     private static <T> T getBean(T object) {
-        T objectCopy = null;
+        // T objectCopy = null;
         try {
             Class<?> classType = object.getClass();
             //SqlRowSet srs = jdbcTemplate.queryForRowSet(sql);
             Field[] fields = classType.getDeclaredFields();//得到对象中的字段
             //每次循环时，重新实例化一个与传过来的对象类型一样的对象
-            objectCopy = (T) classType.getConstructor(new Class[]{}).newInstance(new Object[]{});
+            // objectCopy = (T) classType.getConstructor(new Class[]{}).newInstance(new Object[]{});
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 String fieldName = field.getName();
@@ -225,8 +227,8 @@ public class JsonPartUtil {
                 }
                 Method getMethod = classType.getMethod("get" + firstLetter
                                 + fieldName.substring(1),
-                        new Class[]{field.getType()});
-                Object invoke = getMethod.invoke(objectCopy, new Object[]{});//调用对象的setXXX方法
+                        null);
+                Object invoke = getMethod.invoke(object, null);//调用对象的getXXX方法
                 if (invoke != null) {
                     continue;
                 }
@@ -240,9 +242,11 @@ public class JsonPartUtil {
                 } else if (field.getType().equals(double.class) || field.getType().equals(Double.class)) {
                     value = new Double(0);
                 } else if (field.getType().equals(long.class) || field.getType().equals(Long.class)) {
-                    value = new Long(0);
+                    value = new Long(0L);
                 } else if (field.getType().equals(Date.class)) {
                     value = new Date();
+                } else if (field.getType().equals(Decimal.class)) {
+                    value = new BigDecimal(0);
                 } else if (field.getType().equals(Object.class)) {
                     value = new Object();
                 }
@@ -252,14 +256,14 @@ public class JsonPartUtil {
 
                 Method setMethod = classType.getMethod(setMethodName,
                         new Class[]{field.getType()});
-                setMethod.invoke(objectCopy, new Object[]{value});//调用对象的setXXX方法
+                setMethod.invoke(object, new Object[]{value});//调用对象的setXXX方法
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return objectCopy;
+        return object;
     }
 
     /**
