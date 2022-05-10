@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.dim;
 import cn.hutool.setting.dialect.Props;
 import com.yqwl.datamiddle.realtime.bean.Sptc34Wide;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.util.JDBCSink;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -16,8 +17,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-import java.text.SimpleDateFormat;
 
 
 /**
@@ -68,8 +67,8 @@ public class Sptc34WideApp {
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVsqdm(), sptc34Wide.getVsxdm());
                 sptc34Wide.setVsqsxdm(vsqsxdm);
 //                System.out.println(vsqsxdm);
-                System.out.println(sptc34Wide.toString());
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+//                System.out.println(sptc34Wide.toString());
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
                 return sptc34Wide;
             }
         }).uid("odsSptc34").name("odsSptc34");
@@ -77,18 +76,57 @@ public class Sptc34WideApp {
 
 
 
-//        kafkaStream.print();
-//        //连接mysql数据库,将数据存到mysql中
-//        kafkaStream.addSink(JDBCSink.getSink("insert into dim_vlms_sptc34 values (?,?,?,?,?,?,?,?,?,?," +
-//                        "?,?,?,?,?,?,?,?,?,?," +
-//                        "?,?,?,?,?,?,?,?,?,?," +
-//                        "?,?,?,?,?,?,?,?,?,?," +
-//                        "?,?,?,?,?,?)"))
-//                .uid("sptc34sinkMysql").name("sptc34sinkMysql");
+//        Sptc34MapSteeam.print();
+        System.err.println("走了这里~~~");
+        //连接mysql数据库,将数据存到mysql中
+        Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT, \" +\n" +
+                        "                    \" NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, \" +\n" +
+                        "                    \" CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, \" +\n" +
+                        "                    \" DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, \" +\n" +
+                        "                    \" FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT, VSQSXDM, WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES (?, \" +\n" +
+                        "                    \"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)"))
+                .uid("sptc34sinkMysql").name("sptc34sinkMysql");
+
+//        Sptc34MapSteeam.addSink( new MyJDBCSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");
 
 
         env.execute("Sptc34WideApp");
     }
 
-
+//    private static class MyJDBCSink extends RichSinkFunction<Sptc34Wide> {
+//
+//        //定义sql连接、预编译器
+//        Connection conn = null;
+//        PreparedStatement insertStmt = null;
+//
+//        @Override
+//        public void open(Configuration parameters) throws Exception {
+//
+//            conn = DriverManager.getConnection("jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=utf-8&useSSL=false","fengqiwulian","fengqiwulian");
+//
+//            insertStmt = conn.prepareStatement("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT, " +
+//                    " NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
+//                    " CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, " +
+//                    " DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, " +
+//                    " FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT,  WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES (?, " +
+//                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+//
+//
+//            insertStmt = conn.prepareStatement("INSERT INTO dim_vlms_sptc34 VALUES (?, " +
+//                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
+//
+//            System.out.println(insertStmt);
+//            System.out.println("mysql chenggong ");
+//
+//
+//        }
+//
+//
+//
+//        @Override
+//        public void close() throws Exception {
+//            insertStmt.close();
+//            conn.close();
+//        }
+//    }
 }
