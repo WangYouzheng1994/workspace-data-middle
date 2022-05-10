@@ -32,7 +32,7 @@ public class DatasourceConfig implements Serializable {
     private static final long serialVersionUID = 1L;
 
 	/**id*/
-	@TableId(type = IdType.ASSIGN_ID)
+	@TableId(type = IdType.AUTO)
     @ApiModelProperty(value = "id")
     private Integer id;
 	/**数据源名称*/
