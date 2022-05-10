@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.bean;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -115,5 +116,6 @@ public class Mdac01 implements Serializable {
           
     private Long warehouseUpdatetime;
 
-
+    //新加kafka的ts时间戳
+    private Timestamp ts;
 }
