@@ -163,8 +163,6 @@ public class JsonPartUtil {
 
     /**
      * 获取after部分数据将其转化为对象，
-     * 如果源属性值为null，填充默认值，具体详见
-     * @see {@link JsonPartUtil#getBean} Add By Qingsong 2022年5月10日14:21:54
      *
      * @param json
      * @return
@@ -172,9 +170,23 @@ public class JsonPartUtil {
     public static <T> T getAfterObj(String json, Class<T> clazz) {
         JSONObject jsonObj = toJsonObj(json);
         String afterStr = jsonObj.getString(AFTER);
-        return getBean(JSON.parseObject(afterStr, clazz));
+        return JSON.parseObject(afterStr, clazz);
     }
 
+    /**
+     * 获取after部分数据将其转化为对象，
+     * 如果源属性值为null，填充默认值，具体详见
+     * @see {@link JsonPartUtil#getBean} Add By Qingsong 2022年5月10日14:21:54
+     *
+     * @param clazz 转换后的类型
+     * @param json
+     * @return <T> – the type of Object to this method
+     */
+    public static <T> T getAfterObjWithDefault(String json, Class<T> clazz) {
+        JSONObject jsonObj = toJsonObj(json);
+        String afterStr = jsonObj.getString(AFTER);
+        return getBean(JSON.parseObject(afterStr, clazz));
+    }
 
     /**
      * 传入对象 填充默认值。规则如下：
@@ -188,7 +200,7 @@ public class JsonPartUtil {
      * @param object
      * @param <T>
      * @version 2022年5月10日14:23:57
-     * @return
+     * @return <T>
      */
     private static <T> T getBean(T object) {
         T objectCopy = null;
