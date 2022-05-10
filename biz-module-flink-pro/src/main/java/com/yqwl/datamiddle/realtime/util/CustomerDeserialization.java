@@ -5,6 +5,7 @@ import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 import io.debezium.data.Envelope;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.streaming.api.transformations.SideOutputTransformation;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
@@ -38,7 +39,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
      * "database":"datasource_kafka",
      * "before":{},
      * "after":{"order_no":"20220303911728","create_time":1649412632000,"product_count":1,"product_id":434,"id":297118,"product_amount":3426},
-     * "type":"read",
+     * "type":"read",  query
      * "tableName":"orders_detail",
      * "ts":1651830021955
      * }
@@ -116,7 +117,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         Envelope.Operation operation = Envelope.operationFor(sourceRecord);
         String type = operation.toString().toLowerCase();
         if (READ_TYPE.equals(type)) {
-            type = QUERY_TYPE;
+            type = INSERT_TYPE;
         } else if (CREATE_TYPE.equals(type)) {
             type = INSERT_TYPE;
         }
@@ -131,7 +132,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         result.put("after", afterJson);
         result.put("type", type);
         result.put("ts", tsMs);
-
+        System.out.println("序列化统一数据格式：" + result.toJSONString());
 
         // 8. 输出数据
         collector.collect(result.toJSONString());

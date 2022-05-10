@@ -18,7 +18,7 @@ import java.util.Properties;
  * @Version: V1.0
  */
 public class KafkaUtil {
-    private static final String KAFKA_SERVER = "192.168.74.100:9092,192.168.74.101:9092,192.168.74.102:9092";
+    private static final String KAFKA_SERVER = "192.168.3.95:9092";
     private static final String DEFAULT_TOPIC = "DEFAULT_DATA";
 
     /**

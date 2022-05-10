@@ -58,6 +58,10 @@ public class MySqlCDCApp {
         System.setProperty("HADOOP_USER_NAME", "root");
 
         DataStreamSource<String> source = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source");
+
+        source.print("数量输出->");
+
+      /*
         SingleOutputStreamOperator<String> orderFilter = source.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String data) throws Exception {
@@ -78,10 +82,12 @@ public class MySqlCDCApp {
                 }
                 return false;
             }
-        }).uid("orderDetailFilter").name("orderDetailFilter");
+        }).uid("orderDetailFilter").name("orderDetailFilter");*/
+
+
 
         //order表一个topic
-        FlinkKafkaProducer<String> sinkKafkaOrder = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
+/*        FlinkKafkaProducer<String> sinkKafkaOrder = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORDERS_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME));
         orderFilter.addSink(sinkKafkaOrder).uid("sinkKafkaOrder").name("sinkKafkaOrder");
@@ -90,7 +96,7 @@ public class MySqlCDCApp {
         FlinkKafkaProducer<String> sinkKafkaOrderDetail = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORDER_DETAIL_PREFIX + KafkaTopicConst.MYSQL_TOPIC_NAME));
-        orderDetailFilter.addSink(sinkKafkaOrderDetail).uid("sinkKafkaOrderDetail").name("sinkKafkaOrderDetail");
+        orderDetailFilter.addSink(sinkKafkaOrderDetail).uid("sinkKafkaOrderDetail").name("sinkKafkaOrderDetail");*/
 
         env.execute("mysql-cdc-kafka");
         LOGGER.info("mysql-cdc-kafka 正常执行");

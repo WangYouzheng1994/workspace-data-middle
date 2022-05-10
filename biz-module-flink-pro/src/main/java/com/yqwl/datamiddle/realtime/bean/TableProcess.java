@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class TableProcess {
     //动态分流 Sink 常量 改为小写和脚本一致
+    public static final String SINK_TYPE_MYSQL = "mysql";
     public static final String SINK_TYPE_HBASE = "hbase";
     public static final String SINK_TYPE_KAFKA = "kafka";
     public static final String SINK_TYPE_CK = "clickhouse";

@@ -8,6 +8,7 @@ import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -20,17 +21,17 @@ import org.apache.logging.log4j.Logger;
 import java.util.Properties;
 
 /**
- * @Description:
- * @Author: WangYouzheng
- * @Date: 2022/3/3 18:23
+ * @Description: 将oracle所有源表数据cdc到kafka的同一个topic中
+ * @Author: muqing
+ * @Date: 2022/05/06
  * @Version: V1.0
  */
-public class OracleCDCApp {
-    private static final Logger LOGGER = LogManager.getLogger(OracleCDCApp.class);
+@Slf4j
+public class OracleCDCKafkaApp {
+
     public static void main(String[] args) throws Exception {
-//        'debezium.log.mining.strategy'='online_catalog',
-//                'debezium.log.mining.continuous.mine'='true'
-        Props props = PropertiesUtil.getProps("cdc.properties");
+
+        //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
@@ -39,38 +40,44 @@ public class OracleCDCApp {
         properties.put("database.serverTimezone", "UTC");
         properties.put("database.serverTimezone", "Asia/Shanghai");
 
-
+        //读取oracle连接配置属性
+        Props props = PropertiesUtil.getProps();
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
-                .hostname(props.getStr("oracle.hostname"))
-                .port(props.getInt("oracle.port"))
-                .database(props.getStr("oracle.database")) // monitor XE database
-                .schemaList(StrUtil.getStrList(props.getStr("oracle.schema.list"), ",")) // monitor inventory schema
-                .tableList(StrUtil.getStrList(props.getStr("oracle.table.list"), ",")) // monitor products table
-                .username(props.getStr("oracle.username"))
-                .password(props.getStr("oracle.password"))
+                .hostname(props.getStr("cdc.oracle.hostname"))
+                .port(props.getInt("cdc.oracle.port"))
+                .database(props.getStr("cdc.oracle.database")) // monitor XE database
+                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ",")) // monitor inventory schema
+                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ",")) // monitor products table
+                .username(props.getStr("cdc.oracle.username"))
+                .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .startupOptions(StartupOptions.initial())
                 .debeziumProperties(properties)
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
+        log.info("stream流环境初始化完成");
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
+        //ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
+        log.info("checkpoint设置完成");
+        DataStreamSource<String> source = env.addSource(oracleSource);
 
-        DataStreamSource<String> source = env.addSource(oracleSource);// use parallelism 1 for sink to keep message ordering
-        source.print();
+        //source.print("数据输出：->");
 
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
-                KafkaTopicConst.ORACLE_TOPIC_NAME,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORACLE_TOPIC_NAME));
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
         source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
+
+        log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
-//        LOGGER.info("出现了~");
+        log.info("oracle-cdc-kafka job开始执行");
     }
 }

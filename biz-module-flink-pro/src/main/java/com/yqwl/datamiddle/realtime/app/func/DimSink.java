@@ -28,7 +28,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
     @Override
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
-        Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+        Class.forName(PhoenixConfig.PHOENIX_DRIVER);
         conn = DriverManager.getConnection(PhoenixConfig.PHOENIX_SERVER);
     }
 

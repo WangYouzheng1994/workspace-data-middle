@@ -145,18 +145,25 @@
             <version>0.3.1</version>
         </dependency>
 
-        <!--     phoenix   -->
+        <!-- phoenix -->
         <dependency>
             <groupId>org.apache.phoenix</groupId>
             <artifactId>phoenix-client-hbase-${hbase.profile}</artifactId>
             <version>${phoenix.version}</version>
         </dependency>
 
-        <!--redis-->
+        <!-- redis -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
             <version>3.3.0</version>
+        </dependency>
+
+        <!-- druid -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid.version}</version>
         </dependency>
     </dependencies>
 
