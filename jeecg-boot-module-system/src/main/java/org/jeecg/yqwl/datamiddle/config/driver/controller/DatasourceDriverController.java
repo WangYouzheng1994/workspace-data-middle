@@ -28,7 +28,7 @@ import java.util.Arrays;
  */
 @Api(tags="datasource_driver")
 @RestController
-@RequestMapping("/1/datasourceDriver")
+@RequestMapping("/config/datasourceDriver")
 @Slf4j
 public class DatasourceDriverController extends JeecgController<DatasourceDriver, IDatasourceDriverService> {
 	@Autowired

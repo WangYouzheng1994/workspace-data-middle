@@ -28,7 +28,7 @@ import java.util.Arrays;
  */
 @Api(tags="metadata_config")
 @RestController
-@RequestMapping("/1/metadataConfig")
+@RequestMapping("/datamanage/metadataConfig")
 @Slf4j
 public class MetadataConfigController extends JeecgController<MetadataConfig, IMetadataConfigService> {
 	@Autowired
