@@ -1,8 +1,13 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import cn.hutool.setting.dialect.Props;
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Felix
@@ -10,25 +15,75 @@ import redis.clients.jedis.JedisPoolConfig;
  * Desc: 通过JedisPool连接池获取Jedis连接
  */
 public class RedisUtil {
-    private static JedisPool jedisPool;
-    private static final String hostname = "hadoop95";
-    private static final Integer port = 6379;
-    private static final Integer timeout = 10000;
-    private static final String password = "fqwl!123";
+    private static volatile JedisPool jedisPool;
 
     public static Jedis getJedis() {
         if (jedisPool == null) {
-            JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-            jedisPoolConfig.setMaxTotal(100); //最大可用连接数
-            jedisPoolConfig.setBlockWhenExhausted(true); //连接耗尽是否等待
-            jedisPoolConfig.setMaxWaitMillis(2000); //等待时间
-            jedisPoolConfig.setMaxIdle(5); //最大闲置连接数
-            jedisPoolConfig.setMinIdle(5); //最小闲置连接数
-            jedisPoolConfig.setTestOnBorrow(true); //取连接的时候进行一下测试 ping pong
-            jedisPool = new JedisPool(jedisPoolConfig, hostname, port, timeout, password);
+            synchronized (RedisUtil.class) {
+                if (jedisPool == null) {
+                    Props props = PropertiesUtil.getProps();
+                    JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+                    jedisPoolConfig.setMaxTotal(props.getInt("redis.MaxTotal")); //最大可用连接数
+                    jedisPoolConfig.setBlockWhenExhausted(true); //连接耗尽是否等待
+                    jedisPoolConfig.setMaxWaitMillis(props.getInt("redis.MaxWaitMillis")); //等待时间
+                    jedisPoolConfig.setMaxIdle(props.getInt("redis.MaxIdle")); //最大闲置连接数
+                    jedisPoolConfig.setMinIdle(props.getInt("redis.MinIdle")); //最小闲置连接数
+                    jedisPoolConfig.setTestOnBorrow(true); //取连接的时候进行一下测试 ping pong
+                    jedisPool = new JedisPool(
+                            jedisPoolConfig,
+                            props.getStr("redis.hostname"),
+                            props.getInt("redis.port"),
+                            props.getInt("redis.timeout"),
+                            props.getStr("redis.password"));
+                }
+            }
         }
         return jedisPool.getResource();
     }
+
+
+    //key 命名规则
+    //层名 + ":" + 系统名 + ":" + 表名 + ":" + 原oracle表中主键
+    private static final String SEPARATE_CHAR = ":";
+    private static final String DIM_LEVEL_NAME = "dim";
+    private static final String VLMS_SYSTEM_NAME = "vlms";
+
+
+    //获取redis key 名称
+    public static String getRedisKey(String tableName, String pk) {
+        List<String> list = new ArrayList<>();
+        list.add(DIM_LEVEL_NAME);
+        list.add(VLMS_SYSTEM_NAME);
+        list.add(tableName);
+        list.add(pk);
+        return StringUtils.join(list, SEPARATE_CHAR);
+    }
+
+    //获取redis key 名称
+    public static String getRedisKey(String levelName, String systemName, String tableName, String pk) {
+        List<String> list = new ArrayList<>();
+        list.add(levelName);
+        list.add(systemName);
+        list.add(tableName);
+        list.add(pk);
+        return StringUtils.join(list, SEPARATE_CHAR);
+    }
+
+    /**
+     * 根据key让Redis中的缓存失效
+     */
+    public static void deleteKey(String tableName, String id) {
+        String redisKey = getRedisKey(tableName, id);
+        try {
+            Jedis jedis = RedisUtil.getJedis();
+            // 通过key清除缓存
+            jedis.del(redisKey);
+            jedis.close();
+        } catch (Exception e) {
+            throw new RuntimeException("删除redis key异常");
+        }
+    }
+
 
     public static void main(String[] args) {
         Jedis jedis = getJedis();

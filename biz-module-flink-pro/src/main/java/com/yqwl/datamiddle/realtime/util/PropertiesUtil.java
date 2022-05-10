@@ -2,12 +2,15 @@ package com.yqwl.datamiddle.realtime.util;
 
 import cn.hutool.setting.dialect.Props;
 
-
+/**
+ * 解析properties配置文件
+ */
 public class PropertiesUtil {
 
-    public static Props getProps(String filename) {
-        return new Props(filename);
-    }
+    private static final String FILENAME = "cdc.properties";
 
+    public static Props getProps() {
+        return new Props(FILENAME);
+    }
 
 }

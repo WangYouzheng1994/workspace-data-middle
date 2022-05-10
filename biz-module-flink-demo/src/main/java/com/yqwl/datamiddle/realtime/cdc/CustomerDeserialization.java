@@ -14,6 +14,12 @@ import org.apache.kafka.connect.source.SourceRecord;
 import java.util.List;
 
 public class CustomerDeserialization implements DebeziumDeserializationSchema<String> {
+
+
+    private static final String READ_TYPE = "read";
+    private static final String CREATE_TYPE = "create";
+    private static final String INSERT_TYPE = "insert";
+    private static final String QUERY_TYPE = "query";
     /**
      * 封装的数据格式
      * {
@@ -66,8 +72,10 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         // 5. 获取操作类型    CREATE  UPDATE  DELETE
         Envelope.Operation operation = Envelope.operationFor(sourceRecord);
         String type = operation.toString().toLowerCase();
-        if ("create".equals(type)) {
-            type = "insert";
+        if (READ_TYPE.equals(type)) {
+            type = QUERY_TYPE;
+        } else if (CREATE_TYPE.equals(type)) {
+            type = INSERT_TYPE;
         }
 
         // 6. 获取进入cdc时间
@@ -81,7 +89,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         result.put("type", type);
         result.put("ts", tsMs);
 
-
+        System.out.println("序列化统一格式：" + result.toJSONString());
 
         // 8. 输出数据
         collector.collect(result.toJSONString());

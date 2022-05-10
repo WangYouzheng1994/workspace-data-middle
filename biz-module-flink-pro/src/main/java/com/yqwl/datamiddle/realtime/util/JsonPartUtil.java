@@ -240,6 +240,9 @@ public class JsonPartUtil {
         //操作类型  query insert update delete
         String typeStr = JsonPartUtil.getTypeStr(json);
         //{"order_no":"20220303855787","create_time":1647859623000,"product_count":2,"product_id":39,"id":300007,"product_amount":4453}
+
+
+
         String afterStr = JsonPartUtil.getAfterStr(json);
         String beforeStr = JsonPartUtil.getBeforeStr(json);
         Mdac01 mdac01 = JsonPartUtil.getAfterObj(json, Mdac01.class);

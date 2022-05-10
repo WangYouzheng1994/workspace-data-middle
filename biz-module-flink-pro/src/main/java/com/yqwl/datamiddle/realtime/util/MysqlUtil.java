@@ -1,7 +1,9 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import cn.hutool.setting.dialect.Props;
 import com.google.common.base.CaseFormat;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
+import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.sql.*;
@@ -30,11 +32,10 @@ public class MysqlUtil {
         ResultSet rs = null;
         try {
             //注册驱动
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName(MysqlConfig.DRIVER);
+            Props props = PropertiesUtil.getProps();
             //建立连接
-            conn = DriverManager.getConnection(
-                    "jdbc:mysql://192.168.74.100:3306/fdsa?characterEncoding=utf-8&useSSL=false",
-                    "root", "root-password");
+            conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
             //创建数据库操作对象
             ps = conn.prepareStatement(sql);
             //执行 SQL 语句
@@ -53,8 +54,7 @@ public class MysqlUtil {
                     //如果开启了下划线转驼峰的映射，那么将列名里的下划线转换为属性的打
                     if (underScoreToCamel) {
                         //直接调用 Google 的 guava 的 CaseFormat LOWER_UNDERSCORE 小写开头+下划线->LOWER_CAMEL 小写开头+驼峰
-                        propertyName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
-                                propertyName);
+                        propertyName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, propertyName);
                     }
                     //调用 apache 的 commons-bean 中的工具类，给 Bean 的属性赋值
                     BeanUtils.setProperty(obj, propertyName, rs.getObject(i));

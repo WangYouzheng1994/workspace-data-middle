@@ -3,17 +3,20 @@ package com.yqwl.datamiddle.realtime.common;
 public class KafkaTopicConst {
 
     public static final String MYSQL_TOPIC_NAME = "MYSQL_TOPIC_13";
-    public static final String ORACLE_TOPIC_NAME = "ORACLE_TOPIC_00";
     public static final String ORDERS_PREFIX = "orders_";
     public static final String ORDER_DETAIL_PREFIX = "orders_detail_";
 
 
     //groupid
     public static final String ODS_VLMS_SPTC34_GROUP = "ods_vlms_sptc34_group";
+    public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
+
+
 
     //ods topic
+    //oracle cdc 统一进入topic
+    public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
     //source 表sysc07 cdc kafka topic name
-    public static final String ODS_VLMS_SYSC07 = "ods_vlms_sysc07";
     public static final String ODS_VLMS_SPTB02 = "ods_vlms_sptb02";
     public static final String ODS_VLMS_SPTC61 = "ods_vlms_sptc61";
     public static final String ODS_VLMS_SYSC09D = "ods_vlms_sysc09d";
@@ -34,6 +37,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SPTB_XL01 = "ods_vlms_sptb_xl01";
     public static final String ODS_VLMS_SPTI15 = "ods_vlms_spti15";
     public static final String ODS_VLMS_SPTI30 = "ods_vlms_spti30";
+    public static final String ODS_VLMS_SYSC07 = "ods_vlms_sysc07";
     public static final String ODS_VLMS_SYSC08 = "ods_vlms_sysc08";
     public static final String ODS_VLMS_SYSC09 = "ods_vlms_sysc09";
     public static final String ODS_VLMS_LC_SPEC_CONFIG = "ods_vlms_lc_spec_config";
@@ -60,7 +64,9 @@ public class KafkaTopicConst {
 
 
 
+
     //dwm topic
+
 
 
 

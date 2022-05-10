@@ -9,6 +9,8 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,6 +26,8 @@ import java.util.*;
  */
 public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject> {
 
+    private static final Logger LOGGER = LogManager.getLogger(TableProcessFunction.class);
+
     //因为要将维度数据写到侧输出流，所以定义一个侧输出流标签
     private OutputTag<JSONObject> outputTag;
 
@@ -33,7 +37,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
 
     //用于在内存中存储表配置对象 [表名,表配置信息]
     private Map<String, TableProcess> tableProcessMap = new HashMap<>();
-    //表示目前内存中已经存在的 HBase 表
+    //表示目前内存中已经存在的要放入mysql中的表
     private Set<String> existsTables = new HashSet<>();
     //声明 Phoenix 连接
     private Connection connection = null;
@@ -41,7 +45,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
     @Override
     public void open(Configuration parameters) throws Exception {
         //初始化 Phoenix 连接
-        Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+        Class.forName(PhoenixConfig.PHOENIX_DRIVER);
         connection = DriverManager.getConnection(PhoenixConfig.PHOENIX_SERVER);
         //初始化配置表信息
         initTableProcessMap();
@@ -59,10 +63,9 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
      * 初始化分流配置集合
      */
     private void initTableProcessMap() {
-        System.out.println("更新配置的处理信息");
+        LOGGER.info("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
-        List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process",
-                TableProcess.class, true);
+        List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
         for (TableProcess tableProcess : tableProcessList) {
             //获取源表表名
@@ -159,19 +162,16 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
             TableProcess tableProcess = tableProcessMap.get(key);
             if (tableProcess != null) {
                 jsonObj.put("sink_table", tableProcess.getSinkTable());
-                if (tableProcess.getSinkColumns() != null && tableProcess.getSinkColumns().length() >
-                        0) {
+                if (tableProcess.getSinkColumns() != null && tableProcess.getSinkColumns().length() > 0) {
                     filterColumn(jsonObj.getJSONObject("data"), tableProcess.getSinkColumns());
                 }
             } else {
-                System.out.println("No This Key:" + key);
+                LOGGER.info("No This Key: {}", key);
             }
-            if (tableProcess != null &&
-                    TableProcess.SINK_TYPE_HBASE.equalsIgnoreCase(tableProcess.getSinkType())) {
+            if (tableProcess != null && TableProcess.SINK_TYPE_HBASE.equalsIgnoreCase(tableProcess.getSinkType())) {
                 // 如果是hbase的 那么把这个数据和outputTag打标挂钩。
                 ctx.output(outputTag, jsonObj);
-            } else if (tableProcess != null &&
-                    TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType())) {
+            } else if (tableProcess != null && TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType())) {
                 out.collect(jsonObj);
             }
         }
