@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Spti32 {
-    private  int IDNUM;
+    private Integer  idnum;
     private String cqssqdm;
     private String cqscsdm;
     private String cmbsqdm;

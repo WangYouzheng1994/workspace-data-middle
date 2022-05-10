@@ -3,6 +3,8 @@ package com.yqwl.datamiddle.realtime.util;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
+import org.apache.commons.lang3.StringUtils;
+import scala.annotation.meta.field;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -195,6 +197,7 @@ public class JsonPartUtil {
      * Double: 0
      * Long: 0L
      * Date: date
+     * 注意： 不替換 idnum, serialVersionUID
      *
      * @author QingSong
      * @param object
@@ -213,6 +216,21 @@ public class JsonPartUtil {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
                 String fieldName = field.getName();
+                // 获得属性的首字母并转换为大写，与setter和getter对应即：setXx，getXxxx
+                String firstLetter = fieldName.substring(0, 1).toUpperCase();
+                // 判定此值是否是空的。如果是null 才进行处理。
+                // 序列化id不处理
+                if (StringUtils.equalsAny(fieldName, "serialVersionUID", "idnum")) {
+                    continue;
+                }
+                Method getMethod = classType.getMethod("get" + firstLetter
+                                + fieldName.substring(1),
+                        new Class[]{field.getType()});
+                Object invoke = getMethod.invoke(objectCopy, new Object[]{});//调用对象的setXXX方法
+                if (invoke != null) {
+                    continue;
+                }
+
                 Object value = null;
                 //根据字段类型决定结果集中使用哪种get方法从数据中取到数据
                 if (field.getType().equals(String.class)) {
@@ -228,13 +246,10 @@ public class JsonPartUtil {
                 } else if (field.getType().equals(Object.class)) {
                     value = new Object();
                 }
-                // 获得属性的首字母并转换为大写，与setXXX对应
-                String firstLetter = fieldName.substring(0, 1).toUpperCase();
+
                 String setMethodName = "set" + firstLetter
                         + fieldName.substring(1);
-                if (fieldName.equals("serialVersionUID")) {
-                    continue;
-                }
+
                 Method setMethod = classType.getMethod(setMethodName,
                         new Class[]{field.getType()});
                 setMethod.invoke(objectCopy, new Object[]{value});//调用对象的setXXX方法

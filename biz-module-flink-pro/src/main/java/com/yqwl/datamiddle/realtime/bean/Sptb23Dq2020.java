@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Sptb23Dq2020 {
-    private  int IDNUM;
+    private Integer  idnum;
     private String vin;
     private String ch;
     private String jjdh;

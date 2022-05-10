@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Sptb013{
-    private  int IDNUM;
+    private Integer  idnum;
     private String vph;
     private String czt;
     private String vfcck;

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class Sptb23Dq {
-    private  int IDNUM;
+    private Integer  idnum;
     private Long id;
     private String cpzdbh;
     private String cjhdh;

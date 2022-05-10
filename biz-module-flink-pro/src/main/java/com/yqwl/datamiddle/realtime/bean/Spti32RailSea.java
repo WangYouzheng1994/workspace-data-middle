@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Data
 public class Spti32RailSea {
-    private  int IDNUM;
+    private Integer  idnum;
     private String czjgsdm;
     private String vysfs;
     private String cqsztdm;

@@ -175,7 +175,7 @@ public class DatasourceConfigController extends JeecgController<DatasourceConfig
 
 	 @PostMapping({"/testConnection"})
 	 public Result testConnection(@RequestBody DatasourceConfig var1) {
-		 Connection var2 = null;
+ 		 Connection var2 = null;
 
 		 Result var4;
 		 try {

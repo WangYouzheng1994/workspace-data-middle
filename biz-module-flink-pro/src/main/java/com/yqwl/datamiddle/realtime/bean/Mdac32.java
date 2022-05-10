@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Mdac32 {
-    private  int IDNUM;
+    private Integer  idnum;
     private String cdhddm;
     private String cjxsdm;
     private String csqdm;

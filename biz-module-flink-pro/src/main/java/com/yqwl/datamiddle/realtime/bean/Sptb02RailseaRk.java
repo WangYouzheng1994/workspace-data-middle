@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Sptb02RailseaRk {
-    private  int IDNUM;
+    private Integer  idnum;
     private String cjsdbh;
     private String vvin;
     private String vwlckdm;

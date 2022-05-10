@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Sptb02StdImport{
-    private  int IDNUM;
+    private Integer  idnum;
     private int id;
     private String cjsdbh;
     private String cpzdbh;

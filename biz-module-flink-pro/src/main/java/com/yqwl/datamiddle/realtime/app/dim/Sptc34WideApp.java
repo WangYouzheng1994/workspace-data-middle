@@ -41,7 +41,7 @@ public class Sptc34WideApp {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
 
-        Props props = PropertiesUtil.getProps("cdc.properties");
+        Props props = PropertiesUtil.getProps();
 
         //从kafka消费数据
         KafkaSource<String> kafkasource = KafkaSource.<String>builder()
@@ -64,7 +64,7 @@ public class Sptc34WideApp {
         SingleOutputStreamOperator<Sptc34Wide> Sptc34MapSteeam = kafkaStream.map(new MapFunction<String, Sptc34Wide>() {
             @Override
             public Sptc34Wide map(String value) throws Exception {
-                Sptc34Wide sptc34Wide = JsonPartUtil.getAfterObj(value, Sptc34Wide.class);
+                Sptc34Wide sptc34Wide = JsonPartUtil.getAfterObjWithDefault(value, Sptc34Wide.class);
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVsqdm(), sptc34Wide.getVsxdm());
                 sptc34Wide.setVsqsxdm(vsqsxdm);
 //                System.out.println(vsqsxdm);
@@ -73,7 +73,6 @@ public class Sptc34WideApp {
                 return sptc34Wide;
             }
         }).uid("odsSptc34").name("odsSptc34");
-
 
 
 

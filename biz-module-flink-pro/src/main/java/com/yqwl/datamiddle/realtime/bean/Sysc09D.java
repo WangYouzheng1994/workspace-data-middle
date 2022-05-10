@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Data
 public class Sysc09D {
-    private  int IDNUM;
+    private Integer  idnum;
     private String czddm;
     private String csjxm;
     private String vsjxc;
