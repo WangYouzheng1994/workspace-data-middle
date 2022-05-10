@@ -23,21 +23,32 @@ public class JDBCSink {
                             // 获取所有的属性信息
                             Field[] fields = t.getClass().getDeclaredFields();
                             // 遍历字段
-                            for (int i = 0; i < fields.length; i++) {
+                            int paramIndex = 0;
+                            for ( Field field : fields ) {
                                 // 获取字段
-                                Field field = fields[i];
+//                                Field field = fields[i];
                                 String fieldName = field.getName();
                                 // 序列化id不处理
-                                if ( StringUtils.equalsAny(fieldName, "serialVersionUID", "idnum")) {
+                                if ( StringUtils.equalsAny(fieldName, "serialVersionUID")) {
                                     continue;
                                 }
+
                                 // 设置私有属性可访问
                                 field.setAccessible(true);
                                 // 获取值
                                 Object value = field.get(t);
                                 // 给预编译SQL对象赋值
-                                preparedStatement.setObject(i + 1, value);
+                                try {
+                                    preparedStatement.setObject(paramIndex + 1, value);
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
                             }
+
+                           /*  for (int i = 0; i < fields.length; i++) {
+
+                            }
+                            System.out.println(); */
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
