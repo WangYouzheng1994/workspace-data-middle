@@ -1,14 +1,16 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.ToString;
 
 
 import java.sql.Timestamp;
 
 
 @Data
+@ToString
 public class Sysc07 {
-    private  int IDNUM;
+    //    private  Integer IDNUM;
     private String csqdm;
     private String vsqmc;
     private String cdqdm;
@@ -30,5 +32,9 @@ public class Sysc07 {
     private Long finalApprovalDate;
     private Timestamp createTime;
     private Timestamp updateTime;
+
+
+    //新加kafka的ts时间戳
+    private Timestamp ts;
 
 }

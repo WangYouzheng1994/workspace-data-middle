@@ -1,13 +1,17 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.ToString;
+
 import java.sql.Timestamp;
 
+
 @Data
+@ToString
 public class Mdac01 {
 
-    private  int IDNUM;
-    private int id;
+//    private  Integer IDNUM;
+
 
     private String cdqdm;
 
@@ -41,5 +45,8 @@ public class Mdac01 {
 
     private Timestamp updateTime;
 
+    //新加kafka的ts时间戳
+    private Timestamp ts;
 
 }
+

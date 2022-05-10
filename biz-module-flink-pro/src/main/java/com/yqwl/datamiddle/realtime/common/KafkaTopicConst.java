@@ -55,6 +55,13 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SPTI32_DZ = "ods_vlms_spti32_dz";
     public static final String ODS_VLMS_RFID_WAREHOUSE = "ods_vlms_rfid_warehouse";
 
+    //xiaofeng自建   cdc kafka topic name
+    public static final String  ORACLE_TOPIC_SYSC07="ORACLE_TOPIC_SYSC07";
+    public static final String  ORACLE_TOPIC_SYSC08="ORACLE_TOPIC_SYSC08";
+    public static final String  ORACLE_TOPIC_SYSC09="ORACLE_TOPIC_SYSC09";
+    public static final String  ORACLE_TOPIC_MDAC01="ORACLE_TOPIC_MDAC01";
+
+
     //dim topic
     //
     public static final String DIM_VLMS_SYS_SYSC07SYSC08 = "dim_vlms_sys_sysc07sysc08";
