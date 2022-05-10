@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 站台-仓库对照表
+ * 
  * </p>
  *
  * @author yiqi
@@ -19,8 +19,8 @@ import java.io.Serializable;
  */
 @Data
   @EqualsAndHashCode(callSuper = false)
-    @TableName("ods_vlms_site_warehouse")
-public class SiteWarehouse implements Serializable {
+    @TableName("ods_vlms_sptb_xl01d")
+public class SptbXl01d implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,58 +28,64 @@ public class SiteWarehouse implements Serializable {
       private Long idnum;
 
       /**
-     * 站点代码
+     * 线路代码
      */
-      @TableField("VWLCKDM")
-    private String vwlckdm;
+      @TableField("CXLDM")
+    private String cxldm;
 
       /**
-     * 站点名称
+     * 起点代码
      */
-      @TableField("VWLCKMC")
-    private String vwlckmc;
+      @TableField("CQDDM")
+    private String cqddm;
 
       /**
-     * 库房ID
+     * 起点名称
      */
-      @TableField("WAREHOUSE_ID")
-    private Integer warehouseId;
+      @TableField("VQDMC")
+    private String vqdmc;
 
       /**
-     * 库房代码
+     * 终点代码
      */
-      @TableField("WAREHOUSE_CODE")
-    private String warehouseCode;
+      @TableField("CZDDM")
+    private String czddm;
 
       /**
-     * 库房名称
+     * 终点名称
      */
-      @TableField("WAREHOUSE_NAME")
-    private String warehouseName;
+      @TableField("VZDMC")
+    private String vzdmc;
 
       /**
-     * 备注
-     */
-      @TableField("CBZ")
-    private String cbz;
-
-      /**
-     * 操作日期
-     */
-      @TableField("DCZRQ")
-    private Long dczrq;
-
-      /**
-     * 操作员
+     * 操作员代码
      */
       @TableField("CCZYDM")
     private String cczydm;
 
       /**
-     * 类型：对照contrast；仓库：warehouse
+     * 操作时间
      */
-      @TableField("TYPE")
-    private String type;
+      @TableField("DCZSJ")
+    private Long dczsj;
+
+      /**
+     * 停用标识
+     */
+      @TableField("CTYBS")
+    private String ctybs;
+
+      /**
+     * 停用日期
+     */
+      @TableField("DTYRQ")
+    private Long dtyrq;
+
+      /**
+     * 主机公司
+     */
+      @TableField("CZJGSDM")
+    private String czjgsdm;
 
     @TableField("WAREHOUSE_CREATETIME")
     private Long warehouseCreatetime;

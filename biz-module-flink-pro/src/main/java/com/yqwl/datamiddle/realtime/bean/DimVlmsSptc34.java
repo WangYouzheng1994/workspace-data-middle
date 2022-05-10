@@ -19,8 +19,8 @@ import java.io.Serializable;
  */
 @Data
   @EqualsAndHashCode(callSuper = false)
-    @TableName("ods_vlms_sptc34")
-public class Sptc34 implements Serializable {
+    @TableName("dim_vlms_sptc34")
+public class DimVlmsSptc34 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

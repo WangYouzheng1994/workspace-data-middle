@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 /**
  * <p>
- * 铁水运单溯源接口入库时间
+ * 数据字典表
  * </p>
  *
  * @author yiqi
@@ -19,8 +19,8 @@ import java.io.Serializable;
  */
 @Data
   @EqualsAndHashCode(callSuper = false)
-    @TableName("ods_vlms_sptb02_railsea_rk")
-public class Sptb02RailseaRk implements Serializable {
+    @TableName("ods_vlms_sysc09d")
+public class Sysc09d implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,52 +28,55 @@ public class Sptb02RailseaRk implements Serializable {
       private Long idnum;
 
       /**
-     * 结算单编号 主键
+     * 对应sysc09c.CZDDM 对应
      */
-      @TableField("CJSDBH")
-    private String cjsdbh;
+      @TableField("CZDDM")
+    private String czddm;
 
       /**
-     * VIN 
+     * 要展开数据项的编码
      */
-      @TableField("VVIN")
-    private String vvin;
+      @TableField("CSJXM")
+    private String csjxm;
 
       /**
-     * 物理仓库代码（站台代码）
+     * 数据项名称 由500改为4000
      */
-      @TableField("VWLCKDM")
-    private String vwlckdm;
+      @TableField("VSJXC")
+    private String vsjxc;
 
       /**
-     * 物理仓库名称 增加长度：由20增至50
+     * 级别
      */
-      @TableField("VWLCKMC")
-    private String vwlckmc;
+      @TableField("CJB")
+    private String cjb;
 
       /**
-     * 溯源库房ID
+     * 停用标识
      */
-      @TableField("WAREHOUSE_ID")
-    private Integer warehouseId;
+      @TableField("CTYBS")
+    private String ctybs;
 
       /**
-     * 溯源库房代码
+     * 停用日期
      */
-      @TableField("WAREHOUSE_CODE")
-    private String warehouseCode;
+      @TableField("DTYRQ")
+    private Long dtyrq;
 
       /**
-     * 溯源库房名称
+     * 备注
      */
-      @TableField("WAREHOUSE_NAME")
-    private String warehouseName;
+      @TableField("VBZ")
+    private String vbz;
+
+    @TableField("VBZ2")
+    private String vbz2;
 
       /**
-     * 入库日期
+     * 用于特殊运输商
      */
-      @TableField("DRKRQ")
-    private Long drkrq;
+      @TableField("VBZ3")
+    private String vbz3;
 
       /**
      * 创建时间
