@@ -1,5 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,9 +14,10 @@ import java.io.Serializable;
  * @author yiqi
  * @since 2022-05-10
  */
+@TableName("dim_vlms_sptc34")
 @Data
 public class Sptc34Wide implements Serializable {
-
+    @TransientSink
     private static final long serialVersionUID = 1L;
 
       private Long idnum;
