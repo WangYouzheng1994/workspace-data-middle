@@ -146,7 +146,8 @@ public class DimUtil {
             } else if (CLICKHOUSE_DB_TYPE.equals(dbType)) {
                 dimList = PhoenixUtil.queryList(sql, JSONObject.class);
             }
-            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条            if (dimList != null && dimList.size() > 0) {
+            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
+            if (dimList != null && dimList.size() > 0) {
                 dimJsonObj = dimList.get(0);
                 //将查询出来的数据放到Redis中缓存起来
                 if (jedis != null) {
@@ -155,15 +156,14 @@ public class DimUtil {
             } else {
                 System.out.println("维度数据没有找到:" + sql);
             }
+            //关闭Jedis
+            if (jedis != null) {
+                jedis.close();
+            }
         }
-
-        //关闭Jedis
-        if (jedis != null) {
-            jedis.close();
-        }
-
         return dimJsonObj;
     }
+
 
     /**
      * 根据key让Redis中的缓存失效
