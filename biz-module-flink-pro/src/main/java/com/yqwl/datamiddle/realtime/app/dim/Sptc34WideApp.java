@@ -74,14 +74,19 @@ public class Sptc34WideApp {
                 //将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
                 sptc34Wide.setVsqsxdm(vsqsxdm);
 //                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+                //获取kafka的时间戳作为创建时间和更新时间
+                String tsStr = JsonPartUtil.getTsStr(value);
+                //将String类型的时间戳转换成Long类型
+                Long aLong = Long.valueOf(tsStr);
                 //获取数据类型
                 String typeStr = JsonPartUtil.getTypeStr(value);
                 if ( typeStr.equals("insert") ) {
+
                     //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
-                    sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+                    sptc34Wide.setWarehouseCreatetime(aLong);
                 }else if ( typeStr.equals("update") ) {
                     //获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
-                    sptc34Wide.setWarehouseUpdatetime(System.currentTimeMillis());
+                    sptc34Wide.setWarehouseUpdatetime(aLong);
                 }
                 return sptc34Wide;
             }
