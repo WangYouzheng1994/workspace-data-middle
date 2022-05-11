@@ -25,10 +25,12 @@ import org.apache.logging.log4j.Logger;
  * 从kafka读取sptc34 的topic   并将 sptc34表拓宽字段生成新的维度表   并将生成的维度宽表传到 mysql中
  */
 public class Sptc34WideApp {
+
     //设置LOGGER 日志
     private static final Logger LOGGER = LogManager.getLogger(Sptc34WideApp.class);
 
     public static void main(String[] args) throws Exception{
+        long l = System.currentTimeMillis();
         //获取执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //设置并行度
@@ -57,7 +59,10 @@ public class Sptc34WideApp {
                 .build();
 
         DataStreamSource<String> kafkaStream = env.fromSource(kafkasource, WatermarkStrategy.noWatermarks(), "odssptc34kafka-source");
+        long l1 = System.currentTimeMillis();
+        System.out.println(l1-l);
 
+//        kafkaStream.print();
         //sptc34Wide表转换成实体类(sptc34表的数据传到sptc34Wide中)    sptc34表里面有176条数据省区市县代码是空值  已经使用空串代替
         SingleOutputStreamOperator<Sptc34Wide> Sptc34MapSteeam = kafkaStream.map(new MapFunction<String, Sptc34Wide>() {
             @Override
@@ -68,25 +73,36 @@ public class Sptc34WideApp {
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVsqdm(), sptc34Wide.getVsxdm());
                 //将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
                 sptc34Wide.setVsqsxdm(vsqsxdm);
-                //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中
-                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+//                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+                //获取数据类型
+                String typeStr = JsonPartUtil.getTypeStr(value);
+                if ( typeStr.equals("insert") ) {
+                    //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
+                    sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+                }else if ( typeStr.equals("update") ) {
+                    //获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
+                    sptc34Wide.setWarehouseUpdatetime(System.currentTimeMillis());
+                }
                 return sptc34Wide;
             }
         }).uid("odsSptc34").name("odsSptc34");
 
         //将输出的内容打印到logger中
-        LOGGER.info( Sptc34MapSteeam.print());
+//        LOGGER.info( Sptc34MapSteeam.print());
+        Sptc34MapSteeam.print();
+        long l2 = System.currentTimeMillis();
+        System.out.println(l2-l1);
 
         //连接mysql数据库,将数据存到mysql中
-        Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
+        Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("REPLACE INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
                         "   NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
                         "  CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, " +
                         "  DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, " +
                         "  FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT, VSQSXDM, WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES " +
                         "(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)"))
                 .uid("sptc34sinkMysql").name("sptc34sinkMysql");
-
-
+        long m = System.currentTimeMillis();
+        System.out.println(m-l2);
         //启动
         env.execute("Sptc34WideApp");
     }
