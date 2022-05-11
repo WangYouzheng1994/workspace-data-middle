@@ -16,6 +16,11 @@ import java.util.List;
  * select * from dim_base_trademark where id=10 and name=zs;
  */
 public class DimUtil {
+
+    public static final String MYSQL_DB_TYPE = "mysql";
+    public static final String CLICKHOUSE_DB_TYPE = "clickhouse";
+    public static final String HBASE_DB_TYPE = "hbase";
+
     /**
      * 从Phoenix中查询数据，没有使用缓存
      */
@@ -35,7 +40,7 @@ public class DimUtil {
         String sql = "select * from " + tableName + whereSql;
         System.out.println("查询维度的SQL:" + sql);
 //        List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
-        List<JSONObject> dimList = MysqlUtil.queryList(sql, JSONObject.class,false);
+        List<JSONObject> dimList = MysqlUtil.queryList(sql, JSONObject.class, false);
         JSONObject dimJsonObj = null;
         //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
         if (dimList != null && dimList.size() > 0) {
@@ -48,18 +53,18 @@ public class DimUtil {
     }
 
     //在做维度关联的时候，大部分场景都是通过id进行关联，所以提供一个方法，只需要将id的值作为参数传进来即可
-    public static JSONObject getDimInfo(String tableName, String columnName, Object value) {
+    public static JSONObject getDimInfo(String dbType, String tableName, String columnName, Object value) {
         // 判定是否有多个列,约定 用,号分割
         if (value instanceof List) {
             String[] columnArr = StringUtils.split(columnName, ",");
             List<Tuple2<String, Object>> tupleList = new ArrayList();
             for (int i = 0; i < columnArr.length; i++) {
-                tupleList.add(Tuple2.of(columnArr[i], ((List)value).get(i)));
+                tupleList.add(Tuple2.of(columnArr[i], ((List) value).get(i)));
             }
-            return getDimInfo(tableName, tupleList.toArray(new Tuple2[]{}));
+            return getDimInfo(dbType, tableName, tupleList.toArray(new Tuple2[]{}));
 
         } else {
-            return getDimInfo(tableName, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
+            return getDimInfo(dbType, tableName, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
         }
     }
 
@@ -91,7 +96,7 @@ public class DimUtil {
      * @param cloNameAndValue
      * @return
      */
-    public static JSONObject getDimInfo(String tableName, Tuple2<String, Object>... cloNameAndValue) {
+    public static JSONObject getDimInfo(String dbType, String tableName, Tuple2<String, Object>... cloNameAndValue) {
         //拼接查询条件
         String whereSql = " where ";
         String redisKey = "dim:" + tableName.toLowerCase() + ":";
@@ -135,10 +140,13 @@ public class DimUtil {
             //如果在Redis中没有查到数据，需要到Phoenix中查询
             String sql = "select * from " + tableName + whereSql;
             System.out.println("查询维度的SQL:" + sql);
-//            List<JSONObject> dimList = PhoenixUtil.queryList(sql, JSONObject.class);
-            List<JSONObject> dimList = MysqlUtil.queryList(sql, JSONObject.class,false);
-            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
-            if (dimList != null && dimList.size() > 0) {
+            List<JSONObject> dimList = null;
+            if (MYSQL_DB_TYPE.equals(dbType)) {
+                dimList = MysqlUtil.queryList(sql, JSONObject.class, false);
+            } else if (CLICKHOUSE_DB_TYPE.equals(dbType)) {
+                dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+            }
+            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条            if (dimList != null && dimList.size() > 0) {
                 dimJsonObj = dimList.get(0);
                 //将查询出来的数据放到Redis中缓存起来
                 if (jedis != null) {

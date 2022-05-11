@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.ThreadPoolUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
@@ -18,22 +19,25 @@ import java.util.concurrent.ExecutorService;
  * 在父类中只定义方法的声明，让整个流程跑通
  * 具体的实现延迟到子类中实现
  */
+@Slf4j
 public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implements DimJoinFunction<T> {
 
     //线程池对象的父接口生命（多态）
     private ExecutorService executorService;
-
     //维度的表名
     private String tableName;
     //维度的列名
     private String columnName;
+    //数据库类型
+    private String dbType;
 
     public DimAsyncFunction(String tableName) {
         this.tableName = tableName;
     }
 
-    public DimAsyncFunction(String tableName, String columnName) {
+    public DimAsyncFunction(String dbType, String tableName, String columnName) {
         this(tableName);
+        this.dbType = dbType;
         this.columnName = columnName;
     }
 
@@ -41,6 +45,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
     public void open(Configuration parameters) throws Exception {
         //初始化线程池对象
         System.out.println("初始化线程池对象");
+        log.info("初始化线程池对象");
         executorService = ThreadPoolUtil.getInstance();
     }
 
@@ -64,7 +69,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                             Object key = getKey(obj);
 
                             //根据维度的主键到维度表中进行查询
-                            JSONObject dimInfoJsonObj = DimUtil.getDimInfo(tableName, columnName, key);
+                            JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key);
                             //System.out.println("维度数据Json格式：" + dimInfoJsonObj);
 
                             // 这儿只有关联上的才会处理。
