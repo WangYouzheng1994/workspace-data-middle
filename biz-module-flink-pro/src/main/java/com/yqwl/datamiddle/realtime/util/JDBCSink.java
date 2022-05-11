@@ -47,10 +47,6 @@ public class JDBCSink {
                                 paramIndex++;
                             }
 
-                           /*  for (int i = 0; i < fields.length; i++) {
-
-                            }
-                            System.out.println(); */
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }

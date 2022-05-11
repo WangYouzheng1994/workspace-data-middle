@@ -17,12 +17,17 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * 从kafka读取sptc34 的topic   并将 sptc34表拓宽字段生成新的维度表   并将生成的维度宽表传到 mysql中
  */
 public class Sptc34WideApp {
+    //设置LOGGER 日志
+    private static final Logger LOGGER = LogManager.getLogger(Sptc34WideApp.class);
+
     public static void main(String[] args) throws Exception{
         //获取执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -51,82 +56,40 @@ public class Sptc34WideApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-
-        System.err.println(kafkasource);
         DataStreamSource<String> kafkaStream = env.fromSource(kafkasource, WatermarkStrategy.noWatermarks(), "odssptc34kafka-source");
-//        kafkaStream.print();
-        //DataStreamSource<String> kafkaSource = env.addSource(KafkaUtil.getKafkaSource(KafkaTopicConst.ODS_VLMS_SPTC34,KafkaTopicConst.ODS_VLMS_SPTC34_GROUP));
 
-
-//        System.err.println("1111111-------kafkaSource");
-        //sptc34表转换成实体类    sptc34表里面有176条数据匹配不上  已经使用空串代替
+        //sptc34Wide表转换成实体类(sptc34表的数据传到sptc34Wide中)    sptc34表里面有176条数据省区市县代码是空值  已经使用空串代替
         SingleOutputStreamOperator<Sptc34Wide> Sptc34MapSteeam = kafkaStream.map(new MapFunction<String, Sptc34Wide>() {
             @Override
             public Sptc34Wide map(String value) throws Exception {
+                //获取表字段并将没有值的数据添加默认值
                 Sptc34Wide sptc34Wide = JsonPartUtil.getAfterObjWithDefault(value, Sptc34Wide.class);
+                //合并省区市县字段
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVsqdm(), sptc34Wide.getVsxdm());
+                //将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
                 sptc34Wide.setVsqsxdm(vsqsxdm);
-//                System.out.println(vsqsxdm);
-//                System.out.println(sptc34Wide.toString());
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中
+                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
                 return sptc34Wide;
             }
         }).uid("odsSptc34").name("odsSptc34");
 
+        //将输出的内容打印到logger中
+        LOGGER.info( Sptc34MapSteeam.print());
 
-
-
-//        Sptc34MapSteeam.print();
-        System.err.println("走了这里~~~");
         //连接mysql数据库,将数据存到mysql中
-        Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT, \" +\n" +
-                        "                    \" NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, \" +\n" +
-                        "                    \" CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, \" +\n" +
-                        "                    \" DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, \" +\n" +
-                        "                    \" FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT, VSQSXDM, WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES (?, \" +\n" +
-                        "                    \"?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)"))
+        Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
+                        "   NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
+                        "  CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, " +
+                        "  DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, " +
+                        "  FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT, VSQSXDM, WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES " +
+                        "(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)"))
                 .uid("sptc34sinkMysql").name("sptc34sinkMysql");
 
-//        Sptc34MapSteeam.addSink( new MyJDBCSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");
 
-
+        //启动
         env.execute("Sptc34WideApp");
     }
 
-//    private static class MyJDBCSink extends RichSinkFunction<Sptc34Wide> {
-//
-//        //定义sql连接、预编译器
-//        Connection conn = null;
-//        PreparedStatement insertStmt = null;
-//
-//        @Override
-//        public void open(Configuration parameters) throws Exception {
-//
-//            conn = DriverManager.getConnection("jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=utf-8&useSSL=false","fengqiwulian","fengqiwulian");
-//
-//            insertStmt = conn.prepareStatement("INSERT INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT, " +
-//                    " NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
-//                    " CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, " +
-//                    " DTBRQ, BATCHNO,  CWLBM3,  CCKLX,  DSTAMP, APPROVAL_FLAG,  APPROVAL_USER,  APPROVAL_DATE,  FINAL_APPROVAL_FLAG, " +
-//                    " FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT,  WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES (?, " +
-//                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
-//
-//
-//            insertStmt = conn.prepareStatement("INSERT INTO dim_vlms_sptc34 VALUES (?, " +
-//                    "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
-//
-//            System.out.println(insertStmt);
-//            System.out.println("mysql chenggong ");
-//
-//
-//        }
-//
-//
-//
-//        @Override
-//        public void close() throws Exception {
-//            insertStmt.close();
-//            conn.close();
-//        }
-//    }
+
 }
