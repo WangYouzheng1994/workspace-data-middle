@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -19,8 +20,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.List;
 
- /**
+/**
  * @Description: datasource_driver
  * @Author: jeecg-boot
  * @Date:   2022-05-10
@@ -128,6 +130,22 @@ public class DatasourceDriverController extends JeecgController<DatasourceDriver
 		}
 		return Result.OK(datasourceDriver);
 	}
+
+	 /**
+	  * 查询所有数据
+	  *
+	  * @return
+	  */
+	 @AutoLog(value = "datasource_driver-通过id查询")
+	 @ApiOperation(value="datasource_driver-通过id查询", notes="datasource_driver-通过id查询")
+	 @GetMapping(value = "/queryAll")
+	 public Result<?> queryAll() {
+		 List<DatasourceDriver> datasourceDriver = datasourceDriverService.list();
+		 if(CollectionUtils.isEmpty(datasourceDriver)) {
+			 return Result.error("未找到对应驱动数据");
+		 }
+		 return Result.OK(datasourceDriver);
+	 }
 
     /**
     * 导出excel
