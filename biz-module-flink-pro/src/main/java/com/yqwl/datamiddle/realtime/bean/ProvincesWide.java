@@ -1,22 +1,23 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-
 @Data
 @ToString
 public class ProvincesWide {
 
-    //    private int IDNUM;
+    private Long idnum;
     private String csqdm;
     private String cdsdm;
 
     private String csxdm;
 
-//    private String sqsxdm;
+//在原视图的基础上新增的一条联合的数据:省区市县代码
+    private String sqsxdm;
 
     private String vsqmc;
 
@@ -43,15 +44,13 @@ public class ProvincesWide {
     private String cwlmc;
 
     private String cwlbmSq;
-
-    private Long createTime;
-
-    private Long updateTime;
-
-
+    private Long warehouseCreatetime;
+    private Long warehouseUpdatetime;
     //新加kafka的ts时间戳
+    @TransientSink
     private Timestamp ts;
     //新加合并表的字段
+    @TransientSink
     private String cdsdm08;
 
 
@@ -74,8 +73,28 @@ public class ProvincesWide {
     }
 
     public void mergeProvincesWide(ProvincesWide provincesWide2){
+        System.out.println("Wide:"+provincesWide2.toString());
         if (provincesWide2!=null){
-            this.ts=provincesWide2.getTs();
+
+            if (provincesWide2.getTs() !=null){
+                this.ts=provincesWide2.getTs();
+                Timestamp ts = provincesWide2.getTs();
+                Long time = ts.getTime();
+                this.warehouseCreatetime=time;
+            }
+//            提前给nvl( d.cdsdm, b.csxdm ) cdsdm 中的cdsdm给赋值
+            if (provincesWide2.getCdsdm() !=null){
+                this.cdsdm=provincesWide2.getCdsdm();
+            }
+//             提前给nvl( d.vdsmc, b.vsxmc ) vdsmc 中的vdsmc给赋值
+            if (provincesWide2.getVdsmc() !=null){
+                this.vdsmc=provincesWide2.getVdsmc();
+            }
+//            给新加的字段给赋值:
+            if (provincesWide2.getCsqdm() !=null && provincesWide2.getCsxdm() !=null){
+                this.sqsxdm=provincesWide2.getCsqdm()+provincesWide2.getCsxdm();
+            }
+
             if (provincesWide2.getCsqdm() !=null){
                 this.csqdm=provincesWide2.getCsqdm();
             }
@@ -97,7 +116,6 @@ public class ProvincesWide {
             if (provincesWide2.getCwlbmSq() !=null){
                 this.cwlbmSq=provincesWide2.getCwlbmSq();
             }
-
             if (provincesWide2.getCsxdm() !=null){
                 this.csxdm=provincesWide2.getCsxdm();
             }
@@ -159,11 +177,17 @@ public class ProvincesWide {
     public void mergeSysc08(Sysc08 sysc08Info){
 
         if (sysc08Info != null){
+//            提前给nvl( d.cdsdm, b.csxdm ) cdsdm 中的cdsdm给赋值
+            if (sysc08Info.getCsxdm() !=null){
+                this.cdsdm=sysc08Info.getCsxdm();
+            }
             if (sysc08Info.getCsxdm() !=null){
                 this.csxdm=sysc08Info.getCsxdm();
             }
             if (sysc08Info.getVsxmc() !=null){
                 this.vsxmc=sysc08Info.getVsxmc();
+//             提前给nvl( d.vdsmc, b.vsxmc ) vdsmc 中的vdsmc给赋值
+                this.vdsmc=sysc08Info.getVsxmc();
             }
             if (sysc08Info.getCwlbm() !=null){
                 this.cwlbm3=sysc08Info.getCwlbm();

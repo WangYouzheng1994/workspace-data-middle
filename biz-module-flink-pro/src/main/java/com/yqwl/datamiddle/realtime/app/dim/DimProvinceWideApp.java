@@ -9,6 +9,9 @@ import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.bean.Sysc07;
 import com.yqwl.datamiddle.realtime.bean.Sysc08;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.util.DimUtil;
+import com.yqwl.datamiddle.realtime.util.JDBCSink;
+import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -228,6 +231,7 @@ public class DimProvinceWideApp {
                 ).uid("mergeSysc0708").name("mergeSysc0708");
         KeyedStream<ProvincesWide, String> provincesWide0708KeyedStream = wide0708.keyBy(ProvincesWide::getCdqdm);
 
+
 //6.2 再用wide070809宽表和Mdac01进行关联
         DataStream<ProvincesWide> provincesWide = provincesWide0708KeyedStream
                 .intervalJoin(mdac01StringKeyedStream)
@@ -242,10 +246,10 @@ public class DimProvinceWideApp {
                     }
                 }).uid("mergeWide07mdac01").name("mergeWide07mdac01");
 
-        provincesWide.print();
+//        provincesWide.print("瞅瞅08");
         SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
                 provincesWide,
-                new DimAsyncFunction<ProvincesWide>("ods_vlms_sysc09", "cdsdm,csqdm") {
+                new DimAsyncFunction<ProvincesWide>(DimUtil.MYSQL_DB_TYPE,"ods_vlms_sysc09", "cdsdm,csqdm") {
                     @Override
                     public Object getKey(ProvincesWide wide) {
                         return Arrays.asList(wide.getCdsdm08(),wide.getCsqdm() );
@@ -269,16 +273,12 @@ public class DimProvinceWideApp {
                 }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
 
         provincesWideWithSysc09.print("WIDE");
-
-
-
-        LOGGER.info("展示拓宽后的数据");
-        //provincesWide.print();
         System.out.println("4.表拓宽");
-
 /*写入mysql */
-
-
+        DataStreamSink<ProvincesWide> provincesWideDataStreamSink = provincesWideWithSysc09.addSink(JDBCSink.<ProvincesWide>getSink("replace into dim_vlms_provinces " +
+                "(IDNUM, csqdm, cdsdm, csxdm, sqsxdm, vsqmc, vsqjc, vdsmc, vsxmc, cjc, " +
+                "cdqdm, vdqmc, cwlbm3, cwlmc3, njd, nwd, cwlmc, cwlbm_sq, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME)" +
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);"));
 
         try {
             env.execute("KafkaSinkMysql");
@@ -287,8 +287,6 @@ public class DimProvinceWideApp {
         }
 
     }
-
-
 }
 
 
