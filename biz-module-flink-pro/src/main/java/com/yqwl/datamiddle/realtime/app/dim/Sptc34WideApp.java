@@ -41,10 +41,10 @@ import java.util.List;
  * 从kafka读取sptc34 的topic   并将 sptc34表拓宽字段生成新的维度表   并将生成的维度宽表传到 mysql中
  */
 public class Sptc34WideApp {
-    public static void main(String[] args) throws Exception{
+    public static void main(String[] args) throws Exception {
 
         Configuration conf = new Configuration();
-        conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
+        conf.setString(RestOptions.BIND_PORT, "50100-50200"); // 指定访问端口
         //获取执行环境
         // StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
