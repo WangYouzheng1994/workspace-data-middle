@@ -16,6 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JDBCSink {
+    public static <T> JdbcBatchSink<T> getBatchSink() {
+        return new JdbcBatchSink<T>();
+    }
+
     public static <T> SinkFunction<T> getSink(String sql) {
 
         return JdbcSink.<T>sink(sql,
@@ -58,7 +62,8 @@ public class JDBCSink {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(1000)
+                        .withBatchSize(50)
+                        .withBatchIntervalMs(5000L)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withDriverName(JDBCConfig.JDBC_DRIVER)
