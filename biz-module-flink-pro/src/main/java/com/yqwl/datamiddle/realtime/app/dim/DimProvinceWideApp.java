@@ -29,6 +29,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -60,6 +61,7 @@ public class DimProvinceWideApp {
 
 //        env.disableOperatorChaining();  取消合并算子
 //        env.setParallelism(1);
+        env.setParallelism(1);
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
@@ -294,9 +296,10 @@ public class DimProvinceWideApp {
 //        System.out.println("4.表拓宽");
 
 /* 7.开窗,按照数量(后续改为按照时间窗口)*/
-        DataStreamSink<List<ProvincesWide>> listDataStreamSink = provincesWideWithSysc09.countWindowAll(500).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, GlobalWindow>() {
+        provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        provincesWideWithSysc09.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, TimeWindow>() {
             @Override
-            public void apply(GlobalWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
+            public void apply(TimeWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
                 ArrayList<ProvincesWide> es = Lists.newArrayList(iterable);
                 if (es.size() > 0) {
                     collector.collect(es);
@@ -304,28 +307,16 @@ public class DimProvinceWideApp {
             }
         }).addSink(JDBCSink.<ProvincesWide>getBatchSink());
 
-//        按照本地process_time
-//        SingleOutputStreamOperator<Sysc07> sysc07WithTs = mapSysc07.assignTimestampsAndWatermarks(
-//                WatermarkStrategy.<Sysc07>forBoundedOutOfOrderness(Duration.ofMinutes(5))
-//                        .withTimestampAssigner(new SerializableTimestampAssigner<Sysc07>() {
-//                            @Override
-//                            public long extractTimestamp(Sysc07 sysc07, long recordTimestamp) {
-//                                Timestamp ts = sysc07.getTs();
 
-//                                Long time = ts.getTime();
-//                                return time;
-//                            }
-//                        })
-//        ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
-//        DataStreamSink<List<ProvincesWide>> name = provincesWideWithSysc09.timeWindowAll(Time.seconds(10)).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, TimeWindow>() {
-//            @Override
-//            public void apply(TimeWindow window, Iterable<ProvincesWide> values, Collector<List<ProvincesWide>> out) throws Exception {
-//                ArrayList<ProvincesWide> es = Lists.newArrayList(values);
-//                if (es.size() > 0) {
-//                    out.collect(es);
-//                }
-//            }
-//        }).addSink(JDBCSink.<ProvincesWide>getBatchSink()).uid("insertMysqlWIde").name("insertMysqlWIde");
+        /*DataStreamSink<List<ProvincesWide>> listDataStreamSink = provincesWideWithSysc09.countWindowAll(500).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, GlobalWindow>() {
+            @Override
+            public void apply(GlobalWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
+                ArrayList<ProvincesWide> es = Lists.newArrayList(iterable);
+                if (es.size() > 0) {
+                    collector.collect(es);
+                }
+            }
+        }).addSink(JDBCSink.<ProvincesWide>getBatchSink());*/
 
 
 

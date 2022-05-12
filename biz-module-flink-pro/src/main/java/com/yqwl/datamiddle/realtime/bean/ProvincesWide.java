@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.ToString;
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 @Data
 @ToString
+@TableName("dim_vlms_provinces")
 public class ProvincesWide {
 
     private Long idnum;
