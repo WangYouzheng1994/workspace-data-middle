@@ -52,16 +52,14 @@ import java.util.concurrent.TimeUnit;
 public class DimProvinceWideApp {
     private static final Logger LOGGER = LogManager.getLogger(DimProvinceWideApp.class);
     public static void main(String[] args) {
-/*1. 创建环境*/
-//        Configuration conf = new Configuration();
-//        conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
-//        获取执行环境:
-                StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
+        /*1. 创建环境*/
+        Configuration conf = new Configuration();
+        conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
 
-//        env.disableOperatorChaining();  取消合并算子
-//        env.setParallelism(1);
+        // 获取执行环境:
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
+
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
@@ -70,16 +68,17 @@ public class DimProvinceWideApp {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
 
-//        Props props = PropertiesUtil.getProps("cdc.properties");
         Props props = PropertiesUtil.getProps();
-        //kafka source1 sysc07
+
+        // kafka source1 sysc07
         KafkaSource<String> sysc07 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORACLE_TOPIC_SYSC07)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
-        //kafka source1 sysc08
+
+        // kafka source1 sysc08
         KafkaSource<String> sysc08 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORACLE_TOPIC_SYSC08)
@@ -87,7 +86,7 @@ public class DimProvinceWideApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        //kafka source1 mdac01
+        // kafka source1 mdac01
         KafkaSource<String> mdac01 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORACLE_TOPIC_MDAC01)
@@ -99,10 +98,10 @@ public class DimProvinceWideApp {
         DataStreamSource<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka");
         DataStreamSource<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka");
 
-        LOGGER.warn("1.kafka数据源收入");
-        System.out.println("1.kafka数据源收入");
-/*2. 进行数据过滤:*/
-//     过滤出sysc07的表  todo 当前的是:TDS_LJ.SYSC07
+        LOGGER.info("1.kafka数据源收入");
+
+        /*2. 进行数据过滤:*/
+        // 过滤出sysc07的表
         DataStream<String> filterSysc07 = sysc07Source.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
@@ -118,7 +117,7 @@ public class DimProvinceWideApp {
                 return false;
             }
         }).uid("filterSysc07").name("filterSysc07");
-//     过滤出sysc08的表
+        // 过滤出sysc08的表
         SingleOutputStreamOperator<String> filterSysc08 = sysc08Source.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
@@ -130,7 +129,7 @@ public class DimProvinceWideApp {
             }
         }).uid("filterSysc08").name("filterSysc08");
 
-//     过滤出mdac01的表
+        // 过滤出mdac01的表
         SingleOutputStreamOperator<String> filterMdac01 = mdac01Source.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
@@ -142,11 +141,10 @@ public class DimProvinceWideApp {
             }
         }).uid("filterMdac01").name("filterMdac01");
 
-        LOGGER.warn("2.过滤后的数据");
-        System.out.println("2.过滤后的数据");
+        LOGGER.info("2.过滤后的数据");
 
-/*3.进行实体类转换 */
-//转换  Sysc07的表
+        /*3.进行实体类转换 */
+        //  转换Sysc07的表
         SingleOutputStreamOperator<Sysc07> mapSysc07 = filterSysc07.map(new MapFunction<String, Sysc07>() {
             @Override
             public Sysc07 map(String data) throws Exception {
@@ -157,7 +155,8 @@ public class DimProvinceWideApp {
                 return sysc07;
             }
         }).uid("mapSysc07").name("mapSysc07");
-//转换  Sysc08的表
+
+        //  转换  Sysc08的表
         SingleOutputStreamOperator<Sysc08> mapSysc08 = filterSysc08.map(new MapFunction<String, Sysc08>() {
             @Override
             public Sysc08 map(String data) throws Exception {
@@ -169,8 +168,7 @@ public class DimProvinceWideApp {
             }
         }).uid("mapSysc08").name("mapSysc08");
 
-
-//转换  Mdac01的表
+        //  转换  Mdac01的表
         SingleOutputStreamOperator<Mdac01> mapMdac01 = filterMdac01.map(new MapFunction<String, Mdac01>() {
             @Override
             public Mdac01 map(String data) throws Exception {
@@ -181,15 +179,9 @@ public class DimProvinceWideApp {
                 return mdac01;
             }
         }).uid("mapMdac01").name("mapMdac01");
-        System.out.println("3.实体类的转换");
 
-
-
-
-/*4.指定事件时间字段 */
-
-//todo 指定的事件时间戳去从哪里获得->暂时是按照kafka的ts时间戳
-//sysc07指定事件时间
+        /*4.指定事件时间字段 */
+        //  sysc07指定事件时间
         SingleOutputStreamOperator<Sysc07> sysc07WithTs = mapSysc07.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Sysc07>forBoundedOutOfOrderness(Duration.ofMinutes(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Sysc07>() {
@@ -201,7 +193,8 @@ public class DimProvinceWideApp {
                             }
                         })
         ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
-//sysc08指定事件时间
+
+        //  sysc08指定事件时间
         SingleOutputStreamOperator<Sysc08> sysc08WithTs = mapSysc08.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Sysc08>forBoundedOutOfOrderness(Duration.ofMinutes(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Sysc08>() {
@@ -214,7 +207,7 @@ public class DimProvinceWideApp {
                         })
         ).uid("Sysc08WithTsDS").name("Sysc08WithTsDS");
 
-//mdac01指定事件时间
+        //  mdac01指定事件时间
         SingleOutputStreamOperator<Mdac01> mdac01WithTs = mapMdac01.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<Mdac01>forBoundedOutOfOrderness(Duration.ofMinutes(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Mdac01>() {
@@ -227,46 +220,40 @@ public class DimProvinceWideApp {
                         })
         ).uid("Mdac01WithTsDS").name("Mdac01WithTsDS");
 
-
-        /* 5. 分组指定关联key
-*/
-//sysc07,08,09按照省区代码(CSQDM)分组
+        /* 5. 分组指定关联key */
+        //  sysc07,08,09按照省区代码(CSQDM)分组
         KeyedStream<Sysc07, String> sysc07StringKeyedStream = sysc07WithTs.keyBy(Sysc07::getCsqdm);
         KeyedStream<Sysc08, String> sysc08StringKeyedStream = sysc08WithTs.keyBy(Sysc08::getCsqdm);
-//Mdac01按照大区代码(CDQDM)分组
+        //  Mdac01按照大区代码(CDQDM)分组
         KeyedStream<Mdac01, String> mdac01StringKeyedStream = mdac01WithTs.keyBy(Mdac01::getCdqdm);
 
-/* 6.进行表拓宽 */
-//6.1 先使用省区代码(CSQDM)对sysc07,08进行关联
-         DataStream<ProvincesWide> wide0708 = sysc08StringKeyedStream
-                .intervalJoin(sysc07StringKeyedStream)
-                .between(Time.minutes(-10), Time.minutes(10))
-                .process(
-                        new ProcessJoinFunction<Sysc08, Sysc07, ProvincesWide>() {
-                            @Override
-                            public void processElement(Sysc08 left, Sysc07 right, Context ctx, Collector<ProvincesWide> out) throws Exception {
-                                out.collect(new ProvincesWide(right, left));
-                            }
+        /* 6.进行表拓宽 */
+        //6.1 先使用省区代码(CSQDM)对sysc07,08进行关联
+        DataStream<ProvincesWide> wide0708 = sysc08StringKeyedStream
+            .intervalJoin(sysc07StringKeyedStream)
+            .between(Time.minutes(-10), Time.minutes(10))
+            .process(
+                    new ProcessJoinFunction<Sysc08, Sysc07, ProvincesWide>() {
+                        @Override
+                        public void processElement(Sysc08 left, Sysc07 right, Context ctx, Collector<ProvincesWide> out) {
+                            out.collect(new ProvincesWide(right, left));
                         }
-                ).uid("mergeSysc0708").name("mergeSysc0708");
+                    }
+            ).uid("mergeSysc0708").name("mergeSysc0708");
         KeyedStream<ProvincesWide, String> provincesWide0708KeyedStream = wide0708.keyBy(ProvincesWide::getCdqdm);
 
 
-//6.2 再用wide070809宽表和Mdac01进行关联
+        //  6.2 再用wide070809宽表和Mdac01进行关联
         DataStream<ProvincesWide> provincesWide = provincesWide0708KeyedStream
                 .intervalJoin(mdac01StringKeyedStream)
                 .between(Time.minutes(-10), Time.minutes(10))
                 .process(new ProcessJoinFunction<ProvincesWide, Mdac01, ProvincesWide>() {
                     @Override
-                    public void processElement(ProvincesWide left, Mdac01 right, Context ctx, Collector<ProvincesWide> out) throws Exception {
-
-                            out.collect(new ProvincesWide(left, right));
-
-
+                    public void processElement(ProvincesWide left, Mdac01 right, Context ctx, Collector<ProvincesWide> out) {
+                        out.collect(new ProvincesWide(left, right));
                     }
                 }).uid("mergeWide07mdac01").name("mergeWide07mdac01");
 
-//        provincesWide.print("瞅瞅08");
         SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
                 provincesWide,
                 new DimAsyncFunction<ProvincesWide>(DimUtil.MYSQL_DB_TYPE,"ods_vlms_sysc09", "cdsdm,csqdm") {
@@ -292,10 +279,7 @@ public class DimProvinceWideApp {
                     }
                 }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
 
-//        provincesWideWithSysc09.print("WIDE");
-//        System.out.println("4.表拓宽");
-
-/* 7.开窗,按照数量(后续改为按照时间窗口)*/
+        /* 7.开窗,按照数量(后续改为按照时间窗口)*/
         provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         provincesWideWithSysc09.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, TimeWindow>() {
             @Override
@@ -307,7 +291,6 @@ public class DimProvinceWideApp {
             }
         }).addSink(JDBCSink.<ProvincesWide>getBatchSink());
 
-
         /*DataStreamSink<List<ProvincesWide>> listDataStreamSink = provincesWideWithSysc09.countWindowAll(500).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, GlobalWindow>() {
             @Override
             public void apply(GlobalWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
@@ -317,8 +300,6 @@ public class DimProvinceWideApp {
                 }
             }
         }).addSink(JDBCSink.<ProvincesWide>getBatchSink());*/
-
-
 
         /*写入mysql 暂不用*/
 /*        DataStreamSink<ProvincesWide> provincesWideDataStreamSink = provincesWideWithSysc09.addSink(JDBCSink.<ProvincesWide>getSink("replace into dim_vlms_provinces " +
