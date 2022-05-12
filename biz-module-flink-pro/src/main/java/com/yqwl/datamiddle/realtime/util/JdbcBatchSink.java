@@ -66,7 +66,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
         druidDataSource.setMaxActive(200);
-        druidDataSource.setInitialSize(1);
+        druidDataSource.setInitialSize(20);
         druidDataSource.setMinIdle(1);
         druidDataSource.setMaxWait(60000);
 
@@ -80,7 +80,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
         druidDataSource.setTestOnReturn(false);
 
         druidDataSource.setPoolPreparedStatements(true);
-        druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(20);
+        druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(200);
 
         druidDataSource.init();
 
@@ -110,80 +110,84 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
 
     @Override
     public void invoke(List<T> value, Context context) throws SQLException, IllegalAccessException {
-        if (CollectionUtils.isEmpty(value)) {
-            return;
-        }
-        DruidPooledConnection druidConnection = getDruidConnection();
-        StringBuffer sb = new StringBuffer();
-
-        String tableName = StringUtils.EMPTY;
-        StringBuffer placeholder = new StringBuffer();
-
-        // 获取要渲染的 插入列。
-        Class<?> entityClass = value.get(0).getClass();
-        Field[] fields = entityClass.getDeclaredFields();
-        List<Field> insertFields = new ArrayList(fields.length);
-
-        // 获取表名
-        TableName annotation = entityClass.getAnnotation(TableName.class);
-        if (annotation == null || StringUtils.isBlank(annotation.value())) {
-            throw new RuntimeException("写入mysql 实体类缺少tableName");
-        } else {
-            tableName = annotation.value();
-        }
-
-        // 填充列名
-        StringBuffer sqlsb = new StringBuffer();
-        sqlsb.append("replace into ");
-        sqlsb.append(tableName);
-        sqlsb.append("(");
-
-        StringBuffer columnSb = new StringBuffer();
-
-        for (Field field : fields) {
-            if (field.getAnnotation(TransientSink.class) != null) {
-                continue;
+        DruidPooledConnection druidConnection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            if (CollectionUtils.isEmpty(value)) {
+                return;
             }
-            if (columnSb.length() != 0) {
-                columnSb.append(", ");
-                placeholder.append(", ");
+            druidConnection = getDruidConnection();
+            StringBuffer sb = new StringBuffer();
+
+            String tableName = StringUtils.EMPTY;
+            StringBuffer placeholder = new StringBuffer();
+
+            // 获取要渲染的 插入列。
+            Class<?> entityClass = value.get(0).getClass();
+            Field[] fields = entityClass.getDeclaredFields();
+            List<Field> insertFields = new ArrayList(fields.length);
+
+            // 获取表名
+            TableName annotation = entityClass.getAnnotation(TableName.class);
+            if (annotation == null || StringUtils.isBlank(annotation.value())) {
+                throw new RuntimeException("写入mysql 实体类缺少tableName");
+            } else {
+                tableName = annotation.value();
             }
-            columnSb.append(camelToUnderline(field.getName()));
 
-            placeholder.append("?");
-            field.setAccessible(true);
-            insertFields.add(field);
-        }
-        sqlsb.append(columnSb);
-        sqlsb.append(")");
+            // 填充列名
+            StringBuffer sqlsb = new StringBuffer();
+            sqlsb.append("replace into ");
+            sqlsb.append(tableName);
+            sqlsb.append("(");
 
-        // 填充数据值
-        sqlsb.append(" values ");
-        // 填充占位符
-        for (int rows = 0; rows < value.size(); rows++) {
-            sqlsb.append(" ( ");
-            sqlsb.append(placeholder);
-            sqlsb.append(" ) ");
-            if (rows != value.size() - 1) {
-                sqlsb.append(", ");
+            StringBuffer columnSb = new StringBuffer();
+
+            for (Field field : fields) {
+                if (field.getAnnotation(TransientSink.class) != null) {
+                    continue;
+                }
+                if (columnSb.length() != 0) {
+                    columnSb.append(", ");
+                    placeholder.append(", ");
+                }
+                columnSb.append(camelToUnderline(field.getName()));
+
+                placeholder.append("?");
+                field.setAccessible(true);
+                insertFields.add(field);
             }
-        }
-        PreparedStatement preparedStatement = druidConnection.prepareStatement(sqlsb.toString());
+            sqlsb.append(columnSb);
+            sqlsb.append(")");
 
-        // preparestatement 往里面填充放值。
-        // 遍历获取对象的所有的值。
-        Integer paramindex = 1;
-        for (T t : value) {
-            // 获取所有的属性信息
-            for (Field insertField : insertFields) {
-                Object o = insertField.get(t);
-                preparedStatement.setObject(paramindex, o);
-                paramindex++;
+            // 填充数据值
+            sqlsb.append(" values ");
+            // 填充占位符
+            for (int rows = 0; rows < value.size(); rows++) {
+                sqlsb.append(" ( ");
+                sqlsb.append(placeholder);
+                sqlsb.append(" ) ");
+                if (rows != value.size() - 1) {
+                    sqlsb.append(", ");
+                }
             }
-        }
-        preparedStatement.execute();
+            preparedStatement = druidConnection.prepareStatement(sqlsb.toString());
 
-        closeResource(druidConnection, preparedStatement, null);
+            // preparestatement 往里面填充放值。
+            // 遍历获取对象的所有的值。
+            Integer paramindex = 1;
+            for (T t : value) {
+                // 获取所有的属性信息
+                for (Field insertField : insertFields) {
+                    Object o = insertField.get(t);
+                    preparedStatement.setObject(paramindex, o);
+                    paramindex++;
+                }
+            }
+            preparedStatement.execute();
+        } finally {
+            closeResource(druidConnection, preparedStatement, null);
+        }
     }
 
     /**

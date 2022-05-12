@@ -23,6 +23,8 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -48,8 +50,8 @@ public class Sptc34WideApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 
         //设置并行度
-        // env.setParallelism(3);
-        env.disableOperatorChaining();
+        env.setParallelism(1);
+        // env.disableOperatorChaining();
         //设置checkpoint`
         CheckpointConfig ck = env.getCheckpointConfig();
         //触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
@@ -107,13 +109,8 @@ public class Sptc34WideApp {
             }
         }).uid("odsSptc34").name("odsSptc34");
 
-        //将输出的内容打印到logger中
-        // Sptc34MapSteeam.print(System.currentTimeMillis()+"");
-
-
-
         // 这里需要搞成 有超时时间的计数窗口。
-        Sptc34MapSteeam.countWindowAll(500).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, GlobalWindow>() {
+/*        Sptc34MapSteeam.countWindowAll(3124).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, GlobalWindow>() {
             @Override
             public void apply(GlobalWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {
                 ArrayList<Sptc34Wide> skuInfos = Lists.newArrayList(iterable);
@@ -121,9 +118,13 @@ public class Sptc34WideApp {
                     collector.collect(skuInfos);
                 }
             }
-        }).addSink(JDBCSink.<Sptc34Wide>getBatchSink());
+        })
+                // .addSink(JDBCSink.<Sptc34Wide>getTestSink());
 
-/*        Sptc34MapSteeam.timeWindowAll(Time.milliseconds(20)).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
+                .addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");*/
+
+        Sptc34MapSteeam.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        Sptc34MapSteeam.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {
                 ArrayList<Sptc34Wide> skuInfos = Lists.newArrayList(iterable);
@@ -131,8 +132,17 @@ public class Sptc34WideApp {
                     collector.collect(skuInfos);
                 }
             }
-        }).addSink(JDBCSink.<Sptc34Wide>getBatchSink());*/
-
+        }).addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");;
+    /*timeWindowAll(Time.seconds(5)).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {
+                ArrayList<Sptc34Wide> skuInfos = Lists.newArrayList(iterable);
+                if (skuInfos.size() > 0) {
+                    collector.collect(skuInfos);
+                }
+            }
+        }).addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");
+*/
         //连接mysql数据库,将数据存到mysql中
         /*Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("REPLACE INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
                         "   NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +

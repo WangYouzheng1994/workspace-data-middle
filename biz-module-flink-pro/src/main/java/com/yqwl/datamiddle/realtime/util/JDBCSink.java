@@ -15,7 +15,26 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 获取sink 工具类
+ */
 public class JDBCSink {
+    /**
+     * 获取test sink
+     *
+     * @param <T>
+     * @return
+     */
+    public static <T> TestSink<T> getTestSink() {
+        return new TestSink<T>();
+    }
+
+    /**
+     * 获取批量sink
+     *
+     * @param <T>
+     * @return
+     */
     public static <T> JdbcBatchSink<T> getBatchSink() {
         return new JdbcBatchSink<T>();
     }
