@@ -149,4 +149,25 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return super.importExcel(request, response, DwmVlmsSptb02.class);
     }
 
+    /**
+     * 分页列表查询
+     *
+     * @param dwmVlmsSptb02
+     * @param pageNo
+     * @param pageSize
+     * @param req
+     * @return
+     */
+    @AutoLog(value = "DwmVlmsSptb02-分页列表查询")
+    @ApiOperation(value = "DwmVlmsSptb02-分页列表查询", notes = "DwmVlmsSptb02-分页列表查询")
+    @GetMapping(value = "/findTop10SendList")
+    public Result<?> findTop10SendList(DwmVlmsSptb02 dwmVlmsSptb02,
+                                   @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+                                   @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                   HttpServletRequest req) {
+        QueryWrapper<DwmVlmsSptb02> queryWrapper = QueryGenerator.initQueryWrapper(dwmVlmsSptb02, req.getParameterMap());
+        Page<DwmVlmsSptb02> page = new Page<DwmVlmsSptb02>(pageNo, pageSize);
+        dwmVlmsSptb02Service.findTop10SendList(null);
+        return null;
+    }
 }
