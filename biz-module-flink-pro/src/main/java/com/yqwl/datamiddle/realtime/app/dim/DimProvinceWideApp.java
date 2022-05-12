@@ -13,11 +13,14 @@ import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.JDBCSink;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.google.common.collect.Lists;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -25,23 +28,38 @@ import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * @Description:
+ * @Author: XiaoFeng
+ * @Date: 2022/5/12 13:30
+ * @Version: V1.2
+ */
 public class DimProvinceWideApp {
     private static final Logger LOGGER = LogManager.getLogger(DimProvinceWideApp.class);
     public static void main(String[] args) {
 /*1. 创建环境*/
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//        Configuration conf = new Configuration();
+//        conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
+//        获取执行环境:
+                StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 
-        env.setParallelism(1);
+//        env.disableOperatorChaining();  取消合并算子
+//        env.setParallelism(1);
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
@@ -272,13 +290,50 @@ public class DimProvinceWideApp {
                     }
                 }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
 
-        provincesWideWithSysc09.print("WIDE");
-        System.out.println("4.表拓宽");
-/*写入mysql */
-        DataStreamSink<ProvincesWide> provincesWideDataStreamSink = provincesWideWithSysc09.addSink(JDBCSink.<ProvincesWide>getSink("replace into dim_vlms_provinces " +
+//        provincesWideWithSysc09.print("WIDE");
+//        System.out.println("4.表拓宽");
+
+/* 7.开窗,按照数量(后续改为按照时间窗口)*/
+        DataStreamSink<List<ProvincesWide>> listDataStreamSink = provincesWideWithSysc09.countWindowAll(500).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, GlobalWindow>() {
+            @Override
+            public void apply(GlobalWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
+                ArrayList<ProvincesWide> es = Lists.newArrayList(iterable);
+                if (es.size() > 0) {
+                    collector.collect(es);
+                }
+            }
+        }).addSink(JDBCSink.<ProvincesWide>getBatchSink());
+
+//        按照本地process_time
+//        SingleOutputStreamOperator<Sysc07> sysc07WithTs = mapSysc07.assignTimestampsAndWatermarks(
+//                WatermarkStrategy.<Sysc07>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+//                        .withTimestampAssigner(new SerializableTimestampAssigner<Sysc07>() {
+//                            @Override
+//                            public long extractTimestamp(Sysc07 sysc07, long recordTimestamp) {
+//                                Timestamp ts = sysc07.getTs();
+
+//                                Long time = ts.getTime();
+//                                return time;
+//                            }
+//                        })
+//        ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
+//        DataStreamSink<List<ProvincesWide>> name = provincesWideWithSysc09.timeWindowAll(Time.seconds(10)).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, TimeWindow>() {
+//            @Override
+//            public void apply(TimeWindow window, Iterable<ProvincesWide> values, Collector<List<ProvincesWide>> out) throws Exception {
+//                ArrayList<ProvincesWide> es = Lists.newArrayList(values);
+//                if (es.size() > 0) {
+//                    out.collect(es);
+//                }
+//            }
+//        }).addSink(JDBCSink.<ProvincesWide>getBatchSink()).uid("insertMysqlWIde").name("insertMysqlWIde");
+
+
+
+        /*写入mysql 暂不用*/
+/*        DataStreamSink<ProvincesWide> provincesWideDataStreamSink = provincesWideWithSysc09.addSink(JDBCSink.<ProvincesWide>getSink("replace into dim_vlms_provinces " +
                 "(IDNUM, csqdm, cdsdm, csxdm, sqsxdm, vsqmc, vsqjc, vdsmc, vsxmc, cjc, " +
                 "cdqdm, vdqmc, cwlbm3, cwlmc3, njd, nwd, cwlmc, cwlbm_sq, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);"));
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);"));*/
 
         try {
             env.execute("KafkaSinkMysql");
