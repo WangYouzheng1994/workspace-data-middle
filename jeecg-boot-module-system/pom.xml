@@ -57,6 +57,13 @@
 			<version>1.3.78</version>
 <!--			<version>1.4.2</version>-->
 		</dependency>
+		<!--clickhouse-->
+		<dependency>
+			<groupId>ru.yandex.clickhouse</groupId>
+			<artifactId>clickhouse-jdbc</artifactId>
+			<version>0.2.4</version>
+		</dependency>
+
 
 		<!-- nacos -->
 <!--		<dependency>

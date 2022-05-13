@@ -3,6 +3,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,15 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      * @param dwmVlmsSptb02
      * @return
      */
-    @DS("xxxxx")
+    @DS("dataWareHouse")
     @Override
     public Result findTop10SendList(DwmVlmsSptb02 dwmVlmsSptb02) {
 
+        return null;
+    }
+
+    @Override
+    public Result findUserInfo(UserInfo userInfo) {
         return null;
     }
 }

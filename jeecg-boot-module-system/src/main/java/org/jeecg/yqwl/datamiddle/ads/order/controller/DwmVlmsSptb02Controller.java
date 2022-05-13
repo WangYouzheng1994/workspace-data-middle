@@ -11,11 +11,14 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
+import org.jeecg.yqwl.datamiddle.ads.order.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
@@ -33,6 +36,15 @@ import java.util.Arrays;
 public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwmVlmsSptb02Service> {
     @Autowired
     private IDwmVlmsSptb02Service dwmVlmsSptb02Service;
+    @Resource
+    private UserInfoService userInfoService;
+
+
+    @RequestMapping("/selectById")
+    public UserInfo selectById () {
+        UserInfo userInfo = userInfoService.findUserInfo(1);
+        return userInfo ;
+    }
 
     /**
      * 分页列表查询
