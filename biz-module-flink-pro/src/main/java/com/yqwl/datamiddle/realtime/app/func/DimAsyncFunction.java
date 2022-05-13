@@ -30,6 +30,8 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
     private String columnName;
     //数据库类型
     private String dbType;
+    //额外添加的where条件里的常量sql,例如：and SPEC_CODE='1'
+    private String andSql;
 
     public DimAsyncFunction(String tableName) {
         this.tableName = tableName;
@@ -39,6 +41,11 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
         this(tableName);
         this.dbType = dbType;
         this.columnName = columnName;
+    }
+
+    public DimAsyncFunction(String dbType, String tableName, String columnName, String andSql) {
+        this(dbType, tableName, columnName);
+        this.andSql = andSql;
     }
 
     @Override
@@ -65,13 +72,11 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                         try {
                             //发送异步请求
                             long start = System.currentTimeMillis();
-                            //从流中事实数据获取key
+                            //从流中事实数据获取key值
                             Object key = getKey(obj);
-
                             //根据维度的主键到维度表中进行查询
-                            JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key);
+                            JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key, andSql);
                             //System.out.println("维度数据Json格式：" + dimInfoJsonObj);
-
                             // 这儿只有关联上的才会处理。
                             if (dimInfoJsonObj != null) {
                                 //维度关联  流中的事实数据和查询出来的维度数据进行关联
@@ -79,8 +84,9 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                             }
                             //System.out.println("维度关联后的对象:" + obj);
                             long end = System.currentTimeMillis();
-                            System.out.println("异步维度查询耗时" + (end - start) + "毫秒");
-                            //将关联后的数据数据继续向下传递
+                            System.out.println("异步查询维表:" + tableName + "耗时:" + (end - start) + "毫秒");
+                            log.info("异步查询维表:{}耗时为:{}毫秒", tableName, (end - start));
+                            //将关联后的数据继续向下传递
                             resultFuture.complete(Arrays.asList(obj));
                         } catch (Exception e) {
                             e.printStackTrace();

@@ -57,7 +57,7 @@ public class MybatisPlusCodeGenerator {
          * 获取项目路径
          */
 		try {
-		    //需要修改成自己项目所有目录
+		    //需要修改成自己项目所在目录
 			canonicalPath = new File("D:\\source\\data-middle\\biz-module-flink-demo").getCanonicalPath();
 		} catch (IOException e) {
 			e.printStackTrace();

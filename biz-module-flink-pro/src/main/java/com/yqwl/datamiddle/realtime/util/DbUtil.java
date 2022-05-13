@@ -12,16 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 数据库操作工具类
- *
- * @author shiyanjun
- * @since 2020/01/05
+ * druid数据库连接池操作工具类
  */
 @Slf4j
 public class DbUtil {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/authapi"; // 数据库连接URL
-    private static final String DB_USERNAME = "root"; // 数据库用户名
-    private static final String DB_PASSWORD = "123456"; // 数据库密码
 
     // Druid数据源，全局唯一（只创建一次）
     private static volatile DruidDataSource druidDataSource;
@@ -35,12 +29,45 @@ public class DbUtil {
     public static void insert(String updateSql) throws SQLException {
         Connection connection = null;
         Statement statement = null;
-        ResultSet resultSet = null;
         try {
             connection = getDruidConnection();
             statement = connection.createStatement();
             int count = statement.executeUpdate(updateSql);
-            log.info(">>>>>>>>>>>>> 插入数据 {}", count);
+            log.info("单条数据执行成功,{}", count);
+            System.out.println("单条数据执行成功:" + count);
+        } finally {
+            // 切记!!! 一定要释放资源
+            closeResource(connection, statement, null);
+        }
+    }
+
+    /**
+     * 执行SQL批量添加
+     *
+     * @param sql
+     * @throws SQLException
+     */
+    public static <T> void insertBatch(String sql, List<T> dataList) throws SQLException {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            connection = getDruidConnection();
+            ps = connection.prepareStatement(sql);
+            connection.setAutoCommit(false);//取消自动提交
+            for (int i = 0; i <= dataList.size(); i++) {
+                ps.setObject(i + 1, dataList.get(i));
+                ps.addBatch();
+                if (i % 500 == 0) {
+                    ps.executeBatch();
+                    ps.clearBatch();
+                }
+            }
+            ps.executeBatch();
+            ps.clearBatch();
+            connection.commit();//所有语句都执行完毕后才手动提交sql语句
+            log.info("批量插入数据成功");
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, resultSet);
@@ -160,8 +187,7 @@ public class DbUtil {
      * @param resultSet
      * @throws SQLException
      */
-    private static void closeResource(Connection connection,
-                                      Statement statement, ResultSet resultSet) throws SQLException {
+    private static void closeResource(Connection connection, Statement statement, ResultSet resultSet) throws SQLException {
         // 注意资源释放顺序
         if (resultSet != null) {
             resultSet.close();

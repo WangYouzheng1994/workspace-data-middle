@@ -19,6 +19,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
     private static final String READ_TYPE = "read";
     private static final String CREATE_TYPE = "create";
     private static final String INSERT_TYPE = "insert";
+    private static final String UPDATE_TYPE = "update";
     private static final String QUERY_TYPE = "query";
 
 
@@ -119,6 +120,8 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         if (READ_TYPE.equals(type)) {
             type = INSERT_TYPE;
         } else if (CREATE_TYPE.equals(type)) {
+            type = INSERT_TYPE;
+        } else if (UPDATE_TYPE.equals(type)) {
             type = INSERT_TYPE;
         }
 

@@ -342,11 +342,7 @@ public class OrderWideApp {
         orderWideWithTmDS.print(">>>>>");
 
         //TODO 11.将关联后的订单宽表数据写回到kafka的DWM层
-        orderWideWithTmDS
-                .map(
-                        orderWide -> JSON.toJSONString(orderWide)
-                )
-                .addSink(KafkaUtil.getKafkaSink(orderWideSinkTopic));
+        orderWideWithTmDS.map(orderWide -> JSON.toJSONString(orderWide)).addSink(KafkaUtil.getKafkaSink(orderWideSinkTopic));
 
         env.execute();
     }

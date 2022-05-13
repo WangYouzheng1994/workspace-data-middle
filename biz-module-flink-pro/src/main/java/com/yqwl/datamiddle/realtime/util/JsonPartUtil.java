@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.data.Decimal;
-import scala.annotation.meta.field;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -179,12 +178,20 @@ public class JsonPartUtil {
 
     /**
      * 获取after部分数据将其转化为对象，
+     */
+    public static <T> T getAfterObj(JSONObject jsonObj, Class<T> clazz) {
+        String afterStr = jsonObj.getString(AFTER);
+        return JSON.parseObject(afterStr, clazz);
+    }
+
+    /**
+     * 获取after部分数据将其转化为对象，
      * 如果源属性值为null，填充默认值，具体详见
-     * @see {@link JsonPartUtil#getBean} Add By Qingsong 2022年5月10日14:21:54
      *
      * @param clazz 转换后的类型
      * @param json
      * @return <T> – the type of Object to this method
+     * @see {@link JsonPartUtil#getBean} Add By Qingsong 2022年5月10日14:21:54
      */
     public static <T> T getAfterObjWithDefault(String json, Class<T> clazz) {
         JSONObject jsonObj = toJsonObj(json);
@@ -201,13 +208,13 @@ public class JsonPartUtil {
      * Date: date
      * 注意： 不替換 idnum, serialVersionUID
      *
-     * @author QingSong
      * @param object
      * @param <T>
-     * @version 2022年5月10日14:23:57
      * @return <T>
+     * @author QingSong
+     * @version 2022年5月10日14:23:57
      */
-    private static <T> T getBean(T object) {
+    public static <T> T getBean(T object) {
         // T objectCopy = null;
         try {
             Class<?> classType = object.getClass();
@@ -217,14 +224,15 @@ public class JsonPartUtil {
             // objectCopy = (T) classType.getConstructor(new Class[]{}).newInstance(new Object[]{});
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
+                field.setAccessible(true);
                 String fieldName = field.getName();
-                // 获得属性的首字母并转换为大写，与setter和getter对应即：setXx，getXxxx
-                String firstLetter = fieldName.substring(0, 1).toUpperCase();
                 // 判定此值是否是空的。如果是null 才进行处理。
                 // 序列化id不处理
                 if (StringUtils.equalsAny(fieldName, "serialVersionUID", "idnum")) {
                     continue;
                 }
+                // 获得属性的首字母并转换为大写，与setter和getter对应即：setXx，getXxxx
+                String firstLetter = fieldName.substring(0, 1).toUpperCase();
                 Method getMethod = classType.getMethod("get" + firstLetter
                                 + fieldName.substring(1),
                         null);
@@ -265,6 +273,7 @@ public class JsonPartUtil {
 
         return object;
     }
+
 
     /**
      * 获取数据操作类型
@@ -337,7 +346,6 @@ public class JsonPartUtil {
         //操作类型  query insert update delete
         String typeStr = JsonPartUtil.getTypeStr(json);
         //{"order_no":"20220303855787","create_time":1647859623000,"product_count":2,"product_id":39,"id":300007,"product_amount":4453}
-
 
 
         String afterStr = JsonPartUtil.getAfterStr(json);

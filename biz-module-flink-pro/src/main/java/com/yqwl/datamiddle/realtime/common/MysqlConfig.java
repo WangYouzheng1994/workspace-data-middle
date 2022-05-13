@@ -5,5 +5,5 @@ package com.yqwl.datamiddle.realtime.common;
  */
 public class MysqlConfig {
     //Driver
-    public static final String DRIVER = "com.mysql.jdbc.Driver";
+    public static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 }

@@ -50,7 +50,6 @@ public class KafkaUtil {
                         element.getBytes(StandardCharsets.UTF_8)); // record contents
             }
         };
-
     }
 
     /**

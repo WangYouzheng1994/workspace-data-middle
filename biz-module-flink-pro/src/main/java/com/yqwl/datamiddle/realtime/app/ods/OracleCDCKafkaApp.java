@@ -15,8 +15,6 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
@@ -45,17 +43,18 @@ public class OracleCDCKafkaApp {
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
                 .port(props.getInt("cdc.oracle.port"))
-                .database(props.getStr("cdc.oracle.database")) // monitor XE database
-                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ",")) // monitor inventory schema
-                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ",")) // monitor products table
+                .database(props.getStr("cdc.oracle.database"))
+                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
+                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
-                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+                .deserializer(new CustomerDeserialization())
                 .startupOptions(StartupOptions.initial())
                 .debeziumProperties(properties)
                 .build();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
         log.info("stream流环境初始化完成");
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
@@ -67,15 +66,14 @@ public class OracleCDCKafkaApp {
         log.info("checkpoint设置完成");
         DataStreamSource<String> source = env.addSource(oracleSource);
 
-        //source.print("数据输出：->");
 
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
-        source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        source.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
 
-
+        source.print("结果数据输出:");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

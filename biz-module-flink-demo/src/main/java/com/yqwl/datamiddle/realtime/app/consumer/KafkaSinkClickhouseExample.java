@@ -43,7 +43,7 @@ public class KafkaSinkClickhouseExample {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         CheckpointConfig ck = env.getCheckpointConfig();
         //触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
-        ck.setCheckpointInterval(1000);
+        ck.setCheckpointInterval(10000);
         //采用精确一次模式
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //检查点保存路径

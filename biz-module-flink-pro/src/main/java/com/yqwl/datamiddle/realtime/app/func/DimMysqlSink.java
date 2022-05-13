@@ -61,39 +61,25 @@ public class DimMysqlSink extends RichSinkFunction<JSONObject> {
         //获取json中after数据
         JSONObject afterJsonObj = JsonPartUtil.getAfterObj(jsonObj);
         log.info("当前要处理数据：" + afterJsonObj);
-        String sql = null;
-        if (Objects.nonNull(afterJsonObj)) {
-            //操作类型为 insert
-            if (OperateTypeConst.INSERT_TYPE.equals(operateType)) {
-                sql = genInsertSql(sinkTableName, afterJsonObj);
-            }
-            //操作类型为 update
-            if (OperateTypeConst.UPDATE_TYPE.equals(operateType)) {
-                sql = genUpdateSql(sinkTableName, afterJsonObj);
-            }
+        String sql = genInsertSql(sinkTableName, afterJsonObj);
 
-            //根据data中属性名和属性值  生成mysql语句
-            System.out.println("向mysql库中插入数据的SQL:" + sql);
-            LOGGER.info("向mysql库中插入数据的SQL:" + sql);
-            //执行SQL
-            PreparedStatement ps = null;
-            try {
-                ps = conn.prepareStatement(sql);
-                ps.execute();
-            } catch (SQLException e) {
-                log.error("向mysql插入数据失败, {}", e.getMessage());
-                throw new RuntimeException("向mysql插入数据失败");
-            } finally {
-                if (ps != null) {
-                    ps.close();
-                }
-            }
-
-            // 如果当前做的是更新操作，需要将Redis中缓存的数据清除掉
-            if (OperateTypeConst.UPDATE_TYPE.equals(operateType)) {
-                RedisUtil.deleteKey(sinkTableName, getPKValue(jsonObj));
+        //根据data中属性名和属性值  生成mysql语句
+        System.out.println("向mysql库中插入数据的SQL:" + sql);
+        LOGGER.info("向mysql库中插入数据的SQL:" + sql);
+        //执行SQL
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(sql);
+            ps.execute();
+        } catch (SQLException e) {
+            log.error("向mysql插入数据失败, {}", e.getMessage());
+            throw new RuntimeException("向mysql插入数据失败");
+        } finally {
+            if (ps != null) {
+                ps.close();
             }
         }
+
     }
 
     // 根据data属性和值生成 insert sql语句

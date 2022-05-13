@@ -28,7 +28,7 @@ public class RedisUtil {
                     jedisPoolConfig.setMaxWaitMillis(props.getInt("redis.MaxWaitMillis")); //等待时间
                     jedisPoolConfig.setMaxIdle(props.getInt("redis.MaxIdle")); //最大闲置连接数
                     jedisPoolConfig.setMinIdle(props.getInt("redis.MinIdle")); //最小闲置连接数
-                    jedisPoolConfig.setTestOnBorrow(true); //取连接的时候进行一下测试 ping pong
+                    jedisPoolConfig.setTestOnBorrow(false); //取连接的时候进行一下测试 ping pong
                     jedisPool = new JedisPool(
                             jedisPoolConfig,
                             props.getStr("redis.hostname"),
@@ -43,7 +43,7 @@ public class RedisUtil {
 
 
     //key 命名规则
-    //层名 + ":" + 系统名 + ":" + 表名 + ":" + 原oracle表中主键
+    //层名 + ":" + 系统名 + ":" + 表名 + ":" + 原oracle表中主键值
     private static final String SEPARATE_CHAR = ":";
     private static final String DIM_LEVEL_NAME = "dim";
     private static final String VLMS_SYSTEM_NAME = "vlms";

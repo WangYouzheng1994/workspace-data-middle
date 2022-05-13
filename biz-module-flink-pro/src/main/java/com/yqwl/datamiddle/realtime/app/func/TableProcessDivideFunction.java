@@ -31,8 +31,6 @@ import java.util.*;
 @Slf4j
 public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSONObject> {
 
-    private static final Logger LOGGER = LogManager.getLogger(TableProcessDivideFunction.class);
-
     //因为要将维度数据写到侧输出流，所以定义一个侧输出流标签
     private OutputTag<JSONObject> outputTag;
 
@@ -66,7 +64,7 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
     private void initTableProcessMap() {
         log.info("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
-        List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process", TableProcess.class, true);
+        List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
         for (TableProcess tableProcess : tableProcessList) {
             log.info("输出分流配置表中数据:{}", tableProcess.toString());
@@ -96,29 +94,32 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
     public void processElement(JSONObject jsonObj, Context ctx, Collector<JSONObject> out) throws Exception {
         //获取表名
         String tableName = JsonPartUtil.getTableNameStr(jsonObj);
+        String lowerTableName = StringUtils.toRootLowerCase(tableName);
         //获取操作类型
         String type = JsonPartUtil.getTypeStr(jsonObj);
         //获取配置表的信息
         if (MapUtils.isNotEmpty(tableProcessMap)) {
             //将源表和操作类型组合成key, 例如：key=MDAC32:insert
-            String key = StringUtils.joinWith(":", tableName, type);
+            String key = StringUtils.joinWith(":", lowerTableName, type);
             TableProcess tableProcess = tableProcessMap.get(key);
             if (tableProcess != null) {
                 //将sink的表添加到当前流记录中
                 jsonObj.put("sink_table", tableProcess.getSinkTable());
                 jsonObj.put("sink_pk", tableProcess.getSinkPk());
-            } else {
-                LOGGER.info("No This Key: {}", key);
-            }
-            //比对sinkType, 如果是写到mysql，打上标签
-            if (tableProcess != null && TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
-                ctx.output(outputTag, jsonObj);
 
-                // 如果是写到kafka的 那么直接写入到kafka中
-            } else if (tableProcess != null && TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                out.collect(jsonObj);
+                //比对sinkType, 如果是写到mysql，打上标签
+                if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                    // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
+                    ctx.output(outputTag, jsonObj);
+
+                    // 如果是写到kafka的 那么直接写入到kafka中
+                } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                    out.collect(jsonObj);
+                }
+            } else {
+                log.info("No This Key: {}", key);
             }
+
         }
     }
 }

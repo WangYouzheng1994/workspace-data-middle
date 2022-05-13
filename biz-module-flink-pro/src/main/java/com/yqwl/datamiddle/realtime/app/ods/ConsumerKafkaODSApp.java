@@ -3,14 +3,20 @@ package com.yqwl.datamiddle.realtime.app.ods;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimMysqlSink;
 import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunction;
+import com.yqwl.datamiddle.realtime.bean.Orders;
+import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -21,12 +27,20 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description: 消费kafka下同一个topic，将表进行分流
@@ -60,31 +74,48 @@ public class ConsumerKafkaODSApp {
                 .build();
         //将kafka中源数据转化成DataStream
         DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
+        env.setParallelism(2);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
-        DataStream<JSONObject> jsonStream = jsonDataStr.map(JSON::parseObject);
+        DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
+            @Override
+            public JSONObject map(String json) throws Exception {
+                JSONObject jsonObj = JSON.parseObject(json);
+                //获取cdc进入kafka的时间
+                String tsStr = JsonPartUtil.getTsStr(jsonObj);
+                //获取after数据
+                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
+                afterObj.put("WAREHOUSE_CREATETIME", tsStr);
+                afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
+                jsonObj.put("after", afterObj);
+                return jsonObj;
+            }
+        });
+        jsonStream.print("json转化map输出:");
         //动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
         //定义输出到mysql的侧输出流标签
         OutputTag<JSONObject> mysqlTag = new OutputTag<JSONObject>(TableProcess.SINK_TYPE_MYSQL) {
         };
+
         //事实流写回到Kafka的数据
         SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunction(mysqlTag)).uid("kafka-divide-data").name("kafka-divide-data");
         log.info("事实主流数据处理完成");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
-        DataStream<JSONObject> hbaseDS = kafkaDS.getSideOutput(mysqlTag);
+        DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
+
         //将维度数据保存到mysql对应的维度表中
-        hbaseDS.addSink(new DimMysqlSink()).uid("dim-sink-mysql").name("dim-sink-mysql");
+        insertMysqlDS.addSink(new DimMysqlSink()).setParallelism(1).uid("dim-sink-mysql").name("dim-sink-mysql");
         log.info("维表sink到mysql数据库中");
 
         //获取一个kafka生产者将事实数据写回到kafka的dwd层
         FlinkKafkaProducer<JSONObject> kafkaSink = KafkaUtil.getKafkaProductBySchema(
-
                 new KafkaSerializationSchema<JSONObject>() {
                     @Override
                     public void open(SerializationSchema.InitializationContext context) throws Exception {
                         log.info("kafka序列化");
                     }
+
                     /**
                      * @param jsonObj 传递给这个生产者的源数据 即flink的流数据
                      * @param timestamp
@@ -103,8 +134,8 @@ public class ConsumerKafkaODSApp {
                 }
         );
 
-        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
-        ;
+        kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
+
         log.info("事实表sink到流处理环境");
         env.execute("consumer-kafka-ods");
         log.info("事实表sink到流处理环境");

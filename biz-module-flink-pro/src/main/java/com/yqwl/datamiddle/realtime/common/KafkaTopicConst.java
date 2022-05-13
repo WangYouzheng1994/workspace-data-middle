@@ -9,6 +9,7 @@ public class KafkaTopicConst {
 
     //groupid
     public static final String ODS_VLMS_SPTC34_GROUP = "ods_vlms_sptc34_group";
+    public static final String ODS_VLMS_SPTB02_GROUP = "ods_vlms_sptb02_group";
     public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
 
 
@@ -68,12 +69,12 @@ public class KafkaTopicConst {
 
 
     //dwd topic
-
+    public static final String DWD_VLMS_SPTB02 = "dwd_vlms_sptb02";
 
 
 
     //dwm topic
-
+    public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
 
 
 

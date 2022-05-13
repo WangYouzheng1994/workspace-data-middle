@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -20,6 +21,7 @@ public class Sptb02 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @TransientSink
     private Long idnum;
 
     /**
@@ -1071,7 +1073,6 @@ public class Sptb02 implements Serializable {
      */
 
     private Long warehouseUpdatetime;
-
 
 
     @Override
