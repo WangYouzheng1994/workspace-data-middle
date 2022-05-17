@@ -135,21 +135,21 @@ spring:
           username: fengqiwulian
           password: fengqiwulian
           driver-class-name: com.mysql.cj.jdbc.Driver
-        dataWareHouse:
+#        dataWareHouse:
+#          url: jdbc:clickhouse://192.168.3.95:8123/default
+#          username:
+#          password:
+#          initialSize: 10
+#          maxActive: 100
+#          minIdle: 10
+#          maxWait: 6000
+#          driverClassName: ru.yandex.clickhouse.ClickHouseDriver
+#        # 多数据源配置
+        slave0:
           url: jdbc:clickhouse://192.168.3.95:8123/default
           username:
           password:
-          initialSize: 10
-          maxActive: 100
-          minIdle: 10
-          maxWait: 6000
-          driverClassName: ru.yandex.clickhouse.ClickHouseDriver
-          # 多数据源配置
-          #multi-datasource1:
-          #url: jdbc:mysql://localhost:3306/jeecg-boot2?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-          #username: root
-          #password: root
-          #driver-class-name: com.mysql.cj.jdbc.Driver
+          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
   #redis 配置
   redis:
     database: 11
