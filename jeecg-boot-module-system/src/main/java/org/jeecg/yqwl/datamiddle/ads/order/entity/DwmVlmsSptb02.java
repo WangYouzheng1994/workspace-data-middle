@@ -38,7 +38,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "运单日期 形成运输计划时产生  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "运单日期 形成运输计划时产生  date 统一时间戳 bigint")
-    private java.lang.Integer ddjrq;
+    private java.lang.Long ddjrq;
     /**
      * 运单费用  number 转 int
      */
@@ -62,7 +62,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "结算时间    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "结算时间    date 统一时间戳 bigint")
-    private java.lang.Integer djssj;
+    private java.lang.Long djssj;
     /**
      * 运输车牌照号
      */
@@ -140,7 +140,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "指车时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "指车时间   date 统一时间戳 bigint")
-    private java.lang.Integer dzpsj;
+    private java.lang.Long dzpsj;
     /**
      * 指车操作员
      */
@@ -152,7 +152,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "返程登记时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "返程登记时间  date 统一时间戳 bigint")
-    private java.lang.Integer dfcdjsj;
+    private java.lang.Long dfcdjsj;
     /**
      * 返单操作员代码
      */
@@ -176,13 +176,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "承运商指派时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "承运商指派时间  date 统一时间戳 bigint")
-    private java.lang.Integer dcyszpsj;
+    private java.lang.Long dcyszpsj;
     /**
      * 运输商指派时间  date 统一时间戳 bigint
      */
     @Excel(name = "运输商指派时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "运输商指派时间  date 统一时间戳 bigint")
-    private java.lang.Integer dysszpsj;
+    private java.lang.Long dysszpsj;
     /**
      * 承运商指派操作员代码
      */
@@ -200,7 +200,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "大众到货时间    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "大众到货时间    date 统一时间戳 bigint")
-    private java.lang.Integer ddhsj;
+    private java.lang.Long ddhsj;
     /**
      * 配车单编号
      */
@@ -218,13 +218,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "date 统一时间戳 bigint")
-    private java.lang.Integer dzcsj;
+    private java.lang.Long dzcsj;
     /**
      * 暂不用 （解放-最迟送达时间）  date 统一时间戳 bigint
      */
     @Excel(name = "暂不用 （解放-最迟送达时间）  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "暂不用 （解放-最迟送达时间）  date 统一时间戳 bigint")
-    private java.lang.Integer dyjwcsj;
+    private java.lang.Long dyjwcsj;
     /**
      * LJS码。MDAC33.CLJSDM
      */
@@ -242,7 +242,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "出库日期    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "出库日期    date 统一时间戳 bigint")
-    private java.lang.Integer dckrq;
+    private java.lang.Long dckrq;
     /**
      * 支付表号。SPTB7.CZFBH
      */
@@ -254,7 +254,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "返单确认时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "返单确认时间   date 统一时间戳 bigint")
-    private java.lang.Integer dbcsj;
+    private java.lang.Long dbcsj;
     /**
      * 暂不用
      */
@@ -314,7 +314,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "入中转库时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "入中转库时间  date 统一时间戳 bigint")
-    private java.lang.Integer dckqrsj;
+    private java.lang.Long dckqrsj;
     /**
      * 暂不用
      */
@@ -326,7 +326,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "暂不用        date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "暂不用        date 统一时间戳 bigint")
-    private java.lang.Integer djkrq;
+    private java.lang.Long djkrq;
     /**
      * 任务单号 20-30
      */
@@ -356,7 +356,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "集运时间    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "集运时间    date 统一时间戳 bigint")
-    private java.lang.Integer djysj;
+    private java.lang.Long djysj;
     /**
      * 集运车号
      */
@@ -374,7 +374,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "陆捷用作常态到货时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "陆捷用作常态到货时间   date 统一时间戳 bigint")
-    private java.lang.Integer dxsqrsj;
+    private java.lang.Long dxsqrsj;
     /**
      * 暂不用
      */
@@ -386,19 +386,19 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "周五到货时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "周五到货时间   date 统一时间戳 bigint")
-    private java.lang.Integer dysxd;
+    private java.lang.Long dysxd;
     /**
      * 出库结算时间   date 统一时间戳 bigint
      */
     @Excel(name = "出库结算时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "出库结算时间   date 统一时间戳 bigint")
-    private java.lang.Integer dckjssj;
+    private java.lang.Long dckjssj;
     /**
      * 调度中心返单时间  date 统一时间戳 bigint
      */
     @Excel(name = "调度中心返单时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "调度中心返单时间  date 统一时间戳 bigint")
-    private java.lang.Integer dckxd;
+    private java.lang.Long dckxd;
     /**
      * 结算排序，用于结算表  number 转 int
      */
@@ -416,7 +416,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "建单日期 （SPTB01C.DDJRQ）date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "建单日期 （SPTB01C.DDJRQ）date 统一时间戳 bigint")
-    private java.lang.Integer dpzrq;
+    private java.lang.Long dpzrq;
     /**
      * 结算表号。SPTB16.CJSBH。年月+3位流水号
      */
@@ -446,19 +446,19 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "暂不用   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "暂不用   date 统一时间戳 bigint")
-    private java.lang.Integer ddcdksj;
+    private java.lang.Long ddcdksj;
     /**
      * GPS到货时间  date 统一时间戳 bigint
      */
     @Excel(name = "GPS到货时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "GPS到货时间  date 统一时间戳 bigint")
-    private java.lang.Integer dgpsdhsj;
+    private java.lang.Long dgpsdhsj;
     /**
      * 实际离长时间  date 统一时间戳 bigint
      */
     @Excel(name = "实际离长时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "实际离长时间  date 统一时间戳 bigint")
-    private java.lang.Integer dsjcfsj;
+    private java.lang.Long dsjcfsj;
     /**
      * 异常状态 0：与R3出库车辆一致，2：与R3出库车辆不致，1：TMS未指车但R3已出库
      */
@@ -476,7 +476,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "预计到货时间 陆捷理论到货时间＝离长时间＋运输时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "预计到货时间 陆捷理论到货时间＝离长时间＋运输时间   date 统一时间戳 bigint")
-    private java.lang.Integer dyjdhsj;
+    private java.lang.Long dyjdhsj;
     /**
      * 实际牌照号
      */
@@ -500,7 +500,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "GPS回长时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "GPS回长时间   date 统一时间戳 bigint")
-    private java.lang.Integer dgpshcsj;
+    private java.lang.Long dgpshcsj;
     /**
      * 新P号：做为指派运输车的前一步
      */
@@ -512,7 +512,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "新P号指生成时间    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "新P号指生成时间    date 统一时间戳 bigint")
-    private java.lang.Integer dphscsj;
+    private java.lang.Long dphscsj;
     /**
      * 配板标识
      */
@@ -530,7 +530,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "理论离长时间  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "理论离长时间  date 统一时间戳 bigint")
-    private java.lang.Integer dlllcsj;
+    private java.lang.Long dlllcsj;
     /**
      * 管理费确认人
      */
@@ -542,7 +542,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "管理费确认时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "管理费确认时间   date 统一时间戳 bigint")
-    private java.lang.Integer dglfqrsj;
+    private java.lang.Long dglfqrsj;
     /**
      * 多公司模式下的公司-SPTC60
      */
@@ -566,7 +566,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "备用金确认时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "备用金确认时间   date 统一时间戳 bigint")
-    private java.lang.Integer dbyjqrsj;
+    private java.lang.Long dbyjqrsj;
     /**
      * 原承运商代码2010-06-09
      */
@@ -656,25 +656,25 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "TVS交车时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "TVS交车时间   date 统一时间戳 bigint")
-    private java.lang.Integer dtvsjcsj;
+    private java.lang.Long dtvsjcsj;
     /**
      * TVS出发时间   date 统一时间戳 bigint
      */
     @Excel(name = "TVS出发时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "TVS出发时间   date 统一时间戳 bigint")
-    private java.lang.Integer dtvscfsj;
+    private java.lang.Long dtvscfsj;
     /**
      * TVS到货时间    date 统一时间戳 bigint
      */
     @Excel(name = "TVS到货时间    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "TVS到货时间    date 统一时间戳 bigint")
-    private java.lang.Integer dtvsdhsj;
+    private java.lang.Long dtvsdhsj;
     /**
      * TVS返回时间。没啥意义  date 统一时间戳 bigint
      */
     @Excel(name = "TVS返回时间。没啥意义  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "TVS返回时间。没啥意义  date 统一时间戳 bigint")
-    private java.lang.Integer dtvsfcsj;
+    private java.lang.Long dtvsfcsj;
     /**
      * TVS批次号
      */
@@ -692,13 +692,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "TVS中途换车时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "TVS中途换车时间   date 统一时间戳 bigint")
-    private java.lang.Integer dtvsjcsj2;
+    private java.lang.Long dtvsjcsj2;
     /**
      * 时间戳。BI提数据   timestamp 转 bigint
      */
     @Excel(name = "时间戳。BI提数据   timestamp 转 bigint", width = 15)
     @ApiModelProperty(value = "时间戳。BI提数据   timestamp 转 bigint")
-    private java.lang.Integer dstamp;
+    private java.lang.Long dstamp;
     /**
      * 交车位置省份
      */
@@ -812,7 +812,7 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "实车交接时间 DSS实车到货时间 20190408  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "实车交接时间 DSS实车到货时间 20190408  date 统一时间戳 bigint")
-    private java.lang.Integer dateScjj;
+    private java.lang.Long dateScjj;
     /**
      * 客服确认标记
      */
@@ -830,13 +830,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "装车完成时间 20191020  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "装车完成时间 20191020  date 统一时间戳 bigint")
-    private java.lang.Integer dzcwcsj;
+    private java.lang.Long dzcwcsj;
     /**
      * 到达站台时间 20191022  date 统一时间戳 bigint
      */
     @Excel(name = "到达站台时间 20191022  date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "到达站台时间 20191022  date 统一时间戳 bigint")
-    private java.lang.Integer dddztsj;
+    private java.lang.Long dddztsj;
     /**
      * 同步标识 0未同步，1已同步
      */
@@ -908,13 +908,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "发货时间           date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "发货时间           date 统一时间戳 bigint")
-    private java.lang.Integer reqDate;
+    private java.lang.Long reqDate;
     /**
      * 要求送达时间     date 统一时间戳 bigint
      */
     @Excel(name = "要求送达时间     date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "要求送达时间     date 统一时间戳 bigint")
-    private java.lang.Integer fhDate;
+    private java.lang.Long fhDate;
     /**
      * 车辆类型
      */
@@ -968,13 +968,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "支付明细管理生成-操作日期    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "支付明细管理生成-操作日期    date 统一时间戳 bigint")
-    private java.lang.Integer zfConfirmDczrq;
+    private java.lang.Long zfConfirmDczrq;
     /**
      * 铁路列号更新时间                 date 统一时间戳 bigint
      */
     @Excel(name = "铁路列号更新时间                 date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "铁路列号更新时间                 date 统一时间戳 bigint")
-    private java.lang.Integer dtllhscsj;
+    private java.lang.Long dtllhscsj;
     /**
      * GPS路径点数    number 转 int
      */
@@ -986,31 +986,31 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "标准GPS到货时间         date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "标准GPS到货时间         date 统一时间戳 bigint")
-    private java.lang.Integer ddhsjGps;
+    private java.lang.Long ddhsjGps;
     /**
      * 标准系统到货时间         date 统一时间戳 bigint
      */
     @Excel(name = "标准系统到货时间         date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "标准系统到货时间         date 统一时间戳 bigint")
-    private java.lang.Integer ddhsjXt;
+    private java.lang.Long ddhsjXt;
     /**
      * 铁路卸车时间 20200525    date 统一时间戳 bigint
      */
     @Excel(name = "铁路卸车时间 20200525    date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "铁路卸车时间 20200525    date 统一时间戳 bigint")
-    private java.lang.Integer dztxcsj;
+    private java.lang.Long dztxcsj;
     /**
      * 20200708 奔马终段预计到货时间   date 统一时间戳 bigint
      */
     @Excel(name = "20200708 奔马终段预计到货时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "20200708 奔马终段预计到货时间   date 统一时间戳 bigint")
-    private java.lang.Integer dyjdhsjBm;
+    private java.lang.Long dyjdhsjBm;
     /**
      * 20200708 奔马分段预计到货时间   date 统一时间戳 bigint
      */
     @Excel(name = "20200708 奔马分段预计到货时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "20200708 奔马分段预计到货时间   date 统一时间戳 bigint")
-    private java.lang.Integer dfdyjdhsjBm;
+    private java.lang.Long dfdyjdhsjBm;
     /**
      * 20201014 保密车支付表号
      */
@@ -1052,13 +1052,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "20210422 DTF 大众标准物流时间   number 转  bigint", width = 15)
     @ApiModelProperty(value = "20210422 DTF 大众标准物流时间   number 转  bigint")
-    private java.lang.Integer nbzwlsjDz;
+    private java.lang.Long nbzwlsjDz;
     /**
      * 20210422 DTF 大众标准到货时间   date 统一时间戳 bigint
      */
     @Excel(name = "20210422 DTF 大众标准到货时间   date 统一时间戳 bigint", width = 15)
     @ApiModelProperty(value = "20210422 DTF 大众标准到货时间   date 统一时间戳 bigint")
-    private java.lang.Integer dbzdhsjDz;
+    private java.lang.Long dbzdhsjDz;
     /**
      * STD同城标识
      */
