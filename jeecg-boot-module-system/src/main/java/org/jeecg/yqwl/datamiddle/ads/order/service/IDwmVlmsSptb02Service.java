@@ -12,6 +12,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
  * @Date:   2022-05-12
  * @Version: V1.0
  */
+@DS("slave0")
 public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     /**
      * 查询top10发运量列表
@@ -20,6 +21,15 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      */
     Result findTop10SendList(DwmVlmsSptb02 dwmVlmsSptb02);
 
-    @DS("dataWareHouse")
+    /**
+     * 查询日计划量
+     * @param dwmVlmsSptb02
+     * @return
+     */
+    Integer findDayAmountOfPlan(DwmVlmsSptb02 dwmVlmsSptb02);
+
+
     Result findUserInfo(UserInfo userInfo);
+
+
 }

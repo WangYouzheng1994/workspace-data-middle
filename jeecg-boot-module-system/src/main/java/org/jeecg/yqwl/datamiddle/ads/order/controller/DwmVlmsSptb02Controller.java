@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @Description: DwmVlmsSptb02
@@ -40,12 +40,14 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     private UserInfoService userInfoService;
 
 
-    @RequestMapping("/selectById")
-    public UserInfo selectById () {
-        UserInfo userInfo = userInfoService.findUserInfo(1);
-        return userInfo ;
+    @PostMapping("/selectDayAmountOfPlan")
+    public Result<?> queryDayAmountOfPlan (@RequestBody DwmVlmsSptb02 dwmVlmsSptb02) {
+        //todo:接受天数和基地和汽车品牌的参数
+        Integer dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(dwmVlmsSptb02);
+        Map map = new HashMap<>();
+        map.put("a",dayAmountOfPlan);
+        return Result.OK(map) ;
     }
-
     /**
      * 分页列表查询
      *
@@ -182,4 +184,8 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         dwmVlmsSptb02Service.findTop10SendList(null);
         return null;
     }
+
+
+
+
 }
