@@ -15,12 +15,12 @@ public class GetBaseBrandTime {
     /**
      * 开始时间
      */
-    private Date startTime;
+    private String startTime;
 
     /**
      * 结束时间
      */
-    private Date endTime;
+    private String endTime;
 
     /**
      * 基地
