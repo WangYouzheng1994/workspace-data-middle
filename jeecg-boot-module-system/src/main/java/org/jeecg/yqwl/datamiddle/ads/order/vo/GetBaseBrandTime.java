@@ -15,7 +15,7 @@ public class GetBaseBrandTime {
     /**
      * 开始时间
      */
-    private Long startTime;
+    private Long  startTime;
 
     /**
      * 结束时间
