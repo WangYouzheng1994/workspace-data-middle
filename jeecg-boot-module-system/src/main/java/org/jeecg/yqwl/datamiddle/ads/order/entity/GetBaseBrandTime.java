@@ -2,6 +2,8 @@ package org.jeecg.yqwl.datamiddle.ads.order.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * @Description:
  * @Author: XiaoFeng
@@ -13,12 +15,12 @@ public class GetBaseBrandTime {
     /**
      * 开始时间
      */
-    private String startTime;
+    private Date startTime;
 
     /**
      * 结束时间
      */
-    private String endTime;
+    private Date endTime;
 
     /**
      * 基地
