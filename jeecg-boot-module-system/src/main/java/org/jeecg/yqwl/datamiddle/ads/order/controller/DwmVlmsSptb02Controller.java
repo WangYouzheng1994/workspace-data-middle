@@ -11,6 +11,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.service.UserInfoService;
@@ -41,12 +42,18 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
 
 
     @PostMapping("/selectDayAmountOfPlan")
-    public Result<?> queryDayAmountOfPlan (@RequestBody DwmVlmsSptb02 dwmVlmsSptb02) {
-        //todo:接受天数和基地和汽车品牌的参数
-        Integer dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(dwmVlmsSptb02);
-        Map map = new HashMap<>();
-        map.put("a",dayAmountOfPlan);
-        return Result.OK(map) ;
+    public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
+        // 给开始时间赋值
+        String startTime="2013-02-13";
+        //todo:给startTime和endTime 转成Long值
+        baseBrandTime.setStartTime(startTime);
+        // 给结束时间赋值
+        String endTime="2013-02-14";
+        baseBrandTime.setEndTime(endTime);
+        //接受天数和基地和汽车品牌的参数
+       dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
+
+        return Result.OK() ;
     }
     /**
      * 分页列表查询

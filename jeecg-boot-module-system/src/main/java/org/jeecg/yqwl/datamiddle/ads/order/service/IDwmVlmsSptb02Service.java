@@ -4,6 +4,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 
 /**
@@ -23,10 +24,10 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
 
     /**
      * 查询日计划量
-     * @param dwmVlmsSptb02
+     * @param baseBrandTime
      * @return
      */
-    Integer findDayAmountOfPlan(DwmVlmsSptb02 dwmVlmsSptb02);
+    Integer findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
 
 
     Result findUserInfo(UserInfo userInfo);

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
@@ -42,29 +43,37 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 查询日计划量
-     * @param dwmVlmsSptb02
+     * @param baseBrandTime
      * @return
      */
     @Override
-    public Integer findDayAmountOfPlan(DwmVlmsSptb02 dwmVlmsSptb02) {
+    public Integer findDayAmountOfPlan(GetBaseBrandTime baseBrandTime) {
+        String transModeCode = baseBrandTime.getTransModeCode(); //基地代码
+        String hostComCode = baseBrandTime.getHostComCode();     //汽车品牌
+        String startTime = baseBrandTime.getStartTime();         //开始时间
+        String endTime = baseBrandTime.getEndTime();             //结束时间
+
         // 暂时写个count的测试,已通过
         Integer integer = this.dwmVlmsSptb02Mapper.selectCount(new LambdaQueryWrapper<DwmVlmsSptb02>());
-        // todo:按照传过来的数据进行条件查询
+        // 按照传过来的数据进行条件查询
         LambdaQueryWrapper<DwmVlmsSptb02> queryWrapper = new LambdaQueryWrapper<>();
-        if (dwmVlmsSptb02 !=null){
+        if (baseBrandTime !=null){
             //基地
-            if (StringUtils.isNotBlank(dwmVlmsSptb02.getTransModeCode())){
-                queryWrapper.eq(DwmVlmsSptb02::getTransModeCode,"1");
+            if (StringUtils.isNotBlank(transModeCode)){
+                queryWrapper.eq(DwmVlmsSptb02::getTransModeCode,transModeCode);
+                //如果查询所有的基地,就分组
+                if (transModeCode.equals("0")){
+                    queryWrapper.groupBy(DwmVlmsSptb02::getBaseName);
+                }
             }
             //汽车品牌
-            if (StringUtils.isNotBlank(dwmVlmsSptb02.getHostComCode())){
-                queryWrapper.eq(DwmVlmsSptb02::getHostComCode,"1");
+            if (StringUtils.isNotBlank(hostComCode)){
+                queryWrapper.eq(DwmVlmsSptb02::getHostComCode,hostComCode);
             }
-            //todo:按照时间查询,注:StringUtils.isNotBlank()不支持Lang类型
-            if (dwmVlmsSptb02.getDdjrq()!=null){
-                queryWrapper.between(DwmVlmsSptb02::getDdjrq,"xxxxxxL","xxxxxxL");
+            //按照开始,结束时间查询
+            if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)){
+                queryWrapper.between(DwmVlmsSptb02::getDdjrq,startTime,endTime);
             }
-
         }
         //todo: 返回值改成Wrapper
         return integer;

@@ -1185,4 +1185,9 @@ public class DwmVlmsSptb02 {
     @Excel(name = "dwm新增 运单状态名称 1待出库2已出库3待起运(待离港)4干线在途5已到待卸6末端配送-同城直发(配送中)7异地直发or移库(入库中)8已到库9已到店", width = 15)
     @ApiModelProperty(value = "dwm新增 运单状态名称 1待出库2已出库3待起运(待离港)4干线在途5已到待卸6末端配送-同城直发(配送中)7异地直发or移库(入库中)8已到库9已到店")
     private java.lang.String trafficStatusName;
+
+    /**
+     * 发车基地名称
+     */
+    private java.lang.String baseName;
 }
