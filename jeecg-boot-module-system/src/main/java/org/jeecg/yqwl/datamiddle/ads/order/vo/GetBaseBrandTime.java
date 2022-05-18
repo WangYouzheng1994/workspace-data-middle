@@ -1,4 +1,4 @@
-package org.jeecg.yqwl.datamiddle.ads.order.entity;
+package org.jeecg.yqwl.datamiddle.ads.order.vo;
 
 import lombok.Data;
 
@@ -15,12 +15,12 @@ public class GetBaseBrandTime {
     /**
      * 开始时间
      */
-    private String startTime;
+    private Long startTime;
 
     /**
      * 结束时间
      */
-    private String endTime;
+    private Long endTime;
 
     /**
      * 基地
