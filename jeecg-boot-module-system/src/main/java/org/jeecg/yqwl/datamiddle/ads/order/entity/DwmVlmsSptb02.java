@@ -15,18 +15,12 @@ import org.jeecgframework.poi.excel.annotation.Excel;
  * @Version: V1.0
  */
 @Data
-@TableName("dwm_vlms_sptb02_view")
+@TableName("dwm_vlms_sptb02_test")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value = "dwm_vlms_sptb02对象", description = "DwmVlmsSptb02")
 public class DwmVlmsSptb02 {
 
-    /**
-     * idnum
-     */
-    @Excel(name = "idnum", width = 15)
-    @ApiModelProperty(value = "idnum")
-    private Integer idnum;
     /**
      * 结算单编号 主键
      */
