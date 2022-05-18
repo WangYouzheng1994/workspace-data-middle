@@ -13,6 +13,10 @@ import java.util.Date;
 @Data
 public class GetBaseBrandTime {
     /**
+     * 时间种类 (day/week...)
+     */
+    private String timeType;
+    /**
      * 开始时间
      */
     private Long  startTime;
@@ -25,10 +29,10 @@ public class GetBaseBrandTime {
     /**
      * 基地
      */
-    private String transModeCode;
+    private String cqwh;
 
     /**
-     * 品牌
+     * 主机厂品牌
      */
-    private String hostComCode;
+    private String czjgsdm;
 }

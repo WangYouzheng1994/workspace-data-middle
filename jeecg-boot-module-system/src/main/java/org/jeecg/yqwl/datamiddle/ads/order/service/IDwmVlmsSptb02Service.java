@@ -1,11 +1,14 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
+
+import java.util.List;
 
 /**
  * @Description: DwmVlmsSptb02
@@ -27,7 +30,7 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    Integer findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
+    List<DwmVlmsSptb02> findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
 
 
     Result findUserInfo(UserInfo userInfo);

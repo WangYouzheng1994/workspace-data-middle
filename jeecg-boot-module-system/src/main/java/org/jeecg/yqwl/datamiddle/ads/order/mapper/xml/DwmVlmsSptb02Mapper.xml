@@ -2,36 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
 
-    <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-    resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
-
+    <select id="getPlanAmount"
+    parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+    resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+    >
         SELECT
-        COUNT(dvs.ddjrq) as total
-        ,toDate(fromUnixTimestamp64Milli(dvs.ddjrq)) as days
+        COUNT(dvs.ddjrq) as totalNum,
+            <if test="params.timeType == 'day'">
+                toDate(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            </if>
+            <if test="params.timeType == 'week'">
+                toWeek(fromUnixTimestamp64Milli(dvs.ddjrq))+1 as dates
+            </if>
+            <if test="params.timeType == 'month'">
+                toMonth(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            </if>
+            <if test="params.timeType == 'quarter'">
+                toQuarter(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            </if>
+            <if test="params.timeType == 'year'">
+                toYear(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            </if>
+
         FROM dwm_vlms_sptb02_test dvs
         <where>
-            <if test="params.startTime != null and params.startTime !=null and params.endTime !=null params.endTime !='' " >
-                dvs.ddjrq BETWEEN  #{startTime}and #{endTime}
+            <if test="params.startTime != null and params.startTime !=null and params.endTime !=null and params.endTime !='' " >
+                dvs.ddjrq BETWEEN  #{params.startTime}and #{params.endTime}
             </if>
-            <if test="transModeCode != null and transModeCode != ''">
-                and dvs.trans_mode_code = #{transModeCode}
+            <if test="params.cqwh != null and params.cqwh != ''">
+                and dvs.cqwh = #{params.cqwh}
             </if>
-            <if test="transModeCode != null and transModeCode != ''">
-                and dvs.host_com_code = #{hostComCode}
+            <if test="params.czjgsdm != null and params.czjgsdm != ''">
+                and dvs.czjgsdm = #{params.czjgsdm}
             </if>
         </where>
-            group by days
-
-<!--        <if test="type != null and type != '' and type == 'year'">-->
-<!--            group by da-->
-<!--        </if>-->
-<!--        <if test="xxx != null and xxx != '' and type == 'month'">-->
-<!--            group by da-->
-<!--        </if>-->
-<!--        <if test="xxx != null and xxx != ''">-->
-<!--            group by da-->
-<!--        </if>-->
-
+            group by dates
     </select>
 
 </mapper>

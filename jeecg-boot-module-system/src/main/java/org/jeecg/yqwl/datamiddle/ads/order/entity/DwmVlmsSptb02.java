@@ -15,7 +15,7 @@ import org.jeecgframework.poi.excel.annotation.Excel;
  * @Version: V1.0
  */
 @Data
-@TableName("dwm_vlms_sptb02_test")
+@TableName("dwm_vlms_sptb02")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value = "dwm_vlms_sptb02对象", description = "DwmVlmsSptb02")
@@ -1064,13 +1064,13 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "新增-创建时间", width = 15)
     @ApiModelProperty(value = "新增-创建时间")
-    private java.lang.Integer warehouseCreatetime;
+    private java.lang.String warehouseCreatetime;
     /**
      * 新增-更新时间
      */
     @Excel(name = "新增-更新时间", width = 15)
     @ApiModelProperty(value = "新增-更新时间")
-    private java.lang.Integer warehouseUpdatetime;
+    private java.lang.String warehouseUpdatetime;
     /**
      * dwd新增-运输方式 公路 G 水路 S 铁路 T
      */
@@ -1094,25 +1094,25 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "dwd新增-运单指派时间", width = 15)
     @ApiModelProperty(value = "dwd新增-运单指派时间")
-    private java.lang.Integer assignTime;
+    private java.lang.String assignTime;
     /**
      * dwd新增-打点到货时间
      */
     @Excel(name = "dwd新增-打点到货时间", width = 15)
     @ApiModelProperty(value = "dwd新增-打点到货时间")
-    private java.lang.Integer dotSiteTime;
+    private java.lang.String dotSiteTime;
     /**
      * dwd新增-最终到货时间
      */
     @Excel(name = "dwd新增-最终到货时间", width = 15)
     @ApiModelProperty(value = "dwd新增-最终到货时间")
-    private java.lang.Integer finalSiteTime;
+    private java.lang.String finalSiteTime;
     /**
      * dwd新增-运单生成时间
      */
     @Excel(name = "dwd新增-运单生成时间", width = 15)
     @ApiModelProperty(value = "dwd新增-运单生成时间")
-    private java.lang.Integer orderCreateTime;
+    private java.lang.String orderCreateTime;
     /**
      * dwd基地代码转换 适配 lc_spec_config
      */
@@ -1136,31 +1136,31 @@ public class DwmVlmsSptb02 {
      */
     @Excel(name = "dwm新增-理论起运时间", width = 15)
     @ApiModelProperty(value = "dwm新增-理论起运时间")
-    private java.lang.Integer theoryShipmentTime;
+    private java.lang.String theoryShipmentTime;
     /**
      * dwm新增-理论出库时间
      */
     @Excel(name = "dwm新增-理论出库时间", width = 15)
     @ApiModelProperty(value = "dwm新增-理论出库时间")
-    private java.lang.Integer theoryOutTime;
+    private java.lang.String theoryOutTime;
     /**
      * dwm新增-理论到货时间
      */
     @Excel(name = "dwm新增-理论到货时间", width = 15)
     @ApiModelProperty(value = "dwm新增-理论到货时间")
-    private java.lang.Integer theorySiteTime;
+    private java.lang.String theorySiteTime;
     /**
      * dwm新增-实际出库时间
      */
     @Excel(name = "dwm新增-实际出库时间", width = 15)
     @ApiModelProperty(value = "dwm新增-实际出库时间")
-    private java.lang.Integer actualOutTime;
+    private java.lang.String actualOutTime;
     /**
      * dwm新增-入目标库时间
      */
     @Excel(name = "dwm新增-入目标库时间", width = 15)
     @ApiModelProperty(value = "dwm新增-入目标库时间")
-    private java.lang.Integer enterTargetTime;
+    private java.lang.String enterTargetTime;
     /**
      * dwm新增-车架号
      */
@@ -1184,4 +1184,13 @@ public class DwmVlmsSptb02 {
      * 发车基地名称
      */
     private java.lang.String baseName;
+
+    /**
+     * 总数
+     */
+    private Integer totalNum;
+    /**
+     * 日期
+     */
+    private String dates;
 }
