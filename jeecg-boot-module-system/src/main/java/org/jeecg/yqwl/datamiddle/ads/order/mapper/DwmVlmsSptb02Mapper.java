@@ -15,6 +15,35 @@ import java.util.List;
  */
 public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
-    public List<DwmVlmsSptb02> getPlanAmount(@Param("params") GetBaseBrandTime params);
+     /**
+      * 出库量
+      * @param params
+      * @return
+      */
+     List<DwmVlmsSptb02> stockOUtList(@Param("params") GetBaseBrandTime params);
+     /**
+      * top10 发运量
+      * @param params
+      * @return
+      */
+     List<DwmVlmsSptb02> sendList(@Param("params") GetBaseBrandTime params);
+
+     /**
+      * top10待发量
+      * @param params
+      * @return
+      */
+     List<DwmVlmsSptb02> pendingList (@Param("params") GetBaseBrandTime params);
+
+     /**
+      * top10在途量
+      * @param params
+      * @return
+      */
+     List<DwmVlmsSptb02> onWayList (@Param("params") GetBaseBrandTime params);
+
+
+
+     List<DwmVlmsSptb02> getPlanAmount(@Param("params") GetBaseBrandTime params);
 
 }

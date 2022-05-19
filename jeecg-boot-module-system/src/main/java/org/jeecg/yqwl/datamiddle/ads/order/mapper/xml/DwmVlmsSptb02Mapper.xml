@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
-
     <select id="getPlanAmount"
     parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
     resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
@@ -38,5 +37,168 @@
         </where>
             group by dates
     </select>
+
+    <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where shipment_time between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
+    <select id="sendList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+            COUNT(*) as totalNum , dates
+        FROM
+            dwm_vlms_sptb02_test
+        <where>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L">
+                AND shipment_time <![CDATA[ != ]]> 0L
+            </if>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L">
+                AND shipment_time BETWEEN  #{params.startTime} AND #{params.endTime}
+            </if>
+            <if test="params.cqwh != null and params.cqwh = ' '">
+                AND  #{params.cqwh}
+            </if>
+            <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
+                AND #{params.czjgsdm}
+            </if>
+        </where>
+        <if test="params.timeType = 'day' ">
+            GROUP BY  Date(fromUnixTimestamp64Milli(shipment_time)) as dates
+        </if>
+        <if test="params.timeType = 'week' ">
+            GROUP BY  toWeek(fromUnixTimestamp64Milli(shipment_time))  as dates
+        </if>
+        <if test="params.timeType = 'month' ">
+            GROUP BY  toMonth(fromUnixTimestamp64Milli(shipment_time)) as dates
+        </if>
+        <if test="params.timeType = 'quarter' ">
+            GROUP BY  QUARTER(fromUnixTimestamp64Milli(shipment_time)) as dates
+        </if>
+        <if test="params.timeType = 'year' ">
+            GROUP BY  YEAR(fromUnixTimestamp64Milli(shipment_time)) as dates
+        </if>
+            ORDER BY totalNum DESC
+    </select>
+
+
+    <!--  top10待发量  select count(*) cnf   from dwm_vlms_sptb02 where THEORY_OUT_TIME between '1491485187000' and '1492008443000' group by Date(fromUnixTimestamp64Milli(THEORY_OUT_TIME))  order by cnf desc    -->
+    <select id="pendingList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+            COUNT(*) as totalNum , dates
+        FROM
+            dwm_vlms_sptb02_test
+        <where>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L">
+                AND THEORY_OUT_TIME BETWEEN  #{params.startTime} AND #{params.endTime}
+            </if>
+            <if test="params.cqwh != null and params.cqwh = ' '">
+                AND  #{params.cqwh}
+            </if>
+            <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
+                AND #{params.czjgsdm}
+            </if>
+        </where>
+        <if test="params.timeType = 'day' ">
+            GROUP BY  Date(fromUnixTimestamp64Milli(THEORY_OUT_TIME)) as dates
+        </if>
+        <if test="params.timeType = 'week' ">
+            GROUP BY  toWeek(fromUnixTimestamp64Milli(THEORY_OUT_TIME)) as dates
+        </if>
+        <if test="params.timeType = 'month' ">
+            GROUP BY  toMonth(fromUnixTimestamp64Milli(THEORY_OUT_TIME)) as dates
+        </if>
+        <if test="params.timeType = 'quarter' ">
+            GROUP BY  QUARTER(fromUnixTimestamp64Milli(THEORY_OUT_TIME)) as dates
+        </if>
+        <if test="params.timeType = 'year' ">
+            GROUP BY  YEAR(fromUnixTimestamp64Milli(THEORY_OUT_TIME)) as dates
+        </if>
+            ORDER BY totalNum DESC
+    </select>
+
+<!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
+    <select id="onWayList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+            SELECT
+                COUNT(*)  as totalNum ,dates
+            FROM
+                dwm_vlms_sptb02_test
+        <where>
+            <if test="params.startTime != null and params.startTime != 0L ">
+                 AND  shipment_time <![CDATA[ >= ]]> #{params.startTime}
+            </if>
+            <if test=" params.endTime != null and params.endTime != 0L">
+                AND final_site_time <![CDATA[ <= ]]> #{params.endTime}
+            </if>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L ">
+                OR final_site_time <![CDATA[ = ]]> 0L
+            </if>
+            <if test="params.cqwh != null and params.cqwh = ' '">
+                AND  #{params.cqwh}
+            </if>
+            <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
+                AND #{params.czjgsdm}
+            </if>
+        </where>
+        <if test="params.timeType = 'day' ">
+            GROUP BY  Date(fromUnixTimestamp64Milli(SHIPMENT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'week' ">
+            GROUP BY  toWeek(fromUnixTimestamp64Milli(SHIPMENT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'month' ">
+            GROUP BY  toMonth(fromUnixTimestamp64Milli(SHIPMENT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'quarter' ">
+            GROUP BY  QUARTER(fromUnixTimestamp64Milli(SHIPMENT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'year' ">
+            GROUP BY  YEAR(fromUnixTimestamp64Milli(SHIPMENT_TIME))  as dates
+        </if>
+            ORDER BY totalNum DESC
+    </select>
+
+
+
+<!--    出库量  select count(*) cnf  from dwm_vlms_sptb02_test where ACTUAL_OUT_TIME between '1491485187000' and '1492008443000' and ACTUAL_OUT_TIME !=0L  -->
+    <select id="stockOUtList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+            SELECT
+                count(*)  as totalNum , dates
+            FROM
+                dwm_vlms_sptb02_test
+        <where>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L">
+                AND  actual_out_time <![CDATA[ != ]]> 0L
+            </if>
+            <if test=" params.startTime != null and params.startTime != 0L  params.endTime != null and params.endTime != 0L">
+                AND actual_out_time BETWEEN  #{params.startTime} AND #{params.endTime}
+            </if>
+            <if test="params.cqwh != null and params.cqwh = ' '">
+                AND  #{params.cqwh}
+            </if>
+            <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
+                AND #{params.czjgsdm}
+            </if>
+        </where>
+        <if test="params.timeType = 'day' ">
+            GROUP BY  Date(fromUnixTimestamp64Milli(ACTUAL_OUT_TIME)) as dates
+        </if>
+        <if test="params.timeType = 'week' ">
+            GROUP BY  toWeek(fromUnixTimestamp64Milli(ACTUAL_OUT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'month' ">
+            GROUP BY  toMonth(fromUnixTimestamp64Milli(ACTUAL_OUT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'quarter' ">
+            GROUP BY  QUARTER(fromUnixTimestamp64Milli(ACTUAL_OUT_TIME))  as dates
+        </if>
+        <if test="params.timeType = 'year' ">
+            GROUP BY  YEAR(fromUnixTimestamp64Milli(ACTUAL_OUT_TIME))  as dates
+        </if>
+    </select>
+
 
 </mapper>
