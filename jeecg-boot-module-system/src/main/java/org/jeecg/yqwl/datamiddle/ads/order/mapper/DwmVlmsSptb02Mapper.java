@@ -20,27 +20,27 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param params
       * @return
       */
-     List<DwmVlmsSptb02> stockOUtList(@Param("params") GetBaseBrandTime params);
+     List<GetBaseBrandTime> stockOUtList(@Param("params") DwmVlmsSptb02 params);
      /**
       * top10 发运量
       * @param params
       * @return
       */
-     List<DwmVlmsSptb02> sendList(@Param("params") GetBaseBrandTime params);
+     List<GetBaseBrandTime> sendList(@Param("params") DwmVlmsSptb02 params);
 
      /**
       * top10待发量
       * @param params
       * @return
       */
-     List<DwmVlmsSptb02> pendingList (@Param("params") GetBaseBrandTime params);
+     List<GetBaseBrandTime> pendingList (@Param("params") DwmVlmsSptb02 params);
 
      /**
       * top10在途量
       * @param params
       * @return
       */
-     List<DwmVlmsSptb02> onWayList (@Param("params") GetBaseBrandTime params);
+     List<GetBaseBrandTime> onWayList (@Param("params") DwmVlmsSptb02 params);
 
 
 
