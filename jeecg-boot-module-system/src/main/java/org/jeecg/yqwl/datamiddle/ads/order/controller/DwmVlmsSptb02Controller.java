@@ -11,7 +11,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * @Description: DwmVlmsSptb02
@@ -39,13 +39,18 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @Resource
     private UserInfoService userInfoService;
 
+    /**
+     * 查询日计划量
+     * @param baseBrandTime
+     * @return
+     */
+    @PostMapping("/selectDayAmountOfPlan")
+    public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
 
-    @RequestMapping("/selectById")
-    public UserInfo selectById () {
-        UserInfo userInfo = userInfoService.findUserInfo(1);
-        return userInfo ;
+        List<DwmVlmsSptb02> dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
+
+        return Result.OK(dayAmountOfPlan) ;
     }
-
     /**
      * 分页列表查询
      *
@@ -182,4 +187,8 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         dwmVlmsSptb02Service.findTop10SendList(null);
         return null;
     }
+
+
+
+
 }

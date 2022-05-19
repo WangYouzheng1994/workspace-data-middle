@@ -150,6 +150,10 @@ spring:
           username:
           password:
           driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+          initialSize: 10
+          maxActive: 100
+          minIdle: 10
+          maxWait: 6000
   #redis 配置
   redis:
     database: 11
@@ -165,7 +169,7 @@ spring:
     port: 6379
 #mybatis plus 设置
 mybatis-plus:
-  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml,classpath*:org/jeecg/yqwl/datamiddle/ads/order/**/xml/**Mapper.xml
   global-config:
     # 关闭MP3.0自带的banner
     banner: false
