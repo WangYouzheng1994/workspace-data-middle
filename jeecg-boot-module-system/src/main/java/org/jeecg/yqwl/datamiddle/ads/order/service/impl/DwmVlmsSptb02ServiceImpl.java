@@ -1,15 +1,9 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.springframework.stereotype.Service;
@@ -17,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
-import java.util.Date;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -45,20 +39,37 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     }
 
     /**
-     * 查询日计划量
+     * 按条件查询计划量
      * @param baseBrandTime
      * @return
      */
     @Override
     public List<DwmVlmsSptb02> findDayAmountOfPlan(GetBaseBrandTime baseBrandTime) {
         List<DwmVlmsSptb02> list = dwmVlmsSptb02Mapper.getPlanAmount(baseBrandTime);
-
+        //todo:对返回前端的值做处理
         return list;
     }
 
+    /**
+     * 按条件查询发运量
+     * @param baseBrandTime
+     * @return
+     */
     @Override
-    public Result findUserInfo(UserInfo userInfo) {
-
-        return null;
+    public List<DwmVlmsSptb02> findShipment(GetBaseBrandTime baseBrandTime) {
+        List<DwmVlmsSptb02> shipment = dwmVlmsSptb02Mapper.getShipment(baseBrandTime);
+        //todo:对返回前端的值做处理
+        return shipment;
     }
+
+    @Override
+    public Double findArrivalRate(GetBaseBrandTime baseBrandTime) {
+        DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
+        Double percentage = arrivalRate.getPercentage();
+        //下面开始截取两位数 原数据:0.12594458438287154
+        BigDecimal bigDecimal = new BigDecimal(percentage);
+        Double newPercentage = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return newPercentage;
+    }
+
 }

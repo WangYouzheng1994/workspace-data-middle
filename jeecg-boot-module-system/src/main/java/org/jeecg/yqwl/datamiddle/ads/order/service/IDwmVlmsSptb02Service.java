@@ -1,12 +1,10 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.UserInfo;
 
 import java.util.List;
 
@@ -26,14 +24,22 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     Result findTop10SendList(DwmVlmsSptb02 dwmVlmsSptb02);
 
     /**
-     * 查询日计划量
+     * 按条件查询计划量
      * @param baseBrandTime
      * @return
      */
     List<DwmVlmsSptb02> findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
 
+    /**
+     * 按条件查询发运量
+     * @param baseBrandTime
+     * @return
+     */
+    List<DwmVlmsSptb02> findShipment(GetBaseBrandTime baseBrandTime );
 
-    Result findUserInfo(UserInfo userInfo);
+    Double findArrivalRate(GetBaseBrandTime baseBrandTime );
+
+
 
 
 }

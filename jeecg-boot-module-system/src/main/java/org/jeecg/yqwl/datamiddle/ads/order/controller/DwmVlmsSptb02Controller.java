@@ -13,12 +13,10 @@ import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
-import org.jeecg.yqwl.datamiddle.ads.order.service.UserInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -36,21 +34,43 @@ import java.util.*;
 public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwmVlmsSptb02Service> {
     @Autowired
     private IDwmVlmsSptb02Service dwmVlmsSptb02Service;
-    @Resource
-    private UserInfoService userInfoService;
 
     /**
-     * 查询日计划量
+     * 按条件查询计划量
      * @param baseBrandTime
      * @return
      */
-    @PostMapping("/selectDayAmountOfPlan")
+    @PostMapping("/selectAmountOfPlan")
     public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
 
         List<DwmVlmsSptb02> dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
 
         return Result.OK(dayAmountOfPlan) ;
     }
+    /**
+     * 按条件查询发运量
+     * @param baseBrandTime
+     * @return
+     */
+    @PostMapping("/selectShipment")
+    public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
+        List<DwmVlmsSptb02> dayAmountOfPlan = dwmVlmsSptb02Service.findShipment(baseBrandTime);
+        return Result.OK(dayAmountOfPlan) ;
+    }
+
+    /**
+     * 到货率查询
+     * @param baseBrandTime
+     * @return
+     */
+    @PostMapping("/selectArrivalRate")
+    public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
+        Double dayAmountOfPlan = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        return Result.OK(dayAmountOfPlan) ;
+    }
+
+
+
     /**
      * 分页列表查询
      *

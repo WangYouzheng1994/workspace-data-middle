@@ -44,6 +44,25 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
 
 
-     List<DwmVlmsSptb02> getPlanAmount(@Param("params") GetBaseBrandTime params);
 
+    /**
+     * 按条件查询计划量
+     * @param params
+     * @return
+     */
+    List<DwmVlmsSptb02> getPlanAmount(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 按条件查询发运量
+     * @param params
+     * @return
+     */
+    List<DwmVlmsSptb02> getShipment(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 到货准时率
+     * @param params
+     * @return
+     */
+    DwmVlmsSptb02 getArrivalRate(@Param("params") GetBaseBrandTime params);
 }

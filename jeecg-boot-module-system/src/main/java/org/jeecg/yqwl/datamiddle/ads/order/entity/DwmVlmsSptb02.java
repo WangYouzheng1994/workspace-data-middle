@@ -1180,6 +1180,8 @@ public class DwmVlmsSptb02 {
     @ApiModelProperty(value = "dwm新增 运单状态名称 1待出库2已出库3待起运(待离港)4干线在途5已到待卸6末端配送-同城直发(配送中)7异地直发or移库(入库中)8已到库9已到店")
     private java.lang.String trafficStatusName;
 
+    //主机公司名称
+    private String  customerName;
     /**
      * 发车基地名称
      */
@@ -1193,4 +1195,17 @@ public class DwmVlmsSptb02 {
      * 日期
      */
     private String dates;
+    /**
+     * 到货准时率中已到达未迟到的数量
+     */
+    private Integer finalNum;
+    /**
+     * 到货准时率中未到达未迟到的数量
+     */
+    private Integer nowNum;
+    /**
+     * 到货准时率的小数形式
+     */
+    private Double percentage;
+
 }

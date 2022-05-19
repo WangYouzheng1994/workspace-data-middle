@@ -1,41 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
+    <!--按条件查询计划量    -->
     <select id="getPlanAmount"
-    parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-    resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+     parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+     resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
     >
         SELECT
-        COUNT(dvs.ddjrq) as totalNum,
-            <if test="params.timeType == 'day'">
-                toDate(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+        COUNT(dvs.DDJRQ) as totalNum
+            <if test="params.cqwh != '' and params.czjgsdm='' ">
+                , dvs.CUSTOMER_NAME
             </if>
-            <if test="params.timeType == 'week'">
-                toWeek(fromUnixTimestamp64Milli(dvs.ddjrq))+1 as dates
+                , dvs.BASE_NAME ,
+            <if test=" params.timeType == 'day' ">
+                toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
             </if>
-            <if test="params.timeType == 'month'">
-                toMonth(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            <if test=" params.timeType == 'week' ">
+                toWeek(fromUnixTimestamp64Milli(dvs.DDJRQ))+1 as dates
             </if>
-            <if test="params.timeType == 'quarter'">
-                toQuarter(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            <if test=" params.timeType == 'month' ">
+                toMonth(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
             </if>
-            <if test="params.timeType == 'year'">
-                toYear(fromUnixTimestamp64Milli(dvs.ddjrq)) as dates
+            <if test=" params.timeType == 'quarter' ">
+                toQuarter(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
             </if>
-
-        FROM dwm_vlms_sptb02_test dvs
+            <if test=" params.timeType == 'year' ">
+                toYear(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
+            </if>
+        FROM dwm_vlms_sptb02 dvs
         <where>
-            <if test="params.startTime != null and params.startTime !=null and params.endTime !=null and params.endTime !='' " >
-                dvs.ddjrq BETWEEN  #{params.startTime}and #{params.endTime}
-            </if>
-            <if test="params.cqwh != null and params.cqwh != ''">
-                and dvs.cqwh = #{params.cqwh}
-            </if>
-            <if test="params.czjgsdm != null and params.czjgsdm != ''">
-                and dvs.czjgsdm = #{params.czjgsdm}
-            </if>
+            (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
+            (select
+                dvs1.CJSDBH,
+                max(dvs1.WAREHOUSE_CREATETIME)
+            from
+                dwm_vlms_sptb02  dvs1
+            <where>
+                <if test=" params.startTime != null and params.endTime !=null " >
+                    and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                </if>
+                <if test=" params.cqwh != null and params.cqwh != '' ">
+                    and dvs1.CQWH = #{params.cqwh}
+                </if>
+                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
+                    and dvs1.CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+                 group by dvs1.CJSDBH
+            )
         </where>
             group by dates
+                <if test="params.cqwh != '' and params.czjgsdm='' ">
+                    , dvs.CUSTOMER_NAME
+                </if>
+                    , dvs.BASE_NAME
+    </select>
+    <!--按条件查询发运量    -->
+    <select id="getShipment"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+    >
+        SELECT
+        COUNT(dvs.SHIPMENT_TIME) as totalNum
+        <if test="params.cqwh != '' and params.czjgsdm='' ">
+            , dvs.CUSTOMER_NAME
+        </if>
+        , dvs.BASE_NAME ,
+        <if test=" params.timeType == 'day' ">
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        </if>
+        <if test=" params.timeType == 'week' ">
+            toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))+1 as dates
+        </if>
+        <if test=" params.timeType == 'month' ">
+            toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        </if>
+        <if test=" params.timeType == 'quarter' ">
+            toQuarter(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        </if>
+        <if test=" params.timeType == 'year' ">
+            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        </if>
+        FROM dwm_vlms_sptb02 dvs
+        <where>
+            (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
+            (select
+            dvs1.CJSDBH,
+            max(dvs1.WAREHOUSE_CREATETIME)
+            from
+            dwm_vlms_sptb02  dvs1
+            <where>
+                <if test=" params.startTime != null and params.endTime !=null " >
+                    and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                </if>
+                <if test=" params.cqwh != null and params.cqwh != '' ">
+                    and dvs1.CQWH = #{params.cqwh}
+                </if>
+                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
+                    and dvs1.CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            group by dvs1.CJSDBH
+            )
+        </where>
+        group by dates
+        <if test="params.cqwh != '' and params.czjgsdm='' ">
+            , dvs.CUSTOMER_NAME
+        </if>
+        , dvs.BASE_NAME
+    </select>
+    <!--按条件查询到货及时率    -->
+    <select id="getArrivalRate"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+    >
+        select
+        COUNT(aa.CJSDBH) as totalNum,
+        (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME &lt; dvs1.THEORY_SITE_TIME) as finalNum,
+        (select COUNT(1) from dwm_vlms_sptb02 dvs2 WHERE FINAL_SITE_TIME=0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
+        (nowNum+finalNum)/totalNum * 100 as percentage
+        from
+        dwm_vlms_sptb02 aa
+        where
+        (CJSDBH,
+        WAREHOUSE_UPDATETIME) in (
+        select
+        CJSDBH,
+        max(WAREHOUSE_UPDATETIME)
+        from
+        dwm_vlms_sptb02 dvs
+        <where>
+            <if test=" params.startTime != null and params.endTime !=null " >
+                and dvs.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+            </if>
+            <if test=" params.cqwh != null and params.cqwh != '' ">
+                and dvs.CQWH = #{params.cqwh}
+            </if>
+            <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
+                and dvs.CZJGSDM = #{params.czjgsdm}
+            </if>
+        </where>
+        group by dvs.CJSDBH
+        )
+
     </select>
 
     <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where shipment_time between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
