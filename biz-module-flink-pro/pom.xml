@@ -142,7 +142,6 @@
         <dependency>
             <groupId>ru.yandex.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.3.1</version>
         </dependency>
 
         <!-- phoenix -->
