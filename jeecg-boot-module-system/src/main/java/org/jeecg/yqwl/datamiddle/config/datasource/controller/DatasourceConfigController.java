@@ -24,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.jeecg.yqwl.datamiddle.config.datasource.entity.DatasourceConfig;
 import org.jeecg.yqwl.datamiddle.config.datasource.service.IDatasourceConfigService;
+import org.jeecg.yqwl.datamiddle.config.driver.entity.DatasourceDriver;
+import org.jeecg.yqwl.datamiddle.config.driver.service.IDatasourceDriverService;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -53,6 +55,8 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 public class DatasourceConfigController extends JeecgController<DatasourceConfig, IDatasourceConfigService> {
 	@Autowired
 	private IDatasourceConfigService datasourceConfigService;
+	@Autowired
+	private IDatasourceDriverService datasourceDriverService;
 	
 	/**
 	 * 分页列表查询
@@ -174,16 +178,21 @@ public class DatasourceConfigController extends JeecgController<DatasourceConfig
 
 
 	 @PostMapping({"/testConnection"})
-	 public Result testConnection(@RequestBody DatasourceConfig var1) {
+	 public Result testConnection(@RequestBody DatasourceConfig config) {
  		 Connection conn = null;
 
 		 Result result;
+
+		 DatasourceDriver driver = datasourceDriverService.getById(config.getDataDriverId());
+		 if (driver == null) {
+		 	return Result.error("驱动不存在");
+		 }
 		 try {
 			 //注册驱动
-			 Class.forName("com.mysql.jdbc.Driver");
+			 Class.forName(driver.getDataDriverClass());
 			 // Class.forName(var1.getDriver());
 			 // jdbc:mysql://192.168.3.4:3306/data_middle fengqiwulian
-			 conn = DriverManager.getConnection(var1.getDatasourceUrl(), var1.getAccount(), var1.getPassword());
+			 conn = DriverManager.getConnection(config.getDatasourceUrl(), config.getAccount(), config.getPassword());
 			 if (conn != null) {
 				 result = Result.OK("数据库连接成功");
 				 return result;
