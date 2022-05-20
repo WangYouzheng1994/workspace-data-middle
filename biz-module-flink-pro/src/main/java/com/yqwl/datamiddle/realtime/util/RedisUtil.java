@@ -21,7 +21,7 @@ public class RedisUtil {
         if (jedisPool == null) {
             synchronized (RedisUtil.class) {
                 if (jedisPool == null) {
-                    Props props = PropertiesUtil.getProps();
+                    Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
                     JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
                     jedisPoolConfig.setMaxTotal(props.getInt("redis.MaxTotal")); //最大可用连接数
                     jedisPoolConfig.setBlockWhenExhausted(true); //连接耗尽是否等待

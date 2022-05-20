@@ -64,7 +64,7 @@ public class ConsumerKafkaODSApp {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_DEV);
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
@@ -72,7 +72,8 @@ public class ConsumerKafkaODSApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //将kafka中源数据转化成DataStream
-        DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
+        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
+                .uid("jsonDataStr").name("jsonDataStr");
         env.setParallelism(1);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");

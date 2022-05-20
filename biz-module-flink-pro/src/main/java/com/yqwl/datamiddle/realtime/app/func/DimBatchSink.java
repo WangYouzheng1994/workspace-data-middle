@@ -33,7 +33,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 

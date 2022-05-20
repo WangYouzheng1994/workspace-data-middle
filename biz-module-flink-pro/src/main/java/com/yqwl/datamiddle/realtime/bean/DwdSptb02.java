@@ -1143,6 +1143,23 @@ public class DwdSptb02 implements Serializable {
      */
     private String HOST_COM_CODE;
 
+    /**
+     * dwm新增-理论起运时间
+     */
+
+    private Long THEORY_SHIPMENT_TIME;
+
+    /**
+     * dwm新增-理论出库时间
+     */
+
+    private Long THEORY_OUT_TIME;
+
+    /**
+     * dwm新增-理论到货时间
+     */
+
+    private Long THEORY_SITE_TIME;
 
     /**
      * dwd基地省区代码-起货地

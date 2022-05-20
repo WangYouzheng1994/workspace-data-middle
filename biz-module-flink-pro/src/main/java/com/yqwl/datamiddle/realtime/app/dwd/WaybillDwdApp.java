@@ -55,7 +55,7 @@ public class WaybillDwdApp {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_DEV);
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02)//消费sptb02 原数据topic  ods_vlms_sptb02

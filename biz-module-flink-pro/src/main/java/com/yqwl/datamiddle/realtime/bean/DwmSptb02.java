@@ -1257,6 +1257,23 @@ public class DwmSptb02 implements Serializable {
 
     private String DEALER_NAME;
 
+    /**
+     * dwm起运是否正常 1正常0异常
+     */
+    private Integer SHIPMENT_FLAG;
+
+    /**
+     * dwm出库是否正常 1正常0异常
+     */
+    private Integer OUT_FLAG;
+
+    /**
+     * dwm到货是否正常 1正常0异常
+     */
+    private Integer SITE_FLAG;
+
+
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);

@@ -34,7 +34,7 @@ public class MybatisPlusCodeGenerator {
 
     //要生成的表名
     private static String[] tables = {
-            "dwd_vlms_sptb02",
+            "dwm_vlms_sptb02",
 
     };
 

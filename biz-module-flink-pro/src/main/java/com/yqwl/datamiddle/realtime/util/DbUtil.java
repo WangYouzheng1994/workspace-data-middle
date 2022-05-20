@@ -162,7 +162,7 @@ public class DbUtil {
      */
     private static DruidDataSource createDruidDataSource() throws SQLException {
         DruidDataSource druidDataSource = new DruidDataSource();
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         druidDataSource.setUrl(props.getStr("mysql.url"));
         druidDataSource.setUsername(props.getStr("mysql.username"));
         druidDataSource.setPassword(props.getStr("mysql.password"));
