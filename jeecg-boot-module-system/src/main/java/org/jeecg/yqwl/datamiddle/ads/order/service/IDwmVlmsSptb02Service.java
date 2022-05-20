@@ -5,8 +5,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -33,12 +34,19 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
 
     /**
      * 按条件查询发运量
+     *
      * @param baseBrandTime
      * @return
      */
-    List<DwmVlmsSptb02> findShipment(GetBaseBrandTime baseBrandTime );
+    Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime );
 
-    TimelinessRatioVO findArrivalRate(GetBaseBrandTime baseBrandTime );
+    /**
+     * 获取到货及时率
+     *
+     * @param baseBrandTime
+     * @return
+     */
+    Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime );
 
 
 

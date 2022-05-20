@@ -58,14 +58,19 @@
     <!--按条件查询发运量    -->
     <select id="getShipment"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
     >
         SELECT
-        COUNT(dvs.SHIPMENT_TIME) as totalNum
-        <if test="params.cqwh != '' and params.czjgsdm='' ">
-            , dvs.CUSTOMER_NAME
-        </if>
-        , dvs.BASE_NAME ,
+        COUNT(dvs.SHIPMENT_TIME) as totalNum,
+        <choose>
+            <when test="params.cqwh != '' and params.czjgsdm=''">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <otherwise>
+                dvs.BASE_NAME as groupName,
+            </otherwise>
+        </choose>
+
         <if test=" params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
         </if>
@@ -91,7 +96,7 @@
             dwm_vlms_sptb02  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
-                    and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                    and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
                     and dvs1.CQWH = #{params.cqwh}
@@ -103,11 +108,7 @@
             group by dvs1.CJSDBH
             )
         </where>
-        group by dates
-        <if test="params.cqwh != '' and params.czjgsdm='' ">
-            , dvs.CUSTOMER_NAME
-        </if>
-        , dvs.BASE_NAME
+        group by dates ,groupName
     </select>
 
     <!--按条件查询到货及时率    -->
