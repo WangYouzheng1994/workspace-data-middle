@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      */
     List<DwmVlmsSptb02> findShipment(GetBaseBrandTime baseBrandTime );
 
-    Double findArrivalRate(GetBaseBrandTime baseBrandTime );
+    TimelinessRatioVO findArrivalRate(GetBaseBrandTime baseBrandTime );
 
 
 

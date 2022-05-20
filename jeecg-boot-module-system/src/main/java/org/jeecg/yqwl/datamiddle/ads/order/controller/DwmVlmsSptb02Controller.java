@@ -13,6 +13,7 @@ import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -65,8 +66,8 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectArrivalRate")
     public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
-        Double dayAmountOfPlan = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
-        return Result.OK(dayAmountOfPlan) ;
+        TimelinessRatioVO arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        return Result.OK(arrivalRate) ;
     }
 
 
