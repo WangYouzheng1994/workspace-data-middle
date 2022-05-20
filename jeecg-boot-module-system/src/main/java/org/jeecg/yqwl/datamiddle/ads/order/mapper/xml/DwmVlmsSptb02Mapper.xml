@@ -96,7 +96,7 @@
             dwm_vlms_sptb02  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
-                    and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                    and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
                     and dvs1.CQWH = #{params.cqwh}
