@@ -9,6 +9,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -31,6 +32,7 @@ public class MysqlUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
+
             //注册驱动
             Class.forName(MysqlConfig.DRIVER);
             Props props = PropertiesUtil.getProps();

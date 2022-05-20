@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,146 +11,144 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Sptb013 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 批次号
      */
-          
-    private String vph;
 
-      /**
+    private String VPH;
+
+    /**
      * 状态：0、初始；1、提交；2、完成
      */
-          
-    private String czt;
 
-      /**
+    private String CZT;
+
+    /**
      * 发车仓库
      */
-          
-    private String vfcck;
 
-      /**
+    private String VFCCK;
+
+    /**
      * 发车站台
      */
-          
-    private String vfczt;
 
-      /**
+    private String VFCZT;
+
+    /**
      * 收车站台
      */
-          
-    private String vsczt;
 
-      /**
+    private String VSCZT;
+
+    /**
      * 计划数量
      */
-          
-    private Integer njhsl;
 
-      /**
+    private Integer NJHSL;
+
+    /**
      * 实际数量
      */
-          
-    private Integer nsjsl;
 
-      /**
+    private Integer NSJSL;
+
+    /**
      * 运输商
      */
-          
-    private String vyss;
 
-      /**
+    private String VYSS;
+
+    /**
      * 操作员
      */
-          
-    private String vczy;
 
-      /**
+    private String VCZY;
+
+    /**
      * 操作日期
      */
-          
-    private Long dczrq;
 
-      /**
+    private Long DCZRQ;
+
+    /**
      * 提交日期
      */
-          
-    private Long dtjrq;
 
-      /**
+    private Long DTJRQ;
+
+    /**
      * 停用标识
      */
-          
-    private String ctybs;
 
-      /**
+    private String CTYBS;
+
+    /**
      * 停用日期
      */
-          
-    private Long dtyrq;
 
-      /**
+    private Long DTYRQ;
+
+    /**
      * 公司
      */
-          
-    private String vgs;
 
-      /**
+    private String VGS;
+
+    /**
      * 铁路列号
      */
-          
-    private String vtllh;
 
-      /**
+    private String VTLLH;
+
+    /**
      * 标识：1铁路，2水路
      */
-          
-    private String cbs;
 
-      /**
+    private String CBS;
+
+    /**
      * 分驳标识  0否，1是
      */
-          
-    private String cfbbs;
 
-      /**
+    private String CFBBS;
+
+    /**
      * 短驳运输商
      */
-          
-    private String cdbyss;
 
-      /**
-     * LJS代码 
+    private String CDBYSS;
+
+    /**
+     * LJS代码
      */
-          
-    private String cljsdm;
 
-      /**
+    private String CLJSDM;
+
+    /**
      * 船舶号
      */
-          
-    private String ccbh;
 
-      /**
+    private String CCBH;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

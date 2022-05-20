@@ -30,4 +30,8 @@ public class TableProcess {
     String sinkPk;
     //建表扩展
     String sinkExtend;
+    //源表数据对应类全名
+    String className;
+    //所在层次
+    String levelName;
 }

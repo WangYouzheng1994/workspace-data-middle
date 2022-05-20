@@ -56,7 +56,7 @@ public class DbUtil {
             connection = getDruidConnection();
             ps = connection.prepareStatement(sql);
             connection.setAutoCommit(false);//取消自动提交
-            for (int i = 0; i <= dataList.size(); i++) {
+            for (int i = 0; i < dataList.size(); i++) {
                 ps.setObject(i + 1, dataList.get(i));
                 ps.addBatch();
                 if (i % 500 == 0) {
@@ -110,6 +110,30 @@ public class DbUtil {
     }
 
     /**
+     * 执行SQL查询
+     *
+     * @param querySql
+     * @return
+     * @throws Exception
+     */
+    public static ResultSet executeQuerySet(String querySql) throws Exception {
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = getDruidConnection();
+            statement = connection.prepareStatement(querySql);
+            resultSet = statement.executeQuery();
+            log.info(">>>>>>>>>>>> 查询数据:{}", resultList);
+        } finally {
+            // 切记!!! 一定要释放资源
+            //closeResource(connection, statement, resultSet);
+        }
+        return resultSet;
+    }
+
+    /**
      * 获取Druid数据源
      *
      * @return
@@ -145,7 +169,7 @@ public class DbUtil {
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
         druidDataSource.setMaxActive(20);
-        druidDataSource.setInitialSize(1);
+        druidDataSource.setInitialSize(10);
         druidDataSource.setMinIdle(1);
         druidDataSource.setMaxWait(60000);
 
@@ -157,6 +181,10 @@ public class DbUtil {
         druidDataSource.setTestWhileIdle(true);
         druidDataSource.setTestOnBorrow(false);
         druidDataSource.setTestOnReturn(false);
+        //无连接可用超时
+        //此配置项会影响性能，只在排查的时候打开，系统运行时最好关闭
+        druidDataSource.setRemoveAbandoned(true);
+        druidDataSource.setRemoveAbandonedTimeout(180);
 
         druidDataSource.setPoolPreparedStatements(true);
         druidDataSource.setMaxPoolPreparedStatementPerConnectionSize(20);

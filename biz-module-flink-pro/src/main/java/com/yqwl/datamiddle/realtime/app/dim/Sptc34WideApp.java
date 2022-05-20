@@ -65,7 +65,7 @@ public class Sptc34WideApp {
         System.setProperty("HADOOP_USER_NAME", "root");
 
 
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_DEV);
 
         //从kafka消费数据
         KafkaSource<String> kafkasource = KafkaSource.<String>builder()

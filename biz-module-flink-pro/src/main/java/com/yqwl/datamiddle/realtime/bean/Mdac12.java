@@ -1,165 +1,164 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Mdac12 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 产品代码
      */
-          
-    private String ccpdm;
 
-      /**
+    private String CCPDM;
+
+    /**
      * 产品名称
      */
-          
-    private String vcpmc;
 
-        
-    private String vcpjc;
+    private String VCPMC;
 
-        
-    private Integer naqkc;
 
-        
-    private Integer npl;
+    private String VCPJC;
 
-        
-    private Integer nplzl;
 
-        
-    private String ctybs;
+    private Integer NAQKC;
 
-        
-    private Long dtyrq;
 
-        
-    private String cpp;
+    private Integer NPL;
 
-        
-    private String ccxdl;
 
-      /**
+    private Integer NPLZL;
+
+
+    private String CTYBS;
+
+
+    private Long DTYRQ;
+
+
+    private String CPP;
+
+
+    private String CCXDL;
+
+    /**
      * 20190404 30-40 红旗车型33  40-100 20210528
      */
-          
-    private String ccxdm;
 
-        
-    private String cjhty;
+    private String CCXDM;
 
-        
-    private Long djhtyrq;
 
-        
-    private String cddty;
+    private String CJHTY;
 
-        
-    private Long dddtyrq;
 
-        
-    private String clsty;
+    private Long DJHTYRQ;
 
-        
-    private Long dlstyrq;
 
-        
-    private BigDecimal nccfdj;
+    private String CDDTY;
 
-        
-    private String cphbs;
 
-        
-    private String cjhdbbs;
+    private Long DDDTYRQ;
 
-        
-    private String vbz;
 
-        
-    private String cjkbs;
+    private String CLSTY;
 
-        
-    private Integer id;
 
-      /**
+    private Long DLSTYRQ;
+
+
+    private BigDecimal NCCFDJ;
+
+
+    private String CPHBS;
+
+
+    private String CJHDBBS;
+
+
+    private String VBZ;
+
+
+    private String CJKBS;
+
+
+    private Integer ID;
+
+    /**
      * 描述
      */
-          
-    private String vms;
 
-        
-    private Integer nfwfdj;
+    private String VMS;
 
-      /**
+
+    private Integer NFWFDJ;
+
+    /**
      * 库龄设置，单位为天
      */
-          
-    private Integer nklsz;
 
-        
-    private String cxsty;
+    private Integer NKLSZ;
 
-      /**
+
+    private String CXSTY;
+
+    /**
      * 多公司模式下的公司-SPTC60
      */
-          
-    private String cgs;
 
-      /**
+    private String CGS;
+
+    /**
      * 审批标识：0  未审批  1：已审批
      */
-          
-    private String approvalFlag;
 
-      /**
+    private String APPROVAL_FLAG;
+
+    /**
      * 审批人
      */
-          
-    private String approvalUser;
 
-      /**
+    private String APPROVAL_USER;
+
+    /**
      * 审批日期
      */
-          
-    private Long approvalDate;
 
-        
-    private String finalApprovalFlag;
+    private Long APPROVAL_DATE;
 
-        
-    private String finalApprovalUser;
 
-        
-    private Long finalApprovalDate;
+    private String FINAL_APPROVAL_FLAG;
 
-      /**
+
+    private String FINAL_APPROVAL_USER;
+
+
+    private Long FINAL_APPROVAL_DATE;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

@@ -1,7 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -11,67 +11,77 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Sysc09d implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long idnum;
 
     /**
      * 对应sysc09c.CZDDM 对应
      */
-    private String czddm;
+
+    private String CZDDM;
 
     /**
      * 要展开数据项的编码
      */
-    private String csjxm;
+
+    private String CSJXM;
 
     /**
      * 数据项名称 由500改为4000
      */
-    private String vsjxc;
+
+    private String VSJXC;
 
     /**
      * 级别
      */
-    private String cjb;
+
+    private String CJB;
 
     /**
      * 停用标识
      */
-    private String ctybs;
+
+    private String CTYBS;
 
     /**
      * 停用日期
      */
-    private Long dtyrq;
+
+    private Long DTYRQ;
 
     /**
      * 备注
      */
-    private String vbz;
 
-    private String vbz2;
+    private String VBZ;
+
+
+    private String VBZ2;
 
     /**
      * 用于特殊运输商
      */
-    private String vbz3;
+
+    private String VBZ3;
 
     /**
      * 创建时间
      */
-    private Long warehouseCreatetime;
+
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

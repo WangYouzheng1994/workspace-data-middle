@@ -1,6 +1,8 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -10,110 +12,110 @@ import java.math.BigDecimal;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Spti32 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
 
-      private Long idnum;
-
-      /**
+    /**
      * 起始省区代码
      */
-    private String cqssqdm;
 
-      /**
+    private String CQSSQDM;
+
+    /**
      * 起始市县代码
      */
-    private String cqscsdm;
 
-      /**
+    private String CQSCSDM;
+
+    /**
      * 目标省区代码
      */
-      
-    private String cmbsqdm;
 
-      /**
+    private String CMBSQDM;
+
+    /**
      * 目标市县代码
      */
-      
-    private String cmbcsdm;
 
-      /**
+    private String CMBCSDM;
+
+    /**
      * 里程
      */
-      
-    private BigDecimal nlc;
 
-      /**
+    private BigDecimal NLC;
+
+    /**
      * 主机公司。字典：WTDW
      */
-      
-    private String czjgs;
 
-      /**
+    private String CZJGS;
+
+    /**
      * 运输方式  G-公路 T-铁路 D-短驳
      */
-      
-    private String vysfs;
 
-      /**
+    private String VYSFS;
+
+    /**
      * 在途时间(出库-到货)
      */
-      
-    private Long nztsj;
 
-      /**
+    private Long NZTSJ;
+
+    /**
      * 物流时间
      */
-      
-    private Long nts;
 
-      /**
+    private Long NTS;
+
+    /**
      * 备注
      */
-      
-    private String cbz;
 
-      /**
+    private String CBZ;
+
+    /**
      * 操作日期
      */
-      
-    private Long dczrq;
 
-      /**
+    private Long DCZRQ;
+
+    /**
      * 操作员
      */
-      
-    private String cczydm;
 
-      /**
+    private String CCZYDM;
+
+    /**
      * 标准GPS到货时间
      */
-      
-    private Long ndhsjGps;
 
-      /**
+    private Long NDHSJ_GPS;
+
+    /**
      * 标准系统到货时间
      */
-      
-    private Long ndhsjXt;
 
-      /**
+    private Long NDHSJ_XT;
+
+    /**
      * 创建时间
      */
-      
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-      
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

@@ -74,6 +74,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                             long start = System.currentTimeMillis();
                             //从流中事实数据获取key值
                             Object key = getKey(obj);
+                            log.info("获取的查询条件values值:{}", key);
                             //根据维度的主键到维度表中进行查询
                             JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key, andSql);
                             //System.out.println("维度数据Json格式：" + dimInfoJsonObj);
@@ -84,8 +85,8 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                             }
                             //System.out.println("维度关联后的对象:" + obj);
                             long end = System.currentTimeMillis();
-                            System.out.println("异步查询维表:" + tableName + "耗时:" + (end - start) + "毫秒");
-                            log.info("异步查询维表:{}耗时为:{}毫秒", tableName, (end - start));
+                            System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
+                            log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
                             //将关联后的数据继续向下传递
                             resultFuture.complete(Arrays.asList(obj));
                         } catch (Exception e) {

@@ -4,17 +4,15 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import com.yqwl.datamiddle.realtime.app.func.DimMysqlSink;
+import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
 import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunction;
-import com.yqwl.datamiddle.realtime.bean.Orders;
-import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;
@@ -38,9 +36,10 @@ import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nullable;
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 消费kafka下同一个topic，将表进行分流
@@ -65,7 +64,7 @@ public class ConsumerKafkaODSApp {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_DEV);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
@@ -74,7 +73,7 @@ public class ConsumerKafkaODSApp {
                 .build();
         //将kafka中源数据转化成DataStream
         DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
-        env.setParallelism(2);
+        env.setParallelism(1);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
@@ -92,7 +91,7 @@ public class ConsumerKafkaODSApp {
                 return jsonObj;
             }
         });
-        jsonStream.print("json转化map输出:");
+        //jsonStream.print("json转化map输出:");
         //动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
         //定义输出到mysql的侧输出流标签
         OutputTag<JSONObject> mysqlTag = new OutputTag<JSONObject>(TableProcess.SINK_TYPE_MYSQL) {
@@ -101,12 +100,6 @@ public class ConsumerKafkaODSApp {
         //事实流写回到Kafka的数据
         SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunction(mysqlTag)).uid("kafka-divide-data").name("kafka-divide-data");
         log.info("事实主流数据处理完成");
-        //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
-        DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
-
-        //将维度数据保存到mysql对应的维度表中
-        insertMysqlDS.addSink(new DimMysqlSink()).setParallelism(1).uid("dim-sink-mysql").name("dim-sink-mysql");
-        log.info("维表sink到mysql数据库中");
 
         //获取一个kafka生产者将事实数据写回到kafka的dwd层
         FlinkKafkaProducer<JSONObject> kafkaSink = KafkaUtil.getKafkaProductBySchema(
@@ -135,6 +128,44 @@ public class ConsumerKafkaODSApp {
         );
 
         kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
+
+        //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
+        DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
+
+        //定义水位线
+        SingleOutputStreamOperator<JSONObject> jsonStreamOperator = insertMysqlDS.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        //定义开窗
+        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<JSONObject> elements, Collector<Map<String, List<JSONObject>>> collector) throws Exception {
+                List<JSONObject> listTotal = Lists.newArrayList(elements);
+                if (CollectionUtils.isNotEmpty(listTotal)) {
+                    Map<String, List<JSONObject>> map = new HashMap<>();
+                    for (JSONObject element : elements) {
+                        //获取目标表
+                        String sinkTable = element.getString("sink_table");
+                        if (map.containsKey(sinkTable)) {
+                            List<JSONObject> list = map.get(sinkTable);
+                            //取出真实数据
+                            list.add(JsonPartUtil.getAfterObj(element));
+                        } else {
+                            List<JSONObject> list = new ArrayList<>();
+                            //取出真实数据
+                            list.add(JsonPartUtil.getAfterObj(element));
+                            map.put(sinkTable, list);
+                        }
+                    }
+                    System.err.println("map里数据数量:" + map.size());
+                    log.info("map里数据数量:" + map.size());
+                    collector.collect(map);
+                }
+            }
+        });
+
+        //mysqlProcess.print("数据打印:");
+        //将维度数据保存到mysql对应的维度表中
+        mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
+        log.info("维表sink到mysql数据库中");
 
         log.info("事实表sink到流处理环境");
         env.execute("consumer-kafka-ods");

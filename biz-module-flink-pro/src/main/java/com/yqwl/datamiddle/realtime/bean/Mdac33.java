@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,734 +11,732 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Mdac33 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 运输车代码
      */
-          
-    private String vyscdm;
 
-      /**
+    private String VYSCDM;
+
+    /**
      * 牌照号
      */
-          
-    private String vpzh;
 
-      /**
+    private String VPZH;
+
+    /**
      * 电话
      */
-          
-    private String vdh;
 
-      /**
+    private String VDH;
+
+    /**
      * 联系人
      */
-          
-    private String clxr;
 
-      /**
+    private String CLXR;
+
+    /**
      * 联系电话
      */
-          
-    private String vlxdh;
 
-      /**
+    private String VLXDH;
+
+    /**
      * 移动电话
      */
-          
-    private String vyddh;
 
-      /**
+    private String VYDDH;
+
+    /**
      * 运输车型代码
      */
-          
-    private String vyscx;
 
-      /**
+    private String VYSCX;
+
+    /**
      * 0、未停用，1、停用
      */
-          
-    private String ctybs;
 
-      /**
+    private String CTYBS;
+
+    /**
      * 停用日期
      */
-          
-    private Long dtyrq;
 
-      /**
+    private Long DTYRQ;
+
+    /**
      * 备注
      */
-          
-    private String vbz;
 
-      /**
+    private String VBZ;
+
+    /**
      * 0/可用，1/已分配，2/在途，3/返程，G/锁定
      */
-          
-    private String czt;
 
-      /**
+    private String CZT;
+
+    /**
      * 副司机代码（T）
      */
-          
-    private String vfsjdm;
 
-      /**
+    private String VFSJDM;
+
+    /**
      * 主司机代码(T)
      */
-          
-    private String vzsjdm;
 
-      /**
+    private String VZSJDM;
+
+    /**
      * 承运定额(J)
      */
-          
-    private Integer ncyde;
 
-      /**
+    private Integer NCYDE;
+
+    /**
      * 认证标识。0/未认证，1/认证(J)
      */
-          
-    private String crzbs;
 
-      /**
+    private String CRZBS;
+
+    /**
      * 承运商代码(J)
      */
-          
-    private String ccysdm;
 
-      /**
+    private String CCYSDM;
+
+    /**
      * 承运队代码(J)
      */
-          
-    private String ccyddm;
 
-      /**
+    private String CCYDDM;
+
+    /**
      * 挂车牌照号
      */
-          
-    private String vgcpzh;
 
-      /**
+    private String VGCPZH;
+
+    /**
      * 运输车规格型号
      */
-          
-    private String vggxh;
 
-        
-    private String vclqk;
+    private String VGGXH;
 
-      /**
+
+    private String VCLQK;
+
+    /**
      * 0/正常,1/临时
      */
-          
-    private String cclsx;
 
-      /**
+    private String CCLSX;
+
+    /**
      * 专线说明
      */
-          
-    private String czxdm;
 
-      /**
+    private String CZXDM;
+
+    /**
      * GPS锁定时间
      */
-          
-    private Long dgpssdsj;
 
-      /**
+    private Long DGPSSDSJ;
+
+    /**
      * GPS解锁时间
      */
-          
-    private Long dgpsjssj;
 
-      /**
+    private Long DGPSJSSJ;
+
+    /**
      * 管理费标识 1收管理费 0不收管理费
      */
-          
-    private String cglfbs;
 
-      /**
+    private String CGLFBS;
+
+    /**
      * 运费标识 0不收运费  1正常收运费 2挂靠运费 3对流运费(返单登记306和业务接口tr_sptb02_yfcl用到)
      */
-          
-    private String cyfbs;
 
-      /**
+    private String CYFBS;
+
+    /**
      * 新车标识。0旧车，1新车
      */
-          
-    private String ccygb;
 
-      /**
+    private String CCYGB;
+
+    /**
      * 车头登记日期   日期型有日期控件
      */
-          
-    private Long dctdjrq;
 
-      /**
+    private Long DCTDJRQ;
+
+    /**
      * 制造厂家    下拉框，下拉内容为 一汽和其他厂
      */
-          
-    private String czzcj;
 
-      /**
+    private String CZZCJ;
+
+    /**
      * 发动机马力  下拉框，下拉内容为 180及以下、180~220、220~260、260~320、320及以上
      */
-          
-    private String cfdjml;
 
-      /**
+    private String CFDJML;
+
+    /**
      * 发动机维修   下拉框，下拉内容为 无和更换
      */
-          
-    private String cfdjwx;
 
-      /**
+    private String CFDJWX;
+
+    /**
      * 挂车登记日期   日期型有日期控件
      */
-          
-    private Long dgcdjrq;
 
-      /**
+    private Long DGCDJRQ;
+
+    /**
      * 桥（含牵引头） 下拉框，下拉内容为 三桥、四桥、五桥、六桥
      */
-          
-    private String cq;
 
-      /**
+    private String CQ;
+
+    /**
      * 车辆属性      下拉框，下拉内容为 公司、个人
      */
-          
-    private String cclsx1;
 
-      /**
+    private String CCLSX1;
+
+    /**
      * 车辆状态      下拉框，下拉内容为 内网车、外网车、加盟商
      */
-          
-    private String cclzt;
 
-      /**
+    private String CCLZT;
+
+    /**
      * 调度员        字符型，50字符长度
      */
-          
-    private String cddyxm;
 
-      /**
+    private String CDDYXM;
+
+    /**
      * 核算员        字符型，50字符长度
      */
-          
-    private String chsyxm;
 
-      /**
+    private String CHSYXM;
+
+    /**
      * 属性   下拉框，下拉内容为站队、一汽物流
      */
-          
-    private String csx;
 
-      /**
+    private String CSX;
+
+    /**
      * 运营模式 下拉框，下拉内容为半运费、对流1、对流2、对流3、挂靠(卓成)、挂靠1、挂靠2、挂靠3、挂靠4、挂靠5、管理费1、管理费2、管理费3、管理费4、里程工资制、买断、内大包、内大包1、外大包
      */
-          
-    private String cyyms;
 
-      /**
-     *  支付标准
+    private String CYYMS;
+
+    /**
+     * 支付标准
      */
-          
-    private String czfbs;
 
-      /**
+    private String CZFBS;
+
+    /**
      * 捆绑费 下拉框  下拉内容 是、否
      */
-          
-    private String ckbf;
 
-      /**
+    private String CKBF;
+
+    /**
      * 车厢牌照号
      */
-          
-    private String ccxpzh;
 
-      /**
+    private String CCXPZH;
+
+    /**
      * 车型        下拉菜单 下拉内容为 正常、A2、宽体、宽体+A2
      */
-          
-    private String ccx;
 
-      /**
+    private String CCX;
+
+    /**
      * 发动机号    字符型  50字符长度
      */
-          
-    private String cfdjh;
 
-      /**
+    private String CFDJH;
+
+    /**
      * 车辆厂牌型号 字符型 50字符长度
      */
-          
-    private String cclcpxh;
 
-      /**
+    private String CCLCPXH;
+
+    /**
      * 车厢品牌     下拉菜单 下拉内容为  解放牌、通华牌、金鸽牌、万荣牌、环达牌、汇达牌、神行牌、冀骏牌、东堡牌、劳尔牌、其他
      */
-          
-    private String ccxpp;
 
-      /**
+    private String CCXPP;
+
+    /**
      * 连接全长（实际尺寸）字符型  50字符长度
      */
-          
-    private String cljqc;
 
-      /**
+    private String CLJQC;
+
+    /**
      * 挂车全长（行车证尺寸）
      */
-          
-    private String cgcqc1;
 
-      /**
-     *  挂车全长（实际尺寸）
+    private String CGCQC1;
+
+    /**
+     * 挂车全长（实际尺寸）
      */
-          
-    private String cgcqc2;
 
-      /**
-     *  车厢宽度（行车证尺寸）
+    private String CGCQC2;
+
+    /**
+     * 车厢宽度（行车证尺寸）
      */
-          
-    private String ccxkd1;
 
-      /**
-     *  车厢宽度（实际尺寸）
+    private String CCXKD1;
+
+    /**
+     * 车厢宽度（实际尺寸）
      */
-          
-    private String ccxkd2;
 
-      /**
+    private String CCXKD2;
+
+    /**
      * 车厢高度（行车证尺寸）
      */
-          
-    private String ccxgd1;
 
-      /**
+    private String CCXGD1;
+
+    /**
      * 车厢高度（实际尺寸）
      */
-          
-    private String ccxgd2;
 
-      /**
+    private String CCXGD2;
+
+    /**
      * 上梯实际尺寸
      */
-          
-    private String cstsjcc;
 
-      /**
+    private String CSTSJCC;
+
+    /**
      * 下梯实际尺寸
      */
-          
-    private String cxtsjcc;
 
-      /**
+    private String CXTSJCC;
+
+    /**
      * 检车日期
      */
-          
-    private Long djcrq;
 
-      /**
+    private Long DJCRQ;
+
+    /**
      * 入网日期
      */
-          
-    private Long drwrq;
 
-      /**
+    private Long DRWRQ;
+
+    /**
      * 0、在网，1、清网
      */
-          
-    private String cqwbs;
 
-      /**
+    private String CQWBS;
+
+    /**
      * 清网日期
      */
-          
-    private Long dqwrq;
 
-      /**
+    private Long DQWRQ;
+
+    /**
      * 运力状态
      */
-          
-    private String cylzt;
 
-      /**
+    private String CYLZT;
+
+    /**
      * 区域费率
      */
-          
-    private Integer nflQy;
 
-      /**
+    private Integer NFL_QY;
+
+    /**
      * 历史运输商简称
      */
-          
-    private String cyssjcLs;
 
-      /**
+    private String CYSSJC_LS;
+
+    /**
      * VW卡号
      */
-          
-    private String cvw;
 
-      /**
+    private String CVW;
+
+    /**
      * A2卡号
      */
-          
-    private String ca2;
 
-      /**
+    private String CA2;
+
+    /**
      * 得分
      */
-          
-    private Integer ndf;
 
-      /**
+    private Integer NDF;
+
+    /**
      * GPS状态
      */
-          
-    private String cgpszt;
 
-      /**
+    private String CGPSZT;
+
+    /**
      * 不合格原因
      */
-          
-    private String cbhgyy;
 
-        
-    private String cclsx2;
+    private String CBHGYY;
 
-      /**
+
+    private String CCLSX2;
+
+    /**
      * 检车结果
      */
-          
-    private String cjcjg;
 
-      /**
+    private String CJCJG;
+
+    /**
      * 是否大循环
      */
-          
-    private String csfdxh;
 
-      /**
+    private String CSFDXH;
+
+    /**
      * 费率
      */
-          
-    private Integer nfl;
 
-      /**
+    private Integer NFL;
+
+    /**
      * 车辆归属：SYSC09D.CZDDM='CLDA-CLGS'
      */
-          
-    private String cclgs;
 
-      /**
+    private String CCLGS;
+
+    /**
      * 1表示非系统车辆
      */
-          
-    private String cfxtcl;
 
-      /**
+    private String CFXTCL;
+
+    /**
      * 停用原因
      */
-          
-    private String ctyyy;
 
-      /**
+    private String CTYYY;
+
+    /**
      * 路线代码。来源于MDAC37C.LXDM
      */
-          
-    private String clxdm;
 
-      /**
+    private String CLXDM;
+
+    /**
      * 检车标识。0未通过，1通过
      */
-          
-    private String ckfp;
 
-      /**
+    private String CKFP;
+
+    /**
      * 序号
      */
-          
-    private String cxh;
 
-      /**
+    private String CXH;
+
+    /**
      * 牵引车识别代码
      */
-          
-    private String cqycsbdm;
 
-      /**
+    private String CQYCSBDM;
+
+    /**
      * 挂车识别代码
      */
-          
-    private String cgcsbdm;
 
-      /**
+    private String CGCSBDM;
+
+    /**
      * 连接全长（行车证尺寸）字符型  50字符长度
      */
-          
-    private String cljqc1;
 
-      /**
+    private String CLJQC1;
+
+    /**
      * 结算单位代码
      */
-          
-    private String cljsdm;
 
-      /**
+    private String CLJSDM;
+
+    /**
      * 旧代码
      */
-          
-    private String cdmO;
 
-      /**
+    private String CDM_O;
+
+    /**
      * 物流标准编码。选择，来源于M平台
      */
-          
-    private String cwlbm;
 
-      /**
+    private String CWLBM;
+
+    /**
      * 物流标准名称。来源于M平台
      */
-          
-    private String cwlmc;
 
-      /**
+    private String CWLMC;
+
+    /**
      * 同步日期
      */
-          
-    private Long dtbrq;
 
-      /**
+    private Long DTBRQ;
+
+    /**
      * 版本号
      */
-          
-    private Integer batchno;
 
-      /**
+    private Integer BATCHNO;
+
+    /**
      * 当后轴保养系统中的车，没有按时进行保养则在V-LMS中进行锁车
      */
-          
-    private String cbysc;
 
-      /**
+    private String CBYSC;
+
+    /**
      * 路线 （长春运力明细字段 统计）
      */
-          
-    private String vlx;
 
-      /**
+    private String VLX;
+
+    /**
      * 组合 （长春运力明细字段 统计）
      */
-          
-    private String vzh;
 
-      /**
+    private String VZH;
+
+    /**
      * 路线代码。来源于MDAC37C1.CLXDM
      */
-          
-    private String clxdm1;
 
-      /**
-     * 是否上TVS标识：默认0 未上；1已上 
+    private String CLXDM1;
+
+    /**
+     * 是否上TVS标识：默认0 未上；1已上
      */
-          
-    private String ctvsbs;
 
-      /**
+    private String CTVSBS;
+
+    /**
      * 合规不合规标识 (默认不合规0；合规1)
      */
-          
-    private String csfhg;
 
-      /**
+    private String CSFHG;
+
+    /**
      * 安装稽查队
      */
-          
-    private String vazjcd;
 
-      /**
+    private String VAZJCD;
+
+    /**
      * 区域监控人员
      */
-          
-    private String vqyjkry;
 
-      /**
+    private String VQYJKRY;
+
+    /**
      * 安装登记负责人
      */
-          
-    private String vazdjfzr;
 
-      /**
+    private String VAZDJFZR;
+
+    /**
      * 时间戳。BI提数据
      */
-          
-    private Long dstamp;
 
-      /**
+    private Long DSTAMP;
+
+    /**
      * 绑定TVS日期
      */
-          
-    private Long dtvsbsbdrq;
 
-      /**
-     * 20181215 add by dtf 是否分拨 标识 
+    private Long DTVSBSBDRQ;
+
+    /**
+     * 20181215 add by dtf 是否分拨 标识
      */
-          
-    private String csffb;
 
-      /**
+    private String CSFFB;
+
+    /**
      * 空闲定额
      */
-          
-    private Integer ncydeD;
 
-      /**
+    private Integer NCYDE_D;
+
+    /**
      * 牵引车审批标识：0  未审批  1：已审批
      */
-          
-    private String approvalFlag;
 
-      /**
+    private String APPROVAL_FLAG;
+
+    /**
      * 牵引车审批人
      */
-          
-    private String approvalUser;
 
-      /**
+    private String APPROVAL_USER;
+
+    /**
      * 牵引车审批日期
      */
-          
-    private Long approvalDate;
 
-      /**
+    private Long APPROVAL_DATE;
+
+    /**
      * 牵引车终审审批标识：0  未审批  1：已审批
      */
-          
-    private String finalApprovalFlag;
 
-      /**
+    private String FINAL_APPROVAL_FLAG;
+
+    /**
      * 牵引车终审审批人
      */
-          
-    private String finalApprovalUser;
 
-      /**
+    private String FINAL_APPROVAL_USER;
+
+    /**
      * 牵引车终审审批日期
      */
-          
-    private Long finalApprovalDate;
 
-      /**
+    private Long FINAL_APPROVAL_DATE;
+
+    /**
      * 初审是否合格
      */
-          
-    private String ccsyj;
 
-      /**
+    private String CCSYJ;
+
+    /**
      * 初审时间
      */
-          
-    private Long dcssj;
 
-      /**
+    private Long DCSSJ;
+
+    /**
      * 初审人代码
      */
-          
-    private String ccsrdm;
 
-      /**
+    private String CCSRDM;
+
+    /**
      * 头车车籍
      */
-          
-    private String ctccj;
 
-      /**
+    private String CTCCJ;
+
+    /**
      * 挂车车籍
      */
-          
-    private String cgccj;
 
-      /**
+    private String CGCCJ;
+
+    /**
      * 牵引车小组名称
      */
-          
-    private String cxzmc;
 
-      /**
+    private String CXZMC;
+
+    /**
      * 牵引车组长名称
      */
-          
-    private String czzmc;
 
-      /**
+    private String CZZMC;
+
+    /**
      * 挂车审批标识：0  未审批  1：已审批
      */
-          
-    private String trailerApprovalFlag;
 
-      /**
+    private String TRAILER_APPROVAL_FLAG;
+
+    /**
      * 挂车审批人
      */
-          
-    private String trailerApprovalUser;
 
-      /**
+    private String TRAILER_APPROVAL_USER;
+
+    /**
      * 挂车审批日期
      */
-          
-    private Long trailerApprovalDate;
 
-      /**
+    private Long TRAILER_APPROVAL_DATE;
+
+    /**
      * 挂车终审审批标识：0  未审批  1：已审批
      */
-          
-    private String trailerFinalApprovalFlag;
 
-      /**
+    private String TRAILER_FINAL_APPROVAL_FLAG;
+
+    /**
      * 挂车终审审批人
      */
-          
-    private String trailerFinalApprovalUser;
 
-      /**
+    private String TRAILER_FINAL_APPROVAL_USER;
+
+    /**
      * 挂车终审审批日期
      */
-          
-    private Long trailerFinalApprovalDate;
 
-      /**
+    private Long TRAILER_FINAL_APPROVAL_DATE;
+
+    /**
      * 挂车小组名称
      */
-          
-    private String trailerCxzmc;
 
-      /**
+    private String TRAILER_CXZMC;
+
+    /**
      * 挂车组长名称
      */
-          
-    private String trailerCzzmc;
 
-        
-    private Long warehouseCreatetime;
+    private String TRAILER_CZZMC;
 
-        
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_CREATETIME;
+
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

@@ -79,22 +79,6 @@ public class DwdMysqlSink extends RichSinkFunction<String> {
 
     // 根据data属性和值生成 insert sql语句
     private String genInsertSql(String tableName, JSONObject dataJsonObj) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         //"insert into 表名(列名.....) values (值....)"
         Set<String> columns = dataJsonObj.keySet();
         log.info("获取当前数据所有key:{}", columns);

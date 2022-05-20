@@ -39,7 +39,7 @@ public class OracleCDCKafkaApp {
         properties.put("database.serverTimezone", "Asia/Shanghai");
 
         //读取oracle连接配置属性
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_PROD);
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
                 .port(props.getInt("cdc.oracle.port"))
@@ -71,6 +71,8 @@ public class OracleCDCKafkaApp {
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
+
+        //输出到kafka
         source.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
 
         source.print("结果数据输出:");

@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -11,111 +12,114 @@ import java.sql.Timestamp;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Mdac01 implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    private Long idnum;
-
     /**
      * 大区代码
      */
 
-    private String cdqdm;
+    private String CDQDM;
 
     /**
      * 大区名称
      */
 
-    private String vdqmc;
+    private String VDQMC;
 
     /**
      * 大区联系人
      */
 
-    private String clxrdm;
+    private String CLXRDM;
 
     /**
      * 大区联系电话
      */
 
-    private String vdh;
+    private String VDH;
 
     /**
      * 大区负责人
      */
 
-    private String cfzrdm;
+    private String CFZRDM;
 
     /**
      * 省区代码
      */
 
-    private String csqdm;
+    private String CSQDM;
 
     /**
      * 市县代码
      */
 
-    private String csxdm;
+    private String CSXDM;
 
     /**
      * 地址
      */
 
-    private String vdz;
+    private String VDZ;
 
     /**
      * 传真
      */
 
-    private String vcz;
+    private String VCZ;
 
     /**
      * e_mail
      */
 
-    private String veMail;
+    private String VE_MAIL;
 
     /**
      * 邮编
      */
 
-    private String cyb;
+    private String CYB;
 
     /**
      * 没有可录入项，但需要特别说明的信息
      */
 
-    private String vbz;
+    private String VBZ;
 
     /**
      * 0、在用，1、停用
      */
 
-    private String ctybs;
+    private String CTYBS;
 
     /**
      * 停用日期
      */
 
-    private Long dtyrq;
+    private Long DTYRQ;
 
     /**
      * 创建时间
      */
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
 
-    private Long warehouseUpdatetime;
+    private Long WAREHOUSE_UPDATETIME;
 
-    //新加kafka的ts时间戳
+    /**
+     * 更新时间
+     */
+
     private Timestamp ts;
+
+
 }

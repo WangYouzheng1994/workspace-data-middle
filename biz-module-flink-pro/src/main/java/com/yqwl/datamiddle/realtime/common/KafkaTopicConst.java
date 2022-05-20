@@ -1,10 +1,9 @@
 package com.yqwl.datamiddle.realtime.common;
 
+/**
+ * kafka topic 常量定义
+ */
 public class KafkaTopicConst {
-
-    public static final String MYSQL_TOPIC_NAME = "MYSQL_TOPIC_13";
-    public static final String ORDERS_PREFIX = "orders_";
-    public static final String ORDER_DETAIL_PREFIX = "orders_detail_";
 
 
     //groupid
@@ -34,6 +33,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_MDAC10 = "ods_vlms_mdac10";
     public static final String ODS_VLMS_MDAC11 = "ods_vlms_mdac11";
     public static final String ODS_VLMS_MDAC14 = "ods_vlms_mdac14";
+    public static final String ODS_VLMS_MDAC22 = "ods_vlms_mdac22";
     public static final String ODS_VLMS_SPTB02_RAILSEA_RK = "ods_vlms_sptb02_railsea_rk";
     public static final String ODS_VLMS_SPTB_XL01 = "ods_vlms_sptb_xl01";
     public static final String ODS_VLMS_SPTI15 = "ods_vlms_spti15";
@@ -65,7 +65,7 @@ public class KafkaTopicConst {
 
     //dim topic
     //
-    public static final String DIM_VLMS_SYS_SYSC07SYSC08 = "dim_vlms_sys_sysc07sysc08";
+    public static final String DIM_VLMS_PROVINCES = "dim_vlms_provinces";
 
 
     //dwd topic
@@ -74,7 +74,7 @@ public class KafkaTopicConst {
 
 
     //dwm topic
-    public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
+    public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02_03";
 
 
 

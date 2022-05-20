@@ -1,194 +1,192 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Mdac32 implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
-      private Long idnum;
-
-      /**
+    /**
      * 到货地代码 6
      */
-          
-    private String cdhddm;
 
-      /**
+    private String CDHDDM;
+
+    /**
      * 经销商代码 10
      */
-          
-    private String cjxsdm;
 
-      /**
-     * 省区代码    4 
+    private String CJXSDM;
+
+    /**
+     * 省区代码    4
      */
-          
-    private String csqdm;
 
-      /**
+    private String CSQDM;
+
+    /**
      * 市县代码    4
      */
-          
-    private String csxdm;
 
-      /**
+    private String CSXDM;
+
+    /**
      * 联系人
      */
-          
-    private String clxr;
 
-      /**
+    private String CLXR;
+
+    /**
      * 电话
      */
-          
-    private String vdh;
 
-      /**
+    private String VDH;
+
+    /**
      * 移动电话
      */
-          
-    private String vyddh;
 
-      /**
+    private String VYDDH;
+
+    /**
      * e_mail
      */
-          
-    private String veMail;
 
-      /**
+    private String VE_MAIL;
+
+    /**
      * 0、在用，1、停用
      */
-          
-    private String ctybs;
 
-      /**
+    private String CTYBS;
+
+    /**
      * 停用日期
      */
-          
-    private Long dtyrq;
 
-      /**
+    private Long DTYRQ;
+
+    /**
      * 地址 100   modify by dtf 20181113 100-200与TDS一致！
      */
-          
-    private String vdz;
 
-      /**
+    private String VDZ;
+
+    /**
      * 收车人
      */
-          
-    private String vscr;
 
-      /**
+    private String VSCR;
+
+    /**
      * 有效证件
      */
-          
-    private String vyxzj;
 
-      /**
+    private String VYXZJ;
+
+    /**
      * 证件号
      */
-          
-    private String vzjh;
 
-      /**
+    private String VZJH;
+
+    /**
      * 到货地名称 100
      */
-          
-    private String vdhdmc;
 
-      /**
+    private String VDHDMC;
+
+    /**
      * ID
      */
-          
-    private Integer id;
 
-      /**
+    private Integer ID;
+
+    /**
      * 传真
      */
-          
-    private String vcz;
 
-      /**
+    private String VCZ;
+
+    /**
      * ???1
      */
-          
-    private String clxr1;
 
-      /**
+    private String CLXR1;
+
+    /**
      * ??1
      */
-          
-    private String vdh1;
 
-      /**
+    private String VDH1;
+
+    /**
      * ????1
      */
-          
-    private String vyddh1;
 
-      /**
+    private String VYDDH1;
+
+    /**
      * ???1
      */
-          
-    private String vscr1;
 
-      /**
+    private String VSCR1;
+
+    /**
      * ???1
      */
-          
-    private String vzjh1;
 
-        
-    private String cssxt;
+    private String VZJH1;
 
-      /**
+
+    private String CSSXT;
+
+    /**
      * ????2
      */
-          
-    private String vyxzj1;
 
-        
-    private Long dczrq;
+    private String VYXZJ1;
 
-        
-    private String cczydm;
 
-      /**
+    private Long DCZRQ;
+
+
+    private String CCZYDM;
+
+    /**
      * 时间戳。BI提数据
      */
-          
-    private Long dstamp;
 
-      /**
+    private Long DSTAMP;
+
+    /**
      * 20181009 add by dtf 备注
      */
-          
-    private String vbz;
 
-      /**
+    private String VBZ;
+
+    /**
      * 20181207 add by lwx 备注
      */
-          
-    private String vbz1;
 
-        
-    private Long warehouseCreatetime;
+    private String VBZ1;
 
-        
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_CREATETIME;
+
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

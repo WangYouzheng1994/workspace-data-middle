@@ -8,7 +8,7 @@
         <Encoding>UTF-8</Encoding>
     </appender>
 
-    <root level="debug">
-        <appender-ref ref="STDOUT" />
+    <root level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

@@ -1,99 +1,97 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Sptb23Dq2020 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
+    private String VIN;
 
-        
-    private String vin;
 
-        
-    private String ch;
+    private String CH;
 
-        
-    private String jjdh;
 
-        
-    private Long xdsj;
+    private String JJDH;
 
-        
-    private String pp;
 
-        
-    private String dcs;
+    private Long XDSJ;
 
-        
-    private String fz;
 
-        
-    private String dz;
+    private String PP;
 
-        
-    private Long fcsj;
 
-        
-    private Long ddsj;
+    private String DCS;
 
-        
-    private String sheng;
 
-        
-    private String shi;
+    private String FZ;
 
-        
-    private String xian;
 
-        
-    private Long bgsj;
+    private String DZ;
 
-        
-    private String zkbz;
 
-        
-    private Long dczrq;
+    private Long FCSJ;
 
-        
-    private String cbs;
 
-        
-    private BigDecimal jd;
+    private Long DDSJ;
 
-        
-    private BigDecimal wd;
 
-      /**
+    private String SHENG;
+
+
+    private String SHI;
+
+
+    private String XIAN;
+
+
+    private Long BGSJ;
+
+
+    private String ZKBZ;
+
+
+    private Long DCZRQ;
+
+
+    private String CBS;
+
+
+    private BigDecimal JD;
+
+
+    private BigDecimal WD;
+
+    /**
      * 主键 S_SPTB23_DQ_2020
      */
-          
-    private Integer id;
 
-      /**
+    private Integer ID;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }
