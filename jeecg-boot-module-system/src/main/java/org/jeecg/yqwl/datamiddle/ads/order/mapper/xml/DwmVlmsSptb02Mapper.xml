@@ -109,40 +109,37 @@
         </if>
         , dvs.BASE_NAME
     </select>
+
     <!--按条件查询到货及时率    -->
-    <select id="getArrivalRate"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
-    >
+    <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
         select
         COUNT(aa.CJSDBH) as totalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME &lt; dvs1.THEORY_SITE_TIME) as finalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs2 WHERE FINAL_SITE_TIME=0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
-        (nowNum+finalNum)/totalNum * 100 as percentage
+        (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME <![CDATA[ < ]]> dvs1.THEORY_SITE_TIME) as finalNum,
+        (select COUNT(1) from dwm_vlms_sptb02 dvs2 WHERE FINAL_SITE_TIME = 0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
+        (nowNum+finalNum) / totalNum * 100 as percentage
         from
         dwm_vlms_sptb02 aa
         where
-        (CJSDBH,
-        WAREHOUSE_UPDATETIME) in (
-        select
-        CJSDBH,
-        max(WAREHOUSE_UPDATETIME)
-        from
-        dwm_vlms_sptb02 dvs
-        <where>
-            <if test=" params.startTime != null and params.endTime !=null " >
-                and dvs.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
-            </if>
-            <if test=" params.cqwh != null and params.cqwh != '' ">
-                and dvs.CQWH = #{params.cqwh}
-            </if>
-            <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                and dvs.CZJGSDM = #{params.czjgsdm}
-            </if>
-        </where>
-        group by dvs.CJSDBH
-        )
-
+            (CJSDBH,
+            WAREHOUSE_UPDATETIME) in (
+                select
+                    CJSDBH,
+                    max(WAREHOUSE_UPDATETIME)
+                from
+                    dwm_vlms_sptb02 dvs
+                <where>
+                    <if test=" params.startTime != null and params.endTime !=null " >
+                        and dvs.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                    </if>
+                    <if test=" params.cqwh != null and params.cqwh != '' ">
+                        and dvs.CQWH = #{params.cqwh}
+                    </if>
+                    <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
+                        and dvs.CZJGSDM = #{params.czjgsdm}
+                    </if>
+                </where>
+                group by dvs.CJSDBH
+            )
     </select>
 
     <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where shipment_time between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
