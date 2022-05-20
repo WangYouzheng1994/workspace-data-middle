@@ -21,6 +21,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @return
       */
      List<GetBaseBrandTime> stockOUtList(@Param("params") DwmVlmsSptb02 params);
+
      /**
       * top10 发运量
       * @param params
@@ -41,9 +42,6 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @return
       */
      List<GetBaseBrandTime> onWayList (@Param("params") DwmVlmsSptb02 params);
-
-
-
 
     /**
      * 按条件查询计划量
