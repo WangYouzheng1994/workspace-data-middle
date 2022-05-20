@@ -110,10 +110,7 @@
         , dvs.BASE_NAME
     </select>
     <!--按条件查询到货及时率    -->
-    <select id="getArrivalRate"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
-    >
+    <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
         select
         COUNT(aa.CJSDBH) as totalNum,
         (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME &lt; dvs1.THEORY_SITE_TIME) as finalNum,
