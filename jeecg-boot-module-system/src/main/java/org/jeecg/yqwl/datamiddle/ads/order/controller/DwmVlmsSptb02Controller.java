@@ -55,8 +55,9 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
-        List<DwmVlmsSptb02> dayAmountOfPlan = dwmVlmsSptb02Service.findShipment(baseBrandTime);
-        return Result.OK(dayAmountOfPlan) ;
+        // TODO: 参数校验。
+
+        return Result.OK(dwmVlmsSptb02Service.findShipment(baseBrandTime)) ;
     }
 
     /**
@@ -66,8 +67,21 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectArrivalRate")
     public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
-        TimelinessRatioVO arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
-        return Result.OK(arrivalRate) ;
+        // TODO: 指派
+        // TODO: 出库
+
+        // TODO: 起运
+        // 到货
+        dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+
+        // TODO: 合并出返回对象。
+        TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
+        timelinessRatioVO.setAllotPercent(10); //分配及时率
+        timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
+        timelinessRatioVO.setStartPercent(50);//起运及时率
+        timelinessRatioVO.setHalfwayPercent(90);//在途及时率
+        timelinessRatioVO.setEndPercent(100);//到货及时率
+        return Result.OK(timelinessRatioVO) ;
     }
 
 

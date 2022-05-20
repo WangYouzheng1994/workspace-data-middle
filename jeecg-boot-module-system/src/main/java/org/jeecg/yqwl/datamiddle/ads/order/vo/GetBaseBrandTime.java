@@ -1,5 +1,7 @@
 package org.jeecg.yqwl.datamiddle.ads.order.vo;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,13 +15,15 @@ import java.util.Date;
 @Data
 public class GetBaseBrandTime {
     /**
-     * 时间种类 (day/week...)
+     * 时间种类
+     * 日/星期/月份/季度/年
+     * (day/week/month/quarter/year)
      */
     private String timeType;
     /**
      * 开始时间
      */
-    private Long  startTime;
+    private Long startTime;
 
     /**
      * 结束时间
@@ -35,4 +39,9 @@ public class GetBaseBrandTime {
      * 主机厂品牌
      */
     private String czjgsdm;
+
+
+    public static void main(String[] args) {
+        DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);
+    }
 }

@@ -3,6 +3,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @param params
      * @return
      */
-    List<DwmVlmsSptb02> getShipment(@Param("params") GetBaseBrandTime params);
+    List<ShipmentDTO> getShipment(@Param("params") GetBaseBrandTime params);
 
     /**
      * 到货准时率
