@@ -135,7 +135,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         result.put("after", afterJson);
         result.put("type", type);
         result.put("ts", tsMs);
-        System.out.println("序列化统一数据格式：" + result.toJSONString());
+        //System.out.println("序列化统一数据格式：" + result.toJSONString());
 
         // 8. 输出数据
         collector.collect(result.toJSONString());

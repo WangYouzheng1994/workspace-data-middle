@@ -2,24 +2,16 @@ package com.yqwl.datamiddle.realtime.app.func;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
-import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -110,6 +102,12 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
                 //比对sinkType, 如果是写到mysql，打上标签
                 if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
                     // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
+                    // 单条处理
+                    // 对数据转换成实体类,对默认值进行赋值
+                    Class<?> aClass = Class.forName(tableProcess.getClassName());
+                    Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
+                    Object bean = JsonPartUtil.getBean(afterObj);
+                    jsonObj.put("after", bean);
                     ctx.output(outputTag, jsonObj);
 
                     // 如果是写到kafka的 那么直接写入到kafka中

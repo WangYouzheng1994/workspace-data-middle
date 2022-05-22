@@ -1,135 +1,133 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Sptb22Dq implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
+    private Integer ID;
 
-        
-    private Integer id;
 
-        
-    private String cpzh;
+    private String CPZH;
 
-        
-    private String vwz;
 
-        
-    private Long dcjsj;
+    private String VWZ;
 
-        
-    private String vsd;
 
-        
-    private String cjsdbh;
+    private Long DCJSJ;
 
-        
-    private String csqdm;
 
-        
-    private String csxdm;
+    private String VSD;
 
-        
-    private Long dczrq;
 
-        
-    private String cdhbs;
+    private String CJSDBH;
 
-      /**
+
+    private String CSQDM;
+
+
+    private String CSXDM;
+
+
+    private Long DCZRQ;
+
+
+    private String CDHBS;
+
+    /**
      * 0 gps/ 1 lbs
      */
-          
-    private String clybs;
 
-      /**
+    private String CLYBS;
+
+    /**
      * 离长时间
      */
-          
-    private Long dlcsj;
 
-        
-    private String csq;
+    private Long DLCSJ;
 
-        
-    private String csx;
 
-        
-    private Long ddksj;
+    private String CSQ;
 
-      /**
+
+    private String CSX;
+
+
+    private Long DDKSJ;
+
+    /**
      * 车辆滞留标识（两次取得数据相同认为是滞留）
      */
-          
-    private String czlbs;
 
-      /**
+    private String CZLBS;
+
+    /**
      * 上次位置
      */
-          
-    private String vywz;
 
-        
-    private String cbz;
+    private String VYWZ;
 
-        
-    private String csjh;
 
-        
-    private Long dlbssj;
+    private String CBZ;
 
-        
-    private String vlbswz;
 
-      /**
+    private String CSJH;
+
+
+    private Long DLBSSJ;
+
+
+    private String VLBSWZ;
+
+    /**
      * 采点时段形如'20091004 02'
      */
-          
-    private String csd;
 
-      /**
+    private String CSD;
+
+    /**
      * 滞留小时
      */
-          
-    private Integer nljzt;
 
-      /**
+    private Integer NLJZT;
+
+    /**
      * 经度
      */
-          
-    private BigDecimal ccbjd;
 
-      /**
+    private BigDecimal CCBJD;
+
+    /**
      * 纬度
      */
-          
-    private BigDecimal ccbwd;
 
-      /**
+    private BigDecimal CCBWD;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

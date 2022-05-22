@@ -7,10 +7,25 @@ import cn.hutool.setting.dialect.Props;
  */
 public class PropertiesUtil {
 
-    private static final String FILENAME = "cdc.properties";
+    //开启哪个模式
+    public static final String ACTIVE_TYPE = "dev";
 
-    public static Props getProps() {
-        return new Props(FILENAME);
+    //开发模式
+    private static final String ACTIVE_DEV = "dev";
+    //生产模式
+    private static final String ACTIVE_PROD = "prod";
+
+    private static final String FILENAME_DEV = "cdc-dev.properties";
+    private static final String FILENAME_PROD = "cdc-prod.properties";
+
+    public static Props getProps(String active) {
+        if (ACTIVE_DEV.equals(active)) {
+            return new Props(FILENAME_DEV);
+        }
+        if (ACTIVE_PROD.equals(active)) {
+            return new Props(FILENAME_PROD);
+        }
+        return null;
     }
 
 }

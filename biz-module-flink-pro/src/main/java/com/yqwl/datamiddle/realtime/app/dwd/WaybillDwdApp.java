@@ -4,15 +4,15 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.DwdMysqlSink;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
+import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -20,6 +20,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -29,6 +30,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 对运单 sptb02 表进行统一数据格式 字段统一等
@@ -53,7 +55,7 @@ public class WaybillDwdApp {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02)//消费sptb02 原数据topic  ods_vlms_sptb02
@@ -81,9 +83,9 @@ public class WaybillDwdApp {
         }).uid("objStream").name("objStream");
         log.info("将kafka中原始json数据转化成实例对象");
         //对一些时间字段进行单独字段处理保存
-        SingleOutputStreamOperator<String> dataDwdProcess = objStream.process(new ProcessFunction<Sptb02, String>() {
+        SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = objStream.process(new ProcessFunction<Sptb02, DwdSptb02>() {
             @Override
-            public void processElement(Sptb02 sptb02, Context context, Collector<String> collector) throws Exception {
+            public void processElement(Sptb02 sptb02, Context context, Collector<DwdSptb02> collector) throws Exception {
                 System.out.println("processElement方法开始时，数据值：" + sptb02);
                 log.info("将kafka中原始json数据转化成实例对象");
                 //处理实体类
@@ -93,57 +95,57 @@ public class WaybillDwdApp {
                 BeanUtil.copyProperties(sptb02, dwdSptb02);
                 System.out.println("属性copy后值：" + dwdSptb02.toString());
                 //获取原数据的运输方式
-                String vysfs = sptb02.getVysfs();
+                String vysfs = sptb02.getVYSFS();
                 System.out.println("运输方式：" + vysfs);
-                if (StringUtils.isNotEmpty(sptb02.getVysfs())) {
+                if (StringUtils.isNotEmpty(vysfs)) {
                     //1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
                     //('J','TD','SD','G')='G'
                     if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
-                        dwdSptb02.setTrafficType("G");
+                        dwdSptb02.setTRAFFIC_TYPE("G");
                         //运输方式 适配 lc_spec_config
-                        dwdSptb02.setTransModeCode("1");
+                        dwdSptb02.setTRANS_MODE_CODE("1");
                     }
                     //(''L1'','T') ='T'
                     if (vysfs.equals("L1") || vysfs.equals("T")) {
-                        dwdSptb02.setTrafficType("T");
-                        dwdSptb02.setTransModeCode("2");
+                        dwdSptb02.setTRAFFIC_TYPE("T");
+                        dwdSptb02.setTRANS_MODE_CODE("2");
                     }
                     //('S') ='S'
                     if (vysfs.equals("S")) {
-                        dwdSptb02.setTrafficType("S");
-                        dwdSptb02.setTransModeCode("3");
+                        dwdSptb02.setTRAFFIC_TYPE("S");
+                        dwdSptb02.setTRANS_MODE_CODE("3");
                     }
                     //2.处理 起运时间
                     //公路取sptb02.dtvscfsj，其他取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
-                    if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDtvscfsj())) {
-                        dwdSptb02.setShipmentTime(sptb02.getDtvscfsj());
+                    if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
+                        dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                     }
-                    if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDsjcfsj())) {
-                        dwdSptb02.setShipmentTime(sptb02.getDsjcfsj());
+                    if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
+                        dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                     }
                 }
                 //3.处理 计划下达时间
-                if (Objects.nonNull(sptb02.getDpzrq())) {
-                    dwdSptb02.setPlanReleaseTime(sptb02.getDpzrq());
+                if (Objects.nonNull(sptb02.getDPZRQ())) {
+                    dwdSptb02.setPLAN_RELEASE_TIME(sptb02.getDPZRQ());
                 }
                 //4.处理 运单指派时间
-                if (Objects.nonNull(sptb02.getDysszpsj())) {
-                    dwdSptb02.setAssignTime(sptb02.getDysszpsj());
+                if (Objects.nonNull(sptb02.getDYSSZPSJ())) {
+                    dwdSptb02.setASSIGN_TIME(sptb02.getDYSSZPSJ());
                 }
                 //5.处理 打点到货时间
-                if (Objects.nonNull(sptb02.getDgpsdhsj())) {
-                    dwdSptb02.setDotSiteTime(sptb02.getDgpsdhsj());
+                if (Objects.nonNull(sptb02.getDGPSDHSJ())) {
+                    dwdSptb02.setDOT_SITE_TIME(sptb02.getDGPSDHSJ());
                 }
                 //6.处理 最终到货时间
-                if (Objects.nonNull(sptb02.getDdhsj())) {
-                    dwdSptb02.setFinalSiteTime(sptb02.getDdhsj());
+                if (Objects.nonNull(sptb02.getDDHSJ())) {
+                    dwdSptb02.setFINAL_SITE_TIME(sptb02.getDDHSJ());
                 }
                 //7.处理 运单生成时间
-                if (Objects.nonNull(sptb02.getDdjrq())) {
-                    dwdSptb02.setOrderCreateTime(sptb02.getDdhsj());
+                if (Objects.nonNull(sptb02.getDDJRQ())) {
+                    dwdSptb02.setORDER_CREATE_TIME(sptb02.getDDJRQ());
                 }
                 //8.处理 基地代码 适配 lc_spec_config
-                String cqwh = sptb02.getCqwh();
+                String cqwh = sptb02.getCQWH();
                 if (Objects.nonNull(cqwh)) {
                     /**
                      * 0431、 -> 1  长春基地
@@ -153,16 +155,16 @@ public class WaybillDwdApp {
                      * 0757   -> 3  佛山基地
                      */
                     if ("0431".equals(cqwh)) {
-                        dwdSptb02.setBaseCode("1");
+                        dwdSptb02.setBASE_CODE("1");
                     }
                     if ("022".equals(cqwh)) {
-                        dwdSptb02.setBaseCode("5");
+                        dwdSptb02.setBASE_CODE("5");
                     }
                     if ("028".equals(cqwh)) {
-                        dwdSptb02.setBaseCode("2");
+                        dwdSptb02.setBASE_CODE("2");
                     }
                     if ("0757".equals(cqwh)) {
-                        dwdSptb02.setBaseCode("3");
+                        dwdSptb02.setBASE_CODE("3");
                     }
                 }
                 //9.处理 主机公司代码
@@ -174,16 +176,16 @@ public class WaybillDwdApp {
                  */
                 //获取主机公司代码
                 //sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
-                String czjgsdm = sptb02.getCzjgsdm();
+                String czjgsdm = sptb02.getCZJGSDM();
                 if (StringUtils.isNotEmpty(czjgsdm)) {
                     if ("1".equals(czjgsdm)) {
-                        dwdSptb02.setHostComCode("1");
+                        dwdSptb02.setHOST_COM_CODE("1");
                     }
                     if ("17".equals(czjgsdm)) {
-                        dwdSptb02.setHostComCode("2");
+                        dwdSptb02.setHOST_COM_CODE("2");
                     }
                     if ("29".equals(czjgsdm)) {
-                        dwdSptb02.setHostComCode("3");
+                        dwdSptb02.setHOST_COM_CODE("3");
                     }
                 }
                 //对保存的数据为null的填充默认值
@@ -191,20 +193,75 @@ public class WaybillDwdApp {
                 //实际保存的值为after里的值
                 System.out.println("处理完的数据填充后的值:" + dwdSptb02.toString());
                 log.info("处理完的数据填充后的值:" + dwdSptb02.toString());
-                collector.collect(dwdSptb02.toString());
+                collector.collect(dwdSptb02);
             }
         }).uid("dataDwdProcess").name("dataDwdProcess");
 
+
+        /**
+         *  处理 物理仓库信息 省区代码 市县代码
+         *  inner join sptc34 b on a.vwlckdm = b.vwlckdm
+         *  inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
+         */
+        SingleOutputStreamOperator<DwdSptb02> sptc34DS = AsyncDataStream.unorderedWait(
+                dataDwdProcess,
+                new DimAsyncFunction<DwdSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC34,
+                        "VWLCKDM") {
+
+                    @Override
+                    public Object getKey(DwdSptb02 dwdSptb02) {
+                        return dwdSptb02.getVWLCKDM();
+                    }
+
+                    @Override
+                    public void join(DwdSptb02 dwdSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwdSptb02.setSTART_PROVINCE_CODE(dimInfoJsonObj.getString("VSQDM"));
+                        dwdSptb02.setSTART_CITY_CODE(dimInfoJsonObj.getString("VSXDM"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
+
+        /**
+         *  处理 经销商到货地 省区代码 市县代码
+         *  inner join mdac32 e on a.cdhddm = e.cdhddm
+         *  inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
+         */
+        SingleOutputStreamOperator<DwdSptb02> mdac32DS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwdSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC32,
+                        "CDHDDM") {
+
+                    @Override
+                    public Object getKey(DwdSptb02 dwdSptb02) {
+                        return dwdSptb02.getCDHDDM();
+                    }
+
+                    @Override
+                    public void join(DwdSptb02 dwdSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwdSptb02.setEND_PROVINCE_CODE(dimInfoJsonObj.getString("CSQDM"));
+                        dwdSptb02.setEND_CITY_CODE(dimInfoJsonObj.getString("CSXDM"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac32DS").name("mdac32DS");
+
+        //将实体类映射成json
+        SingleOutputStreamOperator<String> mapJson = mdac32DS.map(DwdSptb02::toString).uid("mapJson").name("mapJson");
+
+        //组装kafka生产端
         dataDwdProcess.print("数据拉宽后输出:");
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
         //将处理完的数据保存到kafka
-        dataDwdProcess.addSink(sinkKafka).uid("dwd-sink-kafka").name("dwd-sink-kafka");
+        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
         log.info("将处理完的数据保存到kafka中");
         //将处理完的数据保存到mysql中
-        //dataDwdProcess.addSink(new DwdMysqlSink()).setParallelism(1).uid("dwd-sink-mysql").name("dwd-sink-mysql");
+        //mapJson.addSink(new DwdMysqlSink()).setParallelism(1).uid("dwd-sink-mysql").name("dwd-sink-mysql");
         log.info("将处理完的数据保存到mysql中");
         env.execute("sptb02-sink-kafka-dwd");
         log.info("sptb02dwd层job任务开始执行");

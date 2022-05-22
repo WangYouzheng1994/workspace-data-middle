@@ -38,7 +38,7 @@ public class DwdMysqlSink extends RichSinkFunction<String> {
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 
@@ -79,22 +79,6 @@ public class DwdMysqlSink extends RichSinkFunction<String> {
 
     // 根据data属性和值生成 insert sql语句
     private String genInsertSql(String tableName, JSONObject dataJsonObj) {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         //"insert into 表名(列名.....) values (值....)"
         Set<String> columns = dataJsonObj.keySet();
         log.info("获取当前数据所有key:{}", columns);

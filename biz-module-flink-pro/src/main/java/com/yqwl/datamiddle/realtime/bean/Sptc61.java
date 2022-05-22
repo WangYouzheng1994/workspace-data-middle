@@ -1,7 +1,8 @@
 package com.yqwl.datamiddle.realtime.bean;
 
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 
 /**
@@ -10,156 +11,152 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Sptc61 implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
-    private Long idnum;
-
     /**
      * 编码
      */
 
-    private String cid;
+    private String CID;
 
     /**
      * 名称
      */
 
-    private String cname;
+    private String CNAME;
 
     /**
      * 简称.用于动态统计
      */
 
-    private String cjc;
+    private String CJC;
 
     /**
      * 备注
      */
 
-    private String cbz;
+    private String CBZ;
 
     /**
      * 物流标准编码.选择,来源于M平台
      */
 
-    private String cwlbm;
+    private String CWLBM;
 
     /**
      * 物流标准名称.来源于M平台
      */
 
-    private String cwlmc;
+    private String CWLMC;
 
     /**
      * 停用标识
      */
 
-    private String ctybs;
+    private String CTYBS;
 
     /**
      * 停用日期
      */
 
-    private Long dtyrq;
+    private Long DTYRQ;
 
     /**
      * 停用原因
      */
 
-    private String ctyyy;
+    private String CTYYY;
 
     /**
      * 操作日期
      */
 
-    private Long dczrq;
+    private Long DCZRQ;
 
     /**
      * 操作人代码
      */
 
-    private String cczydm;
+    private String CCZYDM;
 
     /**
      * 同步日期
      */
 
-    private Long dtbrq;
+    private Long DTBRQ;
 
     /**
      * 版本号
      */
 
-    private Integer batchno;
+    private Integer BATCHNO;
 
 
-    private Integer nsort;
+    private Integer NSORT;
 
     /**
      * 20181010 add by dtf 大众统计报表用
      */
 
-    private String cjc2;
+    private String CJC2;
 
     /**
      * 是否调整承运定额 0不调整; 1调整
      */
 
-    private String ccydebs;
+    private String CCYDEBS;
 
     /**
      * 审批标识: 0  未审批   1:已审批
      */
 
-    private String approvalFlag;
+    private String APPROVAL_FLAG;
 
     /**
      * 审批人
      */
 
-    private String approvalUser;
+    private String APPROVAL_USER;
 
     /**
      * 审批日期
      */
 
-    private Long approvalDate;
+    private Long APPROVAL_DATE;
 
     /**
      * 终审审批标识: 0 未审批   1:已审批
      */
 
-    private String finalApprovalFlag;
+    private String FINAL_APPROVAL_FLAG;
 
     /**
      * 终审审批人
      */
 
-    private String finalApprovalUser;
+    private String FINAL_APPROVAL_USER;
 
     /**
      * 终审审批日期
      */
 
-    private Long finalApprovalDate;
+    private Long FINAL_APPROVAL_DATE;
 
     /**
      * 创建时间
      */
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
 
-    private Long warehouseUpdatetime;
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

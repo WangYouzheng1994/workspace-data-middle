@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.dim;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
 import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
@@ -11,9 +12,7 @@ import com.yqwl.datamiddle.realtime.bean.Sysc08;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.JDBCSink;
-import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import com.google.common.collect.Lists;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -31,7 +30,6 @@ import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
@@ -68,7 +66,7 @@ public class DimProvinceWideApp {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
 
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
         // kafka source1 sysc07
         KafkaSource<String> sysc07 = KafkaSource.<String>builder()
@@ -108,7 +106,7 @@ public class DimProvinceWideApp {
                 JSONObject jo = JSON.parseObject(s);
                 if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SYSC07") ) {
                     Sysc07 after = jo.getObject("after", Sysc07.class);
-                    String cdqdm = after.getCdqdm();
+                    String cdqdm = after.getCDQDM();
                     if (cdqdm !=null){
                         return true;
                     }
@@ -222,10 +220,10 @@ public class DimProvinceWideApp {
 
         /* 5. 分组指定关联key */
         //  sysc07,08,09按照省区代码(CSQDM)分组
-        KeyedStream<Sysc07, String> sysc07StringKeyedStream = sysc07WithTs.keyBy(Sysc07::getCsqdm);
-        KeyedStream<Sysc08, String> sysc08StringKeyedStream = sysc08WithTs.keyBy(Sysc08::getCsqdm);
+        KeyedStream<Sysc07, String> sysc07StringKeyedStream = sysc07WithTs.keyBy(Sysc07::getCSQDM);
+        KeyedStream<Sysc08, String> sysc08StringKeyedStream = sysc08WithTs.keyBy(Sysc08::getCSQDM);
         //  Mdac01按照大区代码(CDQDM)分组
-        KeyedStream<Mdac01, String> mdac01StringKeyedStream = mdac01WithTs.keyBy(Mdac01::getCdqdm);
+        KeyedStream<Mdac01, String> mdac01StringKeyedStream = mdac01WithTs.keyBy(Mdac01::getCDQDM);
 
         /* 6.进行表拓宽 */
         //6.1 先使用省区代码(CSQDM)对sysc07,08进行关联

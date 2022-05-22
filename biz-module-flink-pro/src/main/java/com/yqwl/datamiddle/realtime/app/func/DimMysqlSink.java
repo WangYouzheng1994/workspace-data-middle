@@ -37,7 +37,7 @@ public class DimMysqlSink extends RichSinkFunction<JSONObject> {
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 
@@ -69,9 +69,10 @@ public class DimMysqlSink extends RichSinkFunction<JSONObject> {
         //执行SQL
         PreparedStatement ps = null;
         try {
-            ps = conn.prepareStatement(sql);
-            ps.execute();
-        } catch (SQLException e) {
+            //ps = conn.prepareStatement(sql);
+            //ps.execute();
+            DbUtil.insert(sql);
+        } catch (Exception e) {
             log.error("向mysql插入数据失败, {}", e.getMessage());
             throw new RuntimeException("向mysql插入数据失败");
         } finally {

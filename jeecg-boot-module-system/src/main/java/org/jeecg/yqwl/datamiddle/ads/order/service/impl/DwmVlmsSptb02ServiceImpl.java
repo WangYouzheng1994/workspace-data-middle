@@ -5,7 +5,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.baomidou.dynamic.datasource.annotation.DS;
-import org.apache.commons.collections.CollectionUtils;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
@@ -35,15 +35,240 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     private DwmVlmsSptb02Mapper dwmVlmsSptb02Mapper;
 
     /**
+     * 查询出库量列表
+     * @param baseBrandTime
+     * @return 品牌或基地  数量  时间
+     */
+    @Override
+    public Result<ShipmentVO> findTop10StockOutList(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.stockOutList(baseBrandTime);
+        //todo:对返回前端的值做处理
+        List<String> timingList = this.formatTimingList(baseBrandTime);
+        ShipmentVO resultVO = ShipmentVO.of(timingList);
+
+        /**
+         * 时间，基地/品牌，数量
+         */
+        Map<String, Map> dbMap = new HashMap();
+
+        if ( CollectionUtils.isNotEmpty(shipment)) {
+            String dates = "";
+            String baseName = "";
+            String customerName = "";
+            Integer totalNum = null;
+
+            for (ShipmentDTO shipmentDTO : shipment) {
+                // 时间
+                dates = shipmentDTO.getDates();
+                // 基地名称 / 品牌
+                baseName = shipmentDTO.getGroupName();
+                // 数量
+                totalNum = shipmentDTO.getTotalNum();
+
+                Map<String, Integer> itemMap = null;
+                if (dbMap.containsKey(baseName)) {
+                    itemMap = dbMap.get(baseName);
+                } else {
+                    itemMap = new LinkedHashMap<>();
+                    dbMap.put(baseName, itemMap);
+                    // 设置每天的默认值。
+                    Map<String, Integer> finalItemMap = itemMap;
+                    timingList.forEach(i -> {
+                        finalItemMap.put(i, 0);
+                    });
+                }
+                // 放数据之前 比较一下是否在应返回的范围内。
+                itemMap.put(dates, totalNum);
+            }
+
+            System.out.println(JSONArray.toJSONString(timingList));
+            dbMap.forEach((k, v) -> {
+                ShipmentVO.Item item = new ShipmentVO.Item();
+                item.setName(k);
+                item.setDataList(new ArrayList<>(v.values()));
+                resultVO.addResultItem(item);
+            });
+        }
+
+        return Result.OK(resultVO);
+    }
+
+    /**
      * 查询top10发运量列表
-     *
-     * @param dwmVlmsSptb02
-     * @return
+     * @param baseBrandTime
+     * @return  品牌或基地  数量  时间
      */
 
     @Override
-    public Result findTop10SendList(DwmVlmsSptb02 dwmVlmsSptb02) {
-        return null;
+    public Result<ShipmentVO> findTop10SendList(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.sendList(baseBrandTime);
+        //todo:对返回前端的值做处理
+        List<String> timingList = this.formatTimingList(baseBrandTime);
+        ShipmentVO resultVO = ShipmentVO.of(timingList);
+
+        /**
+         * 时间，基地/品牌，数量
+         */
+        Map<String, Map> dbMap = new HashMap();
+
+        if ( CollectionUtils.isNotEmpty(shipment)) {
+            String dates = "";
+            String baseName = "";
+            String customerName = "";
+            Integer totalNum = null;
+
+            for (ShipmentDTO shipmentDTO : shipment) {
+                // 时间
+                dates = shipmentDTO.getDates();
+                // 基地名称 / 品牌
+                baseName = shipmentDTO.getGroupName();
+                // 数量
+                totalNum = shipmentDTO.getTotalNum();
+
+                Map<String, Integer> itemMap = null;
+                if (dbMap.containsKey(baseName)) {
+                    itemMap = dbMap.get(baseName);
+                } else {
+                    itemMap = new LinkedHashMap<>();
+                    dbMap.put(baseName, itemMap);
+                    // 设置每天的默认值。
+                    Map<String, Integer> finalItemMap = itemMap;
+                    timingList.forEach(i -> {
+                        finalItemMap.put(i, 0);
+                    });
+                }
+                // 放数据之前 比较一下是否在应返回的范围内。
+                itemMap.put(dates, totalNum);
+            }
+
+            System.out.println(JSONArray.toJSONString(timingList));
+            dbMap.forEach((k, v) -> {
+                ShipmentVO.Item item = new ShipmentVO.Item();
+                item.setName(k);
+                item.setDataList(new ArrayList<>(v.values()));
+                resultVO.addResultItem(item);
+            });
+        }
+
+        return Result.OK(resultVO);
+    }
+
+    /**
+     * 查询top10待发量列表
+     * @param  baseBrandTime
+     * @return  品牌或基地  数量  时间
+     */
+    @Override
+    public Result<ShipmentVO> findTop10PendingList(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.pendingList(baseBrandTime);
+        //todo:对返回前端的值做处理
+        List<String> timingList = this.formatTimingList(baseBrandTime);
+        ShipmentVO resultVO = ShipmentVO.of(timingList);
+
+        /**
+         * 时间，基地/品牌，数量
+         */
+        Map<String, Map> dbMap = new HashMap();
+
+        if ( CollectionUtils.isNotEmpty(shipment)) {
+            String dates = "";
+            String baseName = "";
+            String customerName = "";
+            Integer totalNum = null;
+
+            for (ShipmentDTO shipmentDTO : shipment) {
+                // 时间
+                dates = shipmentDTO.getDates();
+                // 基地名称 / 品牌
+                baseName = shipmentDTO.getGroupName();
+                // 数量
+                totalNum = shipmentDTO.getTotalNum();
+
+                Map<String, Integer> itemMap = null;
+                if (dbMap.containsKey(baseName)) {
+                    itemMap = dbMap.get(baseName);
+                } else {
+                    itemMap = new LinkedHashMap<>();
+                    dbMap.put(baseName, itemMap);
+                    // 设置每天的默认值。
+                    Map<String, Integer> finalItemMap = itemMap;
+                    timingList.forEach(i -> {
+                        finalItemMap.put(i, 0);
+                    });
+                }
+                // 放数据之前 比较一下是否在应返回的范围内。
+                itemMap.put(dates, totalNum);
+            }
+
+            System.out.println(JSONArray.toJSONString(timingList));
+            dbMap.forEach((k, v) -> {
+                ShipmentVO.Item item = new ShipmentVO.Item();
+                item.setName(k);
+                item.setDataList(new ArrayList<>(v.values()));
+                resultVO.addResultItem(item);
+            });
+        }
+
+        return Result.OK(resultVO);
+    }
+
+    /**
+     * 查询top10在途量列表
+     * @param baseBrandTime
+     * @return  品牌或基地  数量  时间
+     */
+    @Override
+    public Result<ShipmentVO> findTop10OnWayList(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.onWayList(baseBrandTime);
+        //todo:对返回前端的值做处理
+        List<String> timingList = this.formatTimingList(baseBrandTime);
+        ShipmentVO resultVO = ShipmentVO.of(timingList);
+
+        /**
+         * 时间，基地/品牌，数量
+         */
+        Map<String, Map> dbMap = new HashMap();
+
+        if ( CollectionUtils.isNotEmpty(shipment)) {
+            String dates = "";
+            String baseName = "";
+            String customerName = "";
+            Integer totalNum = null;
+
+            for (ShipmentDTO shipmentDTO : shipment) {
+                // 时间
+                dates = shipmentDTO.getDates();
+                // 基地名称 / 品牌
+                baseName = shipmentDTO.getGroupName();
+                // 数量
+                totalNum = shipmentDTO.getTotalNum();
+
+                Map<String, Integer> itemMap = null;
+                if (dbMap.containsKey(baseName)) {
+                    itemMap = dbMap.get(baseName);
+                } else {
+                    itemMap = new LinkedHashMap<>();
+                    dbMap.put(baseName, itemMap);
+                    // 设置每天的默认值。
+                    Map<String, Integer> finalItemMap = itemMap;
+                    timingList.forEach(i -> {
+                        finalItemMap.put(i, 0);
+                    });
+                }
+                // 放数据之前 比较一下是否在应返回的范围内。
+                itemMap.put(dates, totalNum);
+            }
+
+            System.out.println(JSONArray.toJSONString(timingList));
+            dbMap.forEach((k, v) -> {
+                ShipmentVO.Item item = new ShipmentVO.Item();
+                item.setName(k);
+                item.setDataList(new ArrayList<>(v.values()));
+                resultVO.addResultItem(item);
+            });
+        }
+
+        return Result.OK(resultVO);
     }
 
     /**
@@ -76,7 +301,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
          */
         Map<String, Map> dbMap = new HashMap();
 
-        if (CollectionUtils.isNotEmpty(shipment)) {
+        if ( CollectionUtils.isNotEmpty(shipment)) {
             String dates = "";
             String baseName = "";
             String customerName = "";

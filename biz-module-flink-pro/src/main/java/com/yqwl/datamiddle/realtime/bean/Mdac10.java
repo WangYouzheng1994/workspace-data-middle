@@ -1,119 +1,119 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Mdac10 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
 
-        
-    private String cpp;
+    private String CPP;
 
-        
-    private String vppsm;
 
-        
-    private String ctybs;
+    private String VPPSM;
 
-        
-    private Long dtyrq;
 
-      /**
+    private String CTYBS;
+
+
+    private Long DTYRQ;
+
+    /**
      * 对应委托单位.与字典表SYSC09D对应CZDDM = 'WTDW'
      */
-          
-    private Integer ngsdj;
 
-      /**
+    private Integer NGSDJ;
+
+    /**
      * 排序
      */
-          
-    private String cpx;
 
-      /**
+    private String CPX;
+
+    /**
      * 计划标识.0不检查，1/检查
      */
-          
-    private String cfhbs;
 
-      /**
+    private String CFHBS;
+
+    /**
      * ID
      */
-          
-    private Integer id;
 
-        
-    private String ccqck;
+    private Integer ID;
 
-        
-    private String cwlwz;
 
-      /**
+    private String CCQCK;
+
+
+    private String CWLWZ;
+
+    /**
      * 主机厂公司
      */
-          
-    private String cgs;
 
-      /**
+    private String CGS;
+
+    /**
      * 审批标识：0  未审批  1：已审批
      */
-          
-    private String approvalFlag;
 
-      /**
+    private String APPROVAL_FLAG;
+
+    /**
      * 审批人
      */
-          
-    private String approvalUser;
 
-      /**
+    private String APPROVAL_USER;
+
+    /**
      * 审批日期
      */
-          
-    private Long approvalDate;
 
-      /**
+    private Long APPROVAL_DATE;
+
+    /**
      * 终审审批标识：0  未审批  1：已审批
      */
-          
-    private String finalApprovalFlag;
 
-      /**
+    private String FINAL_APPROVAL_FLAG;
+
+    /**
      * 终审审批人
      */
-          
-    private String finalApprovalUser;
 
-      /**
+    private String FINAL_APPROVAL_USER;
+
+    /**
      * 终审审批日期
      */
-          
-    private Long finalApprovalDate;
 
-      /**
+    private Long FINAL_APPROVAL_DATE;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

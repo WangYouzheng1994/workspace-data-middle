@@ -33,7 +33,10 @@ public class MybatisPlusCodeGenerator {
     private static String moduleName = "sptb02";
 
     //要生成的表名
-    private static String[] tables = {"ods_vlms_sptb02"};
+    private static String[] tables = {
+            "dwm_vlms_sptb02",
+
+    };
 
     //table前缀
     private static String prefix = "ods_vlms_";
@@ -108,7 +111,8 @@ public class MybatisPlusCodeGenerator {
          * 策略配置
          */
         gen.setStrategy(new StrategyConfig()
-                // .setCapitalMode(true)// 全局大写命名
+                .setCapitalMode(true)// 全局大写命
+                .setColumnNaming(NamingStrategy.no_change)
                 //.setDbColumnUnderline(true)//全局下划线命名
                 .setTablePrefix(new String[]{prefix})// 此处可以修改为您的表前缀
                 .setNaming(NamingStrategy.underline_to_camel)// 表名生成策略

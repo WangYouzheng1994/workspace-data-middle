@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,74 +11,72 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class SiteWarehouse implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 站点代码
      */
-          
-    private String vwlckdm;
 
-      /**
+    private String VWLCKDM;
+
+    /**
      * 站点名称
      */
-          
-    private String vwlckmc;
 
-      /**
+    private String VWLCKMC;
+
+    /**
      * 库房ID
      */
-          
-    private Integer warehouseId;
 
-      /**
+    private Integer WAREHOUSE_ID;
+
+    /**
      * 库房代码
      */
-          
-    private String warehouseCode;
 
-      /**
+    private String WAREHOUSE_CODE;
+
+    /**
      * 库房名称
      */
-          
-    private String warehouseName;
 
-      /**
+    private String WAREHOUSE_NAME;
+
+    /**
      * 备注
      */
-          
-    private String cbz;
 
-      /**
+    private String CBZ;
+
+    /**
      * 操作日期
      */
-          
-    private Long dczrq;
 
-      /**
+    private Long DCZRQ;
+
+    /**
      * 操作员
      */
-          
-    private String cczydm;
 
-      /**
+    private String CCZYDM;
+
+    /**
      * 类型：对照contrast；仓库：warehouse
      */
-          
-    private String type;
 
-        
-    private Long warehouseCreatetime;
+    private String TYPE;
 
-        
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_CREATETIME;
+
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

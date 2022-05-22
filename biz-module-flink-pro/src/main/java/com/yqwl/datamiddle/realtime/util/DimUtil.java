@@ -2,12 +2,14 @@ package com.yqwl.datamiddle.realtime.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Author: Felix
@@ -47,7 +49,6 @@ public class DimUtil {
             dimJsonObj = dimList.get(0);
         } else {
             System.out.println("维度数据没有找到:" + sql);
-            System.out.println();
         }
         return dimJsonObj;
     }
@@ -55,17 +56,24 @@ public class DimUtil {
     //在做维度关联的时候，大部分场景都是通过id进行关联，所以提供一个方法，只需要将id的值作为参数传进来即可
     @SuppressWarnings("unchecked")
     public static JSONObject getDimInfo(String dbType, String tableName, String columnName, Object value, String andSql) {
-        // 判定是否有多个列,约定 用,号分割
-        if (value instanceof List) {
-            String[] columnArr = StringUtils.split(columnName, ",");
-            List<Tuple2<String, Object>> tupleList = new ArrayList<>();
-            for (int i = 0; i < columnArr.length; i++) {
-                tupleList.add(Tuple2.of(columnArr[i], ((List) value).get(i)));
+        // 判定是否有多个列值,约定用,号分割
+        System.out.println("获取的value值:" + value);
+        if (Objects.nonNull(value)) {
+            if (value instanceof List) {
+                List list = (List) value;
+                if (CollectionUtils.isNotEmpty(list)) {
+                    String[] columnArr = StringUtils.split(columnName, ",");
+                    List<Tuple2<String, Object>> tupleList = new ArrayList<>();
+                    for (int i = 0; i < columnArr.length; i++) {
+                        tupleList.add(Tuple2.of(columnArr[i], ((List) value).get(i)));
+                    }
+                    return getDimInfo(dbType, tableName, andSql, tupleList.toArray(new Tuple2[]{}));
+                }
+            } else {
+                return getDimInfo(dbType, tableName, andSql, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
             }
-            return getDimInfo(dbType, tableName, andSql, tupleList.toArray(new Tuple2[]{}));
-        } else {
-            return getDimInfo(dbType, tableName, andSql, Tuple2.of(StringUtils.isBlank(columnName) ? "id" : columnName, value));
         }
+        return null;
     }
 
     /*
@@ -100,7 +108,7 @@ public class DimUtil {
     public static JSONObject getDimInfo(String dbType, String tableName, String andSql, Tuple2<String, Object>... cloNameAndValue) {
         //拼接查询条件
         String whereSql = " where ";
-        String redisKey = "dim:" + tableName.toLowerCase() + ":";
+        String redisKey = "dwm:vlms:" + tableName.toLowerCase() + ":";
         for (int i = 0; i < cloNameAndValue.length; i++) {
             Tuple2<String, Object> tuple2 = cloNameAndValue[i];
             String filedName = tuple2.f0;
@@ -129,40 +137,40 @@ public class DimUtil {
         String dimJsonStr = null;
         //维度数据的json对象形式
         JSONObject dimJsonObj = null;
-
-     /*   try {
+        try {
             //获取jedis客户端
             jedis = RedisUtil.getJedis();
             //根据key到Redis中查询
             dimJsonStr = jedis.get(redisKey);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("从redis中查询维度失败");
-        }*/
-
-        //判断是否从Redis中查询到了数据
-        if (dimJsonStr != null && dimJsonStr.length() > 0) {
-            dimJsonObj = JSON.parseObject(dimJsonStr);
-        } else {
-            //如果在Redis中没有查到数据，需要到Phoenix中查询
-            String sql = "select * from " + tableName + whereSql;
-            System.out.println("查询维度的SQL:" + sql);
-            List<JSONObject> dimList = null;
-            if (MYSQL_DB_TYPE.equals(dbType)) {
-                dimList = MysqlUtil.queryList(sql, JSONObject.class, false);
-            } else if (HBASE_DB_TYPE.equals(dbType)) {
-                dimList = PhoenixUtil.queryList(sql, JSONObject.class);
-            }
-            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
-            if (dimList != null && dimList.size() > 0) {
-                dimJsonObj = dimList.get(0);
-                //将查询出来的数据放到Redis中缓存起来
-                if (jedis != null) {
-                    jedis.setex(redisKey, 3600 * 24, dimJsonObj.toJSONString());
-                }
+            //判断是否从Redis中查询到了数据
+            if (dimJsonStr != null && dimJsonStr.length() > 0) {
+                dimJsonObj = JSON.parseObject(dimJsonStr);
             } else {
-                System.out.println("维度数据没有找到:" + sql);
+                //如果在Redis中没有查到数据，需要到Phoenix中查询
+                String sql = "select * from " + tableName + whereSql;
+                System.out.println("查询维度的SQL:" + sql);
+                List<JSONObject> dimList = null;
+                if (MYSQL_DB_TYPE.equals(dbType)) {
+                    dimList = MysqlUtil.queryList(sql, JSONObject.class, false);
+                } else if (HBASE_DB_TYPE.equals(dbType)) {
+                    dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+                }
+                //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
+                if (dimList != null && dimList.size() > 0) {
+                    dimJsonObj = dimList.get(0);
+                    //将查询出来的数据放到Redis中缓存起来
+                    if (jedis != null) {
+                        jedis.setex(redisKey, 3600 * 24, dimJsonObj.toJSONString());
+                    }
+                } else {
+                    System.out.println("维度数据没有找到:" + sql);
+                }
+
             }
+        } catch (Exception e) {
+            System.out.println("维度查询异常信息:" + e.getMessage());
+            throw new RuntimeException("从redis中查询维度失败");
+        } finally {
             //关闭Jedis
             if (jedis != null) {
                 jedis.close();

@@ -1,273 +1,276 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
+/**
+ * <p>
+ * 物理仓库信息表
+ * </p>
+ *
+ * @author yiqi
+ * @since 2022-05-18
+ */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Sptc34 implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
-    private Long idnum;
-
     /**
      * 物理仓库代码（站台代码)
      */
 
-    private String vwlckdm;
+    private String VWLCKDM;
 
     /**
      * 增加长度: 由20增至50
      */
 
-    private String vwlckmc;
+    private String VWLCKMC;
 
     /**
      * 状态(0:可用,1:盘点) 默认可用,暂时不用!
      */
 
-    private String czt;
+    private String CZT;
 
     /**
      * 库容
      */
 
-    private Integer nkr;
+    private Integer NKR;
 
     /**
      * 省区代码
      */
 
-    private String vsqdm;
+    private String VSQDM;
 
     /**
      * 市县代码
      */
 
-    private String vsxdm;
+    private String VSXDM;
 
     /**
      * 联系人
      */
 
-    private String vlxr;
+    private String VLXR;
 
     /**
      * 电话
      */
 
-    private String vdh;
+    private String VDH;
 
     /**
      * 传真
      */
 
-    private String vcz;
+    private String VCZ;
 
     /**
      * EMAIL
      */
 
-    private String vemail;
+    private String VEMAIL;
 
     /**
      * 移动电话
      */
 
-    private String vyddh;
+    private String VYDDH;
 
     /**
      * 邮编
      */
 
-    private String vyb;
+    private String VYB;
 
     /**
      * 地址20210108 50-100
      */
 
-    private String vdz;
+    private String VDZ;
 
     /**
      * 停用标识
      */
 
-    private String ctybs;
+    private String CTYBS;
 
     /**
      * 停用日期
      */
 
-    private Long dtyrq;
+    private Long DTYRQ;
 
 
-    private String vbz;
+    private String VBZ;
 
     /**
      * 字典:WLCKSX,0公路 1铁路 2水路
      */
 
-    private String ccksx;
+    private String CCKSX;
 
     /**
      * 管理库区库位. 0 管理  1 不管理
      */
 
-    private String cglkqkw;
+    private String CGLKQKW;
 
 
-    private String cccsdm;
+    private String CCCSDM;
 
     /**
      * 存放条件
      */
 
-    private String vcftj;
+    private String VCFTJ;
 
     /**
      * 是否外协  0/本公司  1/外协
      */
 
-    private String cwx;
+    private String CWX;
 
     /**
      * 多公司模式下的公司-SPTC60
      */
 
-    private String cgs;
+    private String CGS;
 
     /**
      * 针对铁路站台,是否生成分驳计划 0 否  1 是
      */
 
-    private String cscfbjh;
+    private String CSCFBJH;
 
     /**
      * 大众物理仓库代码
      */
 
-    private String vdzckdm;
+    private String VDZCKDM;
 
     /**
      * 针对铁路站台,设置的默认短驳运输商
      */
 
-    private String cyssdm;
+    private String CYSSDM;
 
     /**
      * 针对铁路站台,设置的默认运输车
      */
 
-    private String cyscdm;
+    private String CYSCDM;
 
     /**
      * 仓库简称
      */
 
-    private String vwlckjc;
+    private String VWLCKJC;
 
     /**
      * 物流标准编码  选择  来源于M平台
      */
 
-    private String cwlbm;
+    private String CWLBM;
 
     /**
      * 物流标准名称 来源于M平台
      */
 
-    private String cwlmc;
+    private String CWLMC;
 
     /**
      * 同步日期
      */
 
-    private Long dtbrq;
+    private Long DTBRQ;
 
     /**
      * 版本号
      */
 
-    private Integer batchno;
+    private Integer BATCHNO;
 
 
-    private String cwlbm3;
+    private String CWLBM3;
 
     /**
      * 字典:WLCKLX (1 基地库  2 中转库)
      */
 
-    private String ccklx;
+    private String CCKLX;
 
     /**
      * 时间戳  BI提数据
      */
 
-    private Long dstamp;
+    private Long DSTAMP;
 
     /**
      * 审批标识  0 未审批  1 已审批
      */
 
-    private String approvalFlag;
+    private String APPROVAL_FLAG;
 
     /**
      * 审批人
      */
 
-    private String approvalUser;
+    private String APPROVAL_USER;
 
     /**
      * 审批日期
      */
 
-    private Long approvalDate;
+    private Long APPROVAL_DATE;
 
     /**
      * 终审审批标识  0 未审批  1 已审批
      */
 
-    private String finalApprovalFlag;
+    private String FINAL_APPROVAL_FLAG;
 
     /**
      * 终审审批人
      */
 
-    private String finalApprovalUser;
+    private String FINAL_APPROVAL_USER;
 
     /**
      * 终审审批日期
      */
 
-    private Long finalApprovalDate;
+    private Long FINAL_APPROVAL_DATE;
 
     /**
      * 主机公司代码  字典WTDW
      */
 
-    private String czjgsdm;
+    private String CZJGSDM;
 
     /**
      * 20220309 中铁新接口 站点名称
      */
 
-    private String vztmcZt;
+    private String VZTMC_ZT;
 
     /**
      * 创建时间
      */
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
 
-    private Long warehouseUpdatetime;
-
-
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }
-

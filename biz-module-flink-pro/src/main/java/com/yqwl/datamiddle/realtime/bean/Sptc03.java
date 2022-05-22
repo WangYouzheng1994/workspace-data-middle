@@ -1,8 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
-
 import lombok.Data;
-
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -12,303 +11,300 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Sptc03 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 司机代码
      */
-      
-    private String vsjdm;
 
-      /**
+    private String VSJDM;
+
+    /**
      * 姓名
      */
-      
-    private String vxm;
 
-      /**
+    private String VXM;
+
+    /**
      * 性别
      */
-      
-    private String cxb;
 
-      /**
+    private String CXB;
+
+    /**
      * 驾驶证号码，身份证
      */
-      
-    private String vjszhm;
 
-      /**
+    private String VJSZHM;
+
+    /**
      * 领证日期
      */
-      
-    private Long dlzrq;
 
-      /**
+    private Long DLZRQ;
+
+    /**
      * 准驾车型
      */
-      
-    private String vzjcx;
 
-      /**
+    private String VZJCX;
+
+    /**
      * 电话
      */
-      
-    private String vdh;
 
-      /**
+    private String VDH;
+
+    /**
      * 移动电话
      */
-      
-    private String vyddh;
 
-      /**
+    private String VYDDH;
+
+    /**
      * 地址
      */
-      
-    private String vdz;
 
-      /**
+    private String VDZ;
+
+    /**
      * 邮编
      */
-      
-    private String vyb;
 
-      /**
+    private String VYB;
+
+    /**
      * EMAIL
      */
-      
-    private String vemail;
 
-      /**
+    private String VEMAIL;
+
+    /**
      * 主驾、副驾
      */
-      
-    private String vzw;
 
-      /**
+    private String VZW;
+
+    /**
      * 学历，SYSC09C‘VXL’
      */
-      
-    private String vxl;
 
-      /**
+    private String VXL;
+
+    /**
      * 职业，SYSC09C'VZY'
      */
-      
-    private String vzy;
 
-      /**
+    private String VZY;
+
+    /**
      * 0、可用 1、停用
      */
-      
-    private String vtybs;
 
-      /**
+    private String VTYBS;
+
+    /**
      * 停用标识
      */
-      
-    private Long vtyrq;
 
-      /**
+    private Long VTYRQ;
+
+    /**
      * 备注
      */
-      
-    private String vbz;
 
-      /**
+    private String VBZ;
+
+    /**
      * 0、空闲 1、运输 2、锁定（事假等）
      */
-      
-    private String czt;
 
-      /**
+    private String CZT;
+
+    /**
      * 运输商代码
      */
-      
-    private String cyssdm;
 
-      /**
+    private String CYSSDM;
+
+    /**
      * LBS手机号
      */
-      
-    private String clbs;
 
-      /**
+    private String CLBS;
+
+    /**
      * 说明
      */
-      
-    private String csm;
 
-      /**
+    private String CSM;
+
+    /**
      * 1表示是特殊人物维护或修改的信息
      */
-      
-    private String ctsbs;
 
-      /**
+    private String CTSBS;
+
+    /**
      * 调度员
      */
-      
-    private String cddy;
 
-      /**
+    private String CDDY;
+
+    /**
      * 核算员
      */
-      
-    private String chsy;
 
-      /**
+    private String CHSY;
+
+    /**
      * 属性 SYSC09D.CZDDM = 'SJSX'
      */
-      
-    private String csx;
 
-      /**
+    private String CSX;
+
+    /**
      * 运营模式 SYSC09D.CZDDM = 'SJYYMS'
      */
-      
-    private String cyyms;
 
-      /**
+    private String CYYMS;
+
+    /**
      * 司机卡号
      */
-      
-    private String csjkh;
 
-      /**
+    private String CSJKH;
+
+    /**
      * 变更日期
      */
-      
-    private Long dbgrq;
 
-      /**
+    private Long DBGRQ;
+
+    /**
      * 确认日期
      */
-      
-    private Long dqrrq;
 
-      /**
+    private Long DQRRQ;
+
+    /**
      * 是否国企司机
      */
-      
-    private String ckqsj;
 
-      /**
+    private String CKQSJ;
+
+    /**
      * 是否开发票。由车辆表中转至此处
      */
-      
-    private String ckfp;
 
-      /**
+    private String CKFP;
+
+    /**
      * 序号
      */
-      
-    private String cxh;
 
-      /**
+    private String CXH;
+
+    /**
      * 逻辑删除标识
      */
-      
-    private String cdel;
 
-      /**
+    private String CDEL;
+
+    /**
      * 旧代码
      */
-      
-    private String cdmO;
 
-      /**
+    private String CDM_O;
+
+    /**
      * 物流标准编码。选择，来源于M平台
      */
-      
-    private String cwlbm;
 
-      /**
+    private String CWLBM;
+
+    /**
      * 物流标准名称。来源于M平台
      */
-      
-    private String cwlmc;
 
-      /**
+    private String CWLMC;
+
+    /**
      * 同步日期
      */
-      
-    private Long dtbrq;
 
-      /**
+    private Long DTBRQ;
+
+    /**
      * 版本号
      */
-      
-    private Integer batchno;
 
-      /**
+    private Integer BATCHNO;
+
+    /**
      * 验证自有车辆和司机关系。0验证，其它 不验证
      */
-      
-    private String cyzbs;
 
-      /**
+    private String CYZBS;
+
+    /**
      * 时间戳。BI提数据
      */
-      
-    private Long dstamp;
 
-      /**
+    private Long DSTAMP;
+
+    /**
      * 审批标识：0  未审批  1：已审批
      */
-      
-    private String approvalFlag;
 
-      /**
+    private String APPROVAL_FLAG;
+
+    /**
      * 审批人
      */
-      
-    private String approvalUser;
 
-      /**
+    private String APPROVAL_USER;
+
+    /**
      * 审批日期
      */
-      
-    private Long approvalDate;
 
-      /**
+    private Long APPROVAL_DATE;
+
+    /**
      * 终审审批标识：0  未审批  1：已审批
      */
-      
-    private String finalApprovalFlag;
 
-      /**
+    private String FINAL_APPROVAL_FLAG;
+
+    /**
      * 终审审批人
      */
-      
-    private String finalApprovalUser;
 
-      /**
+    private String FINAL_APPROVAL_USER;
+
+    /**
      * 终审审批日期
      */
-      
-    private Long finalApprovalDate;
 
-      /**
+    private Long FINAL_APPROVAL_DATE;
+
+    /**
      * 创建时间
      */
-      
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-      
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

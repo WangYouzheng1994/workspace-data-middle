@@ -1,7 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -11,124 +11,122 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Spti32Dz implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
 
-      private Long idnum;
-
-      /**
+    /**
      * 运输方式
      */
-      
-    private String vysfs;
 
-      /**
+    private String VYSFS;
+
+    /**
      * 类型:TC同城；YC异城；
      */
-      
-    private String ctype;
 
-      /**
+    private String CTYPE;
+
+    /**
      * 满载率:DZ大组；ML满列；SH散货；
      */
-      
-    private String vmzl;
 
-      /**
+    private String VMZL;
+
+    /**
      * 始发省区代码
      */
-      
-    private String vqysqdm;
 
-      /**
+    private String VQYSQDM;
+
+    /**
      * 始发城市代码
      */
-      
-    private String vqysxdm;
 
-      /**
+    private String VQYSXDM;
+
+    /**
      * 分拨省区代码
      */
-      
-    private String vfbsqdm;
 
-      /**
+    private String VFBSQDM;
+
+    /**
      * 分拨城市代码
      */
-      
-    private String vfbsxdm;
 
-      /**
+    private String VFBSXDM;
+
+    /**
      * 终到省份代码
      */
-      
-    private String vmdsqdm;
 
-      /**
+    private String VMDSQDM;
+
+    /**
      * 终到城市代码
      */
-      
-    private String vmdsxdm;
 
-      /**
+    private String VMDSXDM;
+
+    /**
      * 终到地级市代码
      */
-      
-    private String vmdxqdm;
 
-      /**
+    private String VMDXQDM;
+
+    /**
      * 终到运区代码
      */
-      
-    private String vmdyqdm;
 
-      /**
+    private String VMDYQDM;
+
+    /**
      * 分段物流时间:公路
      */
-      
-    private Long nwlsjG;
 
-      /**
+    private Long NWLSJ_G;
+
+    /**
      * 分段物流时间:集港
      */
-      
-    private Long nwlsjJ;
 
-      /**
+    private Long NWLSJ_J;
+
+    /**
      * 分段物流时间:铁水
      */
-      
-    private Long nwlsjTs;
 
-      /**
+    private Long NWLSJ_TS;
+
+    /**
      * 分段物流时间:分拨
      */
-      
-    private Long nwlsjF;
 
-      /**
+    private Long NWLSJ_F;
+
+    /**
      * 整体考核物流时间
      */
-      
-    private Long nwlsjAll;
 
-      /**
+    private Long NWLSJ_ALL;
+
+    /**
      * 创建时间
      */
-      
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-      
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

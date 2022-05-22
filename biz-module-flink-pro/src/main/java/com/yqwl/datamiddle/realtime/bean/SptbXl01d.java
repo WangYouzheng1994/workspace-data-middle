@@ -1,8 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
-
 import lombok.Data;
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 
 /**
  * <p>
@@ -10,82 +9,77 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
-public class SptbXl01d implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-
-    private Long idnum;
+@EqualsAndHashCode(callSuper = false)
+public class SptbXl01d {
 
     /**
      * 线路代码
      */
 
-    private String cxldm;
+    private String CXLDM;
 
     /**
      * 起点代码
      */
 
-    private String cqddm;
+    private String CQDDM;
 
     /**
      * 起点名称
      */
 
-    private String vqdmc;
+    private String VQDMC;
 
     /**
      * 终点代码
      */
 
-    private String czddm;
+    private String CZDDM;
 
     /**
      * 终点名称
      */
 
-    private String vzdmc;
+    private String VZDMC;
 
     /**
      * 操作员代码
      */
 
-    private String cczydm;
+    private String CCZYDM;
 
     /**
      * 操作时间
      */
 
-    private Long dczsj;
+    private Long DCZSJ;
 
     /**
      * 停用标识
      */
 
-    private String ctybs;
+    private String CTYBS;
 
     /**
      * 停用日期
      */
 
-    private Long dtyrq;
+    private Long DTYRQ;
 
     /**
      * 主机公司
      */
 
-    private String czjgsdm;
+    private String CZJGSDM;
 
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
 
-    private Long warehouseUpdatetime;
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

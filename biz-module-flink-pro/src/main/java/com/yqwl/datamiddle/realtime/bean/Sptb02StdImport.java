@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,113 +11,111 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Sptb02StdImport implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
+    private Integer ID;
 
-        
-    private Integer id;
-
-      /**
+    /**
      * 结算单编号（作废了）
      */
-          
-    private String cjsdbh;
 
-      /**
+    private String CJSDBH;
+
+    /**
      * 配载单编号
      */
-          
-    private String cpzdbh;
 
-      /**
+    private String CPZDBH;
+
+    /**
      * 清单号
      */
-          
-    private String vwxdwdm;
 
-      /**
+    private String VWXDWDM;
+
+    /**
      * 任务单号
      */
-          
-    private String cjhdh;
 
-      /**
+    private String CJHDH;
+
+    /**
      * 运输方式  公路:G 铁路：T或L1  水路 :S  集港 ：J  水运短拨：SD 铁路短拨：TD （作废了）
      */
-          
-    private String vysfs;
 
-      /**
+    private String VYSFS;
+
+    /**
      * SD:收单  SCSJ:试乘试驾
      */
-          
-    private String type;
 
-      /**
+    private String TYPE;
+
+    /**
      * 创建人
      */
-          
-    private String createBy;
 
-      /**
+    private String CREATE_BY;
+
+    /**
      * 创建人姓名
      */
-          
-    private String createByName;
 
-      /**
+    private String CREATE_BY_NAME;
+
+    /**
      * 创建时间
      */
-          
-    private Long createDate;
 
-      /**
+    private Long CREATE_DATE;
+
+    /**
      * 收单时间
      */
-          
-    private Long sdDate;
 
-      /**
+    private Long SD_DATE;
+
+    /**
      * 监控理论到货时间
      */
-          
-    private Long vdhzsxGps;
 
-      /**
+    private Long VDHZSX_GPS;
+
+    /**
      * 监控到货时间
      */
-          
-    private Long dgpsdhsj;
 
-      /**
+    private Long DGPSDHSJ;
+
+    /**
      * 审核人
      */
-          
-    private String approverUser;
 
-      /**
+    private String APPROVER_USER;
+
+    /**
      * 大众审核时间 20210430 DTF
      */
-          
-    private Long dshsjDz;
 
-      /**
+    private Long DSHSJ_DZ;
+
+    /**
      * 创建时间
      */
-          
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-          
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

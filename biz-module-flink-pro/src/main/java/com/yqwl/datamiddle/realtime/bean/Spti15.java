@@ -1,7 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -11,66 +11,62 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Spti15 implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-
-    private Long idnum;
-
-
-    private String cddy;
+    private String CDDY;
 
 
-    private String cyysdm;
+    private String CYYSDM;
 
 
-    private Long dczrq;
+    private Long DCZRQ;
 
 
-    private String cczydm;
+    private String CCZYDM;
 
 
-    private String vbz;
+    private String VBZ;
 
     /**
      * 多公司
      */
 
-    private String cgs;
+    private String CGS;
 
     /**
      * 停用标识
      */
 
-    private String ctybs;
+    private String CTYBS;
 
     /**
      * 停用日期
      */
 
-    private Long dtyrq;
+    private Long DTYRQ;
 
     /**
      * 停用原因
      */
 
-    private String ctyyy;
+    private String CTYYY;
 
     /**
      * 创建时间
      */
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
 
-    private Long warehouseUpdatetime;
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }

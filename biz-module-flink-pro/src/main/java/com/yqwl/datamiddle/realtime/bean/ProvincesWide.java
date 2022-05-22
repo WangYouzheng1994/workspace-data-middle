@@ -149,26 +149,26 @@ public class ProvincesWide {
     public void mergeSysc07(Sysc07 sysc07Info){
         if (sysc07Info !=null){
             this.ts=sysc07Info.getTs();
-            if (sysc07Info.getCsqdm() !=null){
-                this.csqdm=sysc07Info.getCsqdm();
+            if (sysc07Info.getCSQDM() !=null){
+                this.csqdm=sysc07Info.getCSQDM();
             }
-            if (sysc07Info.getVsqmc() !=null){
-                this.vsqmc=sysc07Info.getVsqmc();
+            if (sysc07Info.getVSQMC() !=null){
+                this.vsqmc=sysc07Info.getVSQMC();
             }
-            if (sysc07Info.getCjc2() !=null){
-                this.vsqjc=sysc07Info.getCjc2();
+            if (sysc07Info.getCJC2() !=null){
+                this.vsqjc=sysc07Info.getCJC2();
             }
-            if (sysc07Info.getCjc() !=null){
-                this.cjc=sysc07Info.getCjc();
+            if (sysc07Info.getCJC() !=null){
+                this.cjc=sysc07Info.getCJC();
             }
-            if (sysc07Info.getCdqdm() !=null){
-                this.cdqdm=sysc07Info.getCdqdm();
+            if (sysc07Info.getCDQDM() !=null){
+                this.cdqdm=sysc07Info.getCDQDM();
             }
-            if (sysc07Info.getCwlmc() !=null){
-                this.cwlmc=sysc07Info.getCwlmc();
+            if (sysc07Info.getCWLMC() !=null){
+                this.cwlmc=sysc07Info.getCWLMC();
             }
-            if (sysc07Info.getCwlbm() !=null){
-                this.cwlbmSq=sysc07Info.getCwlbm();
+            if (sysc07Info.getCWLBM() !=null){
+                this.cwlbmSq=sysc07Info.getCWLBM();
             }
 
         }
@@ -180,43 +180,43 @@ public class ProvincesWide {
 
         if (sysc08Info != null){
 //            提前给nvl( d.cdsdm, b.csxdm ) cdsdm 中的cdsdm给赋值
-            if (sysc08Info.getCsxdm() !=null){
-                this.cdsdm=sysc08Info.getCsxdm();
+            if (sysc08Info.getCSXDM() !=null){
+                this.cdsdm=sysc08Info.getCSXDM();
             }
-            if (sysc08Info.getCsxdm() !=null){
-                this.csxdm=sysc08Info.getCsxdm();
+            if (sysc08Info.getCSXDM() !=null){
+                this.csxdm=sysc08Info.getCSXDM();
             }
-            if (sysc08Info.getVsxmc() !=null){
-                this.vsxmc=sysc08Info.getVsxmc();
+            if (sysc08Info.getVSXMC() !=null){
+                this.vsxmc=sysc08Info.getVSXMC();
 //             提前给nvl( d.vdsmc, b.vsxmc ) vdsmc 中的vdsmc给赋值
-                this.vdsmc=sysc08Info.getVsxmc();
+                this.vdsmc=sysc08Info.getVSXMC();
             }
-            if (sysc08Info.getCwlbm() !=null){
-                this.cwlbm3=sysc08Info.getCwlbm();
+            if (sysc08Info.getCWLBM() !=null){
+                this.cwlbm3=sysc08Info.getCWLBM();
             }
-            if (sysc08Info.getCwlmc() !=null){
-                this.cwlmc3=sysc08Info.getCwlmc();
+            if (sysc08Info.getCWLMC() !=null){
+                this.cwlmc3=sysc08Info.getCWLMC();
             }
-            if (sysc08Info.getNjd() !=null){
-                this.njd=sysc08Info.getNjd();
+            if (sysc08Info.getNJD() !=null){
+                this.njd=sysc08Info.getNJD();
             }
-            if (sysc08Info.getNwd() !=null){
-                this.nwd=sysc08Info.getNwd();
+            if (sysc08Info.getNWD() !=null){
+                this.nwd=sysc08Info.getNWD();
             }
-            if (sysc08Info.getCdsdm() !=null){
-                this.cdsdm08=sysc08Info.getCdsdm();
+            if (sysc08Info.getCDSDM() !=null){
+                this.cdsdm08=sysc08Info.getCDSDM();
             }
         }
     }
     public void mergeSysc09(Sysc09 sysc09Info){
         if (sysc09Info !=null){
-            this.cdsdm=sysc09Info.getCdsdm();
-            this.vdsmc=sysc09Info.getVdsmc();
+            this.cdsdm=sysc09Info.getCDSDM();
+            this.vdsmc=sysc09Info.getVDSMC();
         }
     }
     public void mergeMdac01(Mdac01 mdac01Info){
         if (mdac01Info !=null){
-            this.vdqmc=mdac01Info.getVdqmc();
+            this.vdqmc=mdac01Info.getVDQMC();
         }
     }
 

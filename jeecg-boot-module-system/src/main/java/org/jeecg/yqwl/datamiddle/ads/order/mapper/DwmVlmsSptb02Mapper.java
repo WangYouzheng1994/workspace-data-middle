@@ -18,31 +18,31 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
      /**
       * 出库量
-      * @param params
+      * @param baseBrandTime
       * @return
       */
-     List<GetBaseBrandTime> stockOUtList(@Param("params") DwmVlmsSptb02 params);
+     List<ShipmentDTO > stockOutList(@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10 发运量
-      * @param params
+      * @param baseBrandTime
       * @return
       */
-     List<GetBaseBrandTime> sendList(@Param("params") DwmVlmsSptb02 params);
+     List<ShipmentDTO > sendList(@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10待发量
-      * @param params
+      * @param baseBrandTime
       * @return
       */
-     List<GetBaseBrandTime> pendingList (@Param("params") DwmVlmsSptb02 params);
+     List<ShipmentDTO > pendingList (@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10在途量
-      * @param params
+      * @param baseBrandTime
       * @return
       */
-     List<GetBaseBrandTime> onWayList (@Param("params") DwmVlmsSptb02 params);
+     List<ShipmentDTO > onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 按条件查询计划量

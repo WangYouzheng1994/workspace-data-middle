@@ -1,6 +1,9 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -11,131 +14,150 @@ import java.sql.Timestamp;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
-
+@EqualsAndHashCode(callSuper = false)
 public class Sysc08 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
-
-      /**
+    /**
      * 市县代码
      */
-    private String csxdm;
 
-      /**
+    private String CSXDM;
+
+    /**
      * 省区代码
      */
-    private String csqdm;
 
-      /**
+    private String CSQDM;
+
+    /**
      * 市县名称
      */
-    private String vsxmc;
 
-      /**
+    private String VSXMC;
+
+    /**
      * 备注
      */
-    private String vbz;
 
-    
-    private Integer id;
+    private String VBZ;
 
-      /**
+
+    private Integer ID;
+
+    /**
      * 物流标准编码。选择，来源于M平台
      */
-    private String cwlbm;
 
-      /**
+    private String CWLBM;
+
+    /**
      * 物流标准名称。来源于M平台
      */
-    private String cwlmc;
 
-      /**
+    private String CWLMC;
+
+    /**
      * 同步日期
      */
-    private Long dtbrq;
 
-      /**
+    private Long DTBRQ;
+
+    /**
      * 版本号
      */
-    private Integer batchno;
 
-      /**
+    private Integer BATCHNO;
+
+    /**
      * 地市代码。SYSC09.CDSDM
      */
-    private String cdsdm;
 
-      /**
+    private String CDSDM;
+
+    /**
      * 经度
      */
-    private BigDecimal njd;
 
-      /**
+    private BigDecimal NJD;
+
+    /**
      * 纬度
      */
-    private BigDecimal nwd;
 
-      /**
+    private BigDecimal NWD;
+
+    /**
      * 时间戳。BI提数据
      */
-    private Long dstamp;
 
-      /**
+    private Long DSTAMP;
+
+    /**
      * 20171206 红旗市县代码乱码 处理
      */
-    private String csxdmHq;
 
-      /**
+    private String CSXDM_HQ;
+
+    /**
      * 审批标识：0  未审批  1：已审批
      */
-    private String approvalFlag;
 
-      /**
+    private String APPROVAL_FLAG;
+
+    /**
      * 审批人
      */
-    private String approvalUser;
 
-      /**
+    private String APPROVAL_USER;
+
+    /**
      * 审批日期
      */
-    private Long approvalDate;
 
-      /**
+    private Long APPROVAL_DATE;
+
+    /**
      * 半径
      */
-    private BigDecimal nradius;
 
-      /**
+    private BigDecimal NRADIUS;
+
+    /**
      * 终审审批标识：0  未审批  1：已审批
      */
-    private String finalApprovalFlag;
 
-      /**
+    private String FINAL_APPROVAL_FLAG;
+
+    /**
      * 终审审批人
      */
-    private String finalApprovalUser;
 
-      /**
+    private String FINAL_APPROVAL_USER;
+
+    /**
      * 终审审批日期
      */
-    private Long finalApprovalDate;
 
-      /**
+    private Long FINAL_APPROVAL_DATE;
+
+    /**
      * 创建时间
      */
-    private Long warehouseCreatetime;
 
-      /**
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
      * 更新时间
      */
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
-    //新加kafka的ts时间戳
+    @JSONField(serialize = false)
     private Timestamp ts;
-
 }

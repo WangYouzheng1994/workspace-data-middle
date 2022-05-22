@@ -10,7 +10,7 @@ import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
@@ -39,7 +39,7 @@ public class OracleCDCKafkaApp {
         properties.put("database.serverTimezone", "Asia/Shanghai");
 
         //读取oracle连接配置属性
-        Props props = PropertiesUtil.getProps();
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
                 .port(props.getInt("cdc.oracle.port"))
@@ -64,16 +64,18 @@ public class OracleCDCKafkaApp {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
-        DataStreamSource<String> source = env.addSource(oracleSource);
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
-
+        //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
-        source.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
 
-        source.print("结果数据输出:");
+        //输出到kafka
+        oracleSourceStream.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
+
+        //oracleSourceStream.print("结果数据输出:");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

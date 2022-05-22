@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.data.Decimal;
+import scala.annotation.meta.field;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -253,7 +254,7 @@ public class JsonPartUtil {
                     value = new Long(0L);
                 } else if (field.getType().equals(Date.class)) {
                     value = new Date();
-                } else if (field.getType().equals(Decimal.class)) {
+                } else if (field.getType().equals(BigDecimal.class)) {
                     value = new BigDecimal(0);
                 } else if (field.getType().equals(Object.class)) {
                     value = new Object();

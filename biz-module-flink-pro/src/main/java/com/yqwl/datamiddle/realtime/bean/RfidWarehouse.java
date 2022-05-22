@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,113 +11,110 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-10
+ * @since 2022-05-18
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class RfidWarehouse implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
-      private Long idnum;
+    private Integer ID;
 
-        
-    private Integer id;
-
-      /**
+    /**
      * 库房代码
      */
-          
-    private String warehouseCode;
 
-      /**
+    private String WAREHOUSE_CODE;
+
+    /**
      * 库房名称
      */
-          
-    private String warehouseName;
 
-      /**
+    private String WAREHOUSE_NAME;
+
+    /**
      * 归属基地
      */
-          
-    private String partBase;
 
-      /**
+    private String PART_BASE;
+
+    /**
      * 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
      */
-          
-    private String warehouseType;
 
-      /**
+    private String WAREHOUSE_TYPE;
+
+    /**
      * 站台对应的城市
      */
-          
-    private String city;
 
-      /**
+    private String CITY;
+
+    /**
      * 默认在库量  number 转 int
      */
-          
-    private Integer defalutValue;
 
-      /**
+    private Integer DEFALUT_VALUE;
+
+    /**
      * 标准库容     number 转 int
      */
-          
-    private Integer bzkr;
 
-      /**
+    private Integer BZKR;
+
+    /**
      * 最大库容     number 转 int
      */
-          
-    private Integer zdkr;
 
-      /**
+    private Integer ZDKR;
+
+    /**
      * 数据中台代码
      */
-          
-    private String datacenterCode;
 
-      /**
+    private String DATACENTER_CODE;
+
+    /**
      * 顺序 2019 12 23 宋琳添加   number 转 int
      */
-          
-    private Integer sequence;
 
-      /**
+    private Integer SEQUENCE;
+
+    /**
      * 省份2019 12 23 宋琳添加
      */
-          
-    private String province;
 
-      /**
+    private String PROVINCE;
+
+    /**
      * 整车数据代码
      */
-          
-    private String zcCode;
 
-      /**
+    private String ZC_CODE;
+
+    /**
      * 主机公司代码 1 大众  2 奔腾 3解放  17 红旗  29 马自达
      */
-          
-    private String czjgsdm;
 
-      /**
+    private String CZJGSDM;
+
+    /**
      * 数据中台代码备份
      */
-          
-    private String datacenterCodeBzk;
 
-      /**
+    private String DATACENTER_CODE_BZK;
+
+    /**
      * 所属省份
      */
-          
-    private String provice;
 
-        
-    private Long warehouseCreatetime;
+    private String PROVICE;
 
-        
-    private Long warehouseUpdatetime;
+
+    private Long WAREHOUSE_CREATETIME;
+
+
+    private Long WAREHOUSE_UPDATETIME;
 
 
 }
