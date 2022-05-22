@@ -65,6 +65,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime) {
+        String timeType = baseBrandTime.getTimeType();
         List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.getShipment(baseBrandTime);
         //todo:对返回前端的值做处理
         List<String> timingList = this.formatTimingList(baseBrandTime);
@@ -80,10 +81,19 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
             String baseName = "";
             String customerName = "";
             Integer totalNum = null;
-
+            String yearAndData="";
+//            1. 日  : ”day”   默认为日
+//            2. 周  : ”week”
+//            2. 月  : ”month”
+//            3. 季  : ”quarter”
+//            4. 年  : ”year”
             for (ShipmentDTO shipmentDTO : shipment) {
                 // 时间
                 dates = shipmentDTO.getDates();
+                String yearOfDates = shipmentDTO.getYearOfDates();
+                if (timeType.equals("week")||timeType.equals("month")||timeType.equals("quarter")){
+                    yearAndData=yearOfDates+"-"+dates;
+                }
                 // 基地名称 / 品牌
                 baseName = shipmentDTO.getGroupName();
                 // 数量
@@ -101,11 +111,16 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
                         finalItemMap.put(i, 0);
                     });
                 }
-                // 放数据之前 比较一下是否在应返回的范围内。
-                itemMap.put(dates, totalNum);
+                // 放数据之前 比较一下是否在应返回的范围内。 这里可以实现的原因是map可以自动去重
+                if (timeType.equals("week")||timeType.equals("month")||timeType.equals("quarter")){
+                    itemMap.put(yearAndData, totalNum);
+                }else {
+                    itemMap.put(dates, totalNum);
+                }
             }
 
             System.out.println(JSONArray.toJSONString(timingList));
+//             Map<String, Map> dbMap = new HashMap();  dbMap.forEach(baseName,itemMap)
             dbMap.forEach((k, v) -> {
                 ShipmentVO.Item item = new ShipmentVO.Item();
                 item.setName(k);
@@ -126,8 +141,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     @Override
     public Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime) {
         /**
-         *
-         *
+         *1.获取已到货未超理论实践的值
          */
         DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
         Double percentage = arrivalRate.getPercentage();
@@ -148,21 +162,81 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
         String startTime = "";
         String endTime = "";
-
+        String yearWeek="";
+        String timeType = baseBrandTime.getTimeType();
         List<DateTime> dateTimes = null;
+        LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
+        List<String> timingList = new ArrayList<>();
+
+
         // 从今天开始前推七天
         if (baseBrandTime.getStartTime() == null && baseBrandTime.getEndTime() == null) {
             dateTimes = DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);
         } else {
-            dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
-        }
+            if (timeType.equals("day")){            //时间类型如果是天
+                dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
+                for (DateTime dateTime : dateTimes) {
+                    timingList.add(dateTime.toDateStr());
+                }
 
-        // 格式化成前端要求的格式。
-        List<String> timingList = new ArrayList<>();
-        for (DateTime dateTime : dateTimes) {
-            timingList.add(dateTime.toDateStr());
-        }
+            } else if (timeType.equals("week")){    //时间类型如果是周
+                 dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
+                //分别取年份和一年的第几个周拼接成"20xx-x"的形式
+                 for (DateTime dateTime : dateTimes) {
+                    Integer field = dateTime.getField(DateField.YEAR);
+                    String year = field.toString();
+                    Integer weekOfYear = dateTime.weekOfYear();
+                    yearWeek = year +"-"+ weekOfYear;
+                    linkedHashSet.add(yearWeek);
+                }
+                System.out.println(linkedHashSet);
+                // 格式化成前端要求的格式。
+                /* 注掉是因为有更简洁的写法,下面是他的升级版:
+                for (String date : linkedHashSet) {
+                      timingList.add(date);
+                }*/
+                timingList.addAll(linkedHashSet);
 
+            } else if(timeType.equals("month")){    //时间类型如果是月
+                dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
+                //分别取年份和月份拼接成"20xx-x"的形式
+                for (DateTime dateTime : dateTimes) {
+                    Integer field = dateTime.getField(DateField.YEAR);
+                    String year = field.toString();
+                    Integer monthOfYear = dateTime.monthStartFromOne();
+                    yearWeek = year +"-"+ monthOfYear;
+                    linkedHashSet.add(yearWeek);
+                }
+                System.out.println(linkedHashSet);
+                // 格式化成前端要求的格式。
+                timingList.addAll(linkedHashSet);
+            } else if (timeType.equals("quarter")){ //时间类型如果是季度
+                dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
+                //分别取年份和季度拼接成"20xx-x"的形式
+                for (DateTime dateTime : dateTimes) {
+                    Integer field = dateTime.getField(DateField.YEAR);
+                    String year = field.toString();
+                    Integer quarterOfYear = dateTime.quarter();
+                    yearWeek = year +"-"+ quarterOfYear;
+                    linkedHashSet.add(yearWeek);
+                }
+                System.out.println(linkedHashSet);
+                // 格式化成前端要求的格式。
+                timingList.addAll(linkedHashSet);
+            } else if (timeType.equals("year")){    //时间类型如果是年
+                dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
+                //直接取年份
+                for (DateTime dateTime : dateTimes) {
+                    Integer field = dateTime.getField(DateField.YEAR);
+                    String year = field.toString();
+                    linkedHashSet.add(year);
+                }
+                System.out.println(linkedHashSet);
+                // 格式化成前端要求的格式。
+                timingList.addAll(linkedHashSet);
+            }
+        }
         return timingList;
+
     }
 }

@@ -2,16 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
     <!--按条件查询计划量    -->
-    <select id="getPlanAmount"
-     parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-     resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
-    >
+    <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
-        COUNT(dvs.DDJRQ) as totalNum
-            <if test="params.cqwh != '' and params.czjgsdm='' ">
-                , dvs.CUSTOMER_NAME
-            </if>
-                , dvs.BASE_NAME ,
+        COUNT(dvs.DDJRQ) as totalNum,
+            <choose>
+                <when test="params.cqwh != '' and params.czjgsdm=''">
+                    dvs.CUSTOMER_NAME as groupName,
+                </when>
+                <otherwise>
+                    dvs.BASE_NAME as groupName,
+                </otherwise>
+            </choose>
             <if test=" params.timeType == 'day' ">
                 toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
             </if>
@@ -49,17 +50,10 @@
                  group by dvs1.CJSDBH
             )
         </where>
-            group by dates
-                <if test="params.cqwh != '' and params.czjgsdm='' ">
-                    , dvs.CUSTOMER_NAME
-                </if>
-                    , dvs.BASE_NAME
+            group by dates,groupName
     </select>
     <!--按条件查询发运量    -->
-    <select id="getShipment"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
-    >
+    <select id="getShipment" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.SHIPMENT_TIME) as totalNum,
         <choose>
@@ -75,13 +69,16 @@
             toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
         </if>
         <if test=" params.timeType == 'week' ">
-            toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))+1 as dates
+            toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))+1 as dates,
+            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
         </if>
         <if test=" params.timeType == 'month' ">
-            toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+            toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates,
+            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
         </if>
         <if test=" params.timeType == 'quarter' ">
-            toQuarter(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+            toQuarter(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates,
+            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
         </if>
         <if test=" params.timeType == 'year' ">
             toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
@@ -109,6 +106,9 @@
             )
         </where>
         group by dates ,groupName
+        <if test=" params.timeType == 'week' || params.timeType == 'month' || params.timeType == 'quarter'">
+        , yearOfDates
+        </if>
     </select>
 
     <!--按条件查询到货及时率    -->

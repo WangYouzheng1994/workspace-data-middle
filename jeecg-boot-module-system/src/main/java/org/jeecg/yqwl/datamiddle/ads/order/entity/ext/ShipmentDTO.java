@@ -29,4 +29,9 @@ public class ShipmentDTO {
      * 年：
      */
     private String dates;
+
+    /**
+     * 年份(为拼接周,月,季度而准备的字段)
+     */
+    private String yearOfDates;
 }

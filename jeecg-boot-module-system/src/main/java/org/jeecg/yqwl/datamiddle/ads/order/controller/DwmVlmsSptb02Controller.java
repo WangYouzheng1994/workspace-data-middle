@@ -13,6 +13,7 @@ import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +57,9 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
         // TODO: 参数校验。
+        Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
 
-        return Result.OK(dwmVlmsSptb02Service.findShipment(baseBrandTime)) ;
+        return shipment ;
     }
 
     /**
@@ -72,14 +74,15 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
 
         // TODO: 起运
         // 到货
-        dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
-
+//        dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        System.out.println(baseBrandTime);
+        String s = baseBrandTime.toString();
+        System.out.println(s);
         // TODO: 合并出返回对象。
         TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
         timelinessRatioVO.setAllotPercent(10); //分配及时率
         timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
         timelinessRatioVO.setStartPercent(50);//起运及时率
-        timelinessRatioVO.setHalfwayPercent(90);//在途及时率
         timelinessRatioVO.setEndPercent(100);//到货及时率
         return Result.OK(timelinessRatioVO) ;
     }

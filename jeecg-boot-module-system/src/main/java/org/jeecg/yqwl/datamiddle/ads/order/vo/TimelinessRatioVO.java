@@ -23,10 +23,6 @@ public class TimelinessRatioVO {
      */
     private Integer startPercent;
     /**
-     * 在途及时率
-     */
-    private Integer halfwayPercent;
-    /**
      * 到货及时率
      */
     private Integer endPercent;
