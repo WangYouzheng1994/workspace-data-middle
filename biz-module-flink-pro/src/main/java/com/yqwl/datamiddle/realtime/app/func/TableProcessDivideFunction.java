@@ -5,6 +5,7 @@ import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
@@ -30,8 +31,8 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
         this.outputTag = outputTag;
     }
 
-    //用于在内存中存储表配置对象 [表名,表配置信息]
-    private Map<String, TableProcess> tableProcessMap = new HashMap<>();
+    //用于在内存中存储表配置对象 [表名,[表配置信息]]
+    private Map<String, List<TableProcess>> tableProcessMap = new HashMap<>();
     //表示目前内存中已经存在的要放入mysql中的表
     private Set<String> existsTables = new HashSet<>();
 
@@ -71,7 +72,14 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
             //拼接字段创建主键
             String key = sourceTable + ":" + operateType;
             //将数据存入结果集合
-            tableProcessMap.put(key, tableProcess);
+            if (tableProcessMap.containsKey(key)) {
+                tableProcessMap.get(key).add(tableProcess);
+            } else {
+                List<TableProcess> tableProcessItemlist = new ArrayList<>();
+                tableProcessItemlist.add(tableProcess);
+                tableProcessMap.put(key, tableProcessItemlist);
+            }
+
         }
         if (MapUtils.isEmpty(tableProcessMap)) {
             log.error("读取分流配置表异常");
@@ -93,26 +101,28 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
         if (MapUtils.isNotEmpty(tableProcessMap)) {
             //将源表和操作类型组合成key, 例如：key=MDAC32:insert
             String key = StringUtils.joinWith(":", lowerTableName, type);
-            TableProcess tableProcess = tableProcessMap.get(key);
-            if (tableProcess != null) {
-                //将sink的表添加到当前流记录中
-                jsonObj.put("sink_table", tableProcess.getSinkTable());
-                jsonObj.put("sink_pk", tableProcess.getSinkPk());
+            List<TableProcess> tableProcesses = tableProcessMap.get(key);
+            if (CollectionUtils.isNotEmpty(tableProcesses)) {
+                for (TableProcess tableProcess : tableProcesses) {
+                    //将sink的表添加到当前流记录中
+                    jsonObj.put("sink_table", tableProcess.getSinkTable());
+                    jsonObj.put("sink_pk", tableProcess.getSinkPk());
 
-                //比对sinkType, 如果是写到mysql，打上标签
-                if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                    // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
-                    // 单条处理
-                    // 对数据转换成实体类,对默认值进行赋值
-                    Class<?> aClass = Class.forName(tableProcess.getClassName());
-                    Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
-                    Object bean = JsonPartUtil.getBean(afterObj);
-                    jsonObj.put("after", bean);
-                    ctx.output(outputTag, jsonObj);
+                    //比对sinkType, 如果是写到mysql，打上标签
+                    if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                        // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
+                        // 单条处理
+                        // 对数据转换成实体类,对默认值进行赋值
+                        Class<?> aClass = Class.forName(tableProcess.getClassName());
+                        Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
+                        Object bean = JsonPartUtil.getBean(afterObj);
+                        jsonObj.put("after", bean);
+                        ctx.output(outputTag, jsonObj);
 
-                    // 如果是写到kafka的 那么直接写入到kafka中
-                } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                    out.collect(jsonObj);
+                        // 如果是写到kafka的 那么直接写入到kafka中
+                    } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                        out.collect(jsonObj);
+                    }
                 }
             } else {
                 log.info("No This Key: {}", key);
