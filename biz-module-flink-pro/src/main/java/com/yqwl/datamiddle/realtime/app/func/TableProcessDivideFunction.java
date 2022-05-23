@@ -14,6 +14,7 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description: 消费kafka中的数据将表进行分流处理
@@ -32,7 +33,7 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
     }
 
     //用于在内存中存储表配置对象 [表名,[表配置信息]]
-    private Map<String, List<TableProcess>> tableProcessMap = new HashMap<>();
+    private Map<String, List<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
     //表示目前内存中已经存在的要放入mysql中的表
     private Set<String> existsTables = new HashSet<>();
 
