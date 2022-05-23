@@ -15,6 +15,7 @@ import org.apache.flink.util.OutputTag;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description: 消费kafka中的数据将表进行分流处理
@@ -76,7 +77,7 @@ public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSON
             if (tableProcessMap.containsKey(key)) {
                 tableProcessMap.get(key).add(tableProcess);
             } else {
-                List<TableProcess> tableProcessItemlist = new ArrayList<>();
+                List<TableProcess> tableProcessItemlist = new CopyOnWriteArrayList<>();
                 tableProcessItemlist.add(tableProcess);
                 tableProcessMap.put(key, tableProcessItemlist);
             }
