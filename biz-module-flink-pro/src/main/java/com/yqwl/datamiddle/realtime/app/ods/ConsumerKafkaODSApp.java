@@ -36,10 +36,7 @@ import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: 消费kafka下同一个topic，将表进行分流
@@ -65,16 +62,22 @@ public class ConsumerKafkaODSApp {
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+
+        Properties properties = new Properties();
+        properties.put("transaction.state.log.replication.factor", Short.valueOf("3"));
+        properties.put("transaction.state.log.min.isr", 2);
+
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                .setProperties(properties)
                 .build();
         //将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
                 .uid("jsonDataStr").name("jsonDataStr");
-        //env.setParallelism(1);
+        env.setParallelism(1);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
