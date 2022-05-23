@@ -462,6 +462,5 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
             }
         }
         return timingList;
-
     }
 }
