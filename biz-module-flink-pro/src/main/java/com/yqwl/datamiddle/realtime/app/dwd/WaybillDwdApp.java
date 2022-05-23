@@ -1,12 +1,15 @@
 package com.yqwl.datamiddle.realtime.app.dwd;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.DwdMysqlSink;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
@@ -29,6 +32,9 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -248,6 +254,7 @@ public class WaybillDwdApp {
                 },
                 60, TimeUnit.SECONDS).uid("mdac32DS").name("mdac32DS");
 
+
         //将实体类映射成json
         SingleOutputStreamOperator<String> mapJson = mdac32DS.map(DwdSptb02::toString).uid("mapJson").name("mapJson");
 
@@ -262,7 +269,6 @@ public class WaybillDwdApp {
         log.info("将处理完的数据保存到kafka中");
         //将处理完的数据保存到mysql中
         //mapJson.addSink(new DwdMysqlSink()).setParallelism(1).uid("dwd-sink-mysql").name("dwd-sink-mysql");
-        log.info("将处理完的数据保存到mysql中");
         env.execute("sptb02-sink-kafka-dwd");
         log.info("sptb02dwd层job任务开始执行");
     }

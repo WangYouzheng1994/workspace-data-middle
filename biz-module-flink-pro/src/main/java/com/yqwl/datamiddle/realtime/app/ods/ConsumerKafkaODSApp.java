@@ -156,7 +156,7 @@ public class ConsumerKafkaODSApp {
                             map.put(sinkTable, list);
                         }
                     }
-                    System.err.println("map里数据数量:" + map.size());
+                    //System.err.println("map里数据数量:" + map.size());
                     log.info("map里数据数量:" + map.size());
                     collector.collect(map);
                 }
@@ -168,8 +168,7 @@ public class ConsumerKafkaODSApp {
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");
 
-        log.info("事实表sink到流处理环境");
+        log.info("流处理程序开始执行");
         env.execute("consumer-kafka-ods");
-        log.info("事实表sink到流处理环境");
     }
 }

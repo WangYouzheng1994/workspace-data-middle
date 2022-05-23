@@ -11,14 +11,13 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-18
+ * @since 2022-05-23
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Spti32Dz implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
 
     /**
      * 运输方式

@@ -34,7 +34,12 @@ public class MybatisPlusCodeGenerator {
 
     //要生成的表名
     private static String[] tables = {
-            "dwm_vlms_sptb02",
+            "ods_vlms_rail_plan_allot_site",
+            "ods_vlms_spti32_dz",
+            "ods_vlms_sptb02_end_rk",
+            "ods_vlms_sptb02_railsea_ck",
+            "ods_vlms_sptc03_initial",
+            "ods_vlms_sysc03",
 
     };
 
