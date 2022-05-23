@@ -32,7 +32,6 @@ public class MysqlUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-
             //注册驱动
             Class.forName(MysqlConfig.DRIVER);
             Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);

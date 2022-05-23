@@ -265,10 +265,8 @@ public class WaybillDwdApp {
                 KafkaTopicConst.DWD_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
         //将处理完的数据保存到kafka
-        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
         log.info("将处理完的数据保存到kafka中");
-        //将处理完的数据保存到mysql中
-        //mapJson.addSink(new DwdMysqlSink()).setParallelism(1).uid("dwd-sink-mysql").name("dwd-sink-mysql");
+        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
         env.execute("sptb02-sink-kafka-dwd");
         log.info("sptb02dwd层job任务开始执行");
     }

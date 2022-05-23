@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
@@ -38,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwmApp {
+public class WaybillDwmApp1 {
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
@@ -162,14 +161,201 @@ public class WaybillDwmApp {
                 },
                 60, TimeUnit.SECONDS).uid("theoryShipmentTimeDS").name("theoryShipmentTimeDS");
 
+        /**
+         * 处理主机公司名称
+         * 关联sptc61 c1 on a.CZJGSDM = c1.cid，取c1.cjc
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc61DS = AsyncDataStream.unorderedWait(
+                theoryShipmentTimeDS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC61,
+                        "CID") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getCZJGSDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setCUSTOMER_NAME(dimInfoJsonObj.getString("CJC"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc61DS").name("sptc61DS");
+
+        /**
+         * 处理发车基地名称
+         * 关联sptc62 c2 on a.cqwh = c2.cid，取c2.cname
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc62DS = AsyncDataStream.unorderedWait(
+                sptc61DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC62,
+                        "CID") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getCQWH();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setBASE_NAME(dimInfoJsonObj.getString("CNAME"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc62DS").name("sptc62DS");
+
+
+        /**
+         * 处理发运仓库名称
+         * 关联sptc34 b on a.vwlckdm = b.vwlckdm， 取b.vwlckmc
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc34DS = AsyncDataStream.unorderedWait(
+                sptc62DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC34,
+                        "VWLCKDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getVWLCKDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setSHIPMENT_WAREHOUSE_NAME(dimInfoJsonObj.getString("VWLCKMC"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
+
+        /**
+         * 处理 起货地 物理仓库代码  省区 县区名称
+         * 关联合并后的维表 dim_vlms_provinces
+         *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
+         *   inner join mdac32 e on a.cdhddm = e.cdhddm
+         *   inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
+         *   inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> provincesSptc34DS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.DIM_VLMS_PROVINCES,
+                        "csqdm,csxdm") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return Arrays.asList(dwmSptb02.getSTART_PROVINCE_CODE(), dwmSptb02.getSTART_CITY_CODE());
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //省区名称：山东省
+                        dwmSptb02.setSTART_PROVINCE_NAME(dimInfoJsonObj.getString("vsqmc"));
+                        //市县名称: 齐河
+                        dwmSptb02.setSTART_CITY_NAME(dimInfoJsonObj.getString("vsxmc"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("provincesSptc34DS").name("provincesSptc34DS");
+
+
+        /**
+         * 处理 到货地  省区 县区名称
+         * 关联合并后的维表 dim_vlms_provinces
+         *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
+         *   inner join mdac32 e on a.cdhddm = e.cdhddm
+         *   inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
+         *   inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> provincesMdac32DS = AsyncDataStream.unorderedWait(
+                provincesSptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.DIM_VLMS_PROVINCES,
+                        "csqdm,csxdm") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return Arrays.asList(dwmSptb02.getEND_PROVINCE_CODE(), dwmSptb02.getEND_CITY_CODE());
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //例如 省区名称：山东省
+                        dwmSptb02.setEND_PROVINCE_NAME(dimInfoJsonObj.getString("vsqmc"));
+                        //例如 市县名称: 齐河
+                        dwmSptb02.setEND_PROVINCE_NAME(dimInfoJsonObj.getString("vsxmc"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("provincesMdac32DS").name("provincesMdac32DS");
+
+        /**
+         * 处理 运输商名称
+         * nvl(y.vcydjc,y.vcydmc) 运输商,
+         * inner join mdac52 y on a.cyssdm = y.ccyddm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac52DS = AsyncDataStream.unorderedWait(
+                provincesMdac32DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC52,
+                        "CCYDDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getCYSSDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VCYDJC"))) {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac52DS").name("mdac52DS");
+
+
+        /**
+         * 处理经销商名称
+         * nvl(j.vjxsjc,j.vjxsmc) vscdwmc
+         * left join mdac22 j on a.vdwdm = j.cjxsdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac22DS = AsyncDataStream.unorderedWait(
+                mdac52DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC22,
+                        "CJXSDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getVDWDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VJXSJC"))) {
+                            dwmSptb02.setDEALER_NAME(dimInfoJsonObj.getString("VJXSJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VJXSMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac22DS").name("mdac22DS");
+
 
         //组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
-        //mdac22DS.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        theoryShipmentTimeDS.print("拉宽后输出数据：");
-       // mdac22DS.print("拉宽后输出数据：");
+        //mdac22DS.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1);
+        mdac22DS.print("拉宽后输出数据：");
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-sink-clickhouse-dwm");
         log.info("sptb02dwd层job任务开始执行");
