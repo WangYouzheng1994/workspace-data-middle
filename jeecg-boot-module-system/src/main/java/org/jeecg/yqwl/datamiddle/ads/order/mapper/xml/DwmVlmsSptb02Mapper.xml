@@ -155,29 +155,29 @@
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
             SELECT
                     count(dvs.CJSDBH)  AS totalNum ,
-                    <if test="params.timeType = 'day' ">
-                        Date(fromUnixTimestamp64Milli(dvs.DTVSCFSJ)) AS dates
-                    </if>
-                    <if test="params.timeType == 'week' ">
-                         toWeek(fromUnixTimestamp64Milli(dvs.DTVSCFSJ),9) AS dates
-                    </if>
-                    <if test="params.timeType == 'month' ">
-                         toMonth(fromUnixTimestamp64Milli(dvs.DTVSCFSJ)) AS dates
-                    </if>
-                    <if test="params.timeType == 'quarter' ">
-                         QUARTER(fromUnixTimestamp64Milli(dvs.DTVSCFSJ)) AS dates
-                    </if>
-                    <if test="params.timeType == 'year' ">
-                          YEAR(fromUnixTimestamp64Milli(dvs.DTVSCFSJ)) AS dates
-                    </if>
-                    <choose>
-                        <when test="params.cqwh != '' and params.czjgsdm=''">
-                           , dvs.CUSTOMER_NAME as groupName
-                        </when>
-                        <otherwise>
-                           , dvs.BASE_NAME as groupName
-                        </otherwise>
-                    </choose>
+            <if test="params.timeType == 'day' ">
+                toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            </if>
+            <if test="params.timeType == 'week' ">
+                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+            </if>
+            <if test="params.timeType == 'month' ">
+                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            </if>
+            <if test="params.timeType == 'quarter' ">
+                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            </if>
+            <if test="params.timeType == 'year' ">
+                YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            </if>
+            <choose>
+                <when test="params.cqwh = '' and params.czjgsdm !=''">
+                    ,dvs.CUSTOMER_NAME as groupName
+                </when>
+                <otherwise>
+                    ,dvs.BASE_NAME as groupName
+                </otherwise>
+            </choose>
             FROM
                     dwm_vlms_sptb02 dvs
             <where>
@@ -214,26 +214,26 @@
         SELECT
         count(dvs.CJSDBH) AS totalNum ,
         <if test="params.timeType == 'day' ">
-             toDate(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))  AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            toWeek(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME),9)  AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME),9)))   AS dates
         </if>
         <if test="params.timeType == 'month' ">
-           toMonth(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))))   AS dates
         </if>
-        <if test="params.timeType == 'quarter' ">
-             QUARTER(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
+        <if test="params.timeType =='quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
         <if test="params.timeType == 'year' ">
-              YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm=''">
-                , dvs.CUSTOMER_NAME as groupName
+            <when test="params.cqwh = '' and params.czjgsdm !=''">
+                ,dvs.CUSTOMER_NAME as groupName
             </when>
             <otherwise>
-                , dvs.BASE_NAME as groupName
+                ,dvs.BASE_NAME as groupName
             </otherwise>
         </choose>
         FROM
@@ -245,20 +245,21 @@
             FROM
             dwm_vlms_sptb02 v
             <where>
-                <if test="  params.startTime != null and params.endTime !=null">
-                    AND v.THEORY_OUT_TIME BETWEEN  #{params.startTime} AND #{params.endTime}
+
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh = ' '">
-                    AND v.CQWH =  #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ' '">
+                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
-                    AND v.CZJGSDM = #{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != ' ' ">
+                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
             )
         </where>
-        GROUP BY dates,groupName
+        GROUP BY dates , groupName
 
     </select>
 
@@ -272,19 +273,19 @@
             toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         <if test="params.timeType == 'week' ">
-              toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)  AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
         </if>
         <if test="params.timeType == 'month' ">
-              toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
-        <if test="params.timeType == 'quarter' ">
-             QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+        <if test="params.timeType =='quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
         <if test="params.timeType == 'year' ">
               YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm=''">
+            <when test="params.cqwh = '' and params.czjgsdm !=''">
                 ,dvs.CUSTOMER_NAME as groupName
             </when>
             <otherwise>
@@ -309,11 +310,11 @@
                 <if test="  params.startTime != null and params.endTime !=null ">
                     OR v.FINAL_SITE_TIME <![CDATA[ = ]]> 0
                 </if>
-                <if test="params.cqwh != null and params.cqwh = ' '">
-                    AND  v.CQWH = #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ' '">
+                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
-                    AND v.CZJGSDM =#{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != ' ' ">
+                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
@@ -327,57 +328,60 @@
     <select id="stockOutList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+
+
         SELECT
         count(dvs.CJSDBH) AS totalNum ,
         <if test="params.timeType == 'day' ">
-            Date(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         <if test="params.timeType == 'week' ">
-             toWeek(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME),9)  AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
         </if>
         <if test="params.timeType == 'month' ">
-              toMonth(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
-        <if test="params.timeType == 'quarter' ">
-             QUARTER(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
+        <if test="params.timeType =='quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
         <if test="params.timeType == 'year' ">
-             YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm=''">
+            <when test="params.cqwh = '' and params.czjgsdm !=''">
                 ,dvs.CUSTOMER_NAME as groupName
             </when>
             <otherwise>
-               ,dvs.BASE_NAME as groupName
+                ,dvs.BASE_NAME as groupName
             </otherwise>
         </choose>
         FROM
         dwm_vlms_sptb02 dvs
         <where>
-            (dvs.CJSDBH , dvs.WAREHOUSE_UPDATETIME) IN (
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
-            v.CJSDBH , MAX(v.WAREHOUSE_UPDATETIME)
+            v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
             FROM
             dwm_vlms_sptb02 v
             <where>
-                <if test=" params.startTime != null and params.endTime !=null">
-                    AND  v.ACTUAL_OUT_TIME <![CDATA[ != ]]> 0
+                <if test=" params.startTime != null and params.endTime !=null ">
+                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime !=null">
-                    AND v.ACTUAL_OUT_TIME BETWEEN  #{params.startTime} AND #{params.endTime}
+                <if test="  params.startTime != null and params.endTime !=null ">
+                    AND v.FINAL_SITE_TIME <![CDATA[ != ]]> 0
                 </if>
-                <if test="params.cqwh != null and params.cqwh = ' '">
-                    AND  v.CQWH = #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ' '">
+                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm = ' ' ">
-                    AND v.CZJGSDM = #{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != ' ' ">
+                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
             )
         </where>
-        GROUP BY  dates, groupName
+        GROUP BY dates , groupName
+
     </select>
 
 </mapper>

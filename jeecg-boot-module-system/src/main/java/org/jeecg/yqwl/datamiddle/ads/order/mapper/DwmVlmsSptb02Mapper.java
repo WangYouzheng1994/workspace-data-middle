@@ -29,7 +29,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param baseBrandTime
       * @return
       */
-     List<ShipmentDTO > sendList(@Param("params") GetBaseBrandTime baseBrandTime);
+//     List<ShipmentDTO > sendList(@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10待发量
