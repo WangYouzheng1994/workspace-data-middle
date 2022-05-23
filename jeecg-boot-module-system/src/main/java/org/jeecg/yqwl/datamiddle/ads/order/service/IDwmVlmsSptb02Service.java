@@ -56,7 +56,7 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    List<DwmVlmsSptb02> findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
+    Result<ShipmentVO> findDayAmountOfPlan(GetBaseBrandTime baseBrandTime );
 
     /**
      * 按条件查询发运量

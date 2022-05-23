@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @param params
      * @return
      */
-    List<DwmVlmsSptb02> getPlanAmount(@Param("params") GetBaseBrandTime params);
+    List<ShipmentDTO> getPlanAmount(@Param("params") GetBaseBrandTime params);
 
     /**
      * 按条件查询发运量

@@ -6,7 +6,7 @@
         SELECT
         COUNT(dvs.DDJRQ) as totalNum,
             <choose>
-                <when test="params.cqwh != '' and params.czjgsdm=''">
+                <when test="params.cqwh != '' and params.czjgsdm='' ">
                     dvs.CUSTOMER_NAME as groupName,
                 </when>
                 <otherwise>
@@ -17,13 +17,16 @@
                 toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
             </if>
             <if test=" params.timeType == 'week' ">
-                toWeek(fromUnixTimestamp64Milli(dvs.DDJRQ))+1 as dates
+                toWeek(fromUnixTimestamp64Milli(dvs.DDJRQ))+1 as dates,
+                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
             </if>
             <if test=" params.timeType == 'month' ">
-                toMonth(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
+                toMonth(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates,
+                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
             </if>
             <if test=" params.timeType == 'quarter' ">
-                toQuarter(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
+                toQuarter(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates,
+                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
             </if>
             <if test=" params.timeType == 'year' ">
                 toYear(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
@@ -51,17 +54,20 @@
             )
         </where>
             group by dates,groupName
+        <if test=" params.timeType == 'week' || params.timeType == 'month' || params.timeType == 'quarter'">
+            , yearOfDates
+        </if>
     </select>
     <!--按条件查询发运量    -->
     <select id="getShipment" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.SHIPMENT_TIME) as totalNum,
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm=''">
-                dvs.CUSTOMER_NAME as groupName,
+            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+                dvs.CUSTOMER_NAME as groupName,    --品牌
             </when>
             <otherwise>
-                dvs.BASE_NAME as groupName,
+                dvs.BASE_NAME as groupName,        --基地
             </otherwise>
         </choose>
 
@@ -96,10 +102,10 @@
                     and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh}
+                    and dvs1.CQWH = #{params.cqwh}          --基地
                 </if>
                 <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm}
+                    and dvs1.CZJGSDM = #{params.czjgsdm}    --主机品牌
                 </if>
             </where>
             group by dvs1.CJSDBH
@@ -111,7 +117,7 @@
         </if>
     </select>
 
-    <!--按条件查询到货及时率    -->
+    <!--按条件查询到货及时率    todo:后续逻辑优化-->
     <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
         select
         COUNT(aa.CJSDBH) as totalNum,
@@ -201,8 +207,6 @@
 
     </select>
 
-
-
     <!--  top10待发量  select count(*) cnf   from dwm_vlms_sptb02 where THEORY_OUT_TIME between '1491485187000' and '1492008443000' group by Date(fromUnixTimestamp64Milli(THEORY_OUT_TIME))  order by cnf desc    -->
     <select id="pendingList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
@@ -258,7 +262,7 @@
 
     </select>
 
-<!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
+    <!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
     <select id="onWayList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -319,9 +323,7 @@
 
     </select>
 
-
-
-<!--    出库量  select count(*) cnf  from dwm_vlms_sptb02_test where ACTUAL_OUT_TIME between '1491485187000' and '1492008443000' and ACTUAL_OUT_TIME !=0L  -->
+    <!-- 出库量  select count(*) cnf  from dwm_vlms_sptb02_test where ACTUAL_OUT_TIME between '1491485187000' and '1492008443000' and ACTUAL_OUT_TIME !=0L  -->
     <select id="stockOutList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
