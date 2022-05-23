@@ -6,31 +6,28 @@
         SELECT
         COUNT(dvs.DDJRQ) as totalNum,
             <choose>
-                <when test="params.cqwh != '' and params.czjgsdm='' ">
+                <when test="params.cqwh != '' and params.czjgsdm == '' ">
                     dvs.CUSTOMER_NAME as groupName,
                 </when>
                 <otherwise>
                     dvs.BASE_NAME as groupName,
                 </otherwise>
             </choose>
-            <if test=" params.timeType == 'day' ">
-                toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
-            </if>
-            <if test=" params.timeType == 'week' ">
-                toWeek(fromUnixTimestamp64Milli(dvs.DDJRQ))+1 as dates,
-                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
-            </if>
-            <if test=" params.timeType == 'month' ">
-                toMonth(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates,
-                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
-            </if>
-            <if test=" params.timeType == 'quarter' ">
-                toQuarter(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates,
-                toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
-            </if>
-            <if test=" params.timeType == 'year' ">
-                toYear(fromUnixTimestamp64Milli(dvs.DDJRQ)) as dates
-            </if>
+        <if test="params.timeType == 'day' ">
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+        </if>
+        <if test="params.timeType == 'week' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+        </if>
+        <if test="params.timeType == 'month' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+        </if>
+        <if test="params.timeType == 'quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+        </if>
+        <if test="params.timeType == 'year' ">
+            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+        </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
@@ -71,23 +68,20 @@
             </otherwise>
         </choose>
 
-        <if test=" params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        <if test="params.timeType == 'day' ">
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
-        <if test=" params.timeType == 'week' ">
-            toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))+1 as dates,
-            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
+        <if test="params.timeType == 'week' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
         </if>
-        <if test=" params.timeType == 'month' ">
-            toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates,
-            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
+        <if test="params.timeType == 'month' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
-        <if test=" params.timeType == 'quarter' ">
-            toQuarter(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates,
-            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as yearOfDates
+        <if test="params.timeType == 'quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
-        <if test=" params.timeType == 'year' ">
-            toYear(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) as dates
+        <if test="params.timeType == 'year' ">
+            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
