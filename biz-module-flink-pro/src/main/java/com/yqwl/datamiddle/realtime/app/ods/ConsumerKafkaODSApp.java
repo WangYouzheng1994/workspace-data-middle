@@ -74,7 +74,7 @@ public class ConsumerKafkaODSApp {
         //将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
                 .uid("jsonDataStr").name("jsonDataStr");
-        env.setParallelism(1);
+        //env.setParallelism(1);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
@@ -128,7 +128,7 @@ public class ConsumerKafkaODSApp {
                 }
         );
 
-        kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
+        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
 
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
