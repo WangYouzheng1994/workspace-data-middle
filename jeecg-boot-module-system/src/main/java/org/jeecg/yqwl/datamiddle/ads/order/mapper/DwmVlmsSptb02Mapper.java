@@ -38,6 +38,8 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       */
      List<ShipmentDTO > pendingList (@Param("params") GetBaseBrandTime baseBrandTime);
 
+
+
      /**
       * top10在途量
       * @param baseBrandTime
@@ -58,6 +60,13 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @return
      */
     List<ShipmentDTO> getShipment(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 按条件查询到货量
+     * @param baseBrandTime
+     * @return
+     */
+    List<ShipmentDTO > getFINAL_SITE_TIME (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 到货准时率

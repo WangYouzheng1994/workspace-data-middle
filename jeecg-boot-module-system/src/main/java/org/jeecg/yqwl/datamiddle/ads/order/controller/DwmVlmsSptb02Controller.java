@@ -53,6 +53,18 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @param baseBrandTime
      * @return
      */
+    @PostMapping("/selectEndNum")
+    public Result<?> queryEndNum (@RequestBody GetBaseBrandTime baseBrandTime) {
+        // TODO: 参数校验。
+        Result<ShipmentVO> shipment = dwmVlmsSptb02Service.getFINAL_SITE_TIME(baseBrandTime);
+        return shipment ;
+    }
+
+    /**
+     * 按条件查询发运量
+     * @param baseBrandTime
+     * @return
+     */
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
         // TODO: 参数校验。

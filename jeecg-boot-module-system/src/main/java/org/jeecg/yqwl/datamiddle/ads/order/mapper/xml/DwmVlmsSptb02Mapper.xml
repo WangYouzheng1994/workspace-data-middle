@@ -51,9 +51,6 @@
             )
         </where>
             group by dates,groupName
-        <if test=" params.timeType == 'week' || params.timeType == 'month' || params.timeType == 'quarter'">
-            , yearOfDates
-        </if>
     </select>
     <!--按条件查询发运量    -->
     <select id="getShipment" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
@@ -106,11 +103,60 @@
             )
         </where>
         group by dates ,groupName
-        <if test=" params.timeType == 'week' || params.timeType == 'month' || params.timeType == 'quarter'">
-        , yearOfDates
-        </if>
     </select>
+    <!--按条件查询到货量-->
+    <select id="getFINAL_SITE_TIME" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+        SELECT
+        COUNT(dvs.FINAL_SITE_TIME) as totalNum,
+        <choose>
+            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+                dvs.BASE_NAME as groupName,        --基地
+            </when>
+            <otherwise>
+                dvs.CUSTOMER_NAME as groupName,    --品牌
+            </otherwise>
+        </choose>
 
+        <if test="params.timeType == 'day' ">
+            toDate(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
+        </if>
+        <if test="params.timeType == 'week' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME),9)))   AS dates
+        </if>
+        <if test="params.timeType == 'month' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))   AS dates
+        </if>
+        <if test="params.timeType == 'quarter' ">
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))   AS dates
+        </if>
+        <if test="params.timeType == 'year' ">
+            YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
+        </if>
+        FROM dwm_vlms_sptb02 dvs
+        <where>
+            (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
+            (select
+            dvs1.CJSDBH,
+            max(dvs1.WAREHOUSE_CREATETIME)
+            from
+            dwm_vlms_sptb02  dvs1
+            <where>
+                <if test=" params.startTime != null and params.endTime !=null " >
+                    and dvs1.FINAL_SITE_TIME BETWEEN  #{params.startTime}and #{params.endTime}
+                </if>
+                <if test=" params.cqwh != null and params.cqwh != '' ">
+                    and dvs1.CQWH = #{params.cqwh}          --基地
+                </if>
+                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
+                    and dvs1.CZJGSDM = #{params.czjgsdm}    --主机品牌
+                </if>
+            </where>
+            group by dvs1.CJSDBH
+            )
+        </where>
+        group by dates ,groupName
+
+    </select>
     <!--按条件查询到货及时率    todo:后续逻辑优化-->
     <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
         select
@@ -144,7 +190,7 @@
     </select>
 
     <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where SHIPMENT_TIME between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
-    <select id="sendList"
+    <!--    <select id="sendList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
             SELECT
@@ -199,7 +245,7 @@
             </where>
             GROUP BY  dates,groupName
 
-    </select>
+    </select>-->
 
     <!--  top10待发量  select count(*) cnf   from dwm_vlms_sptb02 where THEORY_OUT_TIME between '1491485187000' and '1492008443000' group by Date(fromUnixTimestamp64Milli(THEORY_OUT_TIME))  order by cnf desc    -->
     <select id="pendingList"

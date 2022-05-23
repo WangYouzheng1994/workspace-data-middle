@@ -65,6 +65,13 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime );
 
     /**
+     * 按条件查询到货量
+     *
+     * @param baseBrandTime
+     * @return
+     */
+    Result<ShipmentVO> getFINAL_SITE_TIME(GetBaseBrandTime baseBrandTime );
+    /**
      * 获取到货及时率
      *
      * @param baseBrandTime

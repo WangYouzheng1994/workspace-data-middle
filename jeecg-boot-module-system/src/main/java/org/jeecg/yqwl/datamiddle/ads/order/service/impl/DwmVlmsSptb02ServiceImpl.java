@@ -91,7 +91,19 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
         return Result.OK(resultVO);
     }
-
+    /**
+     * 按条件查询到货量
+     *
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public Result<ShipmentVO> getFINAL_SITE_TIME(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> planAmount = dwmVlmsSptb02Mapper.getFINAL_SITE_TIME(baseBrandTime);
+        //todo:对返回前端的值做处理
+        ShipmentVO shipmentVO = FormatDataUtil.formatDataList(planAmount, baseBrandTime);
+        return Result.OK(shipmentVO);
+    }
     /**
      * 按条件查询计划量
      * @param baseBrandTime
@@ -165,6 +177,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
         return Result.OK(resultVO);
     }
+
+
 
     /**
      * 获取到货及时率
