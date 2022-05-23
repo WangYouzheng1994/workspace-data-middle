@@ -114,14 +114,9 @@ public class FormatDataUtil {
             String baseName = "";
             String customerName = "";
             Integer totalNum = null;
-            String yearAndData="";
             for (ShipmentDTO shipmentDTO : shipment) {
                 // 时间
                 dates = shipmentDTO.getDates();
-                String yearOfDates = shipmentDTO.getYearOfDates();
-                if (timeType.equals("week")||timeType.equals("month")||timeType.equals("quarter")){
-                    yearAndData=yearOfDates+"-"+dates;
-                }
                 // 基地名称 / 品牌
                 baseName = shipmentDTO.getGroupName();
                 // 数量
@@ -139,12 +134,9 @@ public class FormatDataUtil {
                         finalItemMap.put(i, 0);
                     });
                 }
-                // 放数据之前 比较一下是否在应返回的范围内。 这里可以实现的原因是map可以自动去重
-                if (timeType.equals("week")||timeType.equals("month")||timeType.equals("quarter")){
-                    itemMap.put(yearAndData, totalNum);
-                }else {
+
                     itemMap.put(dates, totalNum);
-                }
+
             }
 
             dbMap.forEach((k, v) -> {

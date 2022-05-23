@@ -4,12 +4,10 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
-
 import java.math.BigDecimal;
-import java.util.List;
+
 
 /**
  * @Description: DwmVlmsSptb02
@@ -31,7 +29,7 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      *@param baseBrandTime
      * @return
      */
-    Result<ShipmentVO> findTop10SendList(GetBaseBrandTime baseBrandTime);
+//    Result<ShipmentVO> findTop10SendList(GetBaseBrandTime baseBrandTime);
 
 
     /**
@@ -66,6 +64,13 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      */
     Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime );
 
+    /**
+     * 按条件查询到货量
+     *
+     * @param baseBrandTime
+     * @return
+     */
+    Result<ShipmentVO> getFINAL_SITE_TIME(GetBaseBrandTime baseBrandTime );
     /**
      * 获取到货及时率
      *

@@ -53,6 +53,18 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @param baseBrandTime
      * @return
      */
+    @PostMapping("/selectEndNum")
+    public Result<?> queryEndNum (@RequestBody GetBaseBrandTime baseBrandTime) {
+        // TODO: 参数校验。
+        Result<ShipmentVO> shipment = dwmVlmsSptb02Service.getFINAL_SITE_TIME(baseBrandTime);
+        return shipment ;
+    }
+
+    /**
+     * 按条件查询发运量
+     * @param baseBrandTime
+     * @return
+     */
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
         // TODO: 参数校验。
@@ -204,13 +216,13 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @param
      * @return
      */
-    @AutoLog(value = "DwmVlmsSptb02-top10发运量")
-    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10发运量")
-    @PostMapping(value = "/findTop10SendList")
-    public Result<?> findTop10SendList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> top10SendList = dwmVlmsSptb02Service.findTop10SendList(baseBrandTime);
-        return Result.OK(top10SendList);
-    }
+//    @AutoLog(value = "DwmVlmsSptb02-top10发运量")
+//    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10发运量")
+//    @PostMapping(value = "/findTop10SendList")
+//    public Result<?> findTop10SendList(@RequestBody GetBaseBrandTime baseBrandTime) {
+//        Result<ShipmentVO> top10SendList = dwmVlmsSptb02Service.findTop10SendList(baseBrandTime);
+//        return top10SendList;
+//    }
 
     /**
      * top10待发量
@@ -222,8 +234,9 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @PostMapping(value = "/findTop10PendingList" )
     public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
         Result<ShipmentVO> top10PendingList = dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime);
-        return Result.OK(top10PendingList);
+        return top10PendingList;
     }
+
 
 
     /**
@@ -235,9 +248,8 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
     @PostMapping(value = "/findTop10OnWayList" )
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
-
         Result<ShipmentVO> top10OnWayList = dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime);
-        return Result.OK(top10OnWayList);
+        return top10OnWayList;
     }
 
     /**
@@ -250,7 +262,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @PostMapping(value = "/findTop10StockOutList")
     public Result<?> findTop10StockOutList(@RequestBody GetBaseBrandTime baseBrandTime ) {
         Result<ShipmentVO> top10StockOutList = dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime);
-        return Result.OK(top10StockOutList);
+        return top10StockOutList;
     }
 
 
