@@ -22,7 +22,7 @@
         <hadoop.version>3.0.0</hadoop.version>
         <oracle.cdc.version>2.1.1</oracle.cdc.version>
         <mysql.cdc.version>2.1.1</mysql.cdc.version>
-        <log4j.version>2.16.0</log4j.version>
+<!--        <log4j.version>2.16.0</log4j.version>-->
     </properties>
 
     <dependencies>
@@ -83,7 +83,7 @@
 
         <!--Flink默认使用的是slf4j记录日志，相当于一个日志的接口,我们这里使用log4j作为具体的日志实现-->
         <!-- slf4j-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>${log4j.version}</version>
@@ -102,7 +102,37 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j.version}</version>
+        </dependency>-->
+       <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
         <!--commons-beanutils 是 Apache 开源组织提供的用于操作 JAVA BEAN 的工具包。
         使用 commons-beanutils，我们可以很方便的对 bean 对象的属性进行操作-->
         <dependency>
@@ -178,11 +208,6 @@
             <version>${flink.version}</version>
         </dependency>
     </dependencies>
-
-
-
-
-
 
     <build>
         <plugins>
