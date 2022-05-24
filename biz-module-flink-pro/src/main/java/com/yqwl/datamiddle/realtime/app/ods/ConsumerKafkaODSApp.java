@@ -57,7 +57,7 @@ public class ConsumerKafkaODSApp {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
@@ -77,7 +77,7 @@ public class ConsumerKafkaODSApp {
         //将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
                 .uid("jsonDataStr").name("jsonDataStr");
-        env.setParallelism(1);
+        env.setParallelism(2);
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
@@ -131,7 +131,7 @@ public class ConsumerKafkaODSApp {
                 }
         );
 
-        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
+        kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
 
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
