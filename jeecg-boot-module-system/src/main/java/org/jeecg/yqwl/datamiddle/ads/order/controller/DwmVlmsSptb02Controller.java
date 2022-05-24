@@ -223,7 +223,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
 //    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10发运量")
 //    @PostMapping(value = "/findTop10SendList")
 //    public Result<?> findTop10SendList(@RequestBody GetBaseBrandTime baseBrandTime) {
-//        Result<ShipmentVO> top10SendList = dwmVlmsSptb02Service.findTop10SendList(baseBrandTime);
+//        Result<ShipmentVO> top10SendList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10SendList(baseBrandTime));
 //        return top10SendList;
 //    }
 
@@ -236,7 +236,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10待发量")
     @PostMapping(value = "/findTop10PendingList" )
     public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> top10PendingList = dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime);
+        Result<ShipmentVO> top10PendingList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime));
         return top10PendingList;
     }
 
@@ -251,7 +251,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
     @PostMapping(value = "/findTop10OnWayList" )
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> top10OnWayList = dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime);
+        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
         return top10OnWayList;
     }
 
@@ -264,7 +264,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-出库量", notes = "DwmVlmsSptb02-出库量")
     @PostMapping(value = "/findTop10StockOutList")
     public Result<?> findTop10StockOutList(@RequestBody GetBaseBrandTime baseBrandTime ) {
-        Result<ShipmentVO> top10StockOutList = dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime);
+        Result<ShipmentVO> top10StockOutList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime));
         return top10StockOutList;
     }
 
