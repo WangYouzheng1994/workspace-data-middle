@@ -288,13 +288,13 @@
             <where>
 
                 <if test="  params.startTime != null and params.endTime != null">
-                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
+                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh !=''">
-                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  v.CQWH = #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm !='' ">
-                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND v.CZJGSDM = #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
@@ -351,11 +351,11 @@
                 <if test="  params.startTime != null and params.endTime != null ">
                     OR v.FINAL_SITE_TIME <![CDATA[ = ]]> 0
                 </if>
-                <if test="params.cqwh != null and params.cqwh !=''">
-                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  v.CQWH = #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm !='' ">
-                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND v.CZJGSDM = #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
@@ -405,13 +405,13 @@
             dwm_vlms_sptb02 v
             <where>
                 <if test="  params.startTime != null and params.endTime != null">
-                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
+                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh !=''">
-                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  v.CQWH = #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm !='' ">
-                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND v.CZJGSDM = #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
