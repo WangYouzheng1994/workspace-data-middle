@@ -28,14 +28,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
                 dvs1.CJSDBH,
                 max(dvs1.WAREHOUSE_CREATETIME)
             from
-                dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_01  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
@@ -80,14 +80,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_01  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
@@ -132,14 +132,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_01  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.FINAL_SITE_TIME BETWEEN  #{params.startTime}and #{params.endTime}
@@ -161,11 +161,11 @@
     <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
         select
         COUNT(aa.CJSDBH) as totalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME <![CDATA[ < ]]> dvs1.THEORY_SITE_TIME) as finalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs2 WHERE FINAL_SITE_TIME = 0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
+        (select COUNT(1) from dwm_vlms_sptb02_01 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME <![CDATA[ < ]]> dvs1.THEORY_SITE_TIME) as finalNum,
+        (select COUNT(1) from dwm_vlms_sptb02_01 dvs2 WHERE FINAL_SITE_TIME = 0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
         (nowNum+finalNum) / totalNum * 100 as percentage
         from
-        dwm_vlms_sptb02 aa
+        dwm_vlms_sptb02_01 aa
         where
             (CJSDBH,
             WAREHOUSE_UPDATETIME) in (
@@ -173,7 +173,7 @@
                     CJSDBH,
                     max(WAREHOUSE_UPDATETIME)
                 from
-                    dwm_vlms_sptb02 dvs
+                dwm_vlms_sptb02_01 dvs
                 <where>
                     <if test=" params.startTime != null and params.endTime !=null " >
                         and dvs.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
@@ -219,13 +219,13 @@
                 </otherwise>
             </choose>
             FROM
-                    dwm_vlms_sptb02 dvs
+                    dwm_vlms_sptb02_01 dvs
             <where>
                 (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
                     SELECT
                             v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
                     FROM
-                            dwm_vlms_sptb02 v
+                            dwm_vlms_sptb02_01 v
                     <where>
                         <if test="  params.startTime != null and params.endTime !=null ">
                             AND v.DTVSCFSJ <![CDATA[ != ]]> 0
@@ -269,7 +269,7 @@
             YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh == '' and params.czjgsdm !=''">
+            <when test="params.cqwh !='' and params.czjgsdm ==''">
                 ,dvs.CUSTOMER_NAME as groupName
             </when>
             <otherwise>
@@ -277,23 +277,23 @@
             </otherwise>
         </choose>
         FROM
-        dwm_vlms_sptb02 dvs
+        dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
             v.CJSDBH,
             MAX(v.WAREHOUSE_UPDATETIME)
             FROM
-            dwm_vlms_sptb02 v
+            dwm_vlms_sptb02_01 v
             <where>
 
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.THEORY_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
+                <if test="params.cqwh !=null and params.cqwh !=''">
                     AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                <if test="params.czjgsdm !=null and params.czjgsdm !='' ">
                     AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
@@ -326,7 +326,7 @@
               YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh == '' and params.czjgsdm !=''">
+            <when test="params.cqwh !='' and params.czjgsdm ==''">
                 ,dvs.CUSTOMER_NAME as groupName
             </when>
             <otherwise>
@@ -334,27 +334,27 @@
             </otherwise>
         </choose>
         FROM
-        dwm_vlms_sptb02 dvs
+        dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
             v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
             FROM
-            dwm_vlms_sptb02 v
+            dwm_vlms_sptb02_01 v
             <where>
-                <if test=" params.startTime != null ">
+                <if test=" params.startTime !=null ">
                     AND  v.SHIPMENT_TIME <![CDATA[ >= ]]> #{params.startTime}
                 </if>
-                <if test="  params.endTime != null">
-                    AND v.FINAL_SITE_TIME <![CDATA[ <= ]]> #{params.endTime}
+                <if test="  params.endTime !=null">
+                    AND v.FINAL_SITE_TIME <![CDATA[ = ]]> #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime !=null ">
+                <if test="  params.startTime !=null and params.endTime !=null ">
                     OR v.FINAL_SITE_TIME <![CDATA[ = ]]> 0
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ' '">
+                <if test="params.cqwh !=null and params.cqwh !=''">
                     AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != ' ' ">
+                <if test="params.czjgsdm !=null and params.czjgsdm !='' ">
                     AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
@@ -387,30 +387,30 @@
             YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
         </if>
         <choose>
-            <when test="params.cqwh == '' and params.czjgsdm !=''">
-                ,dvs.CUSTOMER_NAME as groupName
+            <when test="params.cqwh !='' and params.czjgsdm ==''">
+                ,dvs.CUSTOMER_NAME as groupName    --品牌   主机公司代码
             </when>
             <otherwise>
-                ,dvs.BASE_NAME as groupName
+                ,dvs.BASE_NAME as groupName   --基地  区位号
             </otherwise>
         </choose>
         FROM
-        dwm_vlms_sptb02 dvs
+        dwm_vlms_sptb02_01 dvs
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
             v.CJSDBH,
             MAX(v.WAREHOUSE_UPDATETIME)
             FROM
-            dwm_vlms_sptb02 v
+            dwm_vlms_sptb02_01 v
             <where>
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
+                <if test="params.cqwh !=null and params.cqwh !=''">
                     AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                <if test="params.czjgsdm !=null and params.czjgsdm !='' ">
                     AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>

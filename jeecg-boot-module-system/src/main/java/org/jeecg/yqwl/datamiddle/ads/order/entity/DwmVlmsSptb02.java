@@ -15,7 +15,7 @@ import org.jeecgframework.poi.excel.annotation.Excel;
  * @Version: V1.0
  */
 @Data
-@TableName("dwm_vlms_sptb02")
+@TableName("dwm_vlms_sptb02_01")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value = "dwm_vlms_sptb02对象", description = "DwmVlmsSptb02")
