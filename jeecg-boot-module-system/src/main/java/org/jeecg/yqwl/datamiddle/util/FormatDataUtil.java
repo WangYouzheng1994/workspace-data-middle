@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
@@ -94,6 +95,7 @@ public class FormatDataUtil {
         }
         return timingList;
     }
+
     /**
      * 处理返回给前端的数据,自动补0
      * @param shipment
@@ -149,4 +151,21 @@ public class FormatDataUtil {
         return resultVO;
     }
 
+    /**
+     * 处理返回给前端的空值,做删除操作
+     * @param resultShipmentVO
+     * @return
+     */
+    public static Result<ShipmentVO> formatRemoveEmptyValue(Result<ShipmentVO> resultShipmentVO){
+        ShipmentVO result = resultShipmentVO.getResult();
+        List<ShipmentVO.Item> result1 = result.getResult();
+        Iterator<ShipmentVO.Item> iterator = result1.iterator();
+        while (iterator.hasNext()){
+            ShipmentVO.Item next = iterator.next();
+            if (next.getName().equals("")){
+                iterator.remove();
+            }
+        }
+        return resultShipmentVO;
+    }
 }

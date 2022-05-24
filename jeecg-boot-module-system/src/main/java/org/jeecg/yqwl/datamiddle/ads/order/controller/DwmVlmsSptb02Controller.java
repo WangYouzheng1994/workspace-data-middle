@@ -15,6 +15,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
+import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -44,20 +45,22 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectAmountOfPlan")
     public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
-
         Result<ShipmentVO> dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
-        return dayAmountOfPlan ;
+        //  参数校验,去除key的空值
+        Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(dayAmountOfPlan);
+        return shipmentVOResult ;
     }
     /**
-     * 按条件查询发运量
+     * 按条件查询到货量
      * @param baseBrandTime
      * @return
      */
     @PostMapping("/selectEndNum")
     public Result<?> queryEndNum (@RequestBody GetBaseBrandTime baseBrandTime) {
-        // TODO: 参数校验。
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.getFINAL_SITE_TIME(baseBrandTime);
-        return shipment ;
+        //  参数校验,去除key的空值
+        Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);
+        return shipmentVOResult ;
     }
 
     /**
@@ -67,9 +70,9 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
-        // TODO: 参数校验。
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
-        return shipment ;
+        Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);
+        return shipmentVOResult ;
     }
 
     /**
