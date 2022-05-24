@@ -71,6 +71,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
+        //  参数校验,去除key的空值
         Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);
         return shipmentVOResult ;
     }

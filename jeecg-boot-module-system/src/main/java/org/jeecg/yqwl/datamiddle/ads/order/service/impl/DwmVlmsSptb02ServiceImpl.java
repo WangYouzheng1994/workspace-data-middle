@@ -124,61 +124,10 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime) {
-        String timeType = baseBrandTime.getTimeType();
         List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.getShipment(baseBrandTime);
-        //todo:对返回前端的值做处理
-        List<String> timingList = this.formatTimingList(baseBrandTime);
-        ShipmentVO resultVO = ShipmentVO.of(timingList);
-
-        /**
-         * 时间，基地/品牌，数量
-         */
-        Map<String, Map> dbMap = new HashMap();
-        if ( CollectionUtils.isNotEmpty(shipment)) {
-            String dates = "";
-            String baseName = "";
-            String customerName = "";
-            Integer totalNum = null;
-            for (ShipmentDTO shipmentDTO : shipment) {
-                // 时间
-                dates = shipmentDTO.getDates();
-
-
-                // 基地名称 / 品牌
-                baseName = shipmentDTO.getGroupName();
-                // 数量
-                totalNum = shipmentDTO.getTotalNum();
-
-                Map<String, Integer> itemMap = null;
-                if (dbMap.containsKey(baseName)) {
-                    itemMap = dbMap.get(baseName);
-                } else {
-                    itemMap = new LinkedHashMap<>();
-                    dbMap.put(baseName, itemMap);
-                    // 设置每天的默认值。
-                    Map<String, Integer> finalItemMap = itemMap;
-                    timingList.forEach(i -> {
-                        finalItemMap.put(i, 0);
-                    });
-                }
-                // 放数据之前 比较一下是否在应返回的范围内。 这里可以实现的原因是map可以自动去重
-
-                    itemMap.put(dates, totalNum);
-
-            }
-
-            dbMap.forEach((k, v) -> {
-                ShipmentVO.Item item = new ShipmentVO.Item();
-                item.setName(k);
-                item.setDataList(new ArrayList<>(v.values()));
-                resultVO.addResultItem(item);
-            });
-        }
-
-        return Result.OK(resultVO);
+        ShipmentVO shipmentVO = FormatDataUtil.formatDataList(shipment, baseBrandTime);
+        return Result.OK(shipmentVO);
     }
-
-
 
     /**
      * 获取到货及时率
@@ -329,5 +278,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         }
             return resultVO;
     }
+
+
 
 }
