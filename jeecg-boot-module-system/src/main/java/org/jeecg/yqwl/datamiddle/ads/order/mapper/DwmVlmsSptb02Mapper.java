@@ -22,7 +22,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param baseBrandTime
       * @return
       */
-     List<ShipmentDTO > stockOutList(@Param("params") GetBaseBrandTime baseBrandTime);
+     List<ShipmentDTO> stockOutList(@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10 发运量
@@ -36,7 +36,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param baseBrandTime
       * @return
       */
-     List<ShipmentDTO > pendingList (@Param("params") GetBaseBrandTime baseBrandTime);
+     List<ShipmentDTO> pendingList (@Param("params") GetBaseBrandTime baseBrandTime);
 
 
 
@@ -45,7 +45,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param baseBrandTime
       * @return
       */
-     List<ShipmentDTO > onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
+     List<ShipmentDTO> onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 按条件查询计划量

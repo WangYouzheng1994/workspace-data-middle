@@ -288,7 +288,7 @@
             <where>
 
                 <if test="  params.startTime != null and params.endTime != null">
-                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
@@ -399,25 +399,25 @@
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
-            v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
+            v.CJSDBH,
+            MAX(v.WAREHOUSE_UPDATETIME)
             FROM
             dwm_vlms_sptb02 v
             <where>
-                <if test=" params.startTime != null and params.endTime != null ">
-                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime}AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  v.CQWH = #{params.cqwh}
+                    AND  v.CQWH <![CDATA[ = ]]> #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND v.CZJGSDM = #{params.czjgsdm}
+                    AND v.CZJGSDM <![CDATA[ = ]]> #{params.czjgsdm}
                 </if>
             </where>
             GROUP BY v.CJSDBH
             )
         </where>
         GROUP BY dates , groupName
-
     </select>
 
 </mapper>

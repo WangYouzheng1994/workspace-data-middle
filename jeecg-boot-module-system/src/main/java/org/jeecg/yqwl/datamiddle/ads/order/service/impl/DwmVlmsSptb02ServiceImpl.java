@@ -45,8 +45,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public Result<ShipmentVO> findTop10StockOutList(GetBaseBrandTime baseBrandTime) {
-        List<ShipmentDTO> stockOutList = dwmVlmsSptb02Mapper.stockOutList(baseBrandTime);
-        ShipmentVO resultVO = FormatDataUtil.formatDataList(stockOutList,baseBrandTime);
+        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.stockOutList(baseBrandTime);
+        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
         return Result.OK(resultVO);
     }
 
@@ -76,8 +76,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     public Result<ShipmentVO> findTop10PendingList(GetBaseBrandTime baseBrandTime) {
         List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.pendingList(baseBrandTime);
         //todo:对返回前端的值做处理
-        ShipmentVO timingList = FormatDataUtil.formatDataList(shipment,baseBrandTime);
-        return Result.OK(timingList);
+        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
+        return Result.OK(resultVO);
     }
 
     /**
