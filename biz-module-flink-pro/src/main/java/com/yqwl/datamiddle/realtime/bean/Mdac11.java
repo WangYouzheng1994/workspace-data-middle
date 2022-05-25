@@ -42,7 +42,7 @@ public class Mdac11 implements Serializable {
     private String CJSCX;
 
 
-    private Integer ID;
+    private Long ID;
 
     /**
      * 创建时间

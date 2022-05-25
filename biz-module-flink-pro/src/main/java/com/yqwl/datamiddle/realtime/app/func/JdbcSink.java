@@ -1,11 +1,11 @@
-package com.yqwl.datamiddle.realtime.util;
+package com.yqwl.datamiddle.realtime.app.func;
 
 import com.yqwl.datamiddle.realtime.common.JDBCConfig;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
+import com.yqwl.datamiddle.realtime.util.TestSink;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
-import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 获取sink 工具类
  */
-public class JDBCSink {
+public class JdbcSink {
     /**
      * 获取test sink
      *
@@ -41,7 +41,7 @@ public class JDBCSink {
 
     public static <T> SinkFunction<T> getSink(String sql) {
 
-        return JdbcSink.<T>sink(sql,
+        return org.apache.flink.connector.jdbc.JdbcSink.<T>sink(sql,
                 new JdbcStatementBuilder<T>() {
                     @Override
                     public void accept(PreparedStatement preparedStatement, T t) throws SQLException {

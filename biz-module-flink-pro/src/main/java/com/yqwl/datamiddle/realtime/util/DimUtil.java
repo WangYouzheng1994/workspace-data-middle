@@ -62,14 +62,16 @@ public class DimUtil {
     public static JSONObject getDimInfo(String dbType, String tableName, String columnName, Object value, String andSql) {
         // 判定是否有多个列值,约定用,号分割
         //System.out.println("获取的value值:" + value);
-        log.info("获取的value值:{}", value);
+        log.info("获取的查询where条件里value值:{}", value);
         if (Objects.nonNull(value)) {
             if (value instanceof List) {
                 List list = (List) value;
                 if (CollectionUtils.isNotEmpty(list)) {
+                    //获取查询的列名
                     String[] columnArr = StringUtils.split(columnName, ",");
                     List<Tuple2<String, Object>> tupleList = new ArrayList<>();
                     for (int i = 0; i < columnArr.length; i++) {
+                        //列名和对应值包装成一个对象
                         tupleList.add(Tuple2.of(columnArr[i], ((List) value).get(i)));
                     }
                     return getDimInfo(dbType, tableName, andSql, tupleList.toArray(new Tuple2[]{}));
@@ -162,7 +164,7 @@ public class DimUtil {
             log.info("查询维度的SQL:{}", sql);
             List<JSONObject> dimList = null;
             if (MYSQL_DB_TYPE.equals(dbType)) {
-                dimList = MysqlUtil.queryList(sql, JSONObject.class, false);
+                dimList = DbUtil.queryList(sql, JSONObject.class, false);
             } else if (HBASE_DB_TYPE.equals(dbType)) {
                 dimList = PhoenixUtil.queryList(sql, JSONObject.class);
             }
@@ -182,7 +184,7 @@ public class DimUtil {
         } catch (Exception e) {
             //System.out.println("维度查询异常信息:" + e.getMessage());
             log.info("维度查询异常信息:{}", e.getMessage());
-           // throw new RuntimeException("从redis中查询维度失败");
+            // throw new RuntimeException("从redis中查询维度失败");
         } finally {
             //关闭Jedis
             if (jedis != null) {

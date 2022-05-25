@@ -11,20 +11,17 @@ import com.yqwl.datamiddle.realtime.bean.Sysc07;
 import com.yqwl.datamiddle.realtime.bean.Sysc08;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
-import com.yqwl.datamiddle.realtime.util.JDBCSink;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.*;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
@@ -41,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 /**
  * @Description:
  * @Author: XiaoFeng
@@ -49,21 +47,22 @@ import java.util.concurrent.TimeUnit;
  */
 public class DimProvinceWideApp {
     private static final Logger LOGGER = LogManager.getLogger(DimProvinceWideApp.class);
+
     public static void main(String[] args) {
         /*1. 创建环境*/
-        Configuration conf = new Configuration();
-        conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
+        //Configuration conf = new Configuration();
+        //conf.setString(RestOptions.BIND_PORT, "8081"); // 指定访问端口
 
         // 获取执行环境:
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
-        env.setParallelism(1);
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
 
-        CheckpointConfig ck = env.getCheckpointConfig();
+      /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint/kafka20");
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
         System.setProperty("HADOOP_USER_NAME", "root");
 
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
@@ -71,7 +70,8 @@ public class DimProvinceWideApp {
         // kafka source1 sysc07
         KafkaSource<String> sysc07 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ORACLE_TOPIC_SYSC07)
+                .setTopics(KafkaTopicConst.ODS_VLMS_SYSC07)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC07_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -79,7 +79,8 @@ public class DimProvinceWideApp {
         // kafka source1 sysc08
         KafkaSource<String> sysc08 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ORACLE_TOPIC_SYSC08)
+                .setTopics(KafkaTopicConst.ODS_VLMS_SYSC08)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC07_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -87,14 +88,16 @@ public class DimProvinceWideApp {
         // kafka source1 mdac01
         KafkaSource<String> mdac01 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ORACLE_TOPIC_MDAC01)
+                .setTopics(KafkaTopicConst.ODS_VLMS_MDAC01)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC07_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        DataStreamSource<String> sysc07Source = env.fromSource(sysc07, WatermarkStrategy.noWatermarks(), "sysc07-kafka");
-        DataStreamSource<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka");
-        DataStreamSource<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka");
+        SingleOutputStreamOperator<String> sysc07Source = env.fromSource(sysc07, WatermarkStrategy.noWatermarks(), "sysc07-kafka").uid("sysc07Source").name("sysc07Source");
+        SingleOutputStreamOperator<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka").uid("sysc08Source").name("sysc08Source");
+        SingleOutputStreamOperator<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka").uid("mdac01Source").name("mdac01Source");
+        ;
 
         LOGGER.info("1.kafka数据源收入");
 
@@ -104,10 +107,10 @@ public class DimProvinceWideApp {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SYSC07") ) {
+                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SYSC07")) {
                     Sysc07 after = jo.getObject("after", Sysc07.class);
                     String cdqdm = after.getCDQDM();
-                    if (cdqdm !=null){
+                    if (cdqdm != null) {
                         return true;
                     }
                     return false;
@@ -228,16 +231,16 @@ public class DimProvinceWideApp {
         /* 6.进行表拓宽 */
         //6.1 先使用省区代码(CSQDM)对sysc07,08进行关联
         DataStream<ProvincesWide> wide0708 = sysc08StringKeyedStream
-            .intervalJoin(sysc07StringKeyedStream)
-            .between(Time.minutes(-10), Time.minutes(10))
-            .process(
-                    new ProcessJoinFunction<Sysc08, Sysc07, ProvincesWide>() {
-                        @Override
-                        public void processElement(Sysc08 left, Sysc07 right, Context ctx, Collector<ProvincesWide> out) {
-                            out.collect(new ProvincesWide(right, left));
+                .intervalJoin(sysc07StringKeyedStream)
+                .between(Time.minutes(-10), Time.minutes(10))
+                .process(
+                        new ProcessJoinFunction<Sysc08, Sysc07, ProvincesWide>() {
+                            @Override
+                            public void processElement(Sysc08 left, Sysc07 right, Context ctx, Collector<ProvincesWide> out) {
+                                out.collect(new ProvincesWide(right, left));
+                            }
                         }
-                    }
-            ).uid("mergeSysc0708").name("mergeSysc0708");
+                ).uid("mergeSysc0708").name("mergeSysc0708");
         KeyedStream<ProvincesWide, String> provincesWide0708KeyedStream = wide0708.keyBy(ProvincesWide::getCdqdm);
 
 
@@ -254,11 +257,15 @@ public class DimProvinceWideApp {
 
         SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
                 provincesWide,
-                new DimAsyncFunction<ProvincesWide>(DimUtil.MYSQL_DB_TYPE,"ods_vlms_sysc09", "cdsdm,csqdm") {
+                new DimAsyncFunction<ProvincesWide>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_sysc09", "cdsdm,csqdm") {
                     @Override
                     public Object getKey(ProvincesWide wide) {
-                        return Arrays.asList(wide.getCdsdm08(),wide.getCsqdm() );
+                        if (StringUtils.isNotEmpty(wide.getCdsdm08()) && StringUtils.isNotEmpty(wide.getCsqdm())) {
+                            return Arrays.asList(wide.getCdsdm08(), wide.getCsqdm());
+                        }
+                        return null;
                     }
+
                     @Override
                     public void join(ProvincesWide wide, JSONObject dimInfoJsonObj) throws Exception {
                         if (dimInfoJsonObj.getString("CDSDM") != null) {
@@ -287,23 +294,7 @@ public class DimProvinceWideApp {
                     collector.collect(es);
                 }
             }
-        }).addSink(JDBCSink.<ProvincesWide>getBatchSink());
-
-        /*DataStreamSink<List<ProvincesWide>> listDataStreamSink = provincesWideWithSysc09.countWindowAll(500).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, GlobalWindow>() {
-            @Override
-            public void apply(GlobalWindow window, Iterable<ProvincesWide> iterable, Collector<List<ProvincesWide>> collector) throws Exception {
-                ArrayList<ProvincesWide> es = Lists.newArrayList(iterable);
-                if (es.size() > 0) {
-                    collector.collect(es);
-                }
-            }
-        }).addSink(JDBCSink.<ProvincesWide>getBatchSink());*/
-
-        /*写入mysql 暂不用*/
-/*        DataStreamSink<ProvincesWide> provincesWideDataStreamSink = provincesWideWithSysc09.addSink(JDBCSink.<ProvincesWide>getSink("replace into dim_vlms_provinces " +
-                "(IDNUM, csqdm, cdsdm, csxdm, sqsxdm, vsqmc, vsqjc, vdsmc, vsxmc, cjc, " +
-                "cdqdm, vdqmc, cwlbm3, cwlmc3, njd, nwd, cwlmc, cwlbm_sq, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME)" +
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);"));*/
+        }).addSink(JdbcSink.<ProvincesWide>getBatchSink()).uid("sink-mysql").name("sink-mysql");
 
         try {
             env.execute("KafkaSinkMysql");

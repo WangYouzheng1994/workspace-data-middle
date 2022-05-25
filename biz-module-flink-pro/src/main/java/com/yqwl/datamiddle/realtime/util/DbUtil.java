@@ -3,7 +3,10 @@ package com.yqwl.datamiddle.realtime.util;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
+import com.google.common.base.CaseFormat;
+import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.beanutils.BeanUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -109,6 +112,78 @@ public class DbUtil {
         return resultList;
     }
 
+
+    /**
+     * mysql 查询方法，根据给定的 class 类型 返回对应类型的元素列表
+     *
+     * @param sql
+     * @param clazz
+     * @param underScoreToCamel 是否把对应字段的下划线名转为驼峰名
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> queryList(String sql, Class<T> clazz, Boolean underScoreToCamel) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            //建立连接
+            conn = getDruidConnection();
+            //创建数据库操作对象
+            ps = conn.prepareStatement(sql);
+            //执行 SQL 语句
+            rs = ps.executeQuery();
+            //处理结果集
+            ResultSetMetaData md = rs.getMetaData();
+            //声明集合对象，用于封装返回结果
+            List<T> resultList = new ArrayList<T>();
+            //每循环一次，获取一条查询结果
+            while (rs.next()) {
+                //通过反射创建要将查询结果转换为目标类型的对象
+                T obj = clazz.newInstance();
+                //对查询出的列进行遍历，每遍历一次得到一个列名
+                for (int i = 1; i <= md.getColumnCount(); i++) {
+                    String propertyName = md.getColumnName(i);
+                    //如果开启了下划线转驼峰的映射，那么将列名里的下划线转换为属性的打
+                    if (underScoreToCamel) {
+                        //直接调用 Google 的 guava 的 CaseFormat LOWER_UNDERSCORE 小写开头+下划线->LOWER_CAMEL 小写开头+驼峰
+                        propertyName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, propertyName);
+                    }
+                    //调用 apache 的 commons-bean 中的工具类，给 Bean 的属性赋值
+                    BeanUtils.setProperty(obj, propertyName, rs.getObject(i));
+                }
+                resultList.add(obj);
+            }
+            return resultList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("查询 mysql 失败！");
+        } finally {
+            //释放资源
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     /**
      * 执行SQL查询
      *
@@ -162,10 +237,10 @@ public class DbUtil {
      */
     private static DruidDataSource createDruidDataSource() throws SQLException {
         DruidDataSource druidDataSource = new DruidDataSource();
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        druidDataSource.setUrl(props.getStr("mysql.url"));
-        druidDataSource.setUsername(props.getStr("mysql.username"));
-        druidDataSource.setPassword(props.getStr("mysql.password"));
+        //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        druidDataSource.setUrl(MysqlConfig.URL);
+        druidDataSource.setUsername(MysqlConfig.USERNAME);
+        druidDataSource.setPassword(MysqlConfig.PASSWORD);
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
         druidDataSource.setMaxActive(20);

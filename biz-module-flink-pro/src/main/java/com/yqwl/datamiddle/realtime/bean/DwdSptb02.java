@@ -1,5 +1,8 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -17,9 +20,12 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@TableName("dwd_vlms_sptb02")
+@CamelUnderline(isChange = false)
 public class DwdSptb02 implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    //@TransientSink
+    //private static final long serialVersionUID = 1L;
 
     /**
      * 结算单编号 主键
@@ -1045,7 +1051,7 @@ public class DwdSptb02 implements Serializable {
      * 20210422 DTF 大众标准物流时间   number 转  bigint
      */
 
-    private Long NBZWLSJ_DZ;
+    private Double NBZWLSJ_DZ;
 
     /**
      * 20210422 DTF 大众标准到货时间   date 统一时间戳 bigint

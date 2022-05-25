@@ -18,6 +18,11 @@ import java.util.Map;
  * @Version: V1.0
  */
 public class MysqlUtil {
+
+    private static final String URL = "jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=utf8&serverTimezone=UTC&useSSL=false&rewriteBatchedStatements=true";
+    private static final String USERNAME = "fengqiwulian";
+    private static final String PASSWORD = "fengqiwulian";
+
     /**
      * mysql 查询方法，根据给定的 class 类型 返回对应类型的元素列表
      *
@@ -34,11 +39,13 @@ public class MysqlUtil {
         try {
             //注册驱动
             Class.forName(MysqlConfig.DRIVER);
-            Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+            //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
             //建立连接
-            conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
+            conn = DriverManager.getConnection(MysqlConfig.URL, MysqlConfig.USERNAME, MysqlConfig.PASSWORD);
+            //conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             //创建数据库操作对象
             ps = conn.prepareStatement(sql);
+
             //执行 SQL 语句
             rs = ps.executeQuery();
             //处理结果集

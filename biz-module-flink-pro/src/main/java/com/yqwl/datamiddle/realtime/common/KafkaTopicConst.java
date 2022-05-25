@@ -9,6 +9,10 @@ public class KafkaTopicConst {
     //groupid
     public static final String ODS_VLMS_SPTC34_GROUP = "ods_vlms_sptc34_group";
     public static final String ODS_VLMS_SPTB02_GROUP = "ods_vlms_sptb02_group";
+    public static final String DWD_VLMS_SPTB02_GROUP = "dwd_vlms_sptb02_group";
+    public static final String ODS_VLMS_SYSC07_GROUP = "ods_vlms_sysc07_group";
+    public static final String ODS_VLMS_BASE_STATION_DATA_EPC_GROUP = "ods_vlms_base_station_data_epc_group";
+
     public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
 
 
@@ -53,6 +57,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SPTB02_STD_IMPORT = "ods_vlms_sptb02_std_import";
     public static final String ODS_VLMS_SPTB013 = "ods_vlms_sptb013";
     public static final String ODS_VLMS_BASE_STATION_DATA = "ods_vlms_base_station_data";
+    public static final String ODS_VLMS_BASE_STATION_DATA_EPC = "ods_vlms_base_station_data_epc";
     public static final String ODS_VLMS_SPTI32_DZ = "ods_vlms_spti32_dz";
     public static final String ODS_VLMS_RFID_WAREHOUSE = "ods_vlms_rfid_warehouse";
 
@@ -74,7 +79,7 @@ public class KafkaTopicConst {
 
 
     //dwm topic
-    public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02_03";
+    public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
 
 
 
