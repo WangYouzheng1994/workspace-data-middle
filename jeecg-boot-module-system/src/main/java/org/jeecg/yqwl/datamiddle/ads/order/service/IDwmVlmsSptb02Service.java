@@ -2,8 +2,10 @@ package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.apache.ibatis.annotations.Param;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 import java.math.BigDecimal;
@@ -78,8 +80,11 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @return
      */
     Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime );
-
-
+    /**
+     * 插入clickhouse-dwm_vlms_sptb02表
+     * @param dwmSptb02VO
+     */
+    void insertClickhouse(DwmSptb02VO dwmSptb02VO);
 
 
 }

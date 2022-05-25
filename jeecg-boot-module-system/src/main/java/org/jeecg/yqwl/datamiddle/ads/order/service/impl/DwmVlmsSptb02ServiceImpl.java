@@ -11,6 +11,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
@@ -140,13 +141,25 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         /**
          *1.获取已到货未超理论实践的值
          */
-        DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
-        Double percentage = arrivalRate.getPercentage();
+        /*        DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
+        Double percentage = arrivalRate.();
         //下面开始截取两位数 原数据:0.12594458438287154
         BigDecimal bigDecimal = new BigDecimal(percentage);
-        Double newPercentage = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        Double newPercentage = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();*/
 
         return null;
+    }
+    /**
+     * 插入clickhouse-dwm_vlms_sptb02表
+     * @param dwmSptb02VO
+     */
+    @Override
+    public void insertClickhouse(DwmSptb02VO dwmSptb02VO) {
+        String cjsdbh;
+        Long l = System.currentTimeMillis();
+        cjsdbh=l+"";
+        dwmSptb02VO.setCJSDBH(cjsdbh);
+        dwmVlmsSptb02Mapper.insertClickhouse(dwmSptb02VO);
     }
 
     /**

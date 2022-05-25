@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 
@@ -74,4 +75,10 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @return
      */
     DwmVlmsSptb02 getArrivalRate(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 插入clickhouse-dwm_vlms_sptb02表
+     * @param params
+     */
+    void insertClickhouse(@Param("params") DwmSptb02VO params);
 }

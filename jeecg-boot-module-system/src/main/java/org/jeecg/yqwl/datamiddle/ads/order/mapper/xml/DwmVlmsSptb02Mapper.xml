@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
+    <!--clickhouse插入数据    -->
+    <insert id="insertClickhouse" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO" >
+        INSERT INTO `default`.dwm_vlms_sptb02(
+            CJSDBH,
+            DDJRQ,
+            ACTUAL_OUT_TIME,
+            THEORY_OUT_TIME,
+            SHIPMENT_TIME,
+            FINAL_SITE_TIME,
+            CUSTOMER_NAME,
+            BASE_NAME,
+            CZJGSDM,
+            CQWH)
+            VALUES (
+                       #{params.CJSDBH},
+                       #{params.DDJRQ},
+                       #{params.ACTUAL_OUT_TIME},
+                       #{params.THEORY_OUT_TIME},
+                       #{params.SHIPMENT_TIME},
+                       #{params.FINAL_SITE_TIME},
+                       #{params.CUSTOMER_NAME},
+                       #{params.BASE_NAME},
+                       #{params.CZJGSDM},
+                       #{params.CQWH}
+                    )
+    </insert>
     <!--按条件查询计划量    -->
     <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
@@ -14,19 +40,19 @@
                 </otherwise>
             </choose>
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.DDJRQ))  AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
         <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))  AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>

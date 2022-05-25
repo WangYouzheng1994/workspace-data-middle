@@ -1187,25 +1187,25 @@ public class DwmVlmsSptb02 {
      */
     private java.lang.String baseName;
 
-    /**
-     * 总数
-     */
-    private Integer totalNum;
-    /**
-     * 日期
-     */
-    private String dates;
-    /**
-     * 到货准时率中已到达未迟到的数量
-     */
-    private Integer finalNum;
-    /**
-     * 到货准时率中未到达未迟到的数量
-     */
-    private Integer nowNum;
-    /**
-     * 到货准时率的小数形式
-     */
-    private Double percentage;
+//    /**
+//     * 总数
+//     */
+//    private Integer totalNum;
+//    /**
+//     * 日期
+//     */
+//    private String dates;
+//    /**
+//     * 到货准时率中已到达未迟到的数量
+//     */
+//    private Integer finalNum;
+//    /**
+//     * 到货准时率中未到达未迟到的数量
+//     */
+//    private Integer nowNum;
+//    /**
+//     * 到货准时率的小数形式
+//     */
+//    private Double percentage;
 
 }
