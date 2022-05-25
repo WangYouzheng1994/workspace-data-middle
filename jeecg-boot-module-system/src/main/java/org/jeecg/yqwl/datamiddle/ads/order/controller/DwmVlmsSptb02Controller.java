@@ -11,6 +11,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
@@ -269,7 +270,14 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return top10StockOutList;
     }
 
-
-
-
+    /**
+     * 插入接口
+     * @param dwmSptb02VO
+     * @return
+     */
+    @PostMapping(value = "/insertCLickhouse123")
+    public Result<?> insertClickhouse123(@RequestBody DwmSptb02VO dwmSptb02VO) {
+//        dwmVlmsSptb02Service.insertClickhouse(dwmSptb02VO);
+        return Result.OK("插入成功");
+    }
 }

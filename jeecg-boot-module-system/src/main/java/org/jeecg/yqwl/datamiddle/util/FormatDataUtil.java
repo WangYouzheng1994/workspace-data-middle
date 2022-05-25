@@ -37,7 +37,11 @@ public class FormatDataUtil {
 
         // 从今天开始前推七天
         if (baseBrandTime.getStartTime() == null && baseBrandTime.getEndTime() == null) {
-            dateTimes = DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);
+             dateTimes = DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);
+            for (DateTime dateTime : dateTimes) {
+                timingList.add(dateTime.toDateStr());
+                 }
+            timingList.addAll(linkedHashSet);
         } else {
             if (timeType.equals("day")){            //时间类型如果是天
                 dateTimes = DateUtil.rangeToList(DateUtils.getDate(baseBrandTime.getStartTime()), DateUtils.getDate(baseBrandTime.getEndTime()), DateField.DAY_OF_YEAR);
