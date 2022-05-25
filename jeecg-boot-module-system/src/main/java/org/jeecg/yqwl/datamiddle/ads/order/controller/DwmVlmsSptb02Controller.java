@@ -275,9 +275,9 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @param dwmSptb02VO
      * @return
      */
-    @PostMapping(value = "/insertCLickhouse123")
-    public Result<?> insertClickhouse123(@RequestBody DwmSptb02VO dwmSptb02VO) {
-//        dwmVlmsSptb02Service.insertClickhouse(dwmSptb02VO);
+    @PostMapping(value = "/insertCLickhouse")
+    public Result<?> insertClickhouse(@RequestBody DwmSptb02VO dwmSptb02VO) {
+        dwmVlmsSptb02Service.insertClickhouse(dwmSptb02VO);
         return Result.OK("插入成功");
     }
 }
