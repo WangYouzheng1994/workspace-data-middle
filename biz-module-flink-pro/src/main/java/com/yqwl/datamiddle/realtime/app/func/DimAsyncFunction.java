@@ -51,7 +51,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
     @Override
     public void open(Configuration parameters) throws Exception {
         //初始化线程池对象
-        System.out.println("初始化线程池对象");
+        //System.out.println("初始化线程池对象");
         log.info("初始化线程池对象");
         executorService = ThreadPoolUtil.getInstance();
     }
@@ -85,7 +85,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                             }
                             //System.out.println("维度关联后的对象:" + obj);
                             long end = System.currentTimeMillis();
-                            System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
+                            //System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
                             log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
                             //将关联后的数据继续向下传递
                             resultFuture.complete(Arrays.asList(obj));

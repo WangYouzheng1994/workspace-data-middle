@@ -216,4 +216,6 @@ public class DwdBaseStationData implements Serializable {
     private String IN_WAREHOUSE_NAME;
 
 
+    private String CARRIER_NAME;
+
 }

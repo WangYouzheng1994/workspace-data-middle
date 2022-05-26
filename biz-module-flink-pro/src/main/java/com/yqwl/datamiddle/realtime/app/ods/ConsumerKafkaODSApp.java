@@ -55,13 +55,19 @@ public class ConsumerKafkaODSApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-     /*   CheckpointConfig ck = env.getCheckpointConfig();
+        CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
-        System.setProperty("HADOOP_USER_NAME", "root");
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
+        ck.setCheckpointTimeout(60000);
+        //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
+        ck.setMinPauseBetweenCheckpoints(500);
+        //同一时间只允许进行一个检查点
+        ck.setMaxConcurrentCheckpoints(1);
+        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置

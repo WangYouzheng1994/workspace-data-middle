@@ -86,30 +86,33 @@ public class WaybillDwdApp {
         SingleOutputStreamOperator<Sptb02> objStream = jsonDataStr.map(new MapFunction<String, Sptb02>() {
             @Override
             public Sptb02 map(String json) throws Exception {
-                System.out.println("kafka时消费到的数据:" + json);
+                log.info("从kafka里拿到消费到的原始数据:{}", json);
+                //System.out.println("kafka时消费到的数据:" + json);
                 JSONObject jsonObject = JSON.parseObject(json);
                 String after = jsonObject.getString("after");
                 Sptb02 sptb02 = JSON.parseObject(after, Sptb02.class);
-                System.out.println("转换成实体类对象后数据:" + sptb02);
+                //System.out.println("转换成实体类对象后数据:" + sptb02);
+                log.info("从kafka里转换成实体类对象后数据:{}", sptb02);
                 return sptb02;
             }
         }).uid("objStream").name("objStream");
-        log.info("将kafka中原始json数据转化成实例对象");
         //对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = objStream.process(new ProcessFunction<Sptb02, DwdSptb02>() {
             @Override
             public void processElement(Sptb02 sptb02, Context context, Collector<DwdSptb02> collector) throws Exception {
-                System.out.println("processElement方法开始时，数据值：" + sptb02);
-                log.info("将kafka中原始json数据转化成实例对象");
+                //System.out.println("processElement方法开始时，数据值：" + sptb02);
+                log.info("processElement方法开始执行");
                 //处理实体类
                 DwdSptb02 dwdSptb02 = new DwdSptb02();
                 //将sptb02属性值copy到dwdSptb02
                 //BeanUtils.copyProperties(sptb02, dwdSptb02);
                 BeanUtil.copyProperties(sptb02, dwdSptb02);
-                System.out.println("属性copy后值：" + dwdSptb02.toString());
+                //System.out.println("属性copy后值：" + dwdSptb02.toString());
+                log.info("Sptb02属性复制到DwdSptb02后数据:{}", dwdSptb02);
                 //获取原数据的运输方式
                 String vysfs = sptb02.getVYSFS();
-                System.out.println("运输方式：" + vysfs);
+                //System.out.println("运输方式：" + vysfs);
+                log.info("运单运输方式数据:{}", vysfs);
                 if (StringUtils.isNotEmpty(vysfs)) {
                     //1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
                     //('J','TD','SD','G')='G'
@@ -226,6 +229,7 @@ public class WaybillDwdApp {
                     @Override
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String vwlckdm = dwdSptb02.getVWLCKDM();
+                        log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
                         if (StringUtils.isNotEmpty(vwlckdm)) {
                             return vwlckdm;
                         }
@@ -255,6 +259,7 @@ public class WaybillDwdApp {
                     @Override
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String cdhddm = dwdSptb02.getCDHDDM();
+                        log.info("mdac32DS阶段获取到的查询条件值:{}", cdhddm);
                         if (StringUtils.isNotEmpty(cdhddm)) {
                             return cdhddm;
                         }
@@ -292,7 +297,7 @@ public class WaybillDwdApp {
 
         /* 7.开窗,按照数量(后续改为按照时间窗口)*/
         log.info("将处理完的数据保存到mysql中");
-        mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+/*        mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         mapJson.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<String, List<DwdSptb02>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<String> iterable, Collector<List<DwdSptb02>> collector) throws Exception {
@@ -305,7 +310,7 @@ public class WaybillDwdApp {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");*/
 
 
         env.execute("sptb02-sink-kafka-dwd");
