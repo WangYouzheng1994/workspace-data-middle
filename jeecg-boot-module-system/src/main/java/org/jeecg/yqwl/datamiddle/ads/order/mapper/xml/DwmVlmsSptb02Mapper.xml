@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
     <!--clickhouse插入数据    -->
-    <insert id="insertClickhouse" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO" >
+    <insert id="insertClickhouse" parameterType="java.util.List" >
         INSERT INTO `default`.dwm_vlms_sptb02(
             CJSDBH,
             DDJRQ,
@@ -14,18 +14,21 @@
             BASE_NAME,
             CZJGSDM,
             CQWH)
-            VALUES (
-                       #{params.CJSDBH},
-                       #{params.DDJRQ},
-                       #{params.ACTUAL_OUT_TIME},
-                       #{params.THEORY_OUT_TIME},
-                       #{params.SHIPMENT_TIME},
-                       #{params.FINAL_SITE_TIME},
-                       #{params.CUSTOMER_NAME},
-                       #{params.BASE_NAME},
-                       #{params.CZJGSDM},
-                       #{params.CQWH}
+            VALUES
+           <foreach collection="list" item="item" index="index" separator=",">
+                   (
+                       #{item.CJSDBH},
+                       #{item.DDJRQ},
+                       #{item.ACTUAL_OUT_TIME},
+                       #{item.THEORY_OUT_TIME},
+                       #{item.SHIPMENT_TIME},
+                       #{item.FINAL_SITE_TIME},
+                       #{item.CUSTOMER_NAME},
+                       #{item.BASE_NAME},
+                       #{item.CZJGSDM},
+                       #{item.CQWH}
                     )
+           </foreach>
     </insert>
     <!--按条件查询计划量    -->
     <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
