@@ -201,6 +201,16 @@ public class WaybillDwdApp {
                         dwdSptb02.setHOST_COM_CODE("3");
                     }
                 }
+                //添加新的处理逻辑(10.11  大屏显示数据)
+                //10.处理 ACTUAL_OUT_TIME(实际出库时间)  取 sptb02.dckrq字段
+                if (Objects.nonNull(sptb02.getDCKRQ())) {
+                    dwdSptb02.setACTUAL_OUT_TIME(sptb02.getDCKRQ());
+                }
+                //11.处理 THEORY_OUT_TIME(理论出库时间)  取 sptb02.dpzrq 主机厂下达计划时间+1天  24小时= 86400L
+                if (Objects.nonNull(sptb02.getDPZRQ())) {
+                    dwdSptb02.setTHEORY_OUT_TIME(sptb02.getDPZRQ() + 86400L );
+                }
+
                 //对保存的数据为null的填充默认值
                 //DwdSptb02 bean = JsonPartUtil.getBean(dwdSptb02);
                 //实际保存的值为after里的值
