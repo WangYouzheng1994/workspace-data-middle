@@ -301,7 +301,7 @@ public class WaybillDwdApp {
 
 
         /* 7.开窗,按照数量(后续改为按照时间窗口)*/
-        log.info("将处理完的数据保存到mysql中");
+     /*   log.info("将处理完的数据保存到mysql中");
         mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         mapJson.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<String, List<DwdSptb02>, TimeWindow>() {
             @Override
@@ -315,7 +315,7 @@ public class WaybillDwdApp {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");*/
 
 
         env.execute("sptb02-sink-kafka-dwd");
