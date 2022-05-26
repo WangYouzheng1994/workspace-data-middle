@@ -29,6 +29,9 @@ public class OracleCDCKafkaApp {
 
     public static void main(String[] args) throws Exception {
 
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
+        log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         //oracle cdc 相关配置
         Properties properties = new Properties();
@@ -54,16 +57,19 @@ public class OracleCDCKafkaApp {
                 .debeziumProperties(properties)
                 .build();
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //env.setParallelism(2);
-        log.info("stream流环境初始化完成");
-        CheckpointConfig ck = env.getCheckpointConfig();
+       /* CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
+        ck.setCheckpointTimeout(60000);
+        //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
+        ck.setMinPauseBetweenCheckpoints(500);
+        //同一时间只允许进行一个检查点
+        ck.setMaxConcurrentCheckpoints(1);
+        System.setProperty("HADOOP_USER_NAME", "yunding");*/
+        System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
@@ -73,10 +79,9 @@ public class OracleCDCKafkaApp {
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
 
+        oracleSourceStream.print("结果数据输出:");
         //输出到kafka
         oracleSourceStream.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
-
-        //oracleSourceStream.print("结果数据输出:");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

@@ -4,11 +4,9 @@ import cn.hutool.setting.dialect.Props;
 import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.bean.Sptc34Wide;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.enums.TableName;
-import com.yqwl.datamiddle.realtime.util.JDBCSink;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -23,15 +21,10 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +125,7 @@ public class Sptc34WideApp {
                     collector.collect(skuInfos);
                 }
             }
-        }).addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");;
+        }).addSink(JdbcSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");;
     /*timeWindowAll(Time.seconds(5)).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {

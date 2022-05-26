@@ -34,4 +34,6 @@ public class TableProcess {
     String className;
     //所在层次
     String levelName;
+    //是否扫描使用 1是0否
+    Integer isUse;
 }

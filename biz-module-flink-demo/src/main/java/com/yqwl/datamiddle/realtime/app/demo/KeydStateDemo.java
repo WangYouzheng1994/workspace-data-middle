@@ -83,7 +83,7 @@ public class KeydStateDemo {
         // 初始化 分组的状态缓存集合
         private ValueState<Integer> keyCountState;
         private ListState<Integer> listCountState;
-        private MapState<String, Double> myMapState;
+        private MapState<String, Double> myMapState; //key vin = value 操作时间
         private ReducingState<TestKeyd> reducingState;
 
 

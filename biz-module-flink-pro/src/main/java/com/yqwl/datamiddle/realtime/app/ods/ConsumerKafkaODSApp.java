@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
 import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunction;
+import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunctionList;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
@@ -14,6 +15,7 @@ import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -50,36 +52,44 @@ public class ConsumerKafkaODSApp {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        CheckpointConfig ck = env.getCheckpointConfig();
+     /*   CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
+        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
-        //Properties properties = new Properties();
-        //properties.put("transaction.state.log.replication.factor", Short.valueOf("3"));
-        //properties.put("transaction.state.log.min.isr", 2);
-
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
-                //.setProperties(properties)
                 .build();
         //将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
                 .uid("jsonDataStr").name("jsonDataStr");
-        env.setParallelism(2);
+
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
+        SingleOutputStreamOperator<String> filter = jsonDataStr.filter(new FilterFunction<String>() {
+            @Override
+            public boolean filter(String json) throws Exception {
+                JSONObject jsonObj = JSON.parseObject(json);
+                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
+                if ("sptb02".equalsIgnoreCase(tableNameStr)) {
+                    return true;
+                }
+                return false;
+            }
+        });
         //将json数据转化成JSONObject对象
         DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
             @Override
@@ -102,7 +112,7 @@ public class ConsumerKafkaODSApp {
         };
 
         //事实流写回到Kafka的数据
-        SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunction(mysqlTag)).uid("kafka-divide-data").name("kafka-divide-data");
+        SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunctionList(mysqlTag)).uid("kafka-divide-data").name("kafka-divide-data");
         log.info("事实主流数据处理完成");
 
         //获取一个kafka生产者将事实数据写回到kafka的dwd层
@@ -131,8 +141,8 @@ public class ConsumerKafkaODSApp {
                 }
         );
 
+        kafkaDS.print("kafka结果数据输出:");
         kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
-
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 
@@ -159,14 +169,14 @@ public class ConsumerKafkaODSApp {
                             map.put(sinkTable, list);
                         }
                     }
-                    //System.err.println("map里数据数量:" + map.size());
+                    System.err.println("map里数据数量:" + map.size());
                     log.info("map里数据数量:" + map.size());
                     collector.collect(map);
                 }
             }
         });
 
-        //mysqlProcess.print("数据打印:");
+        mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");

@@ -53,7 +53,7 @@ public class Mdac10 implements Serializable {
      * ID
      */
 
-    private Integer ID;
+    private Long ID;
 
 
     private String CCQCK;

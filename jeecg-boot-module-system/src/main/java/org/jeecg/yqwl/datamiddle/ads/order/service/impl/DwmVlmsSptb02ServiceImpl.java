@@ -155,11 +155,33 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public void insertClickhouse(DwmSptb02VO dwmSptb02VO) {
-        String cjsdbh;
-        Long l = System.currentTimeMillis();
-        cjsdbh=l+"";
-        dwmSptb02VO.setCJSDBH(cjsdbh);
-        dwmVlmsSptb02Mapper.insertClickhouse(dwmSptb02VO);
+        Long actual_out_time = dwmSptb02VO.getACTUAL_OUT_TIME();
+        Long theory_out_time = dwmSptb02VO.getTHEORY_OUT_TIME();
+        String base_name = dwmSptb02VO.getBASE_NAME();
+        String customer_name = dwmSptb02VO.getCUSTOMER_NAME();
+        String cqwh = dwmSptb02VO.getCQWH();
+        String czjgsdm = dwmSptb02VO.getCZJGSDM();
+        String cjsdbh="";
+        int num =5000;
+        int numValue = 1;
+
+        DwmSptb02VO dwmSptb02VO1;
+        List<DwmSptb02VO> dwmSptb02VOS = new ArrayList<>();
+
+        for (int i = 0; i < num; i++) {
+            String uuid = UUID.randomUUID().toString();
+            dwmSptb02VO1 = new DwmSptb02VO();
+            dwmSptb02VO1.setCJSDBH(uuid);
+            dwmSptb02VO1.setDDJRQ(2L);
+            dwmSptb02VO1.setACTUAL_OUT_TIME(actual_out_time);
+            dwmSptb02VO1.setTHEORY_OUT_TIME(theory_out_time);
+            dwmSptb02VO1.setBASE_NAME(base_name);
+            dwmSptb02VO1.setCUSTOMER_NAME(customer_name);
+            dwmSptb02VO1.setCQWH(cqwh);
+            dwmSptb02VO1.setCZJGSDM(czjgsdm);
+            dwmSptb02VOS.add(dwmSptb02VO1);
+        }
+        dwmVlmsSptb02Mapper.insertClickhouse(dwmSptb02VOS);
     }
 
     /**

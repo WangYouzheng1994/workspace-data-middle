@@ -30,7 +30,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @param baseBrandTime
       * @return
       */
-//     List<ShipmentDTO > sendList(@Param("params") GetBaseBrandTime baseBrandTime);
+    //     List<ShipmentDTO > sendList(@Param("params") GetBaseBrandTime baseBrandTime);
 
      /**
       * top10待发量
@@ -80,5 +80,5 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param params
      */
-    void insertClickhouse(@Param("params") DwmSptb02VO params);
+    void insertClickhouse(@Param("list") List<DwmSptb02VO> params);
 }

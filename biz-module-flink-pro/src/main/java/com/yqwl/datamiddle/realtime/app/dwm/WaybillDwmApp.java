@@ -8,10 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
-import com.yqwl.datamiddle.realtime.util.DimUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import com.yqwl.datamiddle.realtime.util.StrUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -46,11 +43,11 @@ public class WaybillDwmApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        CheckpointConfig ck = env.getCheckpointConfig();
+      /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
@@ -59,13 +56,12 @@ public class WaybillDwmApp {
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
+                .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //将kafka中源数据转化成DataStream
-        DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
-        //从Kafka主题中获取消费端
-        log.info("从kafka的主题:" + KafkaTopicConst.ODS_VLMS_SPTB02 + "中获取的要处理的数据");
+        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer").uid("jsonDataStr").name("jsonDataStr");
 
         //将kafka中原始json数据转化成实例对象
         SingleOutputStreamOperator<DwmSptb02> objStream = jsonDataStr.map(new MapFunction<String, DwmSptb02>() {
@@ -77,7 +73,10 @@ public class WaybillDwmApp {
         }).uid("objStream").name("objStream");
         log.info("将kafka中after里数据转化成实例对象");
 
-        //关联ods_vlms_sptb02d1 获取车架号 VVIN 从mysql中获取
+
+        /**
+         * 关联ods_vlms_sptb02d1 获取车架号 VVIN 从mysql中获取
+         */
         SingleOutputStreamOperator<DwmSptb02> sptb02d1DS = AsyncDataStream.unorderedWait(
                 objStream,
                 new DimAsyncFunction<DwmSptb02>(
@@ -87,7 +86,11 @@ public class WaybillDwmApp {
 
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
-                        return dwmSptb02.getCJSDBH();
+                        String cjsdbh = dwmSptb02.getCJSDBH();
+                        if (StringUtils.isNotEmpty(cjsdbh)) {
+                            return cjsdbh;
+                        }
+                        return null;
                     }
 
                     @Override
@@ -125,7 +128,13 @@ public class WaybillDwmApp {
 
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
-                        return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
+                        String hostComCode = dwmSptb02.getHOST_COM_CODE();
+                        String baseCode = dwmSptb02.getBASE_CODE();
+                        String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
+                        if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
+                            return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
+                        }
+                        return null;
                     }
 
                     @Override
@@ -163,13 +172,104 @@ public class WaybillDwmApp {
                 60, TimeUnit.SECONDS).uid("theoryShipmentTimeDS").name("theoryShipmentTimeDS");
 
 
+        /**
+         * 处理主机公司名称
+         * 关联sptc61 c1 on a.CZJGSDM = c1.cid，取c1.cjc
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc61DS = AsyncDataStream.unorderedWait(
+                theoryShipmentTimeDS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC61,
+                        "CID") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String czjgsdm = dwmSptb02.getCZJGSDM();
+                        if (StringUtils.isNotEmpty(czjgsdm)) {
+                            return czjgsdm;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setCUSTOMER_NAME(dimInfoJsonObj.getString("CJC"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc61DS").name("sptc61DS");
+
+        /**
+         * 处理发车基地名称
+         * 关联sptc62 c2 on a.cqwh = c2.cid，取c2.cname
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc62DS = AsyncDataStream.unorderedWait(
+                sptc61DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC62,
+                        "CID") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String cqwh = dwmSptb02.getCQWH();
+                        if (StringUtils.isNotEmpty(cqwh)) {
+                            return cqwh;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setBASE_NAME(dimInfoJsonObj.getString("CNAME"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc62DS").name("sptc62DS");
+
+
+        /**
+         * 处理发运仓库名称
+         * 关联sptc34 b on a.vwlckdm = b.vwlckdm， 取b.vwlckmc
+         */
+        SingleOutputStreamOperator<DwmSptb02> sptc34DS = AsyncDataStream.unorderedWait(
+                sptc62DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTC34,
+                        "VWLCKDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String vwlckdm = dwmSptb02.getVWLCKDM();
+                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                            return vwlckdm;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwmSptb02.setSHIPMENT_WAREHOUSE_NAME(dimInfoJsonObj.getString("VWLCKMC"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
+
+
+        //对实体类中null赋默认值
+        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+            @Override
+            public DwmSptb02 map(DwmSptb02 obj) throws Exception {
+                return JsonPartUtil.getBean(obj);
+            }
+        }).uid("endData").name("endData");
+
         //组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
-        //mdac22DS.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        theoryShipmentTimeDS.print("拉宽后输出数据：");
-       // mdac22DS.print("拉宽后输出数据：");
+        endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
+        endData.print("拉宽后数据输出：");
+        // mdac22DS.print("拉宽后输出数据：");
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-sink-clickhouse-dwm");
         log.info("sptb02dwd层job任务开始执行");

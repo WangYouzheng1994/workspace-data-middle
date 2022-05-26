@@ -35,9 +35,9 @@ public class FormatDataUtil {
         List<String> timingList = new ArrayList<>();
 
 
-        // 从今天开始前推七天
+        //如果开始时间和结束时间为空 从今天开始前推七天 todo:当前只在时间类型为"day"的时候,尚未拓展时间为"week,month,quarter,year"的条件
         if (baseBrandTime.getStartTime() == null && baseBrandTime.getEndTime() == null) {
-             dateTimes = DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);
+             dateTimes = DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -6), new Date(), DateField.DAY_OF_YEAR);
             for (DateTime dateTime : dateTimes) {
                 timingList.add(dateTime.toDateStr());
                  }

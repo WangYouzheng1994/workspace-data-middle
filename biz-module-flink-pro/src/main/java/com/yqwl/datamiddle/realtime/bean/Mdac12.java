@@ -95,7 +95,7 @@ public class Mdac12 implements Serializable {
     private String CJKBS;
 
 
-    private Integer ID;
+    private Long ID;
 
     /**
      * 描述

@@ -54,7 +54,7 @@ public class Mdac14 implements Serializable {
     private String VWLFL;
 
 
-    private Integer ID;
+    private Long ID;
 
 
     private String CJHTY;

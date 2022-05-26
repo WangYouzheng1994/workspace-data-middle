@@ -64,11 +64,12 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
                 }
             }
         }
-        System.out.println("数据插入执行时间：" + (System.currentTimeMillis() - start));
+        //System.out.println("数据插入执行时间：" + (System.currentTimeMillis() - start));
         log.info("数据插入执行时间：" + (System.currentTimeMillis() - start));
     }
 
     // 根据data属性和值生成 insert sql语句
+
     /**
      * *
      * {
@@ -103,9 +104,9 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
         //JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObject);
         //获取真实数据的字段名称
         Set<String> columns = jsonObject.keySet();
-        log.info("获取当前数据所有key:{}", columns.size());
-        System.err.println("获取当前数据key:" + columns.size());
-        System.err.println("获取当前数据key:" + columns);
+        log.info("获取当前数据所有字段数量:{}, 字段值:{}", columns.size(), columns);
+        //System.err.println("获取当前数据key:" + columns.size());
+        //System.err.println("获取当前数据key:" + columns);
         //1.定义sql
         StringBuffer insertSql = new StringBuffer();
         insertSql.append("replace into ").append(tableName).append("(")
@@ -122,8 +123,9 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             //JSONObject afterObjVal = JsonPartUtil.getAfterObj(obj);
             valueForTable.append("(");
             Collection<Object> values = obj.values();
-            System.err.println("获取当前数据values:" + values.size());
-            System.err.println("获取当前数据values:" + values);
+            //System.err.println("获取当前数据values:" + values.size());
+            //System.err.println("获取当前数据values:" + values);
+            log.info("获取当前数据数量:{}, values:{}", values.size(), values);
             Collection<Object> newValues = new ArrayList<>();
             for (Object value : values) {
                 if (value instanceof String) {

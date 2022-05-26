@@ -6,13 +6,17 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.DwdMysqlSink;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
+import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -29,13 +33,15 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,13 +56,14 @@ public class WaybillDwdApp {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        CheckpointConfig ck = env.getCheckpointConfig();
+      /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
@@ -70,8 +77,8 @@ public class WaybillDwdApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //将kafka中源数据转化成DataStream
-        DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
-        env.setParallelism(1);
+        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer").uid("jsonDataStr").name("jsonDataStr");
+
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.ODS_VLMS_SPTB02 + "中获取的要处理的数据");
 
@@ -218,7 +225,11 @@ public class WaybillDwdApp {
 
                     @Override
                     public Object getKey(DwdSptb02 dwdSptb02) {
-                        return dwdSptb02.getVWLCKDM();
+                        String vwlckdm = dwdSptb02.getVWLCKDM();
+                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                            return vwlckdm;
+                        }
+                        return null;
                     }
 
                     @Override
@@ -243,7 +254,11 @@ public class WaybillDwdApp {
 
                     @Override
                     public Object getKey(DwdSptb02 dwdSptb02) {
-                        return dwdSptb02.getCDHDDM();
+                        String cdhddm = dwdSptb02.getCDHDDM();
+                        if (StringUtils.isNotEmpty(cdhddm)) {
+                            return cdhddm;
+                        }
+                        return null;
                     }
 
                     @Override
@@ -256,10 +271,16 @@ public class WaybillDwdApp {
 
 
         //将实体类映射成json
-        SingleOutputStreamOperator<String> mapJson = mdac32DS.map(DwdSptb02::toString).uid("mapJson").name("mapJson");
+        SingleOutputStreamOperator<String> mapJson = mdac32DS.map(new MapFunction<DwdSptb02, String>() {
+            @Override
+            public String map(DwdSptb02 obj) throws Exception {
+                DwdSptb02 bean = JsonPartUtil.getBean(obj);
+                return JSON.toJSONString(bean);
+            }
+        }).uid("mapJson").name("mapJson");
 
         //组装kafka生产端
-        dataDwdProcess.print("数据拉宽后输出:");
+        dataDwdProcess.print("数据拉宽后结果输出:");
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02,
@@ -267,6 +288,26 @@ public class WaybillDwdApp {
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
         mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
+
+
+        /* 7.开窗,按照数量(后续改为按照时间窗口)*/
+        log.info("将处理完的数据保存到mysql中");
+        mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        mapJson.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<String, List<DwdSptb02>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<String> iterable, Collector<List<DwdSptb02>> collector) throws Exception {
+                List<DwdSptb02> list = new ArrayList<>();
+                for (String s : iterable) {
+                    DwdSptb02 dwdSptb02 = JSON.parseObject(s, DwdSptb02.class);
+                    list.add(dwdSptb02);
+                }
+                if (list.size() > 0) {
+                    collector.collect(list);
+                }
+            }
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+
+
         env.execute("sptb02-sink-kafka-dwd");
         log.info("sptb02dwd层job任务开始执行");
     }

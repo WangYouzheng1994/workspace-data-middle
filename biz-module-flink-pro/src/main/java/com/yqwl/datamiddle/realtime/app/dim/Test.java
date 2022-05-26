@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.bean.Sysc07;
@@ -63,6 +64,12 @@ public class Test {
         String s = JSON.toJSONString(sysc07);
         System.out.println(s);
 
+        System.out.println("================================");
+
+        String json = "{\"database\":\"TDS_LJ\",\"before\":{},\"after\":{\"CJHBS\":\"0\",\"VYDDH\":\"18335478582\",\"WAREHOUSE_UPDATETIME\":\"1653362665966\",\"CCXBS\":\"1\",\"CJKBS\":\"0\",\"CFWTY\":\"0\",\"FINAL_APPROVAL_FLAG\":\"0\",\"CTYBS\":\"0\",\"NFYJL\":\"0.00\",\"CSYBDK\":\"0\",\"CDHDDM\":\"H05297\",\"WAREHOUSE_CREATETIME\":\"1653362665966\",\"VJXSJC\":\" \",\"CXLDM_QD\":\"0\",\"NFKQX\":0,\"NKHFS\":0,\"CDMS\":\"0\",\"NXYED\":\"0.00\",\"CXSTY\":\"0\",\"ID\":\"0\",\"VDH\":\"18335478582\",\"NFPSL\":\"0.00\",\"DSTAMP\":1572723546095082,\"CBJGLKC\":\"0\",\"CZJGSDM\":\"2\",\"APPROVAL_FLAG\":\"0\",\"NZYXYED\":\"0.00\",\"CXYJC\":\"0\",\"CSXDM\":\"08\",\"CXLDM_CD\":\"0\",\"NFPXE\":\"0.00\",\"NFYTQQ\":\"0.00\",\"VDZ\":\"山西省晋中市介休市绿城华府工地\",\"CGS\":\"CC\",\"NBJXYED\":\"0.00\",\"VJXSMC\":\"江建军\",\"CDKHBS\":\"0\",\"CFWZSTY\":\"0\",\"CJXSDM\":\"341227197304289010\",\"CSQDM\":\"JN\",\"CBJEJXS\":\"0\"},\"type\":\"insert\",\"tableName\":\"MDAC22\",\"ts\":1653362665966}";
+        JSONObject jsonObject = JSON.parseObject(json);
+        String after = jsonObject.getString("after");
+        System.out.println(after);
 
     }
 
