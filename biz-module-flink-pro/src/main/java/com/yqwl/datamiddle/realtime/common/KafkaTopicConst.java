@@ -16,7 +16,6 @@ public class KafkaTopicConst {
     public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
 
 
-
     //ods topic
     //oracle cdc 统一进入topic
     public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
@@ -62,10 +61,10 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_RFID_WAREHOUSE = "ods_vlms_rfid_warehouse";
 
     //xiaofeng自建   cdc kafka topic name
-    public static final String  ORACLE_TOPIC_SYSC07="ORACLE_TOPIC_SYSC07";
-    public static final String  ORACLE_TOPIC_SYSC08="ORACLE_TOPIC_SYSC08";
-    public static final String  ORACLE_TOPIC_SYSC09="ORACLE_TOPIC_SYSC09";
-    public static final String  ORACLE_TOPIC_MDAC01="ORACLE_TOPIC_MDAC01";
+    public static final String ORACLE_TOPIC_SYSC07 = "ORACLE_TOPIC_SYSC07";
+    public static final String ORACLE_TOPIC_SYSC08 = "ORACLE_TOPIC_SYSC08";
+    public static final String ORACLE_TOPIC_SYSC09 = "ORACLE_TOPIC_SYSC09";
+    public static final String ORACLE_TOPIC_MDAC01 = "ORACLE_TOPIC_MDAC01";
 
 
     //dim topic
@@ -75,16 +74,15 @@ public class KafkaTopicConst {
 
     //dwd topic
     public static final String DWD_VLMS_SPTB02 = "dwd_vlms_sptb02";
-
+    public static final String DWD_VLMS_BASE_STATION_DATA = "dwd_vlms_base_station_data";
+    public static final String DWD_VLMS_BASE_STATION_DATA_EPC = "dwd_vlms_base_station_data_epc";
 
 
     //dwm topic
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
 
 
-
     //dws topic
-
 
 
 }
