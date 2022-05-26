@@ -6,6 +6,7 @@ import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
+import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsIni
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 /**
@@ -84,13 +86,29 @@ public class BaseStationDataAndEpcDwdApp {
         });
 
 
-        //组装sql
-        StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
-        log.info("组装clickhouse插入sql:{}", sql);
-        //endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        //endData.print("拉宽后数据输出：");
-        // mdac22DS.print("拉宽后输出数据：");
+        //base_station_data获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-sink-clickhouse-dwm");
         log.info("sptb02dwd层job任务开始执行");
