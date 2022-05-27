@@ -110,4 +110,67 @@ public class DwmOneOrderToEnd implements Serializable  {
      */
     private Integer VEHICLE_NUM;
 
+    /**
+     * 创建时间
+     */
+    private Long WAREHOUSE_CREATETIME;
+
+    /**
+     * 更新时间
+     */
+    private Long WAREHOUSE_UPDATETIME;
+
+    /**
+     * 始发城市
+     */
+    private String START_CITY_NAME;
+
+    /**
+     * 目的城市
+     */
+    private String END_CITY_NAME;
+
+    /**
+     * 经销商代码
+     */
+    private String VDWDM;
+
+    /**
+     * 经销商名称
+     */
+    private String DEALER_NAME;
+
+    /**
+     * 开始站台,应用于铁路
+     */
+    private String START_PLATFORM_NAME;
+
+    /**
+     * 目的站台,应用于铁路
+     */
+    private String END_PLATFORM_NAME;
+
+    /**
+     * 入开始站台时间,应用于铁路
+     */
+    private Long IN_START_PLATFORM_TIME;
+
+    /**
+     * 出开始站台时间,应用于铁路
+     */
+    private Long OUT_START_PLATFORM_TIME;
+
+
+    /**
+     * 入目的站台时间,应用于铁路
+     */
+    private Long IN_END_PLATFORM_TIME;
+
+    /**
+     * 卸车时间,应用于铁路
+     */
+    private Long UNLOAD_RAILWAY_TIME;
+
+
+
 }
