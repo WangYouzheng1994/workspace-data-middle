@@ -15,10 +15,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -39,7 +36,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
     }
 
     //用于在内存中存储表配置对象 [表名,[表配置信息]]
-    private final Map<String, List<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
+    private final Map<String, LinkedHashSet<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
 
 
     @Override
@@ -65,26 +62,27 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         //List<TableProcess> tableProcessList = DbUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
-        tableProcessMap.clear();
-        for (TableProcess tableProcess : tableProcessList) {
-            log.info("输出分流配置表中数据:{}", tableProcess.toString());
-            //获取源表表名
-            String sourceTable = tableProcess.getSourceTable();
-            //获取数据操作类型
-            String operateType = tableProcess.getOperateType();
-            //拼接字段创建主键
-            String key = sourceTable + ":" + operateType;
-            //将数据存入结果集合
-            if (tableProcessMap.containsKey(key)) {
-                for (TableProcess process : tableProcessMap.get(key)) {
-                    if (!StringUtils.equals(process.getSinkType(), tableProcess.getSinkType())) {
-                        tableProcessMap.get(key).add(tableProcess);
-                    }
+        synchronized (TableProcessDivideFunctionList.class) {
+            for (TableProcess tableProcess : tableProcessList) {
+                log.info("输出分流配置表中数据:{}", tableProcess.toString());
+                //获取源表表名
+                String sourceTable = tableProcess.getSourceTable();
+                //获取数据操作类型
+                String operateType = tableProcess.getOperateType();
+                //拼接字段创建主键
+                String key = sourceTable + ":" + operateType;
+                //将数据存入结果集合
+                if (tableProcessMap.containsKey(key)) {
+                    tableProcessMap.get(key).add(tableProcess);
+                    //for (TableProcess process : tableProcessMap.get(key)) {
+                        //if (!StringUtils.equals(process.getSinkType(), tableProcess.getSinkType())) {
+                        //}
+                    //}
+                } else {
+                    LinkedHashSet<TableProcess> tableProcessItemList = new LinkedHashSet<>();
+                    tableProcessItemList.add(tableProcess);
+                    tableProcessMap.put(key, tableProcessItemList);
                 }
-            } else {
-                List<TableProcess> tableProcessItemList = new CopyOnWriteArrayList<>();
-                tableProcessItemList.add(tableProcess);
-                tableProcessMap.put(key, tableProcessItemList);
             }
         }
         if (MapUtils.isEmpty(tableProcessMap)) {
@@ -113,7 +111,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         if (MapUtils.isNotEmpty(tableProcessMap)) {
             //将源表和操作类型组合成key, 例如：key=MDAC32:insert
             String key = StringUtils.joinWith(":", lowerTableName, type);
-            List<TableProcess> tableProcesses = tableProcessMap.get(key);
+            LinkedHashSet<TableProcess> tableProcesses = tableProcessMap.get(key);
             if (CollectionUtils.isNotEmpty(tableProcesses)) {
                 for (TableProcess tableProcess : tableProcesses) {
                     //将sink的表添加到当前流记录中
