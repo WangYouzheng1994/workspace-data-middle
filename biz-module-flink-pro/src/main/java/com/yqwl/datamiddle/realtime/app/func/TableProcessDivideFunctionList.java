@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
+import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
     private void initTableProcessMap() {
         log.info("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
-        List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
+        List<TableProcess> tableProcessList = DbUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
         for (TableProcess tableProcess : tableProcessList) {
             log.info("输出分流配置表中数据:{}", tableProcess.toString());
