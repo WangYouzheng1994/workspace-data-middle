@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
+import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +34,8 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
+        //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        //conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 
     /**
@@ -50,8 +51,11 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             //对每一批数据进行处理
             String sql = genInsertSql(entry.getKey(), entry.getValue());
             System.out.println("组装生成的sql:" + sql);
+            log.info("组装生成的sql:{}", sql);
             //执行SQL
-            PreparedStatement ps = null;
+            DbUtil.insert(sql);
+
+    /*        PreparedStatement ps = null;
             try {
                 ps = conn.prepareStatement(sql);
                 ps.execute();
@@ -62,7 +66,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
                 if (ps != null) {
                     ps.close();
                 }
-            }
+            }*/
         }
         //System.out.println("数据插入执行时间：" + (System.currentTimeMillis() - start));
         log.info("数据插入执行时间：" + (System.currentTimeMillis() - start));
