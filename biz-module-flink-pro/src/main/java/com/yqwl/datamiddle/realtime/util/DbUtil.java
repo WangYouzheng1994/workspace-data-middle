@@ -276,7 +276,7 @@ public class DbUtil {
      * @return
      * @throws SQLException
      */
-    private static DruidPooledConnection getDruidConnection() throws SQLException {
+    public static DruidPooledConnection getDruidConnection() throws SQLException {
         DruidDataSource druidDataSource = getDruidDataSource();
         DruidPooledConnection connection = druidDataSource.getConnection();
         return connection;

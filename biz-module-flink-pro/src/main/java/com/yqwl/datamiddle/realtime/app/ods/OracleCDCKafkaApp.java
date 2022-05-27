@@ -58,7 +58,7 @@ public class OracleCDCKafkaApp {
                 .build();
 
         CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+     /*   ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
@@ -67,9 +67,9 @@ public class OracleCDCKafkaApp {
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
-        ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
-        //System.setProperty("HADOOP_USER_NAME", "root");
+        ck.setMaxConcurrentCheckpoints(1);*/
+        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 

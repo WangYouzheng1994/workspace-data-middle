@@ -8,8 +8,8 @@ import cn.hutool.setting.dialect.Props;
 public class PropertiesUtil {
 
     //开启哪个模式
-    public static final String ACTIVE_TYPE = "prod";
-    //public static final String ACTIVE_TYPE = "dev";
+    //public static final String ACTIVE_TYPE = "prod";
+    public static final String ACTIVE_TYPE = "dev";
 
     //开发模式
     private static final String ACTIVE_DEV = "dev";

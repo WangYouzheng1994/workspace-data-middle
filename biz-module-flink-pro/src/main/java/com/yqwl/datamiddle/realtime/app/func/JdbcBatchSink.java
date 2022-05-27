@@ -167,6 +167,8 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
                 //是否进行下划线转化
                 if (isChange) {
                     columnSb.append(camelToUnderline(field.getName()));
+                } else {
+                    columnSb.append(field.getName());
                 }
 
                 placeholder.append("?");

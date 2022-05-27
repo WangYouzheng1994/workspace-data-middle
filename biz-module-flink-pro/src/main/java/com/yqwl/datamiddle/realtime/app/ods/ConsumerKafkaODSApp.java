@@ -55,7 +55,7 @@ public class ConsumerKafkaODSApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        CheckpointConfig ck = env.getCheckpointConfig();
+      /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
@@ -66,8 +66,8 @@ public class ConsumerKafkaODSApp {
         ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
-        //System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");*/
+        System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
@@ -91,13 +91,14 @@ public class ConsumerKafkaODSApp {
                 JSONObject jsonObj = JSON.parseObject(json);
                 String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 if ("sptb02".equalsIgnoreCase(tableNameStr)) {
+                    log.info("sptb02==========");
                     return true;
                 }
                 return false;
             }
         });
         //将json数据转化成JSONObject对象
-        DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
+        DataStream<JSONObject> jsonStream = filter.map(new MapFunction<String, JSONObject>() {
             @Override
             public JSONObject map(String json) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(json);

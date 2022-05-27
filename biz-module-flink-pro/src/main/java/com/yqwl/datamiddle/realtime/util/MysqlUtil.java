@@ -41,7 +41,8 @@ public class MysqlUtil {
             Class.forName(MysqlConfig.DRIVER);
             //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
             //建立连接
-            conn = DriverManager.getConnection(MysqlConfig.URL, MysqlConfig.USERNAME, MysqlConfig.PASSWORD);
+            //conn = DriverManager.getConnection(MysqlConfig.URL, MysqlConfig.USERNAME, MysqlConfig.PASSWORD);
+            conn = DbUtil.getDruidConnection();
             //conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             //创建数据库操作对象
             ps = conn.prepareStatement(sql);
