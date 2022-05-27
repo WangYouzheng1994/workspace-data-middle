@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -16,6 +17,7 @@ import java.sql.Timestamp;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
+@CamelUnderline(isChange = false)
 public class DwdBaseStationData implements Serializable {
 
     private static final long serialVersionUID = 1L;
