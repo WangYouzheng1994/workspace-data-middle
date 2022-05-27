@@ -43,7 +43,7 @@ public class WaybillDwmApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-      /*  CheckpointConfig ck = env.getCheckpointConfig();
+        /*CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据

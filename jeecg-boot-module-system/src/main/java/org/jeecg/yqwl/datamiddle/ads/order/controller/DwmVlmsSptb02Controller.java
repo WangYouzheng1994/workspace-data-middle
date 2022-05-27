@@ -51,6 +51,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(dayAmountOfPlan);
         return shipmentVOResult ;
     }
+
     /**
      * 按条件查询到货量
      * @param baseBrandTime
@@ -58,6 +59,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectEndNum")
     public Result<?> queryEndNum (@RequestBody GetBaseBrandTime baseBrandTime) {
+        log.info("查询了到货量");
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.getFINAL_SITE_TIME(baseBrandTime);
         //  参数校验,去除key的空值
         Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);

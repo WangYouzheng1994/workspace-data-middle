@@ -1,24 +1,33 @@
 package com.yqwl.datamiddle.realtime.app.dwd;
 
 import cn.hutool.setting.dialect.Props;
-import com.yqwl.datamiddle.realtime.bean.BaseStationDataEpc;
-import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
+import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
-import com.yqwl.datamiddle.realtime.util.KafkaUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import com.yqwl.datamiddle.realtime.util.StrUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
+
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 一单到底
@@ -30,12 +39,12 @@ import org.apache.flink.util.Collector;
 public class BaseStationDataAndEpcDwdApp {
 
     public static void main(String[] args) throws Exception {
-        //Flink 流式处理环境
+        //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
+        env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-      /*  CheckpointConfig ck = env.getCheckpointConfig();
+        /*CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
@@ -46,6 +55,14 @@ public class BaseStationDataAndEpcDwdApp {
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
+        // kafka source2 base_station_data
+        KafkaSource<String> bsdSource = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();
         // kafka source1 base_station_data_epc
         KafkaSource<String> bsdEpcSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
@@ -55,55 +72,120 @@ public class BaseStationDataAndEpcDwdApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        // kafka source2 base_station_data
-        KafkaSource<String> bsdSource = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new SimpleStringSchema())
-                .build();
 
-        //将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> bsdEpcDs = env.fromSource(bsdEpcSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-epc").uid("bsdEpcDs").name("bsdEpcDs");
+
+        // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> bsdDs = env.fromSource(bsdSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-bsd").uid("bsdDs").name("bsdDs");
+        SingleOutputStreamOperator<String> bsdEpcDs = env.fromSource(bsdEpcSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-epc").uid("bsdEpcDs").name("bsdEpcDs");
 
 
-        SingleOutputStreamOperator<DwdBaseStationDataEpc> processBsdEpcDs = bsdEpcDs.process(new ProcessFunction<String, DwdBaseStationDataEpc>() {
-
+        //2.进行数据过滤
+        // 过滤出BASE_STATION_DATA的表
+        DataStream<String> filterBsdDs = bsdDs.filter(new RichFilterFunction<String>() {
             @Override
-            public void processElement(String json, Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
-                BaseStationDataEpc dataEpc = JsonPartUtil.getAfterObj(json, BaseStationDataEpc.class);
-                DwdBaseStationDataEpc toEnd = new DwdBaseStationDataEpc();
-                //todo 根据 vin 按规则拆分出 车型 品牌
-                String vin = dataEpc.getVIN();
-                toEnd.setVIN(dataEpc.getVIN());
-
-
-                out.collect(toEnd);
+            public boolean filter(String s) throws Exception {
+                JSONObject jo = JSON.parseObject(s);
+                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("BASE_STATION_DATA")) {
+                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
+                    String vin = after.getVIN();
+                    if (vin != null) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
             }
+        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
 
-        });
+        // 过滤出BASE_STATION_DATA的表
+        DataStream<String> filterBsdEpcDs = bsdEpcDs.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String s) throws Exception {
+                JSONObject jo = JSON.parseObject(s);
+                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("BASE_STATION_DATA_EPC")) {
+                    DwdBaseStationDataEpc after = jo.getObject("after", DwdBaseStationDataEpc.class);
+                    String vin = after.getVIN();
+                    if (vin != null) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+        }).uid("filterBASE_STATION_DATA_EPC").name("filterBASE_STATION_DATA_EPC");
+
+        //3. 进行实体类的转换
+        //BASE_STATION_DATA_EPC
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
+            @Override
+            public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
+                DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
+                Timestamp ts = jsonObject.getTimestamp("ts");
+                dataBsdEpc.setTs(ts);
+                return dataBsdEpc;
+            }
+        }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
+        //BASE_STATION_DATA
+        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
+            @Override
+            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
+                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
+                Timestamp ts = jsonObject.getTimestamp("ts");
+                dataBsd.setTs(ts);
+                return dataBsd;
+            }
+        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
+
+        //todo: 4.指定事件时间字段
+        //DwdBaseStationDataEpc指定事件时间
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> dwdBaseStationDataEpcWithTS = mapBsdEpc.assignTimestampsAndWatermarks(
+                WatermarkStrategy.<DwdBaseStationDataEpc>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                        .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationDataEpc>() {
+                            @Override
+                            public long extractTimestamp(DwdBaseStationDataEpc dwdBaseStationDataEpc, long l) {
+                                Timestamp ts = dwdBaseStationDataEpc.getTs();
+                                return ts.getTime();
+                            }
+                        })).uid("DwdBaseStationDataEpcWithTS");
+        //DwdBaseStationData 指定事件时间
+        SingleOutputStreamOperator<DwdBaseStationData> dwdBaseStationDataWithTS = mapBsd.assignTimestampsAndWatermarks(
+                WatermarkStrategy.<DwdBaseStationData>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                        .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationData>() {
+                            @Override
+                            public long extractTimestamp(DwdBaseStationData dwdBaseStationData, long l) {
+                                Timestamp ts = dwdBaseStationData.getTs();
+                                return ts.getTime();
+                            }
+                        })).uid("DwdBaseStationDataEpcWithTS");
+
+        //5.分组指定关联key
+        KeyedStream<DwdBaseStationDataEpc, String> dwdBdsEpcKeyedStream = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN);
+        KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
+        //todo: 1.base_station_data_epc 处理CP9下线接车日期
 
 
-        //base_station_data获取kafka生产者
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
-                props.getStr("kafka.hostname"),
-                KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
+        //todo: 2.base_station_data 和rfid_warehouse关联添加入库仓库的字段
+        SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
+                dwdBdsKeyedStream,
+                new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_base_station_data", "WAREHOUSE_CODE") {
+                    @Override
+                    public Object getKey(DwdBaseStationData dwdBsd) {
+                        if (StringUtils.isNotEmpty(dwdBsd.getSHOP_NO())){
+                            return dwdBsd.getSHOP_NO();
+                        }
+                        return null;
+                    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+                    @Override
+                    public void join(DwdBaseStationData dBsd, JSONObject dimInfoJsonObj) {
+                        if (dimInfoJsonObj.getString("WAREHOUSE_CODE") !=null){
+                            log.info("dim WAREHOUSE_CODE");
+                            dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
+                        }
+                    }
+                }, 60, TimeUnit.SECONDS);
 
 
 

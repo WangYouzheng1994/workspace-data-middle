@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -88,5 +89,8 @@ public class DwdBaseStationDataEpc implements Serializable {
      */
     private Long CP9_OFFLINE_TIME;
 
-
+    /**
+     * 新增更新时间字段
+     */
+    private Timestamp ts;
 }

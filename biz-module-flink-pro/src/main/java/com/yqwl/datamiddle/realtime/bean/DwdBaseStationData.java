@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -217,5 +218,10 @@ public class DwdBaseStationData implements Serializable {
 
 
     private String CARRIER_NAME;
+
+    /**
+     * 新增更新时间字段
+     */
+    private Timestamp ts;
 
 }
