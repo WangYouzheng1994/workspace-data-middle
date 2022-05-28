@@ -134,12 +134,17 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             Collection<Object> newValues = new ArrayList<>();
             for (Object value : values) {
                 if (value instanceof String) {
-                    String newStr = "'" + value + "'";
+                    String newValue = (String) value;
+                    if (newValue.startsWith("'")) {
+                        newValue = newValue.substring(1);
+                    }
+                    String newStr = "'" + newValue + "'";
                     newValues.add(newStr);
                 } else {
                     newValues.add(value);
                 }
             }
+            log.info("处理后values字段值:{}", newValues);
             valueForTable.append(StringUtils.join(newValues, ",")).append(")").append(",");
             valueSql.append(valueForTable);
         }
