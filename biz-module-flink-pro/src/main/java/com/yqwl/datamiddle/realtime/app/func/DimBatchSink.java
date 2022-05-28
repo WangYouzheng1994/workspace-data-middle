@@ -101,6 +101,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
      * @return
      */
     private String genInsertSql(String tableName, List<JSONObject> dataList) {
+        log.info("获取当前数据表名:{}", tableName);
         //"insert into 表名(列名.....) values (值....)"
         //获取第一个元素，目标是组装字段列表部分
         JSONObject jsonObject = dataList.get(0);
