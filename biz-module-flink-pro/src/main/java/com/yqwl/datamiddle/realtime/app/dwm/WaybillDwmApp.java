@@ -27,6 +27,7 @@ import org.apache.flink.streaming.api.functions.async.AsyncFunction;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -295,8 +296,8 @@ public class WaybillDwmApp {
 
                         //获取前置节点代码  START_CAL_NODE_CODE
                         String nodeCode = dimInfoJsonObj.getString("START_CAL_NODE_CODE").trim();
-                        //将标准时长并将小时转换成秒级别  STANDARD_HOURS
-                        Long second = Long.parseLong(dimInfoJsonObj.getString("STANDARD_HOURS")) * 60 * 60L ;
+                        //将标准时长并将小时转换成毫秒级别  STANDARD_HOURS
+                        Long second = Long.parseLong(dimInfoJsonObj.getString("STANDARD_HOURS")) * 60 * 60 * 1000L ;
                         //获取主机公司代码 HOST_COM_CODE
                         String hostCode = dimInfoJsonObj.getString("HOST_COM_CODE").trim();
                         //获取运输方式名称  TRANS_MODE_NAME
@@ -305,28 +306,36 @@ public class WaybillDwmApp {
                         String baseName = dimInfoJsonObj.getString("BASE_NAME").trim();
                         //TODO:只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ +24小时(86400L)  主机公司代码是1 (大众)  主机厂下达计划时间  取sptb02.dpzrq
                         if ( "1".equals(hostCode) && "DZJDJRQ".equals(nodeCode)) {
-                            dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDPZRQ() + second);
+                            if ( dwmSptb02.getDPZRQ() != 0) {
+                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDPZRQ() + second);
+                            }
                         }
                         //TODO:红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
                         if ( "2".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode)) {
-                            switch (transName) {
-                                case "公路":
-                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
-                                    break;
-                                case "铁路":
-                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
-                                    break;
-                                case "水路":
-                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
-                                    break;
+                            if(dwmSptb02.getDYSSZPSJ() != 0){
+                                switch (transName) {
+                                    case "公路":
+                                        dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                        break;
+                                    case "铁路":
+                                        dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                        break;
+                                    case "水路":
+                                        dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                        break;
+                                }
+
                             }
+
                         }
                         //TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
                         if (  "3".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode) ) {
-                            if ( "公路".equals(transName) ) {
-                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
-                            }else if ( "铁路".equals(transName) || "水路".equals(transName) ) {
-                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                            if ( dwmSptb02.getDYSSZPSJ() != 0 ) {
+                                if ( "公路".equals(transName) ) {
+                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                }else if ( "铁路".equals(transName) || "水路".equals(transName) ) {
+                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                }
                             }
                         }
                     }
@@ -344,7 +353,7 @@ public class WaybillDwmApp {
 
         //组装sql
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
+        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02_TEST1).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
         endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         endData.print("拉宽后数据输出：");
