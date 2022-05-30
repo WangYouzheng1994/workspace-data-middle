@@ -214,10 +214,14 @@ public class DwdBaseStationData implements Serializable {
     private Long IN_SITE_TIME;
 
     /**
+     * 入库仓库代码
+     */
+    private String IN_WAREHOUSE_CODE;
+
+    /**
      * 入库仓库名称
      */
     private String IN_WAREHOUSE_NAME;
-
 
     private String CARRIER_NAME;
 

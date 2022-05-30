@@ -59,7 +59,7 @@ public class BaseStationDataAndEpcDwdApp {
         KafkaSource<String> bsdSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
+                //.setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -67,7 +67,7 @@ public class BaseStationDataAndEpcDwdApp {
         KafkaSource<String> bsdEpcSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
+                //.setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -136,7 +136,7 @@ public class BaseStationDataAndEpcDwdApp {
                 dataBsd.setTs(ts);
                 return dataBsd;
             }
-        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
+        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
 
         //todo: 4.指定事件时间字段
         //DwdBaseStationDataEpc指定事件时间
@@ -148,7 +148,7 @@ public class BaseStationDataAndEpcDwdApp {
                                 Timestamp ts = dwdBaseStationDataEpc.getTs();
                                 return ts.getTime();
                             }
-                        })).uid("DwdBaseStationDataEpcWithTS");
+                        })).uid("assIgnDwdBaseStationDataEpcEventTime");
         //DwdBaseStationData 指定事件时间
         SingleOutputStreamOperator<DwdBaseStationData> dwdBaseStationDataWithTS = mapBsd.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<DwdBaseStationData>forBoundedOutOfOrderness(Duration.ofMinutes(5))
@@ -158,22 +158,25 @@ public class BaseStationDataAndEpcDwdApp {
                                 Timestamp ts = dwdBaseStationData.getTs();
                                 return ts.getTime();
                             }
-                        })).uid("DwdBaseStationDataEpcWithTS");
-
+                        })).uid("assIgnDwdBaseStationDataEventTime");
+//        dwdBaseStationDataWithTS.print("输出指定事件时间的:");
         //5.分组指定关联key
-        KeyedStream<DwdBaseStationDataEpc, String> dwdBdsEpcKeyedStream = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN);
-        KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
+//        KeyedStream<DwdBaseStationDataEpc, String> dwdBdsEpcKeyedStream = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN);
+//        KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
         //todo: 1.base_station_data_epc 处理CP9下线接车日期
 
 
         //todo: 2.base_station_data 和rfid_warehouse关联添加入库仓库的字段
+        //provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
-                dwdBdsKeyedStream,
-                new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_base_station_data", "WAREHOUSE_CODE") {
+                dwdBaseStationDataWithTS,
+                new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_rfid_warehouse", "WAREHOUSE_CODE") {
                     @Override
                     public Object getKey(DwdBaseStationData dwdBsd) {
                         if (StringUtils.isNotEmpty(dwdBsd.getSHOP_NO())){
-                            return dwdBsd.getSHOP_NO();
+                            String shop_no = dwdBsd.getSHOP_NO();
+                            log.info("sql查询:"+shop_no);
+                            return shop_no;
                         }
                         return null;
                     }
@@ -182,18 +185,18 @@ public class BaseStationDataAndEpcDwdApp {
                     public void join(DwdBaseStationData dBsd, JSONObject dimInfoJsonObj) {
                         if (dimInfoJsonObj.getString("WAREHOUSE_CODE") !=null){
                             log.info("dim WAREHOUSE_CODE");
-                            dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
+                            dBsd.setIN_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
+                            dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
                         }
                     }
                 }, 60, TimeUnit.SECONDS);
 
+        outSingleOutputStreamOperator.print("输出结果:");
 
 
 
-
-        log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-clickhouse-dwm");
-        log.info("sptb02dwd层job任务开始执行");
+        env.execute("合表开始");
+        log.info("base_station_data job任务开始执行");
 
     }
 }
