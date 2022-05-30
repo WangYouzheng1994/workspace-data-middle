@@ -3,7 +3,9 @@ package com.yqwl.datamiddle.realtime.app.dwd;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
@@ -22,11 +24,17 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -138,7 +146,7 @@ public class BaseStationDataAndEpcDwdApp {
             }
         }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
 
-        //todo: 4.指定事件时间字段
+        // 4.指定事件时间字段
         //DwdBaseStationDataEpc指定事件时间
         SingleOutputStreamOperator<DwdBaseStationDataEpc> dwdBaseStationDataEpcWithTS = mapBsdEpc.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<DwdBaseStationDataEpc>forBoundedOutOfOrderness(Duration.ofMinutes(5))
@@ -163,6 +171,8 @@ public class BaseStationDataAndEpcDwdApp {
         //5.分组指定关联key
 //        KeyedStream<DwdBaseStationDataEpc, String> dwdBdsEpcKeyedStream = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN);
 //        KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
+
+        //6.处理字段
         //todo: 1.base_station_data_epc 处理CP9下线接车日期
 
 
@@ -191,9 +201,17 @@ public class BaseStationDataAndEpcDwdApp {
                     }
                 }, 60, TimeUnit.SECONDS);
 
-        outSingleOutputStreamOperator.print("输出结果:");
-
-
+        //7.开窗,按照时间窗口存储到mysql
+        outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        outSingleOutputStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationData, List<DwdBaseStationData>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<DwdBaseStationData> iterable, Collector<List<DwdBaseStationData>> collector) throws Exception {
+                ArrayList<DwdBaseStationData> es = Lists.newArrayList(iterable);
+                if (es.size() > 0) {
+                    collector.collect(es);
+                }
+            }
+        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysql").name("sink-mysql");
 
         env.execute("合表开始");
         log.info("base_station_data job任务开始执行");
