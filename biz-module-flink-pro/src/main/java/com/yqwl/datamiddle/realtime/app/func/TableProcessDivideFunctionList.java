@@ -18,6 +18,7 @@ import org.apache.flink.util.OutputTag;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @Description: 消费kafka中的数据将表进行分流处理
@@ -36,7 +37,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
     }
 
     //用于在内存中存储表配置对象 [表名,[表配置信息]]
-    private final Map<String, LinkedHashSet<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
+    private final Map<String, CopyOnWriteArraySet<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
 
 
     @Override
@@ -62,7 +63,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         //List<TableProcess> tableProcessList = DbUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
-        synchronized (TableProcessDivideFunctionList.class) {
+        // synchronized (TableProcessDivideFunctionList.class) {
             for (TableProcess tableProcess : tableProcessList) {
                 log.info("输出分流配置表中数据:{}", tableProcess.toString());
                 //获取源表表名
@@ -79,12 +80,12 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
                         //}
                     //}
                 } else {
-                    LinkedHashSet<TableProcess> tableProcessItemList = new LinkedHashSet<>();
+                    CopyOnWriteArraySet<TableProcess> tableProcessItemList = new CopyOnWriteArraySet<>();
                     tableProcessItemList.add(tableProcess);
                     tableProcessMap.put(key, tableProcessItemList);
                 }
             }
-        }
+        // }
         if (MapUtils.isEmpty(tableProcessMap)) {
             log.error("读取分流配置表异常");
             throw new RuntimeException("读取分流配置表异常");
@@ -111,7 +112,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         if (MapUtils.isNotEmpty(tableProcessMap)) {
             //将源表和操作类型组合成key, 例如：key=MDAC32:insert
             String key = StringUtils.joinWith(":", lowerTableName, type);
-            LinkedHashSet<TableProcess> tableProcesses = tableProcessMap.get(key);
+            CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
             if (CollectionUtils.isNotEmpty(tableProcesses)) {
                 for (TableProcess tableProcess : tableProcesses) {
                     //将sink的表添加到当前流记录中
