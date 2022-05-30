@@ -12,13 +12,15 @@ import java.math.BigDecimal;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-17
+ * @since 2022-05-30
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Sptb02d1 implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+
     /**
      * 移动计划
      */
@@ -65,25 +67,25 @@ public class Sptb02d1 implements Serializable {
      * 运费单价
      */
 
-    private Integer NYFDJ;
+    private BigDecimal NYFDJ;
 
     /**
      * 管理费单价
      */
 
-    private Integer NGLFDJ;
+    private BigDecimal NGLFDJ;
 
     /**
      * 针对解放来讲，是总体的支付金额，而不是单价了
      */
 
-    private Integer NZFJG;
+    private BigDecimal NZFJG;
 
     /**
      * 支付价格，主要用于华北基地，算法复杂见21319附件
      */
 
-    private Integer NYFBYJ;
+    private BigDecimal NYFBYJ;
 
     /**
      * 审批表ID。来自支付标准
@@ -95,7 +97,7 @@ public class Sptb02d1 implements Serializable {
      * 支付标准。委托价格X浮动率。
      */
 
-    private Integer NZFBZ;
+    private BigDecimal NZFBZ;
 
     /**
      * 支付备注 20180605(600-1000)
@@ -107,7 +109,7 @@ public class Sptb02d1 implements Serializable {
      * 主机公司的单价
      */
 
-    private Integer NYFDJ_Z;
+    private BigDecimal NYFDJ_Z;
 
     /**
      * 运费备注
@@ -137,19 +139,19 @@ public class Sptb02d1 implements Serializable {
      * 扣款单价。扣款额=nkkdj*nsl
      */
 
-    private Integer NKKDJ;
+    private BigDecimal NKKDJ;
 
     /**
      * 结算补偿单价。支付给基地时，按nzfjg_jd/nyfdj的比例生成
      */
 
-    private Integer NJSBCJ;
+    private BigDecimal NJSBCJ;
 
     /**
      * 支付补偿单价
      */
 
-    private Integer NZFBCJ;
+    private BigDecimal NZFBCJ;
 
     /**
      * 计算补偿价标识；1,2,3为按转网车价、对流价、区域价计算成功了。X表示有异常（详见SPTB87），21表示买断车
@@ -161,19 +163,19 @@ public class Sptb02d1 implements Serializable {
      * 吉轻等 收入补偿价 （特殊报表）
      */
 
-    private Integer NJSBCJ_TS;
+    private BigDecimal NJSBCJ_TS;
 
     /**
      * 吉轻等 奖励支付价 （特殊报表）
      */
 
-    private Integer NJLZFJ_TS;
+    private BigDecimal NJLZFJ_TS;
 
     /**
      * 吉轻等 支付补偿价 （特殊报表）
      */
 
-    private Integer NZFBCJ_TS;
+    private BigDecimal NZFBCJ_TS;
 
 
     private String VJLZFJ_TS;
@@ -182,7 +184,7 @@ public class Sptb02d1 implements Serializable {
      * 20180129 比率支付价格 大众公路中标运输商 出库日期大于20180101
      */
 
-    private Integer NZFJG_BL;
+    private BigDecimal NZFJG_BL;
 
     /**
      * 解放支付类型（比率或招标价）
@@ -194,7 +196,7 @@ public class Sptb02d1 implements Serializable {
      * 解放 20171201-20180317 招标价 新价格 备注 留痕价 解放补偿运输商（一次性）
      */
 
-    private Integer NZFBCJ_JFBZ;
+    private BigDecimal NZFBCJ_JFBZ;
 
     /**
      * 20180516 解放长春补偿报表 支付价备注 20180711(600-1000) 20190216 1000-2000
@@ -224,13 +226,13 @@ public class Sptb02d1 implements Serializable {
      * 大众18年7月补偿 结算补偿价
      */
 
-    private Integer NJSBCJ_7;
+    private BigDecimal NJSBCJ_7;
 
     /**
      * 大众18年7月补偿 支付补偿价
      */
 
-    private Integer NZFBCJ_7;
+    private BigDecimal NZFBCJ_7;
 
     /**
      * 运费备注 补偿 20180909 DTF 大众提价补偿报表
@@ -266,31 +268,31 @@ public class Sptb02d1 implements Serializable {
      * 2018年7月第一次比例补偿 基地支付、收入
      */
 
-    private Integer NJSBCJ_7_BL;
+    private BigDecimal NJSBCJ_7_BL;
 
     /**
      * 2018年7月第一次比例补偿 普通支付
      */
 
-    private Integer NZFBCJ_7_BL;
+    private BigDecimal NZFBCJ_7_BL;
 
     /**
      * 20181115 add by dtf 3地问题处理 新算价格
      */
 
-    private Integer NZFJG_NEW;
+    private BigDecimal NZFJG_NEW;
 
     /**
      * 20181115 add by dtf 3地问题处理 新算基地价格
      */
 
-    private Integer NZFJG_JD_NEW;
+    private BigDecimal NZFJG_JD_NEW;
 
     /**
      * 20181119 add by dtf 大众3地同城支付差值 补偿列
      */
 
-    private Integer NZFBCJ_8;
+    private BigDecimal NZFBCJ_8;
 
     /**
      * 20181120 add by dtf 解放接口 公告车型
@@ -302,55 +304,55 @@ public class Sptb02d1 implements Serializable {
      * 20190121 add by dtf 18年长久支付40%补偿
      */
 
-    private Integer NZFBCJ_9;
+    private BigDecimal NZFBCJ_9;
 
     /**
      * 20190131 add by dtf 2018大众公路运输补偿
      */
 
-    private Integer NJSBCJ_10;
+    private BigDecimal NJSBCJ_10;
 
     /**
      * 大众干线补偿支付价格
      */
 
-    private Integer NZFBCJ_11;
+    private BigDecimal NZFBCJ_11;
 
     /**
      * 大众分拨补偿支付价格
      */
 
-    private Integer NZFBCJ_12;
+    private BigDecimal NZFBCJ_12;
 
     /**
      * 20190809 B平台2次支付补偿
      */
 
-    private Integer NZFBCJ_13;
+    private BigDecimal NZFBCJ_13;
 
     /**
      * 20190926 2019年大众运费补偿
      */
 
-    private Integer NJSBCJ_2019;
+    private BigDecimal NJSBCJ_2019;
 
     /**
      * 20191010 2019年大众支付补偿
      */
 
-    private Integer NZFBCJ_2019;
+    private BigDecimal NZFBCJ_2019;
 
     /**
      * 20191012 2019年大众支付补偿 通过核算项目取到的原价格！
      */
 
-    private Integer NZFBCJ_2019_Y;
+    private BigDecimal NZFBCJ_2019_Y;
 
     /**
      * 20190926 2019年大众运费补偿 通过核算项目取到的原价格！
      */
 
-    private Integer NJSBCJ_2019_Y;
+    private BigDecimal NJSBCJ_2019_Y;
 
 
     private Long DDATE_LASTMOFIFY_YF;
@@ -362,31 +364,31 @@ public class Sptb02d1 implements Serializable {
      * 20200620 DTF 解放支付比例（实际）
      */
 
-    private Integer NZFBL_JF;
+    private BigDecimal NZFBL_JF;
 
     /**
      * 20200621 DTF 解放支付单价（含税）
      */
 
-    private Integer NZFBZ_JF;
+    private BigDecimal NZFBZ_JF;
 
     /**
      * 20200703 DTF 单据日期200401开始接收TDS运费价格*0.99
      */
 
-    private Integer NYFDJ_JF;
+    private BigDecimal NYFDJ_JF;
 
     /**
      * 20200711 DTF 高速扣款
      */
 
-    private Integer NKK_GSF;
+    private BigDecimal NKK_GSF;
 
     /**
      * 20200725 DTF 佛山铁路支付补偿价
      */
 
-    private Integer NZFBCJ_14;
+    private BigDecimal NZFBCJ_14;
 
     /**
      * 20200911 DTF 核算项目代码
@@ -404,49 +406,49 @@ public class Sptb02d1 implements Serializable {
      * 保密车补位结算价格
      */
 
-    private Integer NJSJG_BMCBW;
+    private BigDecimal NJSJG_BMCBW;
 
     /**
      * 保密车补位支付价格
      */
 
-    private Integer NZFJG_BMCBW;
+    private BigDecimal NZFJG_BMCBW;
 
     /**
      * 20201110 奔腾铁路　２次运费价格　固定值
      */
 
-    private Integer NYF_BT_T;
+    private BigDecimal NYF_BT_T;
 
     /**
      * 20210107 特发车支付补偿价格
      */
 
-    private Integer NZFBCJ_15;
+    private BigDecimal NZFBCJ_15;
 
     /**
      * 20210224 大众铁水结算比例
      */
 
-    private Integer NJSBL_TS;
+    private BigDecimal NJSBL_TS;
 
     /**
      * 20210224 大众铁水支付比例
      */
 
-    private Integer NZFBL_TS;
+    private BigDecimal NZFBL_TS;
 
     /**
      * 20210224 大众铁水结算正确价格
      */
 
-    private Integer NYFDJ_SJ_TS;
+    private BigDecimal NYFDJ_SJ_TS;
 
     /**
      * 20210224 大众铁水支付正确价格
      */
 
-    private Integer NZFJG_SJ_TS;
+    private BigDecimal NZFJG_SJ_TS;
 
     /**
      * 20210303 大众铁水基地报表比例
@@ -458,19 +460,19 @@ public class Sptb02d1 implements Serializable {
      * 20211029 解放支付扣款2 财务
      */
 
-    private Integer NKK_JF2;
+    private BigDecimal NKK_JF2;
 
     /**
      * 20211103 大众佛山支付补偿价格
      */
 
-    private Integer NZFBCJ_16;
+    private BigDecimal NZFBCJ_16;
 
     /**
      * 20211116 解放长春基地 扣款后的里程
      */
 
-    private Integer NLC_JF;
+    private BigDecimal NLC_JF;
 
     /**
      * 创建时间
