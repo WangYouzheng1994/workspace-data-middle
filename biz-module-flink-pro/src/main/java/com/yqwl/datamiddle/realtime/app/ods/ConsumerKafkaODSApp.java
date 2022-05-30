@@ -164,7 +164,7 @@ public class ConsumerKafkaODSApp {
                             map.put(sinkTable, list);
                         }
                     }
-                    System.err.println("map里数据数量:" + map.size());
+                    //System.err.println("map里数据数量:" + map.size());
                     log.info("map里数据数量:" + map.size());
                     collector.collect(map);
                 }
