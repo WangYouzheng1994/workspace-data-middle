@@ -1272,6 +1272,13 @@ public class DwmSptb02 implements Serializable {
      */
     private Integer SITE_FLAG;
 
+    /**
+     * 1 (b3.nsjsl /10 >= 26)
+     * 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)
+     * 3 b3.nsjsl /10 <15
+     */
+    private Integer RAILWAY_TRAIN_TYPE;
+
 
     @Override
     public String toString() {
