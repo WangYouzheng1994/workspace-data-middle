@@ -22,6 +22,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.async.AsyncFunction;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -254,9 +255,87 @@ public class WaybillDwmApp {
                 },
                 60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
 
+        //分配及时率  出库及时率  起运及时率 到货及时率
+        /**
+         * 处理理论出库时间 THEORY_OUT_TIME
+         * 关联LC_SPEC_CONFIG 获取前置节点, 标准时长,指标代码,标准时长,状态
+         * 前置节点代码  START_CAL_NODE_CODE
+         * 标准时长(小时,需要转成秒级别)  STANDARD_HOURS
+         * 指标代码(取2): SPEC_CODE  0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
+         * 使用到dwdSptb02 的czjgsdm  cqwh vysfs
+         * vysfs 已经处理成 TRAFFIC_TYPE    dwdsptb02
+         *                 TRANS_MODE_CODE   lc_spec_config
+         * czjgsdm  已经处理成sptb02.HOST_COM_CODE 1:大众  2:红旗 3:马自达
+         * cqwh 已经处理成sptb02.BASE_CODE  1:长春  2:成都  3.佛山 5:天津
+         * TODO:只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ+24小时(86400L)  主机公司代码是1 (大众)
+         * TODO:红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
+         * TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
+         */
+        SingleOutputStreamOperator<DwmSptb02> theoryouttimeDS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG,
+                        "HOST_COM_CODE,BASE_CODE,TRANS_MODE_CODE",
+                        " AND STATUS = '1' AND SPEC_CODE = '2'") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String hostComCode = dwmSptb02.getHOST_COM_CODE();
+                        String baseCode = dwmSptb02.getBASE_CODE();
+                        String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
+                        if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
+                            return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+
+                        //获取前置节点代码  START_CAL_NODE_CODE
+                        String nodeCode = dimInfoJsonObj.getString("START_CAL_NODE_CODE").trim();
+                        //将标准时长并将小时转换成秒级别  STANDARD_HOURS
+                        Long second = Long.parseLong(dimInfoJsonObj.getString("STANDARD_HOURS")) * 60 * 60L ;
+                        //获取主机公司代码 HOST_COM_CODE
+                        String hostCode = dimInfoJsonObj.getString("HOST_COM_CODE").trim();
+                        //获取运输方式名称  TRANS_MODE_NAME
+                        String transName = dimInfoJsonObj.getString("TRANS_MODE_NAME").trim();
+                        //获取基地名称 BASE_NAME
+                        String baseName = dimInfoJsonObj.getString("BASE_NAME").trim();
+                        //TODO:只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ +24小时(86400L)  主机公司代码是1 (大众)  主机厂下达计划时间  取sptb02.dpzrq
+                        if ( "1".equals(hostCode) && "DZJDJRQ".equals(nodeCode)) {
+                            dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDPZRQ() + second);
+                        }
+                        //TODO:红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
+                        if ( "2".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode)) {
+                            switch (transName) {
+                                case "公路":
+                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                    break;
+                                case "铁路":
+                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                    break;
+                                case "水路":
+                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                                    break;
+                            }
+                        }
+                        //TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
+                        if (  "3".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode) ) {
+                            if ( "公路".equals(transName) ) {
+                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                            }else if ( "铁路".equals(transName) || "水路".equals(transName) ) {
+                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+                            }
+                        }
+                    }
+                },60, TimeUnit.SECONDS).uid("theoryouttimeDS").name("theoryouttimeDS");
+
 
         //对实体类中null赋默认值
-        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+        SingleOutputStreamOperator<DwmSptb02> endData = theoryouttimeDS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+//        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
             @Override
             public DwmSptb02 map(DwmSptb02 obj) throws Exception {
                 return JsonPartUtil.getBean(obj);
