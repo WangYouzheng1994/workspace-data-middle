@@ -67,7 +67,7 @@ public class Spti32 implements Serializable {
      * 在途时间(出库-到货)
      */
 
-    private Long NZTSJ;
+    private Double NZTSJ;
 
     /**
      * 物流时间
