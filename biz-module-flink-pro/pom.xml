@@ -117,6 +117,12 @@
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+
+<!--        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.11.0</version>
         </dependency>
@@ -125,7 +131,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.11.0</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -235,6 +241,7 @@
                         <configuration>
                             <finalName>oracle-cdc-kafka</finalName>
                             <!--<finalName>consumer-kafka-divide</finalName>-->
+                            <!--<finalName>consumer-kafka-dwd-sptb02</finalName>-->
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
@@ -271,6 +278,7 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>
                                     <!--<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>-->
+                                    <!--<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>-->
                                 </transformer>
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
