@@ -85,20 +85,8 @@ public class ConsumerKafkaODSApp {
 
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
-        SingleOutputStreamOperator<String> filter = jsonDataStr.filter(new FilterFunction<String>() {
-            @Override
-            public boolean filter(String json) throws Exception {
-                JSONObject jsonObj = JSON.parseObject(json);
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
-                if ("sptb02".equalsIgnoreCase(tableNameStr)) {
-                    log.info("sptb02==========");
-                    return true;
-                }
-                return false;
-            }
-        });
         //将json数据转化成JSONObject对象
-        DataStream<JSONObject> jsonStream = filter.map(new MapFunction<String, JSONObject>() {
+        DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
             @Override
             public JSONObject map(String json) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(json);
@@ -148,7 +136,7 @@ public class ConsumerKafkaODSApp {
                 }
         );
 
-        kafkaDS.print("kafka结果数据输出:");
+        //kafkaDS.print("kafka结果数据输出:");
         kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
@@ -183,7 +171,7 @@ public class ConsumerKafkaODSApp {
             }
         });
 
-        mysqlProcess.print("mysql结果数据输出:");
+       // mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");
