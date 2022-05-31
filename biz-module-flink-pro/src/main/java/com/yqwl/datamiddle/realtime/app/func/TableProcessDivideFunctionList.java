@@ -63,29 +63,24 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         //List<TableProcess> tableProcessList = DbUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
-        // synchronized (TableProcessDivideFunctionList.class) {
-            for (TableProcess tableProcess : tableProcessList) {
-                log.info("输出分流配置表中数据:{}", tableProcess.toString());
-                //获取源表表名
-                String sourceTable = tableProcess.getSourceTable();
-                //获取数据操作类型
-                String operateType = tableProcess.getOperateType();
-                //拼接字段创建主键
-                String key = sourceTable + ":" + operateType;
-                //将数据存入结果集合
-                if (tableProcessMap.containsKey(key)) {
-                    tableProcessMap.get(key).add(tableProcess);
-                    //for (TableProcess process : tableProcessMap.get(key)) {
-                        //if (!StringUtils.equals(process.getSinkType(), tableProcess.getSinkType())) {
-                        //}
-                    //}
-                } else {
-                    CopyOnWriteArraySet<TableProcess> tableProcessItemList = new CopyOnWriteArraySet<>();
-                    tableProcessItemList.add(tableProcess);
-                    tableProcessMap.put(key, tableProcessItemList);
-                }
+        for (TableProcess tableProcess : tableProcessList) {
+            log.info("输出分流配置表中数据:{}", tableProcess.toString());
+            //获取源表表名
+            String sourceTable = tableProcess.getSourceTable();
+            //获取数据操作类型
+            String operateType = tableProcess.getOperateType();
+            //拼接字段创建主键
+            String key = sourceTable + ":" + operateType;
+            //将数据存入结果集合
+            if (tableProcessMap.containsKey(key)) {
+                CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
+                tableProcesses.add(tableProcess);
+            } else {
+                CopyOnWriteArraySet<TableProcess> tableProcessItemList = new CopyOnWriteArraySet<>();
+                tableProcessItemList.add(tableProcess);
+                tableProcessMap.put(key, tableProcessItemList);
             }
-        // }
+        }
         if (MapUtils.isEmpty(tableProcessMap)) {
             log.error("读取分流配置表异常");
             throw new RuntimeException("读取分流配置表异常");
@@ -136,7 +131,9 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
                         log.info("实体赋值默认值后数据:{}", bean);
                         jsonObj.put("after", JSON.toJSON(bean));
                         ctx.output(outputTag, jsonObj);
-
+                        aClass = null;
+                        afterObj = null;
+                        bean = null;
                         // 如果是写到kafka的 那么直接写入到kafka中
                     } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
                         out.collect(jsonObj);
