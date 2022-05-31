@@ -121,7 +121,7 @@ public class Sptb02d1 implements Serializable {
      * 支付给基地
      */
 
-    private Integer NZFJG_JD;
+    private BigDecimal NZFJG_JD;
 
     /**
      * 支付备注
