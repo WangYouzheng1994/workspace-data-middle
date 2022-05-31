@@ -24,6 +24,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.async.AsyncFunction;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -254,6 +255,7 @@ public class WaybillDwmApp {
                         dwmSptb02.setSHIPMENT_WAREHOUSE_NAME(dimInfoJsonObj.getString("VWLCKMC"));
                     }
                 },
+
                 60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
 
         //分配及时率  出库及时率  起运及时率 到货及时率
@@ -339,11 +341,180 @@ public class WaybillDwmApp {
                             }
                         }
                     }
-                },60, TimeUnit.SECONDS).uid("theoryouttimeDS").name("theoryouttimeDS");
+                },
+                60, TimeUnit.SECONDS).uid("theoryouttimeDS").name("theoryouttimeDS");
+        /**
+         * 处理理论到货时间  THEORY_SITE_TIME (铁路和水路数据)
+         * 先处理dwmsptb02表与sptb013表的字段
+         * SPTB013 需要的字段 NSJSL,VPH
+         * 1 (b3.nsjsl /10 >= 26) 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 3 b3.nsjsl /10 <15
+         * 关联条件  left  join sptb013    b3 on a.vph = b3.vph
+         * 字段  RAILWAY_TRAIN_TYPE  铁路种类
+         */
 
+        SingleOutputStreamOperator<DwmSptb02> sptb013DS = AsyncDataStream.unorderedWait(
+                theoryouttimeDS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTB013, "VPH") {
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        //获取vph
+                        String vph = dwmSptb02.getVPH();
+                        if ( StringUtils.isNotEmpty(vph)) {
+                            return vph;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //获取实际数量
+                        Integer nsjsl = dimInfoJsonObj.getIntValue("NSJSL");
+                        //1 (b3.nsjsl /10 >= 26) 
+                        // 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 
+                        // 3 b3.nsjsl /10 <15
+                        if ( nsjsl != 0 ) {
+                            //大于26  1
+                            if ( nsjsl /10 >= 26 ) {
+                                dwmSptb02.setRAILWAY_TRAIN_TYPE(1);
+                                //大于等于 15 小于26  2
+                            }else if ( nsjsl /10 >= 15 && nsjsl /10 < 26 ) {
+                                dwmSptb02.setRAILWAY_TRAIN_TYPE(2);
+                                //小于15 3
+                            }else if ( nsjsl /10 < 15 ) {
+                                dwmSptb02.setRAILWAY_TRAIN_TYPE(3);
+                            }
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("sptb013DS").name("sptb013DS");
+
+
+        /**
+         * 处理理论到货时间
+         * 与spti32表关联  取公路的理论到货时间
+         *  ##### c1  sptc34  c2 mdac32  a sptb02  i spti32
+         * left join spti32 i on c1.vsqdm = i.cqssqdm and c1.vsxdm = i.cqscsdm and c2.csqdm = i.cmbsqdm and c2.csxdm = i.cmbcsdm
+         *        and a.czjgsdm = i.czjgs and a.vysfs = i.vysfs
+         * 关联条件  CQSSQDM 起始省区代码  CQSCSDM 起始市县代码  CMBSQDM 目标省区代码 CMBCSDM 目标市县代码  CZJGS 主机公司代码  VYSFS 运输方式
+         * SPTB02
+         *            END_PROVINCE_CODE 到货地省区代码
+         *           END_CITY_CODE  到货地市县代码
+         *            START_PROVINCE_CODE  起货地省区代码
+         *            START_CITY_CODE 起货地市县代码
+         *            TRAFFIC_TYPE 运输方式
+         *            HOST_COM_CODE 主机公司代码
+         */
+        SingleOutputStreamOperator<DwmSptb02> spti32DS = AsyncDataStream.unorderedWait(
+                sptb013DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTI32, "CQSSQDM,CQSCSDM,CMBSQDM,CMBCSDM,CZJGS,VYSFS") {
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        //获取起始省区代码
+                        String startprovincecode = dwmSptb02.getSTART_PROVINCE_CODE();
+                        //获取起始市县代码  START_CITY_CODE
+                        String startcitycode = dwmSptb02.getSTART_CITY_CODE();
+                        //获取到货地省区代码  END_PROVINCE_CODE
+                        String endprovincecode = dwmSptb02.getEND_PROVINCE_CODE();
+                        //获取到货地市县代码   END_CITY_CODE
+                        String endcitycode = dwmSptb02.getEND_CITY_CODE();
+                        //获取主机公司名称  HOST_COM_CODE
+                        String czjgsdm = dwmSptb02.getCZJGSDM();
+                        //获取运输方式  TRAFFIC_TYPE
+                        String traffictype = dwmSptb02.getTRAFFIC_TYPE();
+                        if ( StringUtils.isNotEmpty(startprovincecode) && StringUtils.isNotEmpty(startcitycode)
+                                && StringUtils.isNotEmpty(endprovincecode) && StringUtils.isNotEmpty(endcitycode)
+                                && StringUtils.isNotEmpty(czjgsdm) &&StringUtils.isNotEmpty(traffictype)) {
+                            return Arrays.asList(dwmSptb02.getSTART_PROVINCE_CODE(), dwmSptb02.getSTART_CITY_CODE(),
+                                    dwmSptb02.getEND_PROVINCE_CODE() ,dwmSptb02.getEND_CITY_CODE()
+                                    ,dwmSptb02.getCZJGSDM(),dwmSptb02.getTRAFFIC_TYPE());
+                        }
+
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //VYSFS 运输方式
+                        String vysfs = dimInfoJsonObj.getString("VYSFS");
+                        //sptb02.dckrq+spti32.ndhsj_xt
+                        Long ndhsj_xt = dimInfoJsonObj.getLong("NDHSJ_XT") * 60 *60 * 1000L;
+                        if ( ndhsj_xt != 0 && "G".equals(vysfs) ) {
+                            dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDCKRQ() + ndhsj_xt);
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("spti32DS").name("spti32DS");
+
+        /**
+         * 处理理论到货时间  THEORY_SITE_TIME
+         * 与 spti32_rail_sea 关联
+         * 关联字段  CZJGSDM  主机公司名称  vysfs S T
+         *  left  join spti32_rail_sea i1 on a.CZJGSDM = i1.CZJGSDM and decode(a.VYSFS,''S'',''S'',''T'') = i1.VYSFS and   a.VFCZT = i1.CQSZTDM and a.VSCZT = i1.CMBZTDM
+         *  RAILWAY_TRAIN_TYPE  1 (b3.nsjsl /10 >= 26) 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 3 b3.nsjsl /10 <15
+         *  SPTB02
+         *  CZJGSDM 主机公司代码
+         *  TRAFFIC_TYPE 运输方式
+         *  VFCZT  发车站台
+         *  VSCZT  收车站台
+         */
+
+        SingleOutputStreamOperator<DwmSptb02> spti32RailSeaDS = AsyncDataStream.unorderedWait(
+                spti32DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SPTI32_RAIL_SEA, "CZJGSDM,VYSFS,CQSZTDM,CMBZTDM") {
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        //获取主机公司名称,运输方式  发车站台  收车站台等
+                        String czjgsdm = dwmSptb02.getCZJGSDM();
+                        String traffictype = dwmSptb02.getTRAFFIC_TYPE();
+                        String vfczt = dwmSptb02.getVFCZT();
+                        String vsczt = dwmSptb02.getVSCZT();
+                        if ( StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype) && StringUtils.isNotEmpty(vfczt) && StringUtils.isNotEmpty(vsczt)) {
+                            return Arrays.asList(dwmSptb02.getCZJGSDM(),dwmSptb02.getTRAFFIC_TYPE(),dwmSptb02.getVFCZT(),dwmSptb02.getVSCZT());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //获取NDHSJ_XTDH_ml(满列)  大于26  RAILWAY_TRAIN_TYPE 1 准换成毫秒级别数据
+                        BigDecimal ml = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_ML") ;
+                        long ndhsjxtdhml = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(ml)).setScale(0).longValue();
+                        //获取NDHSJ_XTDH_dz(大组)  15<= x < 26   RAILWAY_TRAIN_TYPE 2
+                        BigDecimal dz = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_DZ");
+                        long ndhsjxtdhdz = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dz)).setScale(0).longValue();
+                        //获取NDHSJ_XTDH_sl(散列) 小于15  RAILWAY_TRAIN_TYPE 3
+                        BigDecimal sl = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_SL");
+                        long ndhsjxtdhsl = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(sl)).setScale(0).longValue();
+                        //ndhsj_dz_ml  S
+                        BigDecimal dzml = dimInfoJsonObj.getBigDecimal("NDHSJ_DZ_ML");
+                        long ndhsjdzml =  BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dzml)).setScale(0).longValue();
+                        //left  join spti32_rail_sea i1 on a.CZJGSDM = i1.CZJGSDM and decode(a.VYSFS,''S'',''S'',''T'') = i1.VYSFS and   a.VFCZT = i1.CQSZTDM and a.VSCZT = i1.CMBZTDM
+                        String seavysfs = dimInfoJsonObj.getString("VYSFS");
+                        if ( dwmSptb02.getDSJCFSJ() != 0 ) {
+                            if ( "S".equals(seavysfs) ) {
+                                dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjdzml);
+                            }else if ( "T".equals(seavysfs) ) {
+                                if ( dwmSptb02.getRAILWAY_TRAIN_TYPE() == 1 ) {
+                                    dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhml);
+                                }else if ( dwmSptb02.getRAILWAY_TRAIN_TYPE() == 2 ) {
+                                    dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhdz);
+                                }else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 3 ) {
+                                    dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhsl);
+                                }
+                            }
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("spti32RailSeaDS").name("spti32RailSeaDS");
 
         //对实体类中null赋默认值
-        SingleOutputStreamOperator<DwmSptb02> endData = theoryouttimeDS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+        SingleOutputStreamOperator<DwmSptb02> endData = spti32RailSeaDS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
 //        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
             @Override
             public DwmSptb02 map(DwmSptb02 obj) throws Exception {
