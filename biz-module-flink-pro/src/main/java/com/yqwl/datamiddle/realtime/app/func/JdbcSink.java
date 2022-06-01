@@ -1,6 +1,6 @@
 package com.yqwl.datamiddle.realtime.app.func;
 
-import com.yqwl.datamiddle.realtime.common.JDBCConfig;
+import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import com.yqwl.datamiddle.realtime.util.TestSink;
 import org.apache.commons.lang3.StringUtils;
@@ -81,14 +81,15 @@ public class JdbcSink {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(50)
+                        .withBatchSize(5000)
                         .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withDriverName(JDBCConfig.JDBC_DRIVER)
-                        .withUrl(JDBCConfig.JDBC_URL)
-                        .withUsername(JDBCConfig.JDBC_USERNAME)
-                        .withPassword(JDBCConfig.JDBC_PASSWORD)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUrl(MysqlConfig.URL)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
                         .build());
     }
 }
