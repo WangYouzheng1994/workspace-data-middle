@@ -9,6 +9,8 @@ import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -17,6 +19,7 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 将oracle所有源表数据cdc到kafka的同一个topic中
@@ -30,6 +33,8 @@ public class OracleCDCKafkaApp {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //flink程序重启5次，每次之间间隔10s
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(5, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
         log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
@@ -39,7 +44,7 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        properties.put("database.serverTimezone", "UTC");
+        //properties.put("database.serverTimezone", "UTC");
         properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
@@ -57,7 +62,7 @@ public class OracleCDCKafkaApp {
                 .debeziumProperties(properties)
                 .build();
 
-        CheckpointConfig ck = env.getCheckpointConfig();
+        // CheckpointConfig ck = env.getCheckpointConfig();
      /*   ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
@@ -81,7 +86,7 @@ public class OracleCDCKafkaApp {
 
         oracleSourceStream.print("结果数据输出:");
         //输出到kafka
-        oracleSourceStream.addSink(sinkKafka).setParallelism(1).uid("sinkKafka").name("sinkKafka");
+        oracleSourceStream.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

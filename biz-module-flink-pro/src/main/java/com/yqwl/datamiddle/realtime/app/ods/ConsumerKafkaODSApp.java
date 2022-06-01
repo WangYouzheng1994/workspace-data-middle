@@ -17,6 +17,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -39,6 +40,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 消费kafka下同一个topic，将表进行分流
@@ -52,6 +54,8 @@ public class ConsumerKafkaODSApp {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        //flink程序重启5次，每次之间间隔10s
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(5, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -107,7 +111,7 @@ public class ConsumerKafkaODSApp {
         };
 
         //事实流写回到Kafka的数据
-        SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunctionList(mysqlTag)).uid("kafka-divide-data").name("kafka-divide-data");
+        SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunctionList(mysqlTag)).slotSharingGroup("otherGroup").uid("kafka-divide-data").name("kafka-divide-data");
         log.info("事实主流数据处理完成");
 
         //获取一个kafka生产者将事实数据写回到kafka的dwd层
@@ -137,14 +141,14 @@ public class ConsumerKafkaODSApp {
         );
 
         //kafkaDS.print("kafka结果数据输出:");
-        kafkaDS.addSink(kafkaSink).setParallelism(1).uid("ods-sink-kafka").name("ods-sink-kafka");
+        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 
         //定义水位线
         SingleOutputStreamOperator<JSONObject> jsonStreamOperator = insertMysqlDS.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         //定义开窗
-        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
+        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(10))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<JSONObject> elements, Collector<Map<String, List<JSONObject>>> collector) throws Exception {
                 List<JSONObject> listTotal = Lists.newArrayList(elements);
@@ -169,9 +173,10 @@ public class ConsumerKafkaODSApp {
                     collector.collect(map);
                 }
             }
-        }).slotSharingGroup("mysqlProcessGroup").uid("mysqlProcess").name("mysqlProcess");;
+        }).slotSharingGroup("mysqlProcessGroup").uid("mysqlProcess").name("mysqlProcess");
+        ;
 
-       // mysqlProcess.print("mysql结果数据输出:");
+        // mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");
