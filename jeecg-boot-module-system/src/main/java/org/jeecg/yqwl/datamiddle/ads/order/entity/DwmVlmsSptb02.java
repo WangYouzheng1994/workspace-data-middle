@@ -1181,11 +1181,120 @@ public class DwmVlmsSptb02 {
     private java.lang.String trafficStatusName;
 
     //主机公司名称
-    private String  customerName;
+    @Excel(name = "主机公司名称", width = 15)
+    @ApiModelProperty(value = "主机公司名称" )
+    private java.lang.String  customerName;
     /**
      * 发车基地名称
      */
+    @Excel(name = "发车基地", width = 15)
+    @ApiModelProperty(value = "发车基地" )
     private java.lang.String baseName;
+    /**
+     * dwm新增-发运仓库名称
+     */
+    @Excel(name = "发运仓库名称", width = 15)
+    @ApiModelProperty(value = "发运仓库名称" )
+    private java.lang.String shipmentWarehouseName;
+
+    /**
+     * dwm新增-到货地省区代码
+     */
+    @Excel(name = "到货地省区代码", width = 15)
+    @ApiModelProperty(value = "到货地省区代码" )
+    private java.lang.String endProvinceCode;
+
+    /**
+     * dwm到货地省区名称
+     */
+    @Excel(name = "到货地省区名称", width = 15)
+    @ApiModelProperty(value = "到货地省区名称" )
+    private java.lang.String endProvinceName;
+
+    /**
+     * dwm到货地市县代码
+     */
+    @Excel(name = "到货地市县代码", width = 15)
+    @ApiModelProperty(value = "到货地市县代码" )
+    private java.lang.String endCityCode;
+
+    /**
+     * dwm到货地市县名称
+     */
+    @Excel(name = "到货地市县名称", width = 15)
+    @ApiModelProperty(value = "到货地市县名称" )
+    private java.lang.String endCityName;
+
+    /**
+     * dwm起货地省区代码
+     */
+    @Excel(name = "起货地省区代码", width = 15)
+    @ApiModelProperty(value = "起货地省区代码" )
+    private java.lang.String startProvinceCode;
+
+    /**
+     * dwm起货地省区名称
+     */
+    @Excel(name = "起货地省区名称", width = 15)
+    @ApiModelProperty(value = "起货地省区名称" )
+    private java.lang.String startProvinceName;
+
+    /**
+     * dwm起货地市县代码
+     */
+    @Excel(name = "起货地市县代码", width = 15)
+    @ApiModelProperty(value = "起货地市县代码" )
+    private java.lang.String startCityCode;
+
+    /**
+     * dwm起货地市县名称
+     */
+    @Excel(name = "起货地市县代码", width = 15)
+    @ApiModelProperty(value = "起货地市县代码" )
+    private java.lang.String startCityName;
+
+    /**
+     * dwm运输商名称
+     */
+    @Excel(name = "运输商名称", width = 15)
+    @ApiModelProperty(value = "运输商名称" )
+    private java.lang.String transportName;
+
+    /**
+     * dwm经销商名称
+     */
+    @Excel(name = "经销商名称", width = 15)
+    @ApiModelProperty(value = "经销商名称" )
+    private java.lang.String dealerName;
+
+    /**
+     * dwm起运是否正常 1正常0异常
+     */
+    @Excel(name = "起运是否正常", width = 15)
+    @ApiModelProperty(value = "起运是否正常" )
+    private java.lang.Integer shipmentFlag;
+
+    /**
+     * dwm出库是否正常 1正常0异常
+     */
+    @Excel(name = "出库是否正常", width = 15)
+    @ApiModelProperty(value = "出库是否正常" )
+    private java.lang.Integer outFlag;
+
+    /**
+     * dwm到货是否正常 1正常0异常
+     */
+    @Excel(name = "到货是否正常", width = 15)
+    @ApiModelProperty(value = "到货是否正常" )
+    private java.lang.Integer siteFlag;
+
+    /**
+     * 铁路类型(1 (b3.nsjsl /10 >= 26)   2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)   3  b3.nsjsl /10 <15)
+     */
+
+    @Excel(name = "铁路类型", width = 15)
+    @ApiModelProperty(value = "铁路类型" )
+    private java.lang.Integer railwayTrainType;
 
 //    /**
 //     * 总数
