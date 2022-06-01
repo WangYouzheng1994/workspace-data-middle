@@ -99,7 +99,7 @@ public class ConsumerKafkaODSApp {
                 jsonObj.put("after", afterObj);
                 return jsonObj;
             }
-        });
+        }).slotSharingGroup("otherGroup").uid("jsonStream").name("jsonStream");
         //jsonStream.print("json转化map输出:");
         //动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
         //定义输出到mysql的侧输出流标签
@@ -169,7 +169,7 @@ public class ConsumerKafkaODSApp {
                     collector.collect(map);
                 }
             }
-        });
+        }).slotSharingGroup("mysqlProcessGroup").uid("mysqlProcess").name("mysqlProcess");;
 
        // mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
