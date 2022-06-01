@@ -36,7 +36,30 @@ public class StrUtil {
         for (Field field : list) {
             wildcard.add("?");
         }
-        return "(" + StringUtils.join(wildcard, ",") + ")";
+        return " (" + StringUtils.join(wildcard, ",") + ") ";
+    }
+
+
+    /**
+     * 组装列名部分
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> String getColumnSql(Class<T> clazz) {
+        Field[] fields = clazz.getDeclaredFields();
+        List<String> columnList = new ArrayList<>();
+        for (Field field : fields) {
+            if (field.getAnnotation(TransientSink.class) != null) {
+                continue;
+            }
+            if (StringUtils.equals(field.getName(), "serialVersionUID")) {
+                continue;
+            }
+            columnList.add(field.getName());
+        }
+        return " (" + StringUtils.join(columnList, ",") + ") ";
     }
 
 
