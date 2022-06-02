@@ -1,9 +1,13 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -14,10 +18,12 @@ import java.io.Serializable;
  * @since 2022-05-18
  */
 @Data
+@TableName("dwd_vlms_base_station_data_epc")
 @EqualsAndHashCode(callSuper = false)
+@CamelUnderline(isChange = false)
 public class DwdBaseStationDataEpc implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+
 
     /**
      * 车架号
@@ -88,5 +94,9 @@ public class DwdBaseStationDataEpc implements Serializable {
      */
     private Long CP9_OFFLINE_TIME;
 
-
+    /**
+     * 新增更新时间字段
+     */
+    @TransientSink
+    private Timestamp ts;
 }

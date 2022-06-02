@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
+import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +33,9 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
     @Override
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
-        Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
+        //Class.forName(MysqlConfig.DRIVER);
+        //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        //conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 
     /**
@@ -49,9 +50,12 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
         for (Map.Entry<String, List<JSONObject>> entry : entrySet) {
             //对每一批数据进行处理
             String sql = genInsertSql(entry.getKey(), entry.getValue());
-            System.out.println("组装生成的sql:" + sql);
+            //System.out.println("组装生成的sql:" + sql);
+            log.info("组装生成的sql:{}", sql);
             //执行SQL
-            PreparedStatement ps = null;
+            DbUtil.insert(sql);
+
+    /*        PreparedStatement ps = null;
             try {
                 ps = conn.prepareStatement(sql);
                 ps.execute();
@@ -62,7 +66,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
                 if (ps != null) {
                     ps.close();
                 }
-            }
+            }*/
         }
         //System.out.println("数据插入执行时间：" + (System.currentTimeMillis() - start));
         log.info("数据插入执行时间：" + (System.currentTimeMillis() - start));
@@ -97,6 +101,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
      * @return
      */
     private String genInsertSql(String tableName, List<JSONObject> dataList) {
+        log.info("获取当前数据表名:{}", tableName);
         //"insert into 表名(列名.....) values (值....)"
         //获取第一个元素，目标是组装字段列表部分
         JSONObject jsonObject = dataList.get(0);
@@ -129,12 +134,17 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             Collection<Object> newValues = new ArrayList<>();
             for (Object value : values) {
                 if (value instanceof String) {
-                    String newStr = "'" + value + "'";
+                    String newValue = (String) value;
+                    if (newValue.startsWith("'")) {
+                        newValue = newValue.substring(1);
+                    }
+                    String newStr = "'" + newValue + "'";
                     newValues.add(newStr);
                 } else {
                     newValues.add(value);
                 }
             }
+            log.info("处理后values字段值:{}", newValues);
             valueForTable.append(StringUtils.join(newValues, ",")).append(")").append(",");
             valueSql.append(valueForTable);
         }

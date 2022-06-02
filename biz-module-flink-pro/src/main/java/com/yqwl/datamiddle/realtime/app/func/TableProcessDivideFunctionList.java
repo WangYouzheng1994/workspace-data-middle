@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
+import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +15,10 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @Description: 消费kafka中的数据将表进行分流处理
@@ -38,7 +37,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
     }
 
     //用于在内存中存储表配置对象 [表名,[表配置信息]]
-    private final Map<String, List<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
+    private final Map<String, CopyOnWriteArraySet<TableProcess>> tableProcessMap = new ConcurrentHashMap<>();
 
 
     @Override
@@ -73,13 +72,10 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
             String key = sourceTable + ":" + operateType;
             //将数据存入结果集合
             if (tableProcessMap.containsKey(key)) {
-                for (TableProcess process : tableProcessMap.get(key)) {
-                    if (!StringUtils.equals(process.getSinkType(), tableProcess.getSinkType())) {
-                        tableProcessMap.get(key).add(tableProcess);
-                    }
-                }
+                CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
+                tableProcesses.add(tableProcess);
             } else {
-                List<TableProcess> tableProcessItemList = new CopyOnWriteArrayList<>();
+                CopyOnWriteArraySet<TableProcess> tableProcessItemList = new CopyOnWriteArraySet<>();
                 tableProcessItemList.add(tableProcess);
                 tableProcessMap.put(key, tableProcessItemList);
             }
@@ -110,7 +106,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         if (MapUtils.isNotEmpty(tableProcessMap)) {
             //将源表和操作类型组合成key, 例如：key=MDAC32:insert
             String key = StringUtils.joinWith(":", lowerTableName, type);
-            List<TableProcess> tableProcesses = tableProcessMap.get(key);
+            CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
             if (CollectionUtils.isNotEmpty(tableProcesses)) {
                 for (TableProcess tableProcess : tableProcesses) {
                     //将sink的表添加到当前流记录中
@@ -134,7 +130,9 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
                         log.info("实体赋值默认值后数据:{}", bean);
                         jsonObj.put("after", JSON.toJSON(bean));
                         ctx.output(outputTag, jsonObj);
-
+                        aClass = null;
+                        afterObj = null;
+                        bean = null;
                         // 如果是写到kafka的 那么直接写入到kafka中
                     } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
                         out.collect(jsonObj);

@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -118,7 +119,7 @@ public class Mdac01 implements Serializable {
     /**
      * 更新时间
      */
-
+    @JSONField(serialize = false)
     private Timestamp ts;
 
 

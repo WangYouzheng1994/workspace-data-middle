@@ -1,42 +1,52 @@
 package com.yqwl.datamiddle.realtime.app.ods;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
+import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.yqwl.datamiddle.realtime.bean.Mdac01;
+import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
+import com.yqwl.datamiddle.realtime.bean.Sptb02d1;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
-import com.yqwl.datamiddle.realtime.util.KafkaUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import com.yqwl.datamiddle.realtime.util.StrUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.time.Time;
-import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Collector;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.util.*;
 
 /**
- * @Description: 将oracle所有源表数据cdc到kafka的同一个topic中
+ * @Description: 将oracle中某个表消费到mysql中
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
  */
 @Slf4j
-public class OracleCDCKafkaApp {
+public class OracleCdcSinkMysqlApp {
 
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //flink程序重启10次，每次之间间隔10s
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
-
         log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         //oracle cdc 相关配置
@@ -63,7 +73,7 @@ public class OracleCDCKafkaApp {
                 .debeziumProperties(properties)
                 .build();
 
-        // CheckpointConfig ck = env.getCheckpointConfig();
+        //CheckpointConfig ck = env.getCheckpointConfig();
      /*   ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
@@ -79,17 +89,36 @@ public class OracleCDCKafkaApp {
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
-        //获取kafka生产者
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
-                props.getStr("kafka.hostname"),
-                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
-
-        oracleSourceStream.print("结果数据输出:");
-        //输出到kafka
-        oracleSourceStream.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
-        log.info("add sink kafka设置完成");
-        env.execute("oracle-cdc-kafka");
+        //将json串转化成jsonObj
+        SingleOutputStreamOperator<Sptb02d1> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, Sptb02d1>() {
+            @Override
+            public Sptb02d1 map(String json) throws Exception {
+                System.out.println(json);
+                JSONObject jsonObj = JSON.parseObject(json);
+                //获取cdc进入kafka的时间
+                String tsStr = JsonPartUtil.getTsStr(jsonObj);
+                //获取after数据
+                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
+                afterObj.put("WAREHOUSE_CREATETIME", tsStr);
+                afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
+                jsonObj.put("after", afterObj);
+                //获取after真实数据后，映射为实体类
+                Sptb02d1 sptb02d1 = JsonPartUtil.getAfterObj(jsonObj, Sptb02d1.class);
+                log.info("反射后的实例:{}", sptb02d1);
+                //对映射后的实体类为null字段
+                return JsonPartUtil.getBean(sptb02d1);
+            }
+        }).uid("sourceStreamJsonObj").name("sourceStreamJsonObj");
+        //sourceStreamJsonObj.print("结果数据输出:");
+        //组装sql
+        StringBuffer sql = new StringBuffer();
+        String columnSql = StrUtil.getColumnSql(Sptb02d1.class);
+        String valueSql = StrUtil.getValueSql(Sptb02d1.class);
+        sql.append("replace into ").append(KafkaTopicConst.ODS_VLMS_SPTB02D1).append(columnSql).append(" values ").append(valueSql);
+        log.info("组装的插入sql:{}", sql);
+        sourceStreamJsonObj.addSink(JdbcSink.<Sptb02d1>getSink(sql.toString())).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        log.info("add sink mysql设置完成");
+        env.execute("oracle-cdc-mysql");
         log.info("oracle-cdc-kafka job开始执行");
     }
 }

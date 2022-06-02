@@ -248,7 +248,13 @@ public class WaybillDwmApp1 {
 
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
-                        return Arrays.asList(dwmSptb02.getSTART_PROVINCE_CODE(), dwmSptb02.getSTART_CITY_CODE());
+                        String startProvinceCode = dwmSptb02.getSTART_PROVINCE_CODE();
+                        String startCityCode = dwmSptb02.getSTART_CITY_CODE();
+                        if (StringUtils.isNotEmpty(startProvinceCode) && StringUtils.isNotEmpty(startCityCode)) {
+                            log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
+                            return Arrays.asList(startProvinceCode, startCityCode);
+                        }
+                        return null;
                     }
 
                     @Override
@@ -279,7 +285,12 @@ public class WaybillDwmApp1 {
 
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
-                        return Arrays.asList(dwmSptb02.getEND_PROVINCE_CODE(), dwmSptb02.getEND_CITY_CODE());
+                        String endProvinceCode = dwmSptb02.getEND_PROVINCE_CODE();
+                        String endCityCode = dwmSptb02.getEND_CITY_CODE();
+                        if (StringUtils.isNotEmpty(endProvinceCode) && StringUtils.isNotEmpty(endCityCode)) {
+                            return Arrays.asList(endProvinceCode, endCityCode);
+                        }
+                        return null;
                     }
 
                     @Override
@@ -287,7 +298,7 @@ public class WaybillDwmApp1 {
                         //例如 省区名称：山东省
                         dwmSptb02.setEND_PROVINCE_NAME(dimInfoJsonObj.getString("vsqmc"));
                         //例如 市县名称: 齐河
-                        dwmSptb02.setEND_PROVINCE_NAME(dimInfoJsonObj.getString("vsxmc"));
+                        dwmSptb02.setEND_CITY_NAME(dimInfoJsonObj.getString("vsxmc"));
                     }
                 },
                 60, TimeUnit.SECONDS).uid("provincesMdac32DS").name("provincesMdac32DS");

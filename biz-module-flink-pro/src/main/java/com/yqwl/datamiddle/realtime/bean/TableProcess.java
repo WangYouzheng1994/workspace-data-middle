@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @Description:
@@ -9,6 +10,7 @@ import lombok.Data;
  * @Version: V1.0
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TableProcess {
     //动态分流 Sink 常量 改为小写和脚本一致
     public static final String SINK_TYPE_MYSQL = "mysql";

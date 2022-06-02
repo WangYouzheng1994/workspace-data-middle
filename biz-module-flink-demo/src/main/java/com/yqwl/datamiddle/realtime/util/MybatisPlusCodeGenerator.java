@@ -34,12 +34,12 @@ public class MybatisPlusCodeGenerator {
 
     //要生成的表名
     private static String[] tables = {
-            "dwd_vlms_base_station_data",
+            "dwm_vlms_one_order_to_end",
 
     };
 
     //table前缀
-    private static String prefix = "dwd_vlms_";
+    private static String prefix = "dwm_vlms";
 
     //数据库类型
     private static DbType dbType = DbType.MYSQL;

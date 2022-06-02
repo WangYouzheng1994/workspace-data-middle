@@ -97,7 +97,7 @@ public class DimProvinceWideApp {
         SingleOutputStreamOperator<String> sysc07Source = env.fromSource(sysc07, WatermarkStrategy.noWatermarks(), "sysc07-kafka").uid("sysc07Source").name("sysc07Source");
         SingleOutputStreamOperator<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka").uid("sysc08Source").name("sysc08Source");
         SingleOutputStreamOperator<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka").uid("mdac01Source").name("mdac01Source");
-        ;
+
 
         LOGGER.info("1.kafka数据源收入");
 
@@ -189,8 +189,7 @@ public class DimProvinceWideApp {
                             @Override
                             public long extractTimestamp(Sysc07 sysc07, long recordTimestamp) {
                                 Timestamp ts = sysc07.getTs();
-                                Long time = ts.getTime();
-                                return time;
+                                return ts.getTime();
                             }
                         })
         ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
@@ -270,11 +269,9 @@ public class DimProvinceWideApp {
                     public void join(ProvincesWide wide, JSONObject dimInfoJsonObj) throws Exception {
                         if (dimInfoJsonObj.getString("CDSDM") != null) {
                             LOGGER.info("dim cdsdm");
-                            System.out.println("dim cdsdm");
                             wide.setCdsdm(dimInfoJsonObj.getString("CDSDM"));
                         } else {
                             LOGGER.info("wide csxdm");
-                            System.out.println("wide csxdm");
                             wide.setCdsdm(wide.getCsxdm());
                         }
                         if (dimInfoJsonObj.getString("CDSDM").equals(wide.getCdsdm08()) && dimInfoJsonObj.getString("CSQDM").equals(wide.getCsqdm())) {
@@ -284,7 +281,7 @@ public class DimProvinceWideApp {
                     }
                 }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
 
-        /* 7.开窗,按照数量(后续改为按照时间窗口)*/
+        /* 7.开窗,按照时间窗口 */
         provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         provincesWideWithSysc09.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<ProvincesWide, List<ProvincesWide>, TimeWindow>() {
             @Override

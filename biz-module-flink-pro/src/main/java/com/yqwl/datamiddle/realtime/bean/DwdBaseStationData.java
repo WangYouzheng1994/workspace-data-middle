@@ -1,9 +1,13 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -14,10 +18,11 @@ import java.io.Serializable;
  * @since 2022-05-18
  */
 @Data
+@TableName("dwd_vlms_base_station_data")
 @EqualsAndHashCode(callSuper = false)
-public class DwdBaseStationData implements Serializable {
+@CamelUnderline(isChange = false)
+public class DwdBaseStationData  {
 
-    private static final long serialVersionUID = 1L;
 
 
     /**
@@ -211,9 +216,21 @@ public class DwdBaseStationData implements Serializable {
     private Long IN_SITE_TIME;
 
     /**
+     * 入库仓库代码
+     */
+    private String IN_WAREHOUSE_CODE;
+
+    /**
      * 入库仓库名称
      */
     private String IN_WAREHOUSE_NAME;
 
+    //    private String CARRIER_NAME;
+
+    /**
+     * 新增更新时间字段
+     */
+    @TransientSink
+    private Timestamp ts;
 
 }

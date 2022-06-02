@@ -46,7 +46,7 @@ public class WaybillDwmApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-      /*  CheckpointConfig ck = env.getCheckpointConfig();
+        /*CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
@@ -90,6 +90,7 @@ public class WaybillDwmApp {
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String cjsdbh = dwmSptb02.getCJSDBH();
+                        log.info("sptb02d1DS阶段获取到的查询条件值:{}", cjsdbh);
                         if (StringUtils.isNotEmpty(cjsdbh)) {
                             return cjsdbh;
                         }
@@ -100,6 +101,7 @@ public class WaybillDwmApp {
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
                         //将维度中 用户表中username 设置给订单宽表中的属性
                         String vvin = dimInfoJsonObj.getString("VVIN");
+                        log.info("sptb02d1DS阶段获取到的VVIN:{}", vvin);
                         dwmSptb02.setVVIN(vvin);
                     }
                 },
@@ -134,6 +136,7 @@ public class WaybillDwmApp {
                         String hostComCode = dwmSptb02.getHOST_COM_CODE();
                         String baseCode = dwmSptb02.getBASE_CODE();
                         String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
+                        log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
                         if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
                             return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
                         }
@@ -189,6 +192,7 @@ public class WaybillDwmApp {
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String czjgsdm = dwmSptb02.getCZJGSDM();
+                        log.info("sptc61DS阶段获取到的查询条件值:{}", czjgsdm);
                         if (StringUtils.isNotEmpty(czjgsdm)) {
                             return czjgsdm;
                         }
@@ -216,6 +220,7 @@ public class WaybillDwmApp {
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String cqwh = dwmSptb02.getCQWH();
+                        log.info("sptc62DS阶段获取到的查询条件值:{}", cqwh);
                         if (StringUtils.isNotEmpty(cqwh)) {
                             return cqwh;
                         }
@@ -244,6 +249,7 @@ public class WaybillDwmApp {
                     @Override
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String vwlckdm = dwmSptb02.getVWLCKDM();
+                        log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
                         if (StringUtils.isNotEmpty(vwlckdm)) {
                             return vwlckdm;
                         }
@@ -371,8 +377,8 @@ public class WaybillDwmApp {
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
                         //获取实际数量
                         Integer nsjsl = dimInfoJsonObj.getIntValue("NSJSL");
-                        //1 (b3.nsjsl /10 >= 26) 
-                        // 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 
+                        //1 (b3.nsjsl /10 >= 26)
+                        // 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)
                         // 3 b3.nsjsl /10 <15
                         if ( nsjsl != 0 ) {
                             //大于26  1
@@ -513,6 +519,80 @@ public class WaybillDwmApp {
                 },
                 60, TimeUnit.SECONDS).uid("spti32RailSeaDS").name("spti32RailSeaDS");
 
+        /**
+         * 处理 起货地 物理仓库代码  省区 县区名称
+         * 关联合并后的维表 dim_vlms_provinces
+         *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
+         *   inner join mdac32 e on a.cdhddm = e.cdhddm
+         *   inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
+         *   inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> provincesSptc34DS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.DIM_VLMS_PROVINCES,
+                        "csqdm,csxdm") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String startProvinceCode = dwmSptb02.getSTART_PROVINCE_CODE();
+                        String startCityCode = dwmSptb02.getSTART_CITY_CODE();
+                        log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
+                        if (StringUtils.isNotEmpty(startProvinceCode) && StringUtils.isNotEmpty(startCityCode)) {
+                            return Arrays.asList(startProvinceCode, startCityCode);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //省区名称：山东省
+                        dwmSptb02.setSTART_PROVINCE_NAME(dimInfoJsonObj.getString("vsqmc"));
+                        //市县名称: 齐河
+                        dwmSptb02.setSTART_CITY_NAME(dimInfoJsonObj.getString("vsxmc"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("provincesSptc34DS").name("provincesSptc34DS");
+
+
+        /**
+         * 处理 到货地  省区 县区名称
+         * 关联合并后的维表 dim_vlms_provinces
+         *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
+         *   inner join mdac32 e on a.cdhddm = e.cdhddm
+         *   inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
+         *   inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> provincesMdac32DS = AsyncDataStream.unorderedWait(
+                provincesSptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.DIM_VLMS_PROVINCES,
+                        "csqdm,csxdm") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        String endProvinceCode = dwmSptb02.getEND_PROVINCE_CODE();
+                        String endCityCode = dwmSptb02.getEND_CITY_CODE();
+                        log.info("provincesMdac32DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", endProvinceCode, endCityCode);
+                        if (StringUtils.isNotEmpty(endProvinceCode) && StringUtils.isNotEmpty(endCityCode)) {
+                            return Arrays.asList(endProvinceCode, endCityCode);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        //例如 省区名称：山东省
+                        dwmSptb02.setEND_PROVINCE_NAME(dimInfoJsonObj.getString("vsqmc"));
+                        //例如 市县名称: 齐河
+                        dwmSptb02.setEND_CITY_NAME(dimInfoJsonObj.getString("vsxmc"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("provincesMdac32DS").name("provincesMdac32DS");
+
+
         //对实体类中null赋默认值
         SingleOutputStreamOperator<DwmSptb02> endData = spti32RailSeaDS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
 //        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
@@ -524,7 +604,7 @@ public class WaybillDwmApp {
 
         //组装sql
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02_TEST1).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
+        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
         endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         endData.print("拉宽后数据输出：");
