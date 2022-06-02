@@ -39,7 +39,7 @@ public class OracleCdcSinkKafkaApp {
 
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+        ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
