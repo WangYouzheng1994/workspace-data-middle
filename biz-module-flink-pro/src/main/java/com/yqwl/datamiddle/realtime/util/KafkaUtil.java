@@ -18,8 +18,8 @@ import java.util.Properties;
  * @Version: V1.0
  */
 public class KafkaUtil {
-    private static final String KAFKA_SERVER = "10.123.175.195:9092,10.123.175.196:9092,10.123.175.197:9092";
-    //private static final String KAFKA_SERVER = "192.168.3.195:9092,192.168.3.96:9092,192.168.3.97:9092";
+    //private static final String KAFKA_SERVER = "10.123.175.195:9092,10.123.175.196:9092,10.123.175.197:9092";
+    private static final String KAFKA_SERVER = "192.168.3.195:9092,192.168.3.96:9092,192.168.3.97:9092";
     private static final String DEFAULT_TOPIC = "DEFAULT_DATA";
 
     /**
@@ -65,6 +65,7 @@ public class KafkaUtil {
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 15 * 60 * 1000 + "");
+        props.setProperty("acks", "0");
         return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
     }
 
