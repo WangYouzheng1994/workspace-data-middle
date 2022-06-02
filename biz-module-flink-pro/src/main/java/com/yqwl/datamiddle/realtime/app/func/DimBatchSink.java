@@ -33,7 +33,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
     @Override
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
-        Class.forName(MysqlConfig.DRIVER);
+        //Class.forName(MysqlConfig.DRIVER);
         //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         //conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
@@ -50,7 +50,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
         for (Map.Entry<String, List<JSONObject>> entry : entrySet) {
             //对每一批数据进行处理
             String sql = genInsertSql(entry.getKey(), entry.getValue());
-            System.out.println("组装生成的sql:" + sql);
+            //System.out.println("组装生成的sql:" + sql);
             log.info("组装生成的sql:{}", sql);
             //执行SQL
             DbUtil.insert(sql);
