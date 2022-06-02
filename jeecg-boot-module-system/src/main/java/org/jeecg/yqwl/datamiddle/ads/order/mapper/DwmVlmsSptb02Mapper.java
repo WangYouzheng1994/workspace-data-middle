@@ -67,14 +67,14 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    List<ShipmentDTO > getFINAL_SITE_TIME (@Param("params") GetBaseBrandTime baseBrandTime);
+    List<ShipmentDTO> getFINAL_SITE_TIME (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 到货准时率
      * @param params
      * @return
      */
-    DwmVlmsSptb02 getArrivalRate(@Param("params") GetBaseBrandTime params);
+    Double getArrivalRate(@Param("params") GetBaseBrandTime params);
 
     /**
      * 插入clickhouse-dwm_vlms_sptb02表

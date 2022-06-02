@@ -83,20 +83,22 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @return
      */
     @PostMapping("/selectArrivalRate")
-    public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
+    public Double queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
         // TODO: 指派
         // TODO: 出库
 
         // TODO: 起运
         // 到货
-        // dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        Double arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        //Result<ShipmentVO> result = FormatDataUtil.formatRemoveEmptyValue(arrivalRate);
         // TODO: 合并出返回对象。
-        TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
-        timelinessRatioVO.setAllotPercent(10); //分配及时率
-        timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
-        timelinessRatioVO.setStartPercent(50);//起运及时率
-        timelinessRatioVO.setEndPercent(100);//到货及时率
-        return Result.OK(timelinessRatioVO) ;
+        //TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
+//        timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
+//        timelinessRatioVO.setStartPercent(50);//起运及时率
+        //timelinessRatioVO.setEndPercent(result);//到货及时率
+
+        return arrivalRate;
+
     }
 
 

@@ -79,7 +79,7 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime );
+    Double findArrivalRate(GetBaseBrandTime baseBrandTime );
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param dwmSptb02VO

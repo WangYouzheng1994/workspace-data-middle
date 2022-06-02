@@ -137,17 +137,15 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      * @return
      */
     @Override
-    public Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime) {
+    public Double findArrivalRate(GetBaseBrandTime baseBrandTime) {
         /**
          *1.获取已到货未超理论实践的值
          */
-        /*        DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
-        Double percentage = arrivalRate.();
-        //下面开始截取两位数 原数据:0.12594458438287154
-        BigDecimal bigDecimal = new BigDecimal(percentage);
-        Double newPercentage = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();*/
-
-        return null;
+        Double arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
+        //ShipmentVO shipmentVOResult = FormatDataUtil.formatDataList(arrivalRate,baseBrandTime);
+        //System.out.println("baseBrandTimeservice:" + baseBrandTime);
+        //System.out.println("arrivalRateservice:" + arrivalRate);
+        return arrivalRate;
     }
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
