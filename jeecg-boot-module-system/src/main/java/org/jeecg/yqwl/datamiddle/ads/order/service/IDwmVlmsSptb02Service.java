@@ -72,19 +72,60 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    Result<ShipmentVO> getFINAL_SITE_TIME(GetBaseBrandTime baseBrandTime );
+    Result<ShipmentVO> getFINAL_SITE_TIME(GetBaseBrandTime baseBrandTime);
     /**
-     * 获取到货及时率
+     * 获取到货样本总量
      *
      * @param baseBrandTime
      * @return
      */
-    Double findArrivalRate(GetBaseBrandTime baseBrandTime );
+    BigDecimal findArrivalRate(GetBaseBrandTime baseBrandTime);
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param dwmSptb02VO
      */
     void insertClickhouse(DwmSptb02VO dwmSptb02VO);
+
+    /**
+     * 获取到货准时样本数量
+     * @param baseBrandTime
+     * @return
+     */
+    BigDecimal getArriveOnTime(GetBaseBrandTime baseBrandTime);
+
+    /**
+     * 起运总数
+     * @param baseBrandTime
+     * @return
+     */
+    BigDecimal getTotalShipment(GetBaseBrandTime baseBrandTime);
+
+    /**
+     * 起运准时样本总数
+     * @param baseBrandTime
+     * @return
+     */
+    BigDecimal getTimelyShipment(GetBaseBrandTime baseBrandTime);
+
+    /**
+     * 出库及时样本总量
+     * @param baseBrandTime
+     * @return
+     */
+
+    BigDecimal getOnTimeDelivery(GetBaseBrandTime baseBrandTime);
+
+
+    /**
+     * 出库样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime);
+
+
+
+
 
 
 }

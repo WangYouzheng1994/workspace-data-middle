@@ -23,6 +23,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -83,22 +85,37 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @return
      */
     @PostMapping("/selectArrivalRate")
-    public Double queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
-        // TODO: 指派
-        // TODO: 出库
+    public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
+        BigDecimal num = new BigDecimal("100");
+        // TODO: 起运及时率
+        //获取起运样本总量
+        BigDecimal totalShipment = dwmVlmsSptb02Service.getTotalShipment(baseBrandTime);
+        //获取起运准时样本数量
+        BigDecimal timelyShipment = dwmVlmsSptb02Service.getTimelyShipment(baseBrandTime);
+        //起运准时样本数量/起运样本总数 * 100  转换成Integer
+        Integer shipmentValue = timelyShipment.divide(totalShipment, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
 
-        // TODO: 起运
-        // 到货
-        Double arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
-        //Result<ShipmentVO> result = FormatDataUtil.formatRemoveEmptyValue(arrivalRate);
+        //TODO: 出库及时率
+
+        //获取出库准时样本数量
+        BigDecimal onTimeDelivery = dwmVlmsSptb02Service.getOnTimeDelivery(baseBrandTime);
+        //获取出库样本总量
+        BigDecimal totalOutboundQuantity = dwmVlmsSptb02Service.getTotalOutboundQuantity(baseBrandTime);
+        Integer Outbound = onTimeDelivery.divide(totalOutboundQuantity, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+
+        // TODO: 到货准时率计算
+        // 到货样本总量  1733
+        BigDecimal arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        //到货准时样本数量   52
+        BigDecimal arriveOnTime = dwmVlmsSptb02Service.getArriveOnTime(baseBrandTime);
+        Integer arrivalValue = arriveOnTime.divide(arrivalRate, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+
         // TODO: 合并出返回对象。
-        //TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
-//        timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
-//        timelinessRatioVO.setStartPercent(50);//起运及时率
-        //timelinessRatioVO.setEndPercent(result);//到货及时率
-
-        return arrivalRate;
-
+       TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
+        timelinessRatioVO.setStartPercent(shipmentValue);//起运及时率
+        timelinessRatioVO.setOutWarehousePercent(Outbound);//出库及时率
+        timelinessRatioVO.setEndPercent(arrivalValue);//到货及时率
+        return Result.OK(timelinessRatioVO);
     }
 
 

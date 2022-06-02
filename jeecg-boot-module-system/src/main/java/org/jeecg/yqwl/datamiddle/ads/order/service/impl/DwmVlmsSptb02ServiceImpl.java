@@ -131,22 +131,71 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     }
 
     /**
-     * 获取到货及时率
+     * 获取到货样本数据总量
      *
      * @param baseBrandTime
      * @return
      */
     @Override
-    public Double findArrivalRate(GetBaseBrandTime baseBrandTime) {
+    public BigDecimal findArrivalRate(GetBaseBrandTime baseBrandTime) {
         /**
          *1.获取已到货未超理论实践的值
          */
-        Double arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
-        //ShipmentVO shipmentVOResult = FormatDataUtil.formatDataList(arrivalRate,baseBrandTime);
-        //System.out.println("baseBrandTimeservice:" + baseBrandTime);
-        //System.out.println("arrivalRateservice:" + arrivalRate);
+        BigDecimal arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
         return arrivalRate;
     }
+
+    /**
+     * 获取准时到达样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getArriveOnTime(GetBaseBrandTime baseBrandTime) {
+        BigDecimal arriveOnTime = dwmVlmsSptb02Mapper.getArriveOnTime(baseBrandTime);
+        return arriveOnTime;
+    }
+
+    /**
+     * 起运样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTotalShipment(GetBaseBrandTime baseBrandTime) {
+        return null;
+    }
+
+    /**
+     * 起运及时样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTimelyShipment(GetBaseBrandTime baseBrandTime) {
+        return null;
+    }
+
+    /**
+     * 出库及时样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getOnTimeDelivery(GetBaseBrandTime baseBrandTime) {
+        return null;
+    }
+
+    /**
+     * 出库样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime) {
+        return null;
+    }
+
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param dwmSptb02VO
