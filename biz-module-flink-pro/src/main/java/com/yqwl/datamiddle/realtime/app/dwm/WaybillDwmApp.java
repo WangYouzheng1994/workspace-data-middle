@@ -528,7 +528,7 @@ public class WaybillDwmApp {
          *   inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
          */
         SingleOutputStreamOperator<DwmSptb02> provincesSptc34DS = AsyncDataStream.unorderedWait(
-                sptc34DS,
+                spti32RailSeaDS,
                 new DimAsyncFunction<DwmSptb02>(
                         DimUtil.MYSQL_DB_TYPE,
                         KafkaTopicConst.DIM_VLMS_PROVINCES,
@@ -594,7 +594,7 @@ public class WaybillDwmApp {
 
 
         //对实体类中null赋默认值
-        SingleOutputStreamOperator<DwmSptb02> endData = spti32RailSeaDS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+        SingleOutputStreamOperator<DwmSptb02> endData = provincesMdac32DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
 //        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
             @Override
             public DwmSptb02 map(DwmSptb02 obj) throws Exception {
