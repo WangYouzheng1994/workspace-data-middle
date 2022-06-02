@@ -4,30 +4,26 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.ververica.cdc.connectors.oracle.OracleSource;
+import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
-import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunction;
 import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunctionList;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
-import com.yqwl.datamiddle.realtime.util.KafkaUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -49,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class ConsumerKafkaODSApp {
+public class OracleCdcKafkaAndMysqlApp {
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
@@ -70,27 +66,42 @@ public class ConsumerKafkaODSApp {
         ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");*/
-        System.setProperty("HADOOP_USER_NAME", "root");
+        */
+        //System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
-        KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
-                .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new SimpleStringSchema())
-                .build();
-        //将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
-                .uid("jsonDataStr").name("jsonDataStr");
+        //oracle cdc 相关配置
+        Properties properties = new Properties();
+        properties.put("database.tablename.case.insensitive", "false");
+        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+        //properties.put("database.serverTimezone", "UTC");
+        properties.put("database.serverTimezone", "Asia/Shanghai");
+        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
-        //从Kafka主题中获取消费端
-        log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
+        //读取oracle连接配置属性
+        SourceFunction<String> oracleSource = OracleSource.<String>builder()
+                .hostname(props.getStr("cdc.oracle.hostname"))
+                .port(props.getInt("cdc.oracle.port"))
+                .database(props.getStr("cdc.oracle.database"))
+                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
+                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
+                .username(props.getStr("cdc.oracle.username"))
+                .password(props.getStr("cdc.oracle.password"))
+                .deserializer(new CustomerDeserialization())
+                .startupOptions(StartupOptions.initial())
+                .debeziumProperties(properties)
+                .build();
+
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
+
         //将json数据转化成JSONObject对象
-        DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
+        DataStream<JSONObject> jsonStream = oracleSourceStream.map(new MapFunction<String, JSONObject>() {
             @Override
             public JSONObject map(String json) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(json);
@@ -151,7 +162,7 @@ public class ConsumerKafkaODSApp {
         //定义水位线
         SingleOutputStreamOperator<JSONObject> jsonStreamOperator = insertMysqlDS.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         //定义开窗
-        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
+        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(10))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<JSONObject> elements, Collector<Map<String, List<JSONObject>>> collector) throws Exception {
                 List<JSONObject> listTotal = Lists.newArrayList(elements);
