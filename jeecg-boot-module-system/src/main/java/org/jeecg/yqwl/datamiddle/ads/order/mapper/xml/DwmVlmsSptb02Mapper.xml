@@ -191,15 +191,7 @@
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="java.math.BigDecimal">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -226,7 +218,6 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
     </select>
 
     <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where SHIPMENT_TIME between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
@@ -459,19 +450,12 @@
         </where>
         GROUP BY dates , groupName
     </select>
+<!--    到货及时样本总量-->
     <select id="getArriveOnTime"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -507,22 +491,14 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
     </select>
+
 <!--    起运及时样本数量-->
     <select id="getTimelyShipment"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -558,22 +534,13 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
     </select>
 <!--    起运样本总体-->
     <select id="getTotalShipment"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -600,7 +567,7 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
+
 
     </select>
 
@@ -609,15 +576,7 @@
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -653,7 +612,6 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
     </select>
 
 <!--    出库总量-->
@@ -661,15 +619,7 @@
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
-        <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                dvs.CUSTOMER_NAME as groupName
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -696,8 +646,6 @@
             GROUP BY CJSDBH
             )
         </where>
-        GROUP BY  groupName
-
     </select>
 
 </mapper>
