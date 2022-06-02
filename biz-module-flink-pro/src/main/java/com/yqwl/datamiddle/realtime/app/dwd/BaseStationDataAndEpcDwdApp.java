@@ -4,37 +4,50 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.ververica.cdc.connectors.oracle.OracleSource;
+import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
+import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
+import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.*;
-import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.datastream.*;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,12 +60,18 @@ import java.util.concurrent.TimeUnit;
 public class BaseStationDataAndEpcDwdApp {
 
     public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        conf.setString(RestOptions.BIND_PORT, "50100-50200"); // 指定访问端口
+        conf.setInteger( TaskManagerOptions.NUM_TASK_SLOTS, 10 );
+
         //1.创建环境  Flink 流式处理环境
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
+
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        /*CheckpointConfig ck = env.getCheckpointConfig();
+/*        CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
@@ -63,7 +82,7 @@ public class BaseStationDataAndEpcDwdApp {
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
-        // kafka source2 base_station_data
+/*        // kafka source2 base_station_data
         KafkaSource<String> bsdSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
@@ -78,18 +97,37 @@ public class BaseStationDataAndEpcDwdApp {
                 //.setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();*/
+        //oracle cdc 相关配置
+        Properties properties = new Properties();
+        properties.put("database.tablename.case.insensitive", "false");
+        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+        properties.put("database.serverTimezone", "UTC");
+        properties.put("database.serverTimezone", "Asia/Shanghai");
+        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
+
+
+        //读取oracle连接配置属性
+        SourceFunction<String> oracleSource = OracleSource.<String>builder()
+                .hostname(props.getStr("cdc.oracle.hostname"))
+                .port(props.getInt("cdc.oracle.port"))
+                .database(props.getStr("cdc.oracle.database"))
+                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
+                .tableList("TDS_LJ.BASE_STATION_DATA","TDS_LJ.BASE_STATION_DATA_EPC")
+                .username(props.getStr("cdc.oracle.username"))
+                .password(props.getStr("cdc.oracle.password"))
+                .deserializer(new CustomerDeserialization())
+                .startupOptions(StartupOptions.initial())
+                .debeziumProperties(properties)
                 .build();
 
-
-
         // 将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> bsdDs = env.fromSource(bsdSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-bsd").uid("bsdDs").name("bsdDs");
-        SingleOutputStreamOperator<String> bsdEpcDs = env.fromSource(bsdEpcSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-epc").uid("bsdEpcDs").name("bsdEpcDs");
-
-
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
         //2.进行数据过滤
         // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = bsdDs.filter(new RichFilterFunction<String>() {
+        DataStream<String> filterBsdDs = oracleSourceStream.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
@@ -106,7 +144,7 @@ public class BaseStationDataAndEpcDwdApp {
         }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
 
         // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdEpcDs = bsdEpcDs.filter(new RichFilterFunction<String>() {
+        DataStream<String> filterBsdEpcDs = oracleSourceStream.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
@@ -121,6 +159,7 @@ public class BaseStationDataAndEpcDwdApp {
                 return false;
             }
         }).uid("filterBASE_STATION_DATA_EPC").name("filterBASE_STATION_DATA_EPC");
+
 
         //3. 进行实体类的转换
         //BASE_STATION_DATA_EPC
@@ -146,6 +185,7 @@ public class BaseStationDataAndEpcDwdApp {
             }
         }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
 
+
         // 4.指定事件时间字段
         //DwdBaseStationDataEpc指定事件时间
         SingleOutputStreamOperator<DwdBaseStationDataEpc> dwdBaseStationDataEpcWithTS = mapBsdEpc.assignTimestampsAndWatermarks(
@@ -167,17 +207,15 @@ public class BaseStationDataAndEpcDwdApp {
                                 return ts.getTime();
                             }
                         })).uid("assIgnDwdBaseStationDataEventTime");
-//        dwdBaseStationDataWithTS.print("输出指定事件时间的:");
-        //5.分组指定关联key
-//        KeyedStream<DwdBaseStationDataEpc, String> dwdBdsEpcKeyedStream = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN);
-//        KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
-
-        //6.处理字段
-        //todo: 1.base_station_data_epc 处理CP9下线接车日期
 
 
-        //todo: 2.base_station_data 和rfid_warehouse关联添加入库仓库的字段
-        //provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        //5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> map = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station());
+//         KeyedStream<DwdBaseStationData, String> dwdBdsKeyedStream = dwdBaseStationDataWithTS.keyBy(DwdBaseStationData::getVIN);
+
+
+        //6.处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
+//        provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
                 dwdBaseStationDataWithTS,
                 new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_rfid_warehouse", "WAREHOUSE_CODE") {
@@ -185,21 +223,21 @@ public class BaseStationDataAndEpcDwdApp {
                     public Object getKey(DwdBaseStationData dwdBsd) {
                         if (StringUtils.isNotEmpty(dwdBsd.getSHOP_NO())){
                             String shop_no = dwdBsd.getSHOP_NO();
-                            log.info("sql查询:"+shop_no);
+//                            log.info("sql查询:"+shop_no);
                             return shop_no;
                         }
                         return null;
                     }
-
                     @Override
                     public void join(DwdBaseStationData dBsd, JSONObject dimInfoJsonObj) {
                         if (dimInfoJsonObj.getString("WAREHOUSE_CODE") !=null){
-                            log.info("dim WAREHOUSE_CODE");
+//                            log.info("dim WAREHOUSE_CODE");
                             dBsd.setIN_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
                             dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
                         }
                     }
-                }, 60, TimeUnit.SECONDS);
+                }, 60, TimeUnit.SECONDS).uid("base+rfid");
+//       outSingleOutputStreamOperator.print("处理字段后的:");
 
         //7.开窗,按照时间窗口存储到mysql
         outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
@@ -207,14 +245,87 @@ public class BaseStationDataAndEpcDwdApp {
             @Override
             public void apply(TimeWindow window, Iterable<DwdBaseStationData> iterable, Collector<List<DwdBaseStationData>> collector) throws Exception {
                 ArrayList<DwdBaseStationData> es = Lists.newArrayList(iterable);
+                log.info("插入sql");
+                if (es.size() > 0) {
+                    log.info("size>0后:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                    collector.collect(es);
+                }
+            }
+        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysqdsb").name("sink-mysqldsb");
+
+        map.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        map.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationDataEpc, List<DwdBaseStationDataEpc>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<DwdBaseStationDataEpc> iterable, Collector<List<DwdBaseStationDataEpc>> collector) throws Exception {
+                ArrayList<DwdBaseStationDataEpc> es = Lists.newArrayList(iterable);
                 if (es.size() > 0) {
                     collector.collect(es);
                 }
             }
-        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysql").name("sink-mysql");
+        }).addSink(JdbcSink.<DwdBaseStationDataEpc>getBatchSink()).uid("sink-mysqdsbepc").name("sink-mysqdsbepc");
 
-        env.execute("合表开始");
-        log.info("base_station_data job任务开始执行");
+        try {
+            env.execute("OracleSinkMysql");
+        } catch (Exception e) {
+            log.error("stream invoke error", e);
+        }
+    }
 
+    /**
+     * 状态后端
+     */
+    public static class CP9Station extends RichMapFunction<DwdBaseStationDataEpc,DwdBaseStationDataEpc> {
+        // 声明状态
+        private transient MapState<String, DwdBaseStationDataEpc> myMapState;
+
+        @Override
+        public void open(Configuration parameters) throws Exception {
+            MapStateDescriptor<String, DwdBaseStationDataEpc> mapStateDescriptor = new MapStateDescriptor<>("vin码和操作时间", String.class, DwdBaseStationDataEpc.class);
+            myMapState = getRuntimeContext().getMapState(mapStateDescriptor);
+        }
+
+        @Override
+        public DwdBaseStationDataEpc map(DwdBaseStationDataEpc dwdBaseStationDataEpc) throws Exception {
+            /**
+             * 1.当前逻辑以第一次下线时间和DwdBaseStationDataEpc的bean存在状态后端,每次操作都会经过map,所以就会导致每次的更新都会经过这个逻辑
+             *
+             */
+            String vin = dwdBaseStationDataEpc.getVIN();                    //车架号
+            String operator = dwdBaseStationDataEpc.getOPERATOR();          //操作员
+            Long nowOperatetime = dwdBaseStationDataEpc.getOPERATETIME();   //操作时间
+            String epc = dwdBaseStationDataEpc.getEPC();                    //epc码
+            String opertype = dwdBaseStationDataEpc.getOPERTYPE();          //操作类型 1001新增 1002更新
+            String cp = dwdBaseStationDataEpc.getCP();                      //工厂下线口
+            String shopno = dwdBaseStationDataEpc.getSHOPNO();              //站点编号
+            Long insert_date = dwdBaseStationDataEpc.getINSERT_DATE();      //增加时间
+
+            if (myMapState.get(vin)==null){
+//                DwdBaseStationDataEpc dataEpc = new DwdBaseStationDataEpc();
+//                dataEpc.setVIN(vin);
+//                dataEpc.setEPC(operator);
+//                dataEpc.setOPERATETIME(nowOperatetime);
+//                dataEpc.setEPC(epc);
+//                dataEpc.setOPERTYPE(opertype);
+//                dataEpc.setCP(cp);
+//                dataEpc.setSHOPNO(shopno);
+//                dataEpc.setINSERT_DATE(insert_date);
+
+                myMapState.put(vin,dwdBaseStationDataEpc);
+                dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
+                return dwdBaseStationDataEpc;
+            }else {
+                DwdBaseStationDataEpc oldDataEpc = myMapState.get(vin);
+                Long oldOperatetime = oldDataEpc.getOPERATETIME();
+                if (oldOperatetime>nowOperatetime){
+                    myMapState.remove(vin);
+                    myMapState.put(vin,dwdBaseStationDataEpc);
+                    dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
+                    return dwdBaseStationDataEpc;
+                }else {
+                    oldDataEpc.setCP9_OFFLINE_TIME(oldOperatetime);
+                    return oldDataEpc;
+                }
+            }
+        }
     }
 }

@@ -225,7 +225,7 @@ public class DwdBaseStationData  {
      */
     private String IN_WAREHOUSE_NAME;
 
-//    private String CARRIER_NAME;
+    //    private String CARRIER_NAME;
 
     /**
      * 新增更新时间字段
