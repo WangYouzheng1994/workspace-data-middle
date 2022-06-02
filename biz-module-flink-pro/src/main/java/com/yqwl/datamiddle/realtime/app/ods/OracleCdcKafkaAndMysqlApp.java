@@ -50,7 +50,7 @@ public class OracleCdcKafkaAndMysqlApp {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //flink程序重启5次，每次之间间隔10s
+        //flink程序重启10次，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(5, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
         log.info("初始化流处理环境完成");

@@ -52,31 +52,34 @@ import java.util.concurrent.TimeUnit;
 public class ConsumerKafkaODSApp {
 
     public static void main(String[] args) throws Exception {
+        //====================================stream env配置===============================================//
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //flink程序重启5次，每次之间间隔10s
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(5, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        //flink程序重启10次，每次之间间隔10s
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
+
+        //====================================checkpoint配置===============================================//
         //设置CK相关参数
-      /*  CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
-        ck.setCheckpointTimeout(60000);
+        //ck.setCheckpointTimeout(60000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
-        ck.setMinPauseBetweenCheckpoints(500);
+        //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
-        ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");*/
-        System.setProperty("HADOOP_USER_NAME", "root");
+        //ck.setMaxConcurrentCheckpoints(1);
+        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
+        //====================================kafka 消费端配置===============================================//
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
@@ -87,8 +90,9 @@ public class ConsumerKafkaODSApp {
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
                 .uid("jsonDataStr").name("jsonDataStr");
 
+
+        //====================================flink各自算子处理逻辑===============================================//
         //从Kafka主题中获取消费端
-        log.info("从kafka的主题:" + KafkaTopicConst.CDC_VLMS_UNITE_ORACLE + "中获取的要处理的数据");
         //将json数据转化成JSONObject对象
         DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
             @Override
@@ -177,8 +181,9 @@ public class ConsumerKafkaODSApp {
                 }
             }
         }).slotSharingGroup("mysqlProcessGroup").uid("mysqlProcess").name("mysqlProcess");
-        ;
 
+
+        //=====================================插入mysql-sink===============================================//
         // mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
