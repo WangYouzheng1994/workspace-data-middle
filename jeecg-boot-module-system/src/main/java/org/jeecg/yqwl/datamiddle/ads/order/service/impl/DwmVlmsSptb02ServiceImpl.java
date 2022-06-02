@@ -163,7 +163,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public BigDecimal getTotalShipment(GetBaseBrandTime baseBrandTime) {
-        return null;
+        BigDecimal totalShipment = dwmVlmsSptb02Mapper.getTotalShipment(baseBrandTime);
+        return totalShipment;
     }
 
     /**
@@ -173,7 +174,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public BigDecimal getTimelyShipment(GetBaseBrandTime baseBrandTime) {
-        return null;
+        BigDecimal timelyShipment = dwmVlmsSptb02Mapper.getTimelyShipment(baseBrandTime);
+        return timelyShipment;
     }
 
     /**
@@ -183,7 +185,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public BigDecimal getOnTimeDelivery(GetBaseBrandTime baseBrandTime) {
-        return null;
+        BigDecimal onTimeDelivery = dwmVlmsSptb02Mapper.getOnTimeDelivery(baseBrandTime);
+        return onTimeDelivery;
     }
 
     /**
@@ -193,7 +196,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime) {
-        return null;
+        BigDecimal totalOutboundQuantity = dwmVlmsSptb02Mapper.getTotalOutboundQuantity(baseBrandTime);
+        return totalOutboundQuantity;
     }
 
     /**
