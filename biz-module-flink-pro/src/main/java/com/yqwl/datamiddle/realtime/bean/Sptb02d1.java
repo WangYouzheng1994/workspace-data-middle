@@ -79,7 +79,7 @@ public class Sptb02d1 implements Serializable {
      * 针对解放来讲，是总体的支付金额，而不是单价了
      */
 
-    private BigDecimal NZFJG;
+    private String NZFJG;
 
     /**
      * 支付价格，主要用于华北基地，算法复杂见21319附件
