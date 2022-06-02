@@ -224,6 +224,7 @@ public class BaseStationDataAndEpcDwdApp {
                 }, 60, TimeUnit.SECONDS).uid("base+rfid");
 
         //7.开窗,按照时间窗口存储到mysql
+        //BASE_STATION_DATA
         outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         outSingleOutputStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationData, List<DwdBaseStationData>, TimeWindow>() {
             @Override
@@ -234,8 +235,9 @@ public class BaseStationDataAndEpcDwdApp {
                     collector.collect(es);
                 }
             }
-        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysqdsb").name("sink-mysqldsb");
+        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysqDsb").name("sink-mysqldsb");
 
+        //BASE_STATION_DATA_EPC
         map.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         map.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationDataEpc, List<DwdBaseStationDataEpc>, TimeWindow>() {
             @Override
@@ -245,7 +247,7 @@ public class BaseStationDataAndEpcDwdApp {
                     collector.collect(es);
                 }
             }
-        }).addSink(JdbcSink.<DwdBaseStationDataEpc>getBatchSink()).uid("sink-mysqdsbepc").name("sink-mysqdsbepc");
+        }).addSink(JdbcSink.<DwdBaseStationDataEpc>getBatchSink()).uid("sink-mysqdsbEpc").name("sink-mysqdsbepc");
 
         try {
             env.execute("OracleSinkMysql");
@@ -258,7 +260,7 @@ public class BaseStationDataAndEpcDwdApp {
      * 状态后端
      */
     public static class CP9Station extends RichMapFunction<DwdBaseStationDataEpc,DwdBaseStationDataEpc> {
-        // 声明状态
+        // 声明Map类型的状态后端
         private transient MapState<String, DwdBaseStationDataEpc> myMapState;
 
         @Override
