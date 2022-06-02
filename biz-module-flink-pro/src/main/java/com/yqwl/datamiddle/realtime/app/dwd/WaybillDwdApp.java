@@ -298,8 +298,8 @@ public class WaybillDwdApp {
         dataDwdProcess.print("数据拉宽后结果输出:");
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.DWD_VLMS_SPTB02,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
+                KafkaTopicConst.DWD_VLMS_SPTB02_TEST,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02_TEST));
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
         mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");

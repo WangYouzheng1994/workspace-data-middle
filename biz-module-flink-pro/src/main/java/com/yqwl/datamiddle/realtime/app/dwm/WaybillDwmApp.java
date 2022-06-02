@@ -58,7 +58,7 @@ public class WaybillDwmApp {
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
+                .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02_TEST)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
@@ -604,7 +604,7 @@ public class WaybillDwmApp {
 
         //组装sql
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
+        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02_TEST1).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
         endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         endData.print("拉宽后数据输出：");
