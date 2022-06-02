@@ -4,12 +4,17 @@ import cn.hutool.setting.dialect.Props;
 import com.google.common.base.CaseFormat;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
+import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -100,16 +105,39 @@ public class MysqlUtil {
         }
     }
 
+
     /**
-     * 测试验证
+     * 根据类组装sql
      *
-     * @param args
+     * @param clazz
+     * @param <T>
+     * @return
      */
-    public static void main(String[] args) {
-        List<TableProcess> tableProcesses = queryList("select * from table_process",
-                TableProcess.class, true);
-        for (TableProcess tableProcess : tableProcesses) {
-            System.out.println(tableProcess);
+    public static <T> String getSql(Class<T> clazz) {
+        TableName tableName = clazz.getAnnotation(TableName.class);
+        if (Objects.isNull(tableName)) {
+            throw new RuntimeException("当前类没有添加 TableName 注解");
         }
+        Field[] fields = clazz.getDeclaredFields();
+        StringBuffer sql = new StringBuffer();
+        sql.append("replace into ").append(tableName.value());
+        List<String> columnList = new ArrayList<>();
+        List<String> valueList = new ArrayList<>();
+        for (Field field : fields) {
+            if (field.getAnnotation(TransientSink.class) != null) {
+                continue;
+            }
+            if (StringUtils.equals(field.getName(), "serialVersionUID")) {
+                continue;
+            }
+            columnList.add(field.getName());
+            valueList.add("?");
+        }
+        sql.append(" (").append(StringUtils.join(columnList, ",")).append(") ");
+        sql.append("values");
+        sql.append(" (").append(StringUtils.join(valueList, ",")).append(") ");
+        return sql.toString();
     }
+
+
 }

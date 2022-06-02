@@ -22,9 +22,9 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import java.util.Properties;
 
 /**
- * @Description: 将oracle中某个表消费到mysql中
+ * @Description: 直接使用 oracle cdc 将数据同步到 kafka 和 mysql
  * @Author: muqing
- * @Date: 2022/05/06
+ * @Date: 2022/06/02
  * @Version: V1.0
  */
 @Slf4j
@@ -82,7 +82,7 @@ public class OracleCdcSinkKafkaApp {
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
         //====================================flink各自算子处理逻辑===============================================//
-        //将json串转化成jsonObj
+        //将json串转化成Obj
         SingleOutputStreamOperator<Sptb02> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, Sptb02>() {
             @Override
             public Sptb02 map(String json) throws Exception {
@@ -119,16 +119,13 @@ public class OracleCdcSinkKafkaApp {
 
         //mapStrStream.print("结果数据输出:");
         //输出到kafka
-        mapStrStream.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        mapStrStream.addSink(sinkKafka).uid("oracle-cdc-kafka").name("oracle-cdc-kafka");
 
         //=====================================插入mysql-sink===============================================//
         //组装sql
-        StringBuffer sql = new StringBuffer();
-        String columnSql = StrUtil.getColumnSql(Sptb02.class);
-        String valueSql = StrUtil.getValueSql(Sptb02.class);
-        sql.append("replace into ").append(KafkaTopicConst.ODS_VLMS_SPTB02_02).append(columnSql).append(" values ").append(valueSql);
+        String sql = MysqlUtil.getSql(Sptb02.class);
         log.info("组装的插入sql:{}", sql);
-        sourceStreamJsonObj.addSink(JdbcSink.<Sptb02>getSink(sql.toString())).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        sourceStreamJsonObj.addSink(JdbcSink.<Sptb02>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql");
         log.info("oracle-cdc-kafka job开始执行");
