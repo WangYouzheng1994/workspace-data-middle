@@ -74,12 +74,14 @@ public class KafkaTopicConst {
 
     //dwd topic
     public static final String DWD_VLMS_SPTB02 = "dwd_vlms_sptb02";
+    public static final String DWD_VLMS_SPTB02_TEST = "dwd_vlms_sptb02_test";
     public static final String DWD_VLMS_BASE_STATION_DATA = "dwd_vlms_base_station_data";
     public static final String DWD_VLMS_BASE_STATION_DATA_EPC = "dwd_vlms_base_station_data_epc";
 
 
     //dwm topic
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
+    public static final String DWM_VLMS_SPTB02_TEST1 = "dwm_vlms_sptb02_test1";
 
 
     //dws topic
