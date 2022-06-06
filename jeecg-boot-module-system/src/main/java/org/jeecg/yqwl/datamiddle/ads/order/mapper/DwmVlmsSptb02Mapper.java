@@ -8,6 +8,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -67,14 +68,56 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @param baseBrandTime
      * @return
      */
-    List<ShipmentDTO > getFINAL_SITE_TIME (@Param("params") GetBaseBrandTime baseBrandTime);
+    List<ShipmentDTO> getFINAL_SITE_TIME (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
-     * 到货准时率
+     * 到货样本总量
      * @param params
      * @return
      */
-    DwmVlmsSptb02 getArrivalRate(@Param("params") GetBaseBrandTime params);
+    BigDecimal getArrivalRate(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 获取到货准时样本总数量
+     * @param params
+     * @return
+     */
+    BigDecimal getArriveOnTime(@Param("params") GetBaseBrandTime params);
+
+
+    /**
+     * 获取起运准时样本数量
+     * @param params
+     * @return
+     */
+    BigDecimal getTimelyShipment(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 获取起运总体样本数量
+     * @param params
+     * @return
+     */
+    BigDecimal getTotalShipment(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 获取出库准时样本总量
+     * @param params
+     * @return
+     */
+    BigDecimal getOnTimeDelivery(@Param("params") GetBaseBrandTime params);
+
+    /**
+     * 获取出库数据总量
+     * @param params
+     * @return
+     */
+    BigDecimal getTotalOutboundQuantity(@Param("params") GetBaseBrandTime params);
+
+
+
+
+
+
 
     /**
      * 插入clickhouse-dwm_vlms_sptb02表

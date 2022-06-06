@@ -38,7 +38,9 @@ public class DbUtil {
             int count = statement.executeUpdate(updateSql);
             log.info("单条数据执行成功,{}", count);
             System.out.println("单条数据执行成功:" + count);
-        } finally {
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+        } finally{
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, null);
         }

@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,11 +16,12 @@ import java.io.Serializable;
  * @author yiqi
  * @since 2022-05-18
  */
+@TableName("dwm_vlms_sptb02")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class DwmSptb02 implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    //private static final long serialVersionUID = 1L;
 
     /**
      * 结算单编号 主键
