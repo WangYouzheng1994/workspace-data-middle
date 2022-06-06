@@ -19,5 +19,5 @@ import java.util.List;
 public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderToEnd> {
 
 
-    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
+    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria,@Param("pageNum") int pageNum, @Param("pageSize") int pageSize);
 }
