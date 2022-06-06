@@ -5,8 +5,12 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +26,17 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.util.Collector;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -343,13 +354,29 @@ public class WaybillDwmApp {
             }
         }).uid("endData").name("endData");
 
+        //====================================sink clickhouse===============================================//
         //组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
         endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        endData.print("拉宽后数据输出：");
+        //endData.print("拉宽后数据输出：");
         // mdac22DS.print("拉宽后输出数据：");
+
+
+        //====================================sink mysql===============================================//
+        endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        endData.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwmSptb02, List<DwmSptb02>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<DwmSptb02> iterable, Collector<List<DwmSptb02>> collector) throws Exception {
+                ArrayList<DwmSptb02> list = Lists.newArrayList(iterable);
+                if (list.size() > 0) {
+                    collector.collect(list);
+                }
+            }
+        }).addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+
+
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-sink-clickhouse-dwm");
         log.info("sptb02dwd层job任务开始执行");
