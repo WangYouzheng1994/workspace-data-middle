@@ -212,4 +212,9 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "结算单编号 多个逗号隔开", width = 15)
     @ApiModelProperty(value = "结算单编号 多个逗号隔开")
 	private String settleNo;
+
+	/**基地*/
+	@Excel(name = "基地", width = 15)
+	@ApiModelProperty(value = "基地")
+	private String baseName;
 }
