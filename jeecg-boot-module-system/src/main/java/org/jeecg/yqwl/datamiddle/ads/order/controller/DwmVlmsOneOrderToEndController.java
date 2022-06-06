@@ -171,6 +171,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 	  * @param queryCriteria
 	  * @return
 	  */
+
+  @AutoLog(value = "一单到底-按条件查询")
+  @ApiOperation(value="一单到底-按条件查询", notes="一单到底-按条件查询")
   @PostMapping("/selectOneOrderToEndList")
   public Result<?> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
 
