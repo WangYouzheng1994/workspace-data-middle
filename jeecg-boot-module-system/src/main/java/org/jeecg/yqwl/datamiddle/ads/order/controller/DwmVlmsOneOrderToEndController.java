@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -45,7 +46,7 @@ import io.swagger.annotations.ApiOperation;
 @Slf4j
 @Api(tags="一单到底")
 @RestController
-@RequestMapping("/org.jeecg.yqwl.datamiddle.ads.order.entity/dwmVlmsOneOrderToEnd")
+@RequestMapping("/ads/order/dwmVlmsOneOrderToEnd")
 public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVlmsOneOrderToEndService> {
 	@Autowired
 	private IDwmVlmsOneOrderToEndService dwmVlmsOneOrderToEndService;
@@ -164,5 +165,20 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
       return super.importExcel(request, response, DwmVlmsOneOrderToEnd.class);
   }
+
+	 /**
+	  * 按条件查询一单到底
+	  * @param queryCriteria
+	  * @return
+	  */
+  @PostMapping("/selectOneOrderToEndList")
+  public Result<?> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
+
+	  DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEndResult = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+
+	  return Result.OK(dwmVlmsOneOrderToEndResult);
+  }
+
+
 
 }
