@@ -62,18 +62,18 @@ public class ConsumerKafkaODSApp {
 
         //====================================checkpoint配置===============================================//
         //设置CK相关参数
-        CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(600000);
-        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        //CheckpointConfig ck = env.getCheckpointConfig();
+        //ck.setCheckpointInterval(600000);
+        //ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        //ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
         //ck.setCheckpointTimeout(60000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
@@ -107,7 +107,7 @@ public class ConsumerKafkaODSApp {
                 jsonObj.put("after", afterObj);
                 return jsonObj;
             }
-        }).slotSharingGroup("otherGroup").uid("jsonStream").name("jsonStream");
+        }).uid("jsonStream").name("jsonStream");
         //jsonStream.print("json转化map输出:");
         //动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
         //定义输出到mysql的侧输出流标签
@@ -147,14 +147,14 @@ public class ConsumerKafkaODSApp {
         );
 
         //kafkaDS.print("kafka结果数据输出:");
-        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
+       // kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 
         //定义水位线
         SingleOutputStreamOperator<JSONObject> jsonStreamOperator = insertMysqlDS.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         //定义开窗
-        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
+        SingleOutputStreamOperator<Map<String, List<JSONObject>>> mysqlProcess = jsonStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(2))).apply(new AllWindowFunction<JSONObject, Map<String, List<JSONObject>>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<JSONObject> elements, Collector<Map<String, List<JSONObject>>> collector) throws Exception {
                 List<JSONObject> listTotal = Lists.newArrayList(elements);
@@ -183,7 +183,7 @@ public class ConsumerKafkaODSApp {
 
 
         //=====================================插入mysql-sink===============================================//
-        // mysqlProcess.print("mysql结果数据输出:");
+        //mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
         mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");

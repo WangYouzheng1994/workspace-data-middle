@@ -28,7 +28,7 @@ import java.util.*;
 public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>> {
 
     //定义mysql连接对象
-    private Connection conn = null;
+    //private Connection conn = null;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -49,11 +49,17 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
         Set<Map.Entry<String, List<JSONObject>>> entrySet = map.entrySet();
         for (Map.Entry<String, List<JSONObject>> entry : entrySet) {
             //对每一批数据进行处理
-            String sql = genInsertSql(entry.getKey(), entry.getValue());
+            //获取key
+            String key = entry.getKey();
+            //获取value
+            List<JSONObject> value = entry.getValue();
+            String sql = genInsertSql(key, value);
+            //System.err.println("拼接sql: " + sql);
             //System.out.println("组装生成的sql:" + sql);
             //log.info("组装生成的sql:{}", sql);
+            List<List<Object>> valueList = getValueList(value);
             //执行SQL
-            DbUtil.insert(sql);
+            DbUtil.insertPrepare(sql, valueList);
 
     /*        PreparedStatement ps = null;
             try {
@@ -101,8 +107,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
      * @return
      */
     private String genInsertSql(String tableName, List<JSONObject> dataList) {
-        log.info("获取当前数据表名:{}", tableName);
-        //"insert into 表名(列名.....) values (值....)"
+        //"insert into 表名(列名.....) values (值....), (值....), (值....)"
         //获取第一个元素，目标是组装字段列表部分
         JSONObject jsonObject = dataList.get(0);
         //获取真实数据
@@ -118,10 +123,8 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
                 .append(StringUtils.join(columns, ",")).append(" )")
                 .append(" values ");
 
-        //2.处理value部分
-        StringBuffer valueSql = new StringBuffer();
-        //循环同一个表名下所有数据
-        //cdc过来的数据都是有值的 (), (),
+        //里面保存 (?,?,?) (?,?,?) (?,?,?)
+        List<String> questionMarkList = new ArrayList<>();
         for (JSONObject obj : dataList) {
             StringBuffer valueForTable = new StringBuffer();
             //获取每一条真实数据
@@ -131,28 +134,32 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             //System.err.println("获取当前数据values:" + values.size());
             //System.err.println("获取当前数据values:" + values);
             //log.info("获取当前数据数量:{}, values:{}", values.size(), values);
-            Collection<Object> newValues = new ArrayList<>();
-            for (Object value : values) {
-                if (value instanceof String) {
-                    String newValue = (String) value;
-                    if (newValue.startsWith("'")) {
-                        newValue = newValue.substring(1);
-                    }
-                    String newStr = "'" + newValue + "'";
-                    newValues.add(newStr);
-                } else {
-                    newValues.add(value);
-                }
+            List<String> newValues = new ArrayList<>();
+            for (int i = 0; i < values.size(); i++) {
+                newValues.add("?");
             }
             //log.info("处理后values字段值:{}", newValues);
-            valueForTable.append(StringUtils.join(newValues, ",")).append(")").append(",");
-            valueSql.append(valueForTable);
+            valueForTable.append(StringUtils.join(newValues, ",")).append(")");
+            questionMarkList.add(valueForTable.toString());
         }
-        String valueSql2 = valueSql.toString();
-        String substring = valueSql2.substring(0, valueSql2.lastIndexOf(",") - 1);
 
-        insertSql.append(substring).append(")");
+        insertSql.append(StringUtils.join(questionMarkList, ","));
         return insertSql.toString();
     }
 
+
+    private List<List<Object>> getValueList(List<JSONObject> dataList) {
+        List<List<Object>> objectList = new ArrayList<>();
+        for (JSONObject obj : dataList) {
+            List<Object> newList = new ArrayList<>();
+            Collection<Object> values = obj.values();
+            //System.err.println("value size: " + values.size());
+            for (Object value : values) {
+                newList.add(value);
+            }
+            objectList.add(newList);
+        }
+        return objectList;
+
+    }
 }
