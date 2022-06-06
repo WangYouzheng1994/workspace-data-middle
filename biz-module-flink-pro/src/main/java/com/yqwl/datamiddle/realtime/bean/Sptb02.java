@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
  * @author yiqi
  * @since 2022-05-17
  */
+@TableName("ods_vlms_sptb02")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Sptb02 implements Serializable {
@@ -591,7 +593,7 @@ public class Sptb02 implements Serializable {
      * 返单大序号  number 转 int
      */
 
-    private Integer NFDDXH;
+    private Long NFDDXH;
 
     /**
      * 发车站台
