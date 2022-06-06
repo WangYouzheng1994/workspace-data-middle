@@ -8,9 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
-import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +20,9 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.async.AsyncFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -38,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Objects;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -57,11 +52,11 @@ public class WaybillDwmApp {
         env.setParallelism(2);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-        /*CheckpointConfig ck = env.getCheckpointConfig();
+        CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
@@ -316,7 +311,7 @@ public class WaybillDwmApp {
                         //获取前置节点代码  START_CAL_NODE_CODE
                         String nodeCode = dimInfoJsonObj.getString("START_CAL_NODE_CODE").trim();
                         //将标准时长并将小时转换成毫秒级别  STANDARD_HOURS
-                        Long second = Long.parseLong(dimInfoJsonObj.getString("STANDARD_HOURS")) * 60 * 60 * 1000L ;
+                        Long second = Long.parseLong(dimInfoJsonObj.getString("STANDARD_HOURS")) * 60 * 60 * 1000L;
                         //获取主机公司代码 HOST_COM_CODE
                         String hostCode = dimInfoJsonObj.getString("HOST_COM_CODE").trim();
                         //获取运输方式名称  TRANS_MODE_NAME
@@ -324,14 +319,14 @@ public class WaybillDwmApp {
                         //获取基地名称 BASE_NAME
                         String baseName = dimInfoJsonObj.getString("BASE_NAME").trim();
                         //TODO:只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ +24小时(86400L)  主机公司代码是1 (大众)  主机厂下达计划时间  取sptb02.dpzrq
-                        if ( "1".equals(hostCode) && "DZJDJRQ".equals(nodeCode)) {
-                            if ( dwmSptb02.getDPZRQ() != 0) {
+                        if ("1".equals(hostCode) && "DZJDJRQ".equals(nodeCode)) {
+                            if (dwmSptb02.getDPZRQ() != 0) {
                                 dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDPZRQ() + second);
                             }
                         }
                         //TODO:红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
-                        if ( "2".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode)) {
-                            if(dwmSptb02.getDYSSZPSJ() != 0){
+                        if ("2".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode)) {
+                            if (dwmSptb02.getDYSSZPSJ() != 0) {
                                 switch (transName) {
                                     case "公路":
                                         dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
@@ -348,11 +343,11 @@ public class WaybillDwmApp {
 
                         }
                         //TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
-                        if (  "3".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode) ) {
-                            if ( dwmSptb02.getDYSSZPSJ() != 0 ) {
-                                if ( "公路".equals(transName) ) {
+                        if ("3".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCode)) {
+                            if (dwmSptb02.getDYSSZPSJ() != 0) {
+                                if ("公路".equals(transName)) {
                                     dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
-                                }else if ( "铁路".equals(transName) || "水路".equals(transName) ) {
+                                } else if ("铁路".equals(transName) || "水路".equals(transName)) {
                                     dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
                                 }
                             }
@@ -378,7 +373,7 @@ public class WaybillDwmApp {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         //获取vph
                         String vph = dwmSptb02.getVPH();
-                        if ( StringUtils.isNotEmpty(vph)) {
+                        if (StringUtils.isNotEmpty(vph)) {
                             return vph;
                         }
                         return null;
@@ -391,15 +386,15 @@ public class WaybillDwmApp {
                         //1 (b3.nsjsl /10 >= 26)
                         // 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)
                         // 3 b3.nsjsl /10 <15
-                        if ( nsjsl != 0 ) {
+                        if (nsjsl != 0) {
                             //大于26  1
-                            if ( nsjsl /10 >= 26 ) {
+                            if (nsjsl / 10 >= 26) {
                                 dwmSptb02.setRAILWAY_TRAIN_TYPE(1);
                                 //大于等于 15 小于26  2
-                            }else if ( nsjsl /10 >= 15 && nsjsl /10 < 26 ) {
+                            } else if (nsjsl / 10 >= 15 && nsjsl / 10 < 26) {
                                 dwmSptb02.setRAILWAY_TRAIN_TYPE(2);
                                 //小于15 3
-                            }else if ( nsjsl /10 < 15 ) {
+                            } else if (nsjsl / 10 < 15) {
                                 dwmSptb02.setRAILWAY_TRAIN_TYPE(3);
                             }
                         }
@@ -442,12 +437,12 @@ public class WaybillDwmApp {
                         String czjgsdm = dwmSptb02.getCZJGSDM();
                         //获取运输方式  TRAFFIC_TYPE
                         String traffictype = dwmSptb02.getTRAFFIC_TYPE();
-                        if ( StringUtils.isNotEmpty(startprovincecode) && StringUtils.isNotEmpty(startcitycode)
+                        if (StringUtils.isNotEmpty(startprovincecode) && StringUtils.isNotEmpty(startcitycode)
                                 && StringUtils.isNotEmpty(endprovincecode) && StringUtils.isNotEmpty(endcitycode)
-                                && StringUtils.isNotEmpty(czjgsdm) &&StringUtils.isNotEmpty(traffictype)) {
+                                && StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype)) {
                             return Arrays.asList(dwmSptb02.getSTART_PROVINCE_CODE(), dwmSptb02.getSTART_CITY_CODE(),
-                                    dwmSptb02.getEND_PROVINCE_CODE() ,dwmSptb02.getEND_CITY_CODE()
-                                    ,dwmSptb02.getCZJGSDM(),dwmSptb02.getTRAFFIC_TYPE());
+                                    dwmSptb02.getEND_PROVINCE_CODE(), dwmSptb02.getEND_CITY_CODE()
+                                    , dwmSptb02.getCZJGSDM(), dwmSptb02.getTRAFFIC_TYPE());
                         }
 
                         return null;
@@ -458,8 +453,8 @@ public class WaybillDwmApp {
                         //VYSFS 运输方式
                         String vysfs = dimInfoJsonObj.getString("VYSFS");
                         //sptb02.dckrq+spti32.ndhsj_xt
-                        Long ndhsj_xt = dimInfoJsonObj.getLong("NDHSJ_XT") * 60 *60 * 1000L;
-                        if ( ndhsj_xt != 0 && "G".equals(vysfs) ) {
+                        Long ndhsj_xt = dimInfoJsonObj.getLong("NDHSJ_XT") * 60 * 60 * 1000L;
+                        if (ndhsj_xt != 0 && "G".equals(vysfs)) {
                             dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDCKRQ() + ndhsj_xt);
                         }
                     }
@@ -491,8 +486,8 @@ public class WaybillDwmApp {
                         String traffictype = dwmSptb02.getTRAFFIC_TYPE();
                         String vfczt = dwmSptb02.getVFCZT();
                         String vsczt = dwmSptb02.getVSCZT();
-                        if ( StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype) && StringUtils.isNotEmpty(vfczt) && StringUtils.isNotEmpty(vsczt)) {
-                            return Arrays.asList(dwmSptb02.getCZJGSDM(),dwmSptb02.getTRAFFIC_TYPE(),dwmSptb02.getVFCZT(),dwmSptb02.getVSCZT());
+                        if (StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype) && StringUtils.isNotEmpty(vfczt) && StringUtils.isNotEmpty(vsczt)) {
+                            return Arrays.asList(dwmSptb02.getCZJGSDM(), dwmSptb02.getTRAFFIC_TYPE(), dwmSptb02.getVFCZT(), dwmSptb02.getVSCZT());
                         }
                         return null;
                     }
@@ -500,7 +495,7 @@ public class WaybillDwmApp {
                     @Override
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
                         //获取NDHSJ_XTDH_ml(满列)  大于26  RAILWAY_TRAIN_TYPE 1 准换成毫秒级别数据
-                        BigDecimal ml = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_ML") ;
+                        BigDecimal ml = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_ML");
                         long ndhsjxtdhml = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(ml)).setScale(0).longValue();
                         //获取NDHSJ_XTDH_dz(大组)  15<= x < 26   RAILWAY_TRAIN_TYPE 2
                         BigDecimal dz = dimInfoJsonObj.getBigDecimal("NDHSJ_XTDH_DZ");
@@ -510,18 +505,18 @@ public class WaybillDwmApp {
                         long ndhsjxtdhsl = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(sl)).setScale(0).longValue();
                         //ndhsj_dz_ml  S
                         BigDecimal dzml = dimInfoJsonObj.getBigDecimal("NDHSJ_DZ_ML");
-                        long ndhsjdzml =  BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dzml)).setScale(0).longValue();
+                        long ndhsjdzml = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dzml)).setScale(0).longValue();
                         //left  join spti32_rail_sea i1 on a.CZJGSDM = i1.CZJGSDM and decode(a.VYSFS,''S'',''S'',''T'') = i1.VYSFS and   a.VFCZT = i1.CQSZTDM and a.VSCZT = i1.CMBZTDM
                         String seavysfs = dimInfoJsonObj.getString("VYSFS");
-                        if ( dwmSptb02.getDSJCFSJ() != 0 ) {
-                            if ( "S".equals(seavysfs) ) {
+                        if (dwmSptb02.getDSJCFSJ() != 0) {
+                            if ("S".equals(seavysfs)) {
                                 dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjdzml);
-                            }else if ( "T".equals(seavysfs) ) {
-                                if ( dwmSptb02.getRAILWAY_TRAIN_TYPE() == 1 ) {
+                            } else if ("T".equals(seavysfs)) {
+                                if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 1) {
                                     dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhml);
-                                }else if ( dwmSptb02.getRAILWAY_TRAIN_TYPE() == 2 ) {
+                                } else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 2) {
                                     dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhdz);
-                                }else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 3 ) {
+                                } else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 3) {
                                     dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhsl);
                                 }
                             }
@@ -606,7 +601,6 @@ public class WaybillDwmApp {
 
         //对实体类中null赋默认值
         SingleOutputStreamOperator<DwmSptb02> endData = provincesMdac32DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
-//        SingleOutputStreamOperator<DwmSptb02> endData = sptc34DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
             @Override
             public DwmSptb02 map(DwmSptb02 obj) throws Exception {
                 return JsonPartUtil.getBean(obj);
