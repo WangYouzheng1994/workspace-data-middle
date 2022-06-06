@@ -65,7 +65,6 @@ public class KafkaUtil {
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 15 * 60 * 1000 + "");
-        props.setProperty("acks", "0");
         return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
     }
 
