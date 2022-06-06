@@ -51,7 +51,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             //对每一批数据进行处理
             String sql = genInsertSql(entry.getKey(), entry.getValue());
             //System.out.println("组装生成的sql:" + sql);
-            log.info("组装生成的sql:{}", sql);
+            //log.info("组装生成的sql:{}", sql);
             //执行SQL
             DbUtil.insert(sql);
 
@@ -109,7 +109,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
         //JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObject);
         //获取真实数据的字段名称
         Set<String> columns = jsonObject.keySet();
-        log.info("获取当前数据所有字段数量:{}, 字段值:{}", columns.size(), columns);
+        //log.info("获取当前数据所有字段数量:{}, 字段值:{}", columns.size(), columns);
         //System.err.println("获取当前数据key:" + columns.size());
         //System.err.println("获取当前数据key:" + columns);
         //1.定义sql
@@ -130,7 +130,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
             Collection<Object> values = obj.values();
             //System.err.println("获取当前数据values:" + values.size());
             //System.err.println("获取当前数据values:" + values);
-            log.info("获取当前数据数量:{}, values:{}", values.size(), values);
+            //log.info("获取当前数据数量:{}, values:{}", values.size(), values);
             Collection<Object> newValues = new ArrayList<>();
             for (Object value : values) {
                 if (value instanceof String) {
@@ -144,7 +144,7 @@ public class DimBatchSink extends RichSinkFunction<Map<String, List<JSONObject>>
                     newValues.add(value);
                 }
             }
-            log.info("处理后values字段值:{}", newValues);
+            //log.info("处理后values字段值:{}", newValues);
             valueForTable.append(StringUtils.join(newValues, ",")).append(")").append(",");
             valueSql.append(valueForTable);
         }

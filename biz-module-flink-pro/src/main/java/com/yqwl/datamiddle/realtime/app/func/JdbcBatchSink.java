@@ -32,6 +32,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
     @Override
     public void open(Configuration parameters) {
         try {
+            Thread.sleep(500L);
             // 创建连接
             getDruidDataSource();
         } catch (Exception e) {
