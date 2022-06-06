@@ -31,7 +31,7 @@ public class DwmVlmsOneOrderToEnd {
 	/**idnum*/
 	@Excel(name = "idnum", width = 15)
     @ApiModelProperty(value = "idnum")
-	private Integer idnum;
+	private Long idnum;
 	/**车架号 底盘号*/
 	@Excel(name = "车架号 底盘号", width = 15)
     @ApiModelProperty(value = "车架号 底盘号")
@@ -47,15 +47,15 @@ public class DwmVlmsOneOrderToEnd {
 	/**cp9下线接车时间*/
 	@Excel(name = "cp9下线接车时间", width = 15)
     @ApiModelProperty(value = "cp9下线接车时间")
-	private Integer cp9OfflineTime;
+	private Long cp9OfflineTime;
 	/**出厂日期*/
 	@Excel(name = "出厂日期", width = 15)
     @ApiModelProperty(value = "出厂日期")
-	private Integer leaveFactoryTime;
+	private Long leaveFactoryTime;
 	/**入库时间  及入一汽物流基地*/
 	@Excel(name = "入库时间  及入一汽物流基地", width = 15)
     @ApiModelProperty(value = "入库时间  及入一汽物流基地")
-	private Integer inSiteTime;
+	private Long inSiteTime;
 	/**入库名称*/
 	@Excel(name = "入库名称", width = 15)
     @ApiModelProperty(value = "入库名称")
@@ -63,7 +63,7 @@ public class DwmVlmsOneOrderToEnd {
 	/**计划下达时间 取sptb02.dpzrq*/
 	@Excel(name = "计划下达时间 取sptb02.dpzrq", width = 15)
     @ApiModelProperty(value = "计划下达时间 取sptb02.dpzrq")
-	private Integer planReleaseTime;
+	private Long planReleaseTime;
 	/**任务单号 取sptb02.cjhdh*/
 	@Excel(name = "任务单号 取sptb02.cjhdh", width = 15)
     @ApiModelProperty(value = "任务单号 取sptb02.cjhdh")
@@ -75,11 +75,11 @@ public class DwmVlmsOneOrderToEnd {
 	/**配载单日期   sptb02.DPZRQ*/
 	@Excel(name = "配载单日期   sptb02.DPZRQ", width = 15)
     @ApiModelProperty(value = "配载单日期   sptb02.DPZRQ")
-	private Integer stowageNoteTime;
+	private Long stowageNoteTime;
 	/**运单指派时间*/
 	@Excel(name = "运单指派时间", width = 15)
     @ApiModelProperty(value = "运单指派时间")
-	private Integer assignTime;
+	private Long assignTime;
 	/**运输方式*/
 	@Excel(name = "运输方式", width = 15)
     @ApiModelProperty(value = "运输方式")
@@ -91,11 +91,11 @@ public class DwmVlmsOneOrderToEnd {
 	/**实际出库时间*/
 	@Excel(name = "实际出库时间", width = 15)
     @ApiModelProperty(value = "实际出库时间")
-	private Integer actualOutTime;
+	private Long actualOutTime;
 	/**实际起运时间*/
 	@Excel(name = "实际起运时间", width = 15)
     @ApiModelProperty(value = "实际起运时间")
-	private Integer shipmentTime;
+	private Long shipmentTime;
 	/**运输车号*/
 	@Excel(name = "运输车号", width = 15)
     @ApiModelProperty(value = "运输车号")
@@ -107,11 +107,11 @@ public class DwmVlmsOneOrderToEnd {
 	/**创建时间*/
 	@Excel(name = "创建时间", width = 15)
     @ApiModelProperty(value = "创建时间")
-	private Integer warehouseCreatetime;
+	private Long warehouseCreatetime;
 	/**更新时间*/
 	@Excel(name = "更新时间", width = 15)
     @ApiModelProperty(value = "更新时间")
-	private Integer warehouseUpdatetime;
+	private Long warehouseUpdatetime;
 	/**始发城市*/
 	@Excel(name = "始发城市", width = 15)
     @ApiModelProperty(value = "始发城市")
@@ -139,19 +139,19 @@ public class DwmVlmsOneOrderToEnd {
 	/**入开始站台时间 应用于铁路*/
 	@Excel(name = "入开始站台时间 应用于铁路", width = 15)
     @ApiModelProperty(value = "入开始站台时间 应用于铁路")
-	private Integer inStartPlatformTime;
+	private Long inStartPlatformTime;
 	/**出开始站台时间 应用于铁路*/
 	@Excel(name = "出开始站台时间 应用于铁路", width = 15)
     @ApiModelProperty(value = "出开始站台时间 应用于铁路")
-	private Integer outStartPlatformTime;
+	private Long outStartPlatformTime;
 	/**入目的站台时间 应用于铁路*/
 	@Excel(name = "入目的站台时间 应用于铁路", width = 15)
     @ApiModelProperty(value = "入目的站台时间 应用于铁路")
-	private Integer inEndPlatformTime;
+	private Long inEndPlatformTime;
 	/**卸车时间  应用于铁路*/
 	@Excel(name = "卸车时间  应用于铁路", width = 15)
     @ApiModelProperty(value = "卸车时间  应用于铁路")
-	private Integer unloadRailwayTime;
+	private Long unloadRailwayTime;
 	/**开始港口名称 应用于水路*/
 	@Excel(name = "开始港口名称 应用于水路", width = 15)
     @ApiModelProperty(value = "开始港口名称 应用于水路")
@@ -163,19 +163,19 @@ public class DwmVlmsOneOrderToEnd {
 	/**入开始港口时间 应用于水路*/
 	@Excel(name = "入开始港口时间 应用于水路", width = 15)
     @ApiModelProperty(value = "入开始港口时间 应用于水路")
-	private Integer inStartWaterwayTime;
+	private Long inStartWaterwayTime;
 	/**出开始港口时间 应用于水路*/
 	@Excel(name = "出开始港口时间 应用于水路", width = 15)
     @ApiModelProperty(value = "出开始港口时间 应用于水路")
-	private Integer endStartWaterwayTime;
+	private Long endStartWaterwayTime;
 	/**入目的港口时间 应用于水路*/
 	@Excel(name = "入目的港口时间 应用于水路", width = 15)
     @ApiModelProperty(value = "入目的港口时间 应用于水路")
-	private Integer inEndWaterwayTime;
+	private Long inEndWaterwayTime;
 	/**卸船时间 应用水路*/
 	@Excel(name = "卸船时间 应用水路", width = 15)
     @ApiModelProperty(value = "卸船时间 应用水路")
-	private Integer unloadShipTime;
+	private Long unloadShipTime;
 	/**末端分拨中心 入库时间*/
 	@Excel(name = "末端分拨中心 入库时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 入库时间")
@@ -183,11 +183,11 @@ public class DwmVlmsOneOrderToEnd {
 	/**末端分拨中心 出库时间*/
 	@Excel(name = "末端分拨中心 出库时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 出库时间")
-	private Integer outDistributeTime;
+	private Long outDistributeTime;
 	/**末端分拨中心 指派时间*/
 	@Excel(name = "末端分拨中心 指派时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 指派时间")
-	private Integer distributeAssignTime;
+	private Long distributeAssignTime;
 	/**末端分拨中心 承运商名称*/
 	@Excel(name = "末端分拨中心 承运商名称", width = 15)
     @ApiModelProperty(value = "末端分拨中心 承运商名称")
@@ -199,15 +199,15 @@ public class DwmVlmsOneOrderToEnd {
 	/**末端分拨中心 起运时间*/
 	@Excel(name = "末端分拨中心 起运时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 起运时间")
-	private Integer distributeShipmentTime;
+	private Long distributeShipmentTime;
 	/**公路打点到货时间*/
 	@Excel(name = "公路打点到货时间", width = 15)
     @ApiModelProperty(value = "公路打点到货时间")
-	private Integer dotSiteTime;
+	private Long dotSiteTime;
 	/**最终到货时间*/
 	@Excel(name = "最终到货时间", width = 15)
     @ApiModelProperty(value = "最终到货时间")
-	private Integer finalSiteTime;
+	private Long finalSiteTime;
 	/**结算单编号 多个逗号隔开*/
 	@Excel(name = "结算单编号 多个逗号隔开", width = 15)
     @ApiModelProperty(value = "结算单编号 多个逗号隔开")
