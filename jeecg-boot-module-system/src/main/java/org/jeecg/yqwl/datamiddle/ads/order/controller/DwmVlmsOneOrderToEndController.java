@@ -174,9 +174,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @PostMapping("/selectOneOrderToEndList")
   public Result<?> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
 
-	  Result<DwmVlmsOneOrderToEnd> dwmVlmsOneOrderToEndResult = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+	  DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEnd = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
 
-	  return Result.OK(dwmVlmsOneOrderToEndResult);
+	  return Result.OK(dwmVlmsOneOrderToEnd);
   }
 
 

@@ -7,33 +7,33 @@
         SELECT
                *
         FROM
-            dwm_vlms_one_oeder_to_end
+            dwm_vlms_one_order_to_end
         <where>
-            <if test="vin != null and vin != '' ">
+            <if test="params.vin != null and params.vin != '' ">
                 AND VIN = #{params.vin}
             </if>
-            <if test="baseName != null and baseName != '' ">
+            <if test="params.baseName != null and params.baseName != '' ">
                 AND BASE_NAME = #{params.baseName}
             </if>
-            <if test="taskNo != null and taskNo != '' ">
+            <if test="params.taskNo != null and params.taskNo != '' ">
                 AND TASK_NO = #{params.taskNo}
             </if>
-            <if test="stowageNoteNo != null and stowageNoteNo != '' ">
+            <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
                 AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
             </if>
-            <if test="leaveFactoryTimeStart != null   and leaveFactoryTimeEnd != null ">
+            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeEnd != null ">
                 AND LEAVE_FACTORY_TIME BETWEEN #{params.leaveFactoryTimeStart} AND #{params.leaveFactoryTimeEnd}
             </if>
-            <if test="startCityName != null and startCityName != '' ">
+            <if test="params.startCityName != null and params.startCityName != '' ">
                 AND START_CITY_NAME = #{params.startCityName}
             </if>
-            <if test="endCityName != null and endCityName != '' ">
+            <if test="params.endCityName != null and params.endCityName != '' ">
                 AND END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="inSiteTimeStart != null   and inSiteTimeEnd != null  ">
+            <if test="params.inSiteTimeStart != null   and params.inSiteTimeEnd != null  ">
                 AND IN_SITE_TIME BETWEEN #{params.inSiteTimeStart} AND #{params.inSiteTimeEnd}
             </if>
-            <if test="cp9OfflineTimeStart != null   and cp9OfflineTimeEnd != null  ">
+            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeEnd != null  ">
                 AND CP9_OFFLINE_TIME BETWEEN #{params.cp9OfflineTimeStart} AND #{params.cp9OfflineTimeEnd}
             </if>
         </where>

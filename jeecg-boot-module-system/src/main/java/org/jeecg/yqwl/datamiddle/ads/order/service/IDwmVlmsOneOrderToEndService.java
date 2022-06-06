@@ -19,5 +19,5 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 @DS("slave2")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
 
-    Result<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
+    DwmVlmsOneOrderToEnd selectOneOrderToEndList(GetQueryCriteria queryCriteria);
 }
