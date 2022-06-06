@@ -180,14 +180,19 @@ public class BaseStationDataAndEpcDwdApp {
                     String baseCode = cp.substring(0, 4);
                     if (StringUtils.equals(baseCode, "0431")){
                         dataBsdEpc.setBASE_NAME("长春");
+                        dataBsdEpc.setBASE_CODE("0431");
                     }else if (StringUtils.equals(baseCode, "0757")){
                         dataBsdEpc.setBASE_NAME("佛山");
+                        dataBsdEpc.setBASE_CODE("0757");
                     }else if (StringUtils.equals(baseCode, "0532")){
                         dataBsdEpc.setBASE_NAME("青岛");
+                        dataBsdEpc.setBASE_CODE("0532");
                     }else if (StringUtils.equals(baseCode, "028C")){
                         dataBsdEpc.setBASE_NAME("成都");
+                        dataBsdEpc.setBASE_CODE("028C");
                     }else if (StringUtils.equals(baseCode, "022C")){
                         dataBsdEpc.setBASE_NAME("天津");
+                        dataBsdEpc.setBASE_CODE("022C");
                     }
                 }
                 return dataBsdEpc;

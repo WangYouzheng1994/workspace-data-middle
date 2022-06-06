@@ -95,6 +95,16 @@ public class DwdBaseStationDataEpc implements Serializable {
     private Long CP9_OFFLINE_TIME;
 
     /**
+     * 基地名称
+     */
+    private String BASE_NAME;
+
+    /**
+     * 基地代码
+     */
+    private String BASE_CODE;
+
+    /**
      * 新增更新时间字段
      */
     @TransientSink
