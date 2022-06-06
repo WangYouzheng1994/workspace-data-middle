@@ -152,18 +152,48 @@ public class BaseStationDataAndEpcDwdApp {
             }
         }).uid("filterBASE_STATION_DATA_EPC").name("filterBASE_STATION_DATA_EPC");
 
-        //3. 进行实体类的转换
+        //3. 进行实体类的转换 I:添加kafka中ts字段作为当前时间戳 II.取cp中前4位数字翻译成基地名称作为基地的字段
         //BASE_STATION_DATA_EPC
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
-                Timestamp ts = jsonObject.getTimestamp("ts");
+                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
                 dataBsdEpc.setTs(ts);
+                /**
+                 * 得到cp,取前四位,转基地名称:
+                 *                        '0431',
+                 *                        '长春基地',
+                 *                        '0757',
+                 *                        '佛山基地',
+                 *                        '0532',
+                 *                        '青岛基地',
+                 *                        '028C',
+                 *                        '成都基地',
+                 *                        '022C',
+                 *                        '天津基地',
+                 */
+                //先判是否为空为null为空格为空串 ps:本来是赋值"青岛基地",现在雨落要求我改成"青岛"
+                if (StringUtils.isNotBlank(dataBsdEpc.getCP())){
+                    String cp = dataBsdEpc.getCP();
+                    String baseCode = cp.substring(0, 4);
+                    if (StringUtils.equals(baseCode, "0431")){
+                        dataBsdEpc.setBASE_NAME("长春");
+                    }else if (StringUtils.equals(baseCode, "0757")){
+                        dataBsdEpc.setBASE_NAME("佛山");
+                    }else if (StringUtils.equals(baseCode, "0532")){
+                        dataBsdEpc.setBASE_NAME("青岛");
+                    }else if (StringUtils.equals(baseCode, "028C")){
+                        dataBsdEpc.setBASE_NAME("成都");
+                    }else if (StringUtils.equals(baseCode, "022C")){
+                        dataBsdEpc.setBASE_NAME("天津");
+                    }
+                }
                 return dataBsdEpc;
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
+        mapBsdEpc.print("合并基地名称字段后:");
         //BASE_STATION_DATA
         SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
@@ -201,7 +231,7 @@ public class BaseStationDataAndEpcDwdApp {
         //5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
         SingleOutputStreamOperator<DwdBaseStationDataEpc> map = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station());
 
-        //6.处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
+        //6.1处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
         // provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
                 dwdBaseStationDataWithTS,
