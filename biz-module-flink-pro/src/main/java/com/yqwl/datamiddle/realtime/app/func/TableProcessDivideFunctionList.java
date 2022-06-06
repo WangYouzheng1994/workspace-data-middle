@@ -45,13 +45,13 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         //初始化配置表信息
         initTableProcessMap();
         //开启定时任务,用于不断读取配置表信息 从现在起过 delay 毫秒以后，每隔 period 更新一次
-        Timer timer = new Timer();
+/*        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 initTableProcessMap();
             }
-        }, 5000, 5000);
+        }, 5000, 5000);*/
     }
 
     /**
@@ -93,13 +93,13 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
     public void processElement(JSONObject jsonObj, Context ctx, Collector<JSONObject> out) throws Exception {
         //获取表名
         //System.err.println("processElement执行:" + jsonObj);
-        log.info("processElement执行json数据:{}", jsonObj);
+        //log.info("processElement执行json数据:{}", jsonObj);
         //获取表名
         String tableName = JsonPartUtil.getTableNameStr(jsonObj);
         //将表名置为小写
         String lowerTableName = StringUtils.toRootLowerCase(tableName);
 //        System.err.println("获取表名:" + lowerTableName);
-        log.info("获取json中表名:{}", lowerTableName);
+        //log.info("获取json中表名:{}", lowerTableName);
         //获取操作类型
         String type = JsonPartUtil.getTypeStr(jsonObj);
         //获取配置表的信息
@@ -120,15 +120,16 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
                         // 对数据转换成实体类,对默认值进行赋值
                         Class<?> aClass = Class.forName(tableProcess.getClassName());
                         //System.err.println("Class类实例:{}" + aClass);
-                        log.info("Class类实例:{}", aClass);
+                        //log.info("Class类实例:{}", aClass);
                         //获取after真实数据后，映射为实体类
                         Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
                         //System.err.println("反射后映射的实体类:" + afterObj);
-                        log.info("反射后的实例:{}", afterObj);
+                        //log.info("反射后的实例:{}", afterObj);
                         //对映射后的实体类为null字段
                         Object bean = JsonPartUtil.getBean(afterObj);
-                        log.info("实体赋值默认值后数据:{}", bean);
-                        jsonObj.put("after", JSON.toJSON(bean));
+                        Object o = JSON.toJSON(bean);
+                        //log.info("实体赋值默认值后数据:{}", o);
+                        jsonObj.put("after", o);
                         ctx.output(outputTag, jsonObj);
                         aClass = null;
                         afterObj = null;

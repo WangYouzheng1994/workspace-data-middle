@@ -3,16 +3,15 @@ package com.yqwl.datamiddle.realtime.util;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * druid数据库连接池操作工具类
@@ -38,11 +37,44 @@ public class DbUtil {
             int count = statement.executeUpdate(updateSql);
             log.info("单条数据执行成功,{}", count);
             System.out.println("单条数据执行成功:" + count);
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
-        } finally{
+        } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, null);
+        }
+    }
+
+    /**
+     * 执行SQL更新
+     *
+     * @param sql
+     * @throws SQLException
+     */
+    public static void insertPrepare(String sql, List<List<Object>> valueList) throws SQLException {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = getDruidConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            if (CollectionUtils.isNotEmpty(valueList)) {
+                int index = 1;
+                for (int i = 0; i < valueList.size(); i++) {
+                    List<Object> objects = valueList.get(i);
+                    for (Object object : objects) {
+                        preparedStatement.setObject(index, object);
+                        index++;
+                    }
+                }
+            }
+            boolean index = preparedStatement.execute();
+            log.info("单条数据执行成功情况,{}", index);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            // 切记!!! 一定要释放资源
+            closeResource(connection, preparedStatement, null);
         }
     }
 
