@@ -175,8 +175,8 @@ public class BaseStationDataAndEpcDwdApp {
                  *                        '天津基地',
                  */
                 //先判是否为空为null为空格为空串 ps:本来是赋值"青岛基地",现在雨落要求我改成"青岛"
-                if (StringUtils.isNotBlank(dataBsdEpc.getCP())){
-                    String cp = dataBsdEpc.getCP();
+                String cp = dataBsdEpc.getCP();
+                if (StringUtils.isNotBlank(cp)){
                     String baseCode = cp.substring(0, 4);
                     if (StringUtils.equals(baseCode, "0431")){
                         dataBsdEpc.setBASE_NAME("长春");
