@@ -3,6 +3,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -30,8 +32,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     private DwmVlmsOneOrderToEndMapper dwmVlmsOneOrderToEndMapper;
 
     @Override
-    public DwmVlmsOneOrderToEnd selectOneOrderToEndList(GetQueryCriteria queryCriteria) {
-        DwmVlmsOneOrderToEnd oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
+    public Result<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria) {
+        Result<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
         return oneOrderToEndList;
     }
 }

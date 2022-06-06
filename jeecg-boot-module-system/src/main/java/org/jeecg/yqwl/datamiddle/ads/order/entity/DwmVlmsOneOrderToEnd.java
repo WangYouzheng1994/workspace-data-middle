@@ -28,10 +28,10 @@ import org.jeecgframework.poi.excel.annotation.Excel;
 @ApiModel(value="dwm_vlms_one_order_to_end对象", description="一单到底")
 public class DwmVlmsOneOrderToEnd {
     
-	/**idnum*/
-	@Excel(name = "idnum", width = 15)
-    @ApiModelProperty(value = "idnum")
-	private Long idnum;
+//	/**idnum*/
+//	@Excel(name = "idnum", width = 15)
+//    @ApiModelProperty(value = "idnum")
+//	private Long idnum;
 	/**车架号 底盘号*/
 	@Excel(name = "车架号 底盘号", width = 15)
     @ApiModelProperty(value = "车架号 底盘号")

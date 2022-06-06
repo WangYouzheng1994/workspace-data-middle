@@ -3,6 +3,8 @@ package org.jeecg.yqwl.datamiddle.ads.order.service;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
@@ -17,5 +19,5 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 @DS("slave2")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
 
-    DwmVlmsOneOrderToEnd selectOneOrderToEndList(GetQueryCriteria queryCriteria);
+    Result<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
 }

@@ -3,15 +3,9 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
 
     <select id="selectOneOrderToEndList"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
-        SELECT  VIN,VEHICLE_TYPE,BRAND,CP9_OFFLINE_TIME,LEAVE_FACTORY_TIME,IN_SITE_TIME,IN_WAREHOUSE_NAME,PLAN_RELEASE_TIME,TASK_NO,
-            STOWAGE_NOTE_NO,STOWAGE_NOTE_TIME,ASSIGN_TIME,TRAFFIC_TYPE,CARRIER_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,TRANSPORT_VEHICLE_NO,
-            VEHICLE_NUM,WAREHOUSE_CREATETIMEv,WAREHOUSE_UPDATETIME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,START_PLATFORM_NAME,
-            END_PLATFORM_NAME,IN_START_PLATFORM_TIME,OUT_START_PLATFORM_TIME,IN_END_PLATFORM_TIME,UNLOAD_RAILWAY_TIME,START_WATERWAY_NAME,
-            END_WATERWAY_NAME,IN_START_WATERWAY_TIME,END_START_WATERWAY_TIME,IN_END_WATERWAY_TIME,UNLOAD_SHIP_TIME,IN_DISTRIBUTE_TIME,
-            OUT_DISTRIBUTE_TIME,DISTRIBUTE_ASSIGN_TIME,DISTRIBUTE_CARRIER_NAME,DISTRIBUTE_VEHICLE_NO,DISTRIBUTE_SHIPMENT_TIME,
-            DOT_SITE_TIME, FINAL_SITE_TIME,SETTLE_NO,BASE_NAME
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
+        SELECT
+               *
         FROM
             dwm_vlms_one_oeder_to_end
         <where>
@@ -27,7 +21,7 @@
             <if test="stowageNoteNo != null and stowageNoteNo != '' ">
                 AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
             </if>
-            <if test="leaveFactoryTimeStart != null and leaveFactoryTimeStart != ''  and leaveFactoryTimeEnd != null and leaveFactoryTimeEnd != '' ">
+            <if test="leaveFactoryTimeStart != null   and leaveFactoryTimeEnd != null ">
                 AND LEAVE_FACTORY_TIME BETWEEN #{params.leaveFactoryTimeStart} AND #{params.leaveFactoryTimeEnd}
             </if>
             <if test="startCityName != null and startCityName != '' ">
@@ -36,10 +30,10 @@
             <if test="endCityName != null and endCityName != '' ">
                 AND END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="inSiteTimeStart != null and inSiteTimeStart != ''  and params.inSiteTimeEnd != null and params.inSiteTimeEnd != '' ">
+            <if test="inSiteTimeStart != null   and inSiteTimeEnd != null  ">
                 AND IN_SITE_TIME BETWEEN #{params.inSiteTimeStart} AND #{params.inSiteTimeEnd}
             </if>
-            <if test="cp9OfflineTimeStart != null and cp9OfflineTimeStart != ''  and params.params.cp9OfflineTimeEnd != null and params.params.cp9OfflineTimeEnd != '' ">
+            <if test="cp9OfflineTimeStart != null   and cp9OfflineTimeEnd != null  ">
                 AND CP9_OFFLINE_TIME BETWEEN #{params.cp9OfflineTimeStart} AND #{params.cp9OfflineTimeEnd}
             </if>
         </where>
