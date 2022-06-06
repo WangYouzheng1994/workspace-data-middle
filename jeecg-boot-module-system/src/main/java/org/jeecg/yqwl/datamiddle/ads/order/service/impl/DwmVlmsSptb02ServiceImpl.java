@@ -131,24 +131,75 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     }
 
     /**
-     * 获取到货及时率
+     * 获取到货样本数据总量
      *
      * @param baseBrandTime
      * @return
      */
     @Override
-    public Result<BigDecimal> findArrivalRate(GetBaseBrandTime baseBrandTime) {
+    public BigDecimal findArrivalRate(GetBaseBrandTime baseBrandTime) {
         /**
          *1.获取已到货未超理论实践的值
          */
-        /*        DwmVlmsSptb02 arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
-        Double percentage = arrivalRate.();
-        //下面开始截取两位数 原数据:0.12594458438287154
-        BigDecimal bigDecimal = new BigDecimal(percentage);
-        Double newPercentage = bigDecimal.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();*/
-
-        return null;
+        BigDecimal arrivalRate = dwmVlmsSptb02Mapper.getArrivalRate(baseBrandTime);
+        return arrivalRate;
     }
+
+    /**
+     * 获取准时到达样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getArriveOnTime(GetBaseBrandTime baseBrandTime) {
+        BigDecimal arriveOnTime = dwmVlmsSptb02Mapper.getArriveOnTime(baseBrandTime);
+        return arriveOnTime;
+    }
+
+    /**
+     * 起运样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTotalShipment(GetBaseBrandTime baseBrandTime) {
+        BigDecimal totalShipment = dwmVlmsSptb02Mapper.getTotalShipment(baseBrandTime);
+        return totalShipment;
+    }
+
+    /**
+     * 起运及时样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTimelyShipment(GetBaseBrandTime baseBrandTime) {
+        BigDecimal timelyShipment = dwmVlmsSptb02Mapper.getTimelyShipment(baseBrandTime);
+        return timelyShipment;
+    }
+
+    /**
+     * 出库及时样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getOnTimeDelivery(GetBaseBrandTime baseBrandTime) {
+        BigDecimal onTimeDelivery = dwmVlmsSptb02Mapper.getOnTimeDelivery(baseBrandTime);
+        return onTimeDelivery;
+    }
+
+    /**
+     * 出库样本总量
+     * @param baseBrandTime
+     * @return
+     */
+    @Override
+    public BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime) {
+        BigDecimal totalOutboundQuantity = dwmVlmsSptb02Mapper.getTotalOutboundQuantity(baseBrandTime);
+        return totalOutboundQuantity;
+    }
+
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param dwmSptb02VO

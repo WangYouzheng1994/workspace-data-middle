@@ -1187,6 +1187,13 @@ public class DwdSptb02 implements Serializable {
      */
     private String END_CITY_CODE;
 
+    /**
+     * dwd实际出库时间
+     */
+    private Long ACTUAL_OUT_TIME;
+
+
+
 
     @Override
     public String toString() {

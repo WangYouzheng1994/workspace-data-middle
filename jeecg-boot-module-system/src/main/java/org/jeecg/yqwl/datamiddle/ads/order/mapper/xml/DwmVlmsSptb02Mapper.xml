@@ -57,14 +57,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_test1 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
                 dvs1.CJSDBH,
                 max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_test1  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
@@ -109,14 +109,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_test1 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_test1  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
@@ -161,14 +161,14 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
         </if>
-        FROM dwm_vlms_sptb02 dvs
+        FROM dwm_vlms_sptb02_test1 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02_test1  dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null " >
                     and dvs1.FINAL_SITE_TIME BETWEEN  #{params.startTime}and #{params.endTime}
@@ -187,35 +187,37 @@
 
     </select>
     <!--按条件查询到货及时率    todo:后续逻辑优化-->
-    <select id="getArrivalRate" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
-        select
-        COUNT(aa.CJSDBH) as totalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs1 WHERE FINAL_SITE_TIME !=0 and FINAL_SITE_TIME <![CDATA[ < ]]> dvs1.THEORY_SITE_TIME) as finalNum,
-        (select COUNT(1) from dwm_vlms_sptb02 dvs2 WHERE FINAL_SITE_TIME = 0 and #{params.endTime} &lt; dvs2.THEORY_SITE_TIME) as nowNum,
-        (nowNum+finalNum) / totalNum * 100 as percentage
-        from
-        dwm_vlms_sptb02 aa
-        where
-            (CJSDBH,
-            WAREHOUSE_UPDATETIME) in (
-                select
-                    CJSDBH,
-                    max(WAREHOUSE_UPDATETIME)
-                from
-        dwm_vlms_sptb02 dvs
-                <where>
-                    <if test=" params.startTime != null and params.endTime !=null " >
-                        and dvs.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
-                    </if>
-                    <if test=" params.cqwh != null and params.cqwh != '' ">
-                        and dvs.CQWH = #{params.cqwh}
-                    </if>
-                    <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                        and dvs.CZJGSDM = #{params.czjgsdm}
-                    </if>
-                </where>
-                group by dvs.CJSDBH
+    <select id="getArrivalRate"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="java.math.BigDecimal">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SITE_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
             )
+        </where>
     </select>
 
     <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where SHIPMENT_TIME between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
@@ -306,14 +308,14 @@
             </otherwise>
         </choose>
         FROM
-        dwm_vlms_sptb02 dvs
+        dwm_vlms_sptb02_test1 dvs
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
             v.CJSDBH,
             MAX(v.WAREHOUSE_UPDATETIME)
             FROM
-            dwm_vlms_sptb02 v
+            dwm_vlms_sptb02_test1 v
             <where>
 
                 <if test="  params.startTime != null and params.endTime != null">
@@ -363,13 +365,13 @@
             </otherwise>
         </choose>
         FROM
-        dwm_vlms_sptb02 dvs
+        dwm_vlms_sptb02_test1 dvs
         <where>
             (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
             SELECT
             v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
             FROM
-            dwm_vlms_sptb02 v
+            dwm_vlms_sptb02_test1 v
             <where>
                 <if test=" params.startTime != null ">
                     AND  v.SHIPMENT_TIME <![CDATA[ >= ]]> #{params.startTime}
@@ -447,6 +449,203 @@
             )
         </where>
         GROUP BY dates , groupName
+    </select>
+<!--    到货及时样本总量-->
+    <select id="getArriveOnTime"
+            resultType="java.math.BigDecimal"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND FINAL_SITE_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND FINAL_SITE_TIME <![CDATA[ < ]]> THEORY_SITE_TIME
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    OR FINAL_SITE_TIME <![CDATA[ = ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
+            )
+        </where>
+    </select>
+
+<!--    起运及时样本数量-->
+    <select id="getTimelyShipment"
+            resultType="java.math.BigDecimal"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND SHIPMENT_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND SHIPMENT_TIME <![CDATA[ < ]]> THEORY_SHIPMENT_TIME
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    OR SHIPMENT_TIME <![CDATA[ = ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SHIPMENT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
+            )
+        </where>
+    </select>
+<!--    起运样本总体-->
+    <select id="getTotalShipment"
+            resultType="java.math.BigDecimal"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
+            )
+        </where>
+
+
+    </select>
+
+<!--    出库准时-->
+    <select id="getOnTimeDelivery"
+            resultType="java.math.BigDecimal"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND ACTUAL_OUT_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND ACTUAL_OUT_TIME <![CDATA[ < ]]> THEORY_OUT_TIME
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    OR ACTUAL_OUT_TIME <![CDATA[ = ]]> 0
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_OUT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
+            )
+        </where>
+    </select>
+
+<!--    出库总量-->
+    <select id="getTotalOutboundQuantity"
+            resultType="java.math.BigDecimal"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
+        SELECT
+        count(dvs.CJSDBH) AS totalNum
+        FROM
+        dwm_vlms_sptb02_test1 dvs
+        <where>
+            (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
+            SELECT
+            CJSDBH,
+            MAX(WAREHOUSE_UPDATETIME)
+            FROM
+            dwm_vlms_sptb02_test1
+            <where>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                </if>
+                <if test="  params.startTime != null and params.endTime != null">
+                    AND THEORY_OUT_TIME <![CDATA[ != ]]> 0
+                </if>
+                <if test="params.cqwh != null and params.cqwh != ''">
+                    AND  CQWH = #{params.cqwh}
+                </if>
+                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+                    AND CZJGSDM = #{params.czjgsdm}
+                </if>
+            </where>
+            GROUP BY CJSDBH
+            )
+        </where>
     </select>
 
 </mapper>

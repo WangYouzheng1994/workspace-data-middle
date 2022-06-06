@@ -23,6 +23,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -86,19 +87,55 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectArrivalRate")
     public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
-        // TODO: 指派
-        // TODO: 出库
+        BigDecimal num = new BigDecimal("100");
+        // TODO: 起运及时率
+        //获取起运样本总量
+        BigDecimal totalShipment = dwmVlmsSptb02Service.getTotalShipment(baseBrandTime);
+        //获取起运准时样本数量
+        BigDecimal timelyShipment = dwmVlmsSptb02Service.getTimelyShipment(baseBrandTime);
+        Integer shipmentValue;
+        //判断分母是否为0,若为0,返回0,否则返回计算
+        if ( totalShipment.equals(BigDecimal.ZERO)) {
+            shipmentValue = 0;
+        }else{
+            //起运准时样本数量/起运样本总数 * 100  转换成Integer
+            shipmentValue = timelyShipment.divide(totalShipment, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+        }
 
-        // TODO: 起运
-        // 到货
-        // dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        //TODO: 出库及时率
+        //获取出库准时样本数量
+        BigDecimal onTimeDelivery = dwmVlmsSptb02Service.getOnTimeDelivery(baseBrandTime);
+        //获取出库样本总量
+        BigDecimal totalOutboundQuantity = dwmVlmsSptb02Service.getTotalOutboundQuantity(baseBrandTime);
+        Integer Outbound;
+        //判断是否为0,若为0,返回0,否则返回计算
+        if ( totalOutboundQuantity.equals(BigDecimal.ZERO) ) {
+            Outbound = 0;
+        }else{
+            Outbound = onTimeDelivery.divide(totalOutboundQuantity, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+        }
+
+
+        // TODO: 到货准时率计算
+        // 到货样本总量  1733
+        BigDecimal arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
+        //到货准时样本数量   52
+        BigDecimal arriveOnTime = dwmVlmsSptb02Service.getArriveOnTime(baseBrandTime);
+        Integer arrivalValue;
+        //判断是否为0,若为0,返回0,否则返回计算
+        if ( arrivalRate.equals(BigDecimal.ZERO) ) {
+            arrivalValue = 0;
+        }else{
+            arrivalValue = arriveOnTime.divide(arrivalRate, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+        }
+
+
         // TODO: 合并出返回对象。
-        TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
-        timelinessRatioVO.setAllotPercent(10); //分配及时率
-        timelinessRatioVO.setOutWarehousePercent(80);//出库及时率
-        timelinessRatioVO.setStartPercent(50);//起运及时率
-        timelinessRatioVO.setEndPercent(100);//到货及时率
-        return Result.OK(timelinessRatioVO) ;
+       TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
+        timelinessRatioVO.setStartPercent(shipmentValue);//起运及时率
+        timelinessRatioVO.setOutWarehousePercent(Outbound);//出库及时率
+        timelinessRatioVO.setEndPercent(arrivalValue);//到货及时率
+        return Result.OK(timelinessRatioVO);
     }
 
 

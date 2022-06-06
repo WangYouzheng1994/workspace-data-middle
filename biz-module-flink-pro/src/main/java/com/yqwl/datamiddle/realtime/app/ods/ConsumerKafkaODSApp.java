@@ -116,7 +116,6 @@ public class ConsumerKafkaODSApp {
 
         //事实流写回到Kafka的数据
         SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunctionList(mysqlTag))
-                .slotSharingGroup("kafkaGroup")
                 .setParallelism(2)
                 .uid("kafka-divide-data").name("kafka-divide-data");
         log.info("事实主流数据处理完成");
@@ -180,7 +179,7 @@ public class ConsumerKafkaODSApp {
                     collector.collect(map);
                 }
             }
-        }).slotSharingGroup("mysqlProcessGroup").uid("mysqlProcess").name("mysqlProcess");
+        }).uid("mysqlProcess").name("mysqlProcess");
 
 
         //=====================================插入mysql-sink===============================================//
