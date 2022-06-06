@@ -8,6 +8,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
+import java.util.List;
 
 
 /**
@@ -19,5 +20,5 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 @DS("slave2")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
 
-    DwmVlmsOneOrderToEnd selectOneOrderToEndList(GetQueryCriteria queryCriteria);
+    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
 }

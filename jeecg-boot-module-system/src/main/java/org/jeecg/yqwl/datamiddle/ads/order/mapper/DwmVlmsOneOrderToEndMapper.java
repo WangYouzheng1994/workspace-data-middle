@@ -7,6 +7,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
+import java.util.List;
 
 
 /**
@@ -18,5 +19,5 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderToEnd> {
 
 
-    DwmVlmsOneOrderToEnd selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
+    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
 }

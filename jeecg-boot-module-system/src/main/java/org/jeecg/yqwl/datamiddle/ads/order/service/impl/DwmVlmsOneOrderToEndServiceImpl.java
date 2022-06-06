@@ -32,8 +32,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     private DwmVlmsOneOrderToEndMapper dwmVlmsOneOrderToEndMapper;
 
     @Override
-    public DwmVlmsOneOrderToEnd selectOneOrderToEndList(GetQueryCriteria queryCriteria) {
-        DwmVlmsOneOrderToEnd oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
+    public List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria) {
+        List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
         return oneOrderToEndList;
     }
 }
