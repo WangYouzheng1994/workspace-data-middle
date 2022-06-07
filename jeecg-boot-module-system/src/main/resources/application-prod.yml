@@ -141,6 +141,33 @@ spring:
           #username: root
           #password: root
           #driver-class-name: com.mysql.cj.jdbc.Driver
+        slave0:
+          url: jdbc:clickhouse://10.123.175.195/default
+          username: sjztcla
+          password: GtDIg7HifD9MiJNN
+          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+          initialSize: 10
+          maxActive: 100
+          minIdle: 10
+          maxWait: 6000
+        slave1:
+          url: jdbc:clickhouse://10.123.175.196/default
+          username: sjztcla
+          password: GtDIg7HifD9MiJNN
+          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+          initialSize: 10
+          maxActive: 100
+          minIdle: 10
+          maxWait: 6000
+        slave2:
+          url: jdbc:clickhouse://10.123.175.197/default
+          username: sjztcla
+          password: GtDIg7HifD9MiJNN
+          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+          initialSize: 10
+          maxActive: 100
+          minIdle: 10
+          maxWait: 6000
   #redis 配置
   redis:
     database: 0
