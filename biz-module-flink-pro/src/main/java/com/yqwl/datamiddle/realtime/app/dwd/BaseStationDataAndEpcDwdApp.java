@@ -307,7 +307,7 @@ public class BaseStationDataAndEpcDwdApp {
         @Override
         public DwdBaseStationDataEpc map(DwdBaseStationDataEpc dwdBaseStationDataEpc) throws Exception {
             /**
-             * 1.当前状态后端的状态为Map类型,key为String,也就是汽车的Vin码,value为vin码所对应的数据,也就是dwdBaseStationDataEpc对象
+             * 1.当前状态后端的状态为Map类型,key为String,也就是汽车的Vin码,value为vin码所对应的数据,vin所对应的操作时间
              * 2.每次流到了到了这里,就会调用这里的map:
              */
             String vin = dwdBaseStationDataEpc.getVIN();                    //车架号
@@ -320,7 +320,7 @@ public class BaseStationDataAndEpcDwdApp {
             }else {
             // 2):当前'状态后端'有vin码对应的value就会判断操作时间,
             //    如果'状态后端'已有的操作时间大于'当前流数据'的操作时间则删除'状态后端'中的key(因为取的是第一条下线时间的数据).
-            //    然后再把更早的下线时间的对象存到'状态后端'中.
+            //    然后再把更早的下线时间存到'状态后端'中.
                 Long oldOperatetime = myMapState.get(vin);
 //                Long oldOperatetime = oldDataEpc.getOPERATETIME();
                 if (oldOperatetime>nowOperatetime){
