@@ -1,6 +1,7 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 
@@ -20,5 +21,5 @@ import java.util.List;
 @DS("slave2")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
 
-    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
+    Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria,Page<DwmVlmsOneOrderToEnd> page);
 }

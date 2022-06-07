@@ -8,6 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.jeecg.dingtalk.api.core.vo.PageResult;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
@@ -36,8 +38,9 @@ import org.springframework.web.servlet.ModelAndView;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Mono;
 
- /**
+/**
  * @Description: 一单到底
  * @Author: jeecg-boot
  * @Date:   2022-06-06
@@ -175,11 +178,22 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @AutoLog(value = "一单到底-按条件查询")
   @ApiOperation(value="一单到底-按条件查询", notes="一单到底-按条件查询")
   @PostMapping("/selectOneOrderToEndList")
-  public Result<?> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
+  public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria,
+										   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
+										   @RequestParam(name="pageSize", defaultValue="20") Integer pageSize,
+										   DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEnd,
+										   HttpServletRequest req){
+	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
+	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo,pageSize);
+	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria,pageList);
+	  pageList.getCurrent();
+	  pageList.getSize();
+	  pageList.getRecords().size();
+	  pageList.getTotal();
+	  result.setSuccess(true);
+	  result.setResult(pageList);
+	  return result;
 
-	  List<DwmVlmsOneOrderToEnd> dwmVlmsOneOrderToEnd = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
-
-	  return Result.OK(dwmVlmsOneOrderToEnd);
   }
 
 
