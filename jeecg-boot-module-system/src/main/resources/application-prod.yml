@@ -132,8 +132,8 @@ spring:
       datasource:
         master:
           url: jdbc:mysql://10.123.175.197:3306/data_middle?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-          username: root
-          password: 0U4CMeTZqPgmyttb_
+          username: flinkus
+          password: 2usE5x2NIwzQ0tdBSfOZng==
           driver-class-name: com.mysql.cj.jdbc.Driver
         #        dataWareHouse:
         #          url: jdbc:clickhouse://192.168.3.95:8123/default
