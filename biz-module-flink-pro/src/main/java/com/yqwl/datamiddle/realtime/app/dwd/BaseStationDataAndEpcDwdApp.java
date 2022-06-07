@@ -296,11 +296,11 @@ public class BaseStationDataAndEpcDwdApp {
      */
     public static class CP9Station extends RichMapFunction<DwdBaseStationDataEpc,DwdBaseStationDataEpc> {
         // 声明Map类型的状态后端
-        private transient MapState<String, DwdBaseStationDataEpc> myMapState;
+        private transient MapState<String, Long> myMapState;
 
         @Override
         public void open(Configuration parameters) throws Exception {
-            MapStateDescriptor<String, DwdBaseStationDataEpc> mapStateDescriptor = new MapStateDescriptor<>("vin码和操作时间", String.class, DwdBaseStationDataEpc.class);
+            MapStateDescriptor<String, Long> mapStateDescriptor = new MapStateDescriptor<>("vin码和操作时间", String.class, Long.class);
             myMapState = getRuntimeContext().getMapState(mapStateDescriptor);
         }
 
@@ -314,24 +314,24 @@ public class BaseStationDataAndEpcDwdApp {
             Long nowOperatetime = dwdBaseStationDataEpc.getOPERATETIME();   //操作时间
             // 1):判断状态后端有无当前数据的vin码的key所对应的对象,没有就添加上
             if (myMapState.get(vin)==null){
-                myMapState.put(vin,dwdBaseStationDataEpc);
+                myMapState.put(vin,nowOperatetime);
                 dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
                 return dwdBaseStationDataEpc;
             }else {
             // 2):当前'状态后端'有vin码对应的value就会判断操作时间,
             //    如果'状态后端'已有的操作时间大于'当前流数据'的操作时间则删除'状态后端'中的key(因为取的是第一条下线时间的数据).
             //    然后再把更早的下线时间的对象存到'状态后端'中.
-                DwdBaseStationDataEpc oldDataEpc = myMapState.get(vin);
-                Long oldOperatetime = oldDataEpc.getOPERATETIME();
+                Long oldOperatetime = myMapState.get(vin);
+//                Long oldOperatetime = oldDataEpc.getOPERATETIME();
                 if (oldOperatetime>nowOperatetime){
                     myMapState.remove(vin);
-                    myMapState.put(vin,dwdBaseStationDataEpc);
+                    myMapState.put(vin,nowOperatetime);
                     dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
                     return dwdBaseStationDataEpc;
                 }else {
             // 3):如果'状态后端'已有的操作时间小于当前流的操作时间,就会保留当前状态后端的操作时间,且设置为DwdBaseStationDataEpc的第一次下线时间.
-                    oldDataEpc.setCP9_OFFLINE_TIME(oldOperatetime);
-                    return oldDataEpc;
+                    dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(oldOperatetime);
+                    return dwdBaseStationDataEpc;
                 }
             }
         }
