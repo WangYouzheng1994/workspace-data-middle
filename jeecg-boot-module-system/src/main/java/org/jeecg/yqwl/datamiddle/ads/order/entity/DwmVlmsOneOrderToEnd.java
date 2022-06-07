@@ -217,4 +217,20 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "基地", width = 15)
 	@ApiModelProperty(value = "基地")
 	private String baseName;
+
+	/**整车物流接收STD日期*/
+	@Excel(name = "整车物流接收STD日期", width = 15)
+	@ApiModelProperty(value = "整车物流接收STD日期")
+	private Long vehicleReceivingTime;
+
+	/**同板数量*/
+	@Excel(name = "同板数量", width = 15)
+	@ApiModelProperty(value = "同板数量")
+	private Integer samePlateNum;
+
+	/**末端分拨中心 轿车数量*/
+	@Excel(name = "末端分拨中心 轿车数量", width = 15)
+	@ApiModelProperty(value = "末端分拨中心 轿车数量")
+	private Integer distributeVehicleNum;
+
 }
