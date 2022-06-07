@@ -51,11 +51,11 @@ public class WaybillDwmApp {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
-        env.setParallelism(2);
+        env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+        ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
@@ -110,7 +110,11 @@ public class WaybillDwmApp {
                         //将维度中 用户表中username 设置给订单宽表中的属性
                         String vvin = dimInfoJsonObj.getString("VVIN");
                         log.info("sptb02d1DS阶段获取到的VVIN:{}", vvin);
+                        //获取车型代码
+                        String ccpdm = dimInfoJsonObj.getString("CCPDM");
+                        log.info("sptb02d1DS阶段获取到的CCPDM:{}", ccpdm);
                         dwmSptb02.setVVIN(vvin);
+                        dwmSptb02.setCPCDBH(ccpdm);
                     }
                 },
                 60, TimeUnit.SECONDS).uid("sptb02d1DS").name("sptb02d1DS");
