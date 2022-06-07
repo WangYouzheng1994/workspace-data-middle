@@ -11,13 +11,14 @@ import java.io.Serializable;
  * </p>
  *
  * @author yiqi
- * @since 2022-05-27
+ * @since 2022-06-07
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class DwmOneOrderToEnd implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
 
     /**
      * 车架号 底盘号
@@ -26,12 +27,13 @@ public class DwmOneOrderToEnd implements Serializable {
     private String VIN;
 
     /**
-     * dwd车型代码
+     * 车型代码
      */
+
     private String VEHICLE_CODE;
 
     /**
-     * 车型
+     * 车型名称
      */
 
     private String VEHICLE_NAME;
@@ -293,6 +295,54 @@ public class DwmOneOrderToEnd implements Serializable {
      */
 
     private String SETTLE_NO;
+
+    /**
+     * 基地
+     */
+
+    private String BASE_NAME;
+
+    /**
+     * 整车物流接收STD日期  sptb02.ddjrq
+     */
+
+    private Long VEHICLE_RECEIVING_TIME;
+
+    /**
+     * 同板数量
+     */
+
+    private Integer SAME_PLATE_NUM;
+
+    /**
+     * 末端分拨中心 轿车数量
+     */
+
+    private Integer DISTRIBUTE_VEHICLE_NUM;
+
+    /**
+     * 第一个运单的结算单编号
+     */
+
+    private String SETTLEMENT_Y1;
+
+    /**
+     * 铁路单结算单编号
+     */
+
+    private String RAILWAY_SETTLEMENT_NO;
+
+    /**
+     * 水路单结算单编号
+     */
+
+    private String WATERWAY_SETTLEMENT_NO;
+
+    /**
+     * 末端配送结算单编号
+     */
+
+    private String END_DISTRIBUTE_NO;
 
 
 }
