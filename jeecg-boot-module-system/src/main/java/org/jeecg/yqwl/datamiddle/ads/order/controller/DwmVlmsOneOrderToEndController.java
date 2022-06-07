@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.jeecg.dingtalk.api.core.vo.PageResult;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
@@ -154,7 +155,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
    */
   @RequestMapping(value = "/exportXls")
   public ModelAndView exportXls(HttpServletRequest request, DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEnd) {
-      return super.exportXls(request, dwmVlmsOneOrderToEnd, DwmVlmsOneOrderToEnd.class, "一单到底");
+	  SXSSFWorkbook wb = new SXSSFWorkbook();
+
+	  return super.exportXls(request, dwmVlmsOneOrderToEnd, DwmVlmsOneOrderToEnd.class, "一单到底");
   }
 
   /**
@@ -180,22 +183,11 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @PostMapping("/selectOneOrderToEndList")
   public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria,
 										   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-										   @RequestParam(name="pageSize", defaultValue="20") Integer pageSize,
-										   DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEnd,
-										   HttpServletRequest req){
-	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
+										   @RequestParam(name="pageSize", defaultValue="20") Integer pageSize){
+//	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
 	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo,pageSize);
 	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria,pageList);
-	  pageList.getCurrent();
-	  pageList.getSize();
-	  pageList.getRecords().size();
-	  pageList.getTotal();
-	  result.setSuccess(true);
-	  result.setResult(pageList);
-	  return result;
-
+	  return Result.OK(pageList);
   }
-
-
 
 }
