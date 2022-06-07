@@ -615,17 +615,17 @@ public class WaybillDwmApp {
 
         //====================================sink clickhouse===============================================//
         //组装sql
-        StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02_TEST1).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
-        log.info("组装clickhouse插入sql:{}", sql);
-        endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
+        //StringBuffer sql = new StringBuffer();
+        //sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02_TEST1).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
+        //log.info("组装clickhouse插入sql:{}", sql);
+        //endData.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         //endData.print("拉宽后数据输出：");
         // mdac22DS.print("拉宽后输出数据：");
 
 
         //====================================sink mysql===============================================//
-        endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        endData.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwmSptb02, List<DwmSptb02>, TimeWindow>() {
+        SingleOutputStreamOperator<DwmSptb02> dwmSptb02Watermark = endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        SingleOutputStreamOperator<List<DwmSptb02>> dwmSptb02Window = dwmSptb02Watermark.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwmSptb02, List<DwmSptb02>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<DwmSptb02> iterable, Collector<List<DwmSptb02>> collector) throws Exception {
                 ArrayList<DwmSptb02> list = Lists.newArrayList(iterable);
@@ -633,7 +633,9 @@ public class WaybillDwmApp {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+        }).uid("dwmSptb02Window").name("dwmSptb02Window");
+
+        dwmSptb02Window.addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
 
 
         log.info("将处理完的数据保存到clickhouse中");
