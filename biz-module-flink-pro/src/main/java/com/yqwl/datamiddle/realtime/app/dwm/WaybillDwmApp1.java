@@ -5,10 +5,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
+import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
+import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +27,17 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.util.Collector;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,15 +52,15 @@ public class WaybillDwmApp1 {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
+        env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+        ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
@@ -58,13 +68,12 @@ public class WaybillDwmApp1 {
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
+                .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP_1)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //将kafka中源数据转化成DataStream
         DataStreamSource<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer");
-        //从Kafka主题中获取消费端
-        log.info("从kafka的主题:" + KafkaTopicConst.ODS_VLMS_SPTB02 + "中获取的要处理的数据");
 
         //将kafka中原始json数据转化成实例对象
         SingleOutputStreamOperator<DwmSptb02> objStream = jsonDataStr.map(new MapFunction<String, DwmSptb02>() {
@@ -93,7 +102,12 @@ public class WaybillDwmApp1 {
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
                         //将维度中 用户表中username 设置给订单宽表中的属性
                         String vvin = dimInfoJsonObj.getString("VVIN");
+                        log.info("sptb02d1DS阶段获取到的VVIN:{}", vvin);
+                        //获取车型代码
+                        String ccpdm = dimInfoJsonObj.getString("CCPDM");
+                        log.info("sptb02d1DS阶段获取到的CCPDM:{}", ccpdm);
                         dwmSptb02.setVVIN(vvin);
+                        dwmSptb02.setCPCDBH(ccpdm);
                     }
                 },
                 60, TimeUnit.SECONDS).uid("sptb02d1DS").name("sptb02d1DS");
@@ -361,13 +375,29 @@ public class WaybillDwmApp1 {
                 60, TimeUnit.SECONDS).uid("mdac22DS").name("mdac22DS");
 
 
-        //组装sql
-        StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
-        log.info("组装clickhouse插入sql:{}", sql);
-        //mdac22DS.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1);
-        mdac22DS.print("拉宽后输出数据：");
-        log.info("将处理完的数据保存到clickhouse中");
+
+        //对实体类中null赋默认值
+        SingleOutputStreamOperator<DwmSptb02> endData = provincesMdac32DS.map(new MapFunction<DwmSptb02, DwmSptb02>() {
+            @Override
+            public DwmSptb02 map(DwmSptb02 obj) throws Exception {
+                return JsonPartUtil.getBean(obj);
+            }
+        }).uid("endData").name("endData");
+
+
+        //====================================sink mysql===============================================//
+        endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+        endData.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(2))).apply(new AllWindowFunction<DwmSptb02, List<DwmSptb02>, TimeWindow>() {
+            @Override
+            public void apply(TimeWindow window, Iterable<DwmSptb02> iterable, Collector<List<DwmSptb02>> collector) throws Exception {
+                ArrayList<DwmSptb02> list = Lists.newArrayList(iterable);
+                if (list.size() > 0) {
+                    collector.collect(list);
+                }
+            }
+        }).addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+
+
         env.execute("sptb02-sink-clickhouse-dwm");
         log.info("sptb02dwd层job任务开始执行");
     }
