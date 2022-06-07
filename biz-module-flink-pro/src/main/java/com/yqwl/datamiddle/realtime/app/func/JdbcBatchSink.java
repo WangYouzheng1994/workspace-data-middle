@@ -153,7 +153,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
             StringBuffer sqlsb = new StringBuffer();
             sqlsb.append("replace into ");
             sqlsb.append(tableName);
-            sqlsb.append("(");
+            sqlsb.append(" (");
 
             StringBuffer columnSb = new StringBuffer();
 
@@ -177,7 +177,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
                 insertFields.add(field);
             }
             sqlsb.append(columnSb);
-            sqlsb.append(")");
+            sqlsb.append(" )");
 
             // 填充数据值
             sqlsb.append(" values ");
