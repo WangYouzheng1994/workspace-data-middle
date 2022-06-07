@@ -1282,6 +1282,13 @@ public class DwmSptb02 implements Serializable {
     private Integer RAILWAY_TRAIN_TYPE;
 
 
+    /**
+     * dwd车型代码
+     */
+    private String VEHICLE_CODE;
+
+
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);

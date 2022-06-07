@@ -26,10 +26,15 @@ public class DwmOneOrderToEnd implements Serializable {
     private String VIN;
 
     /**
+     * dwd车型代码
+     */
+    private String VEHICLE_CODE;
+
+    /**
      * 车型
      */
 
-    private String VEHICLE_TYPE;
+    private String VEHICLE_NAME;
 
     /**
      * 品牌

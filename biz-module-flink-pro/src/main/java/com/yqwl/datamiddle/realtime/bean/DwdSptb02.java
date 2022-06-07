@@ -1192,6 +1192,11 @@ public class DwdSptb02 implements Serializable {
      */
     private Long ACTUAL_OUT_TIME;
 
+    /**
+     * dwd车型代码
+     */
+    private String VEHICLE_CODE;
+
 
 
 
