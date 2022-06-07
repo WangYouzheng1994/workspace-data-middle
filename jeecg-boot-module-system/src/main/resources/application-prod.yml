@@ -147,7 +147,6 @@ spring:
         #        # 多数据源配置
         slave0:
           url: jdbc:clickhouse://10.123.175.195:8123/default
-          #          url: jdbc:clickhouse://10.123.175.195/default
           username: sjztrd
           password: eMmbfXhpyeXBr2Vm
           driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
@@ -157,7 +156,6 @@ spring:
           maxWait: 6000
         slave1:
           url: jdbc:clickhouse://10.123.175.196:8123/default
-          #          url: jdbc:clickhouse://10.123.175.195/default
           username: sjztrd
           password: eMmbfXhpyeXBr2Vm
           driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
@@ -167,7 +165,6 @@ spring:
           maxWait: 6000
         slave2:
           url: jdbc:clickhouse://10.123.175.197:8123/default
-          #          url: jdbc:clickhouse://10.123.175.195/default
           username: sjztrd
           password: eMmbfXhpyeXBr2Vm
           driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
