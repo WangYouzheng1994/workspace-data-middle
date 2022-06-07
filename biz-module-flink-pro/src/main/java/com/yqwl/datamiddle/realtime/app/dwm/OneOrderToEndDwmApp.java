@@ -66,19 +66,21 @@ public class OneOrderToEndDwmApp {
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
 
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
-                .hostname(props.getStr("mysql.hostname"))
-                .port(props.getInt("mysql.port"))
-                .databaseList(StrUtil.getStrList(props.getStr("mysql.database.list"), ","))
-                .tableList(StrUtil.getStrList(props.getStr("mysql.table.list"), ","))
-                .username(props.getStr("mysql.username"))
-                .password(props.getStr("mysql.password"))
+                .hostname(props.getStr("cdc.mysql.hostname"))
+                .port(props.getInt("cdc.mysql.port"))
+                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
+                .tableList(StrUtil.getStrList(props.getStr("cdc.mysql.table.list"), ","))
+                .username(props.getStr("cdc.mysql.username"))
+                .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .build();
 
         //env.addSource(mySqlSource).uid("oracleSourceStream").name("oracleSourceStream");
         // 将kafka中源数据转化成DataStream
         //SingleOutputStreamOperator<String> bsdDs = env.fromSource(bsdSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-bsd").uid("bsdDs").name("bsdDs");
-        //SingleOutputStreamOperator<String> bsdEpcDs = env.fromSource(bsdEpcSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-epc").uid("bsdEpcDs").name("bsdEpcDs");
+       // SingleOutputStreamOperator<String> bsdEpcDs = env.fromSource(bsdEpcSource, WatermarkStrategy.noWatermarks(), "kafka-consumer-epc").uid("bsdEpcDs").name("bsdEpcDs");
+
+
 
 
 
