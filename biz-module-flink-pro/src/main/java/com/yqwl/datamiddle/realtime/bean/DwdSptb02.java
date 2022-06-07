@@ -601,7 +601,7 @@ public class DwdSptb02 implements Serializable {
      * 返单大序号  number 转 int
      */
 
-    private Long NFDDXH;
+    private String NFDDXH;
 
     /**
      * 发车站台
