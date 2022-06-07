@@ -49,7 +49,7 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
         //properties.put("database.serverTimezone", "UTC");
-        properties.put("database.serverTimezone", "Asia/Shanghai");
+        //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
         //读取oracle连接配置属性
@@ -89,16 +89,19 @@ public class OracleCDCKafkaApp {
                 JSONObject jsonObj = JSON.parseObject(json);
                 String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 if ("SPTB02".equals(tableNameStr)) {
-                    //临界值
-                    String criticalDateStr = "2021-06-01 00:00:00";
+                    //临界值开始时间
+                    String criticalStart = "2021-06-01 00:00:00";
+                    //临界值结束时间
+                    String criticalEnd = "2022-12-31 23:59:59";
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//要转换的时间格式
-                    Date dateCritical = sdf.parse(criticalDateStr);
+                    Date dateCriticalStart = sdf.parse(criticalStart);
+                    Date dateCriticalEnd = sdf.parse(criticalEnd);
                     JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
                     //运单日期
                     String ddjrq = afterObj.getString("DDJRQ");
                     if (StringUtils.isNotEmpty(ddjrq)) {
-                        Date ddjrqDate = DateTimeUtil.timeStamp2Date(ddjrq);
-                        if (ddjrqDate.getTime() >= dateCritical.getTime()) {
+                        long ddjrqTime = Long.parseLong(ddjrq);
+                        if (ddjrqTime >= dateCriticalStart.getTime() && ddjrqTime <= dateCriticalEnd.getTime()) {
                             return true;
                         } else {
                             return false;
@@ -119,7 +122,7 @@ public class OracleCDCKafkaApp {
 
         ddjrqFilter.print("结果数据输出:");
         //输出到kafka
-        ddjrqFilter.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        //ddjrqFilter.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

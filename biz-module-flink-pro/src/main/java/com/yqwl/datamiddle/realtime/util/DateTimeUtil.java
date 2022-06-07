@@ -61,7 +61,16 @@ public class DateTimeUtil {
     public static Date timeStamp2Date(String time) {
         Long timeLong = Long.parseLong(time);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//要转换的时间格式
-        Date date;
+        try {
+            return sdf.parse(sdf.format(timeLong));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Date timeStamp2Date(long timeLong) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//要转换的时间格式
         try {
             return sdf.parse(sdf.format(timeLong));
         } catch (ParseException e) {
