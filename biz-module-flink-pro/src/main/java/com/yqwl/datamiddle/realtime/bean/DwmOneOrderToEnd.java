@@ -303,6 +303,11 @@ public class DwmOneOrderToEnd implements Serializable {
     private String BASE_NAME;
 
     /**
+     * 基地代码
+     */
+    private String BASE_CODE;
+
+    /**
      * 整车物流接收STD日期  sptb02.ddjrq
      */
 
