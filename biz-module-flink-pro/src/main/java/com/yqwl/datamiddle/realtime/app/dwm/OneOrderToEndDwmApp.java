@@ -270,19 +270,19 @@ public class OneOrderToEndDwmApp {
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE )\n" +
                         "VALUES\n" +
-                        "        (?, ?, ?, ? ) \n"
-                     /*   "        ON DUMPLICATE KEY UPDATE \n" +
+                        "        (?, ?, ?, ? ) \n" +
+                        "        ON DUPLICATE KEY UPDATE \n" +
                         "  VIN=?, CP9_OFFLINE_TIME=? ,BASE_NAME=?,\n" +
-                        "        BASE_CODE=?;"*/,
+                        "        BASE_CODE=?",
                 (ps, epc) -> {
                     ps.setString(1, epc.getVIN());
                     ps.setLong(2, epc.getCP9_OFFLINE_TIME());
                     ps.setString(3, epc.getBASE_NAME());
                     ps.setString(4, epc.getBASE_CODE());
-              /*      ps.setString(5, epc.getVIN());
+                    ps.setString(5, epc.getVIN());
                     ps.setLong(6, epc.getCP9_OFFLINE_TIME());
                     ps.setString(7, epc.getBASE_NAME());
-                    ps.setString(8, epc.getBASE_CODE());*/
+                    ps.setString(8, epc.getBASE_CODE());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)
