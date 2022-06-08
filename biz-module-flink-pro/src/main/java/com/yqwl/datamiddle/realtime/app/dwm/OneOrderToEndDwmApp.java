@@ -262,7 +262,7 @@ public class OneOrderToEndDwmApp {
                         "        ON DUPLICATE KEY UPDATE \n" +
                         "       VEHICLE_CODE=?, ORDER_CREATE_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
                         "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
-                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '0' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)" ,
+                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)" ,
                 (ps, epc) -> {
                     ps.setString(1, epc.getVVIN());
                     ps.setString(2, epc.getVEHICLE_CODE());
