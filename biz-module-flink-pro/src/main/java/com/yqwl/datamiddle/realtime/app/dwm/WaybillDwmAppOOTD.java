@@ -45,9 +45,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 对运单 sptb02 表进行统一数据格式 字段统一等
- * @Author: muqing
- * @Date: 2022/05/06
+ * @Description: 对运单 DwmOneOrderToEnd的表插入Clickhouse
+ * @Author: XiaoFeng
+ * @Date: 2022/06/08
  * @Version: V1.0
  */
 @Slf4j
