@@ -218,6 +218,17 @@ public class OneOrderToEndDwmApp {
                 return dataBsd;
             }
         }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+        //BASE_STATION_DATA_EPC
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
+            @Override
+            public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
+                DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
+                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
+                dataBsdEpc.setTs(ts);
+                return dataBsdEpc;
+            }
+        }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
 
         //4.根据车型代码,查出车辆名称
         SingleOutputStreamOperator<OotdTransition> ootdAddCarNameStream = AsyncDataStream.unorderedWait(mapOotdTransition,
