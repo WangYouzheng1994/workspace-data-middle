@@ -1,5 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,6 +15,8 @@ import java.io.Serializable;
  * @author yuluo
  * @since 2022-06-07
  */
+@CamelUnderline(isChange = false)
+@TableName("dwm_vlms_one_order_to_end")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class DwmOneOrderToEnd implements Serializable {
@@ -20,12 +24,11 @@ public class DwmOneOrderToEnd implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
+
     /**
-     * 车架号 底盘号
+     * 车架号底盘号
      */
-
     private String VIN;
-
     /**
      * 车型代码
      */
@@ -39,7 +42,7 @@ public class DwmOneOrderToEnd implements Serializable {
     private String VEHICLE_NAME;
 
     /**
-     * 品牌
+     * 底盘号
      */
 
     private String BRAND;

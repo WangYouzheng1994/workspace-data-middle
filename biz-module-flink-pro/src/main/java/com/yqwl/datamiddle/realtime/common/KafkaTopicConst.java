@@ -85,6 +85,8 @@ public class KafkaTopicConst {
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
     public static final String DWM_VLMS_SPTB02_TEST1 = "dwm_vlms_sptb02_test1";
 
+    public static final String DwmOneOrderToEnd ="dwm_vlms_one_order_to_end_xi";
+
 
     //dws topic
 

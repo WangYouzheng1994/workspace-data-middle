@@ -105,9 +105,6 @@ public class OneOrderToEndDwmApp {
                 Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
                 dataBsdEpc.setTs(ts);
                 String vin = dataBsdEpc.getVIN();
-                if ("LFV5A24G1D3015609".equals(vin)){
-                    log.info(vin);
-                }
                 return dataBsdEpc;
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
