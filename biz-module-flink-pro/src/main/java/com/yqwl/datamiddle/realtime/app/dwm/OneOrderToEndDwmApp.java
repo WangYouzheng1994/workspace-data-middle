@@ -79,7 +79,7 @@ public class OneOrderToEndDwmApp {
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
         //==============================================dwd_base_station_data_epc处理 START====================================================================//
-        // 过滤出BASE_STATION_DATA_Epc的表
+        //2.过滤出BASE_STATION_DATA_Epc的表
         DataStream<String> filterBsdEpcDs = mysqlSource.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
@@ -96,7 +96,7 @@ public class OneOrderToEndDwmApp {
             }
         }).uid("filterDwd_vlms_base_station_data_epc").name("filterDwd_vlms_base_station_data_epc");
 
-        //BASE_STATION_DATA_EPC
+        //3.转实体类 BASE_STATION_DATA_EPC
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
@@ -111,7 +111,7 @@ public class OneOrderToEndDwmApp {
                 return dataBsdEpc;
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
-
+        //4.插入mysql
         mapBsdEpc.addSink(JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE )\n" +
@@ -252,7 +252,7 @@ public class OneOrderToEndDwmApp {
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
         ootdAddCarNameStream.print("ootd:");
-        //5.sptb02插入mysql
+        //5.sptb02与一单到底对应的字段插入mysql
         ootdAddCarNameStream.addSink( JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, ORDER_CREATE_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
@@ -309,7 +309,7 @@ public class OneOrderToEndDwmApp {
         //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
         //==============================================dwd_base_station_data处理====================================================================//
-        // 过滤出BASE_STATION_DATA的表
+        // 1.过滤出BASE_STATION_DATA的表
         DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
@@ -326,24 +326,40 @@ public class OneOrderToEndDwmApp {
             }
         }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");
 
-        //转换BASE_STATION_DATA为实体类
+        //2.转换BASE_STATION_DATA为实体类
         SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
                 DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
                 Timestamp ts = jsonObject.getTimestamp("ts");
-                String vin = dataBsd.getVIN();              //vin码
-//                dataBsd.get
                 dataBsd.setTs(ts);
                 return dataBsd;
             }
         }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+        //3.插入mysql
+        mapBsd.addSink(JdbcSink.sink(
 
+                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ?  WHERE VIN = ? ",
 
+                (ps, epc) -> {
+                    ps.setString(1, epc.getIN_WAREHOUSE_NAME());
+                    ps.setString(2, epc.getIN_WAREHOUSE_CODE());
+                    ps.setString(3, epc.getVIN());
+                },
+                new JdbcExecutionOptions.Builder()
+                        .withBatchSize(5000)
+                        .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
+                        .build(),
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(MysqlConfig.URL)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
+                        .build())).uid("baseStationDataSink").name("baseStationDataSink");
 
-
-        env.execute("合表开始");
+        env.execute("一单到底合表开始");
         log.info("base_station_data job任务开始执行");
 
     }
