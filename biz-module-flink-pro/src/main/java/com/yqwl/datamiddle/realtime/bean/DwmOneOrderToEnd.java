@@ -291,10 +291,10 @@ public class DwmOneOrderToEnd implements Serializable {
     private Long FINAL_SITE_TIME;
 
     /**
-     * 结算单编号 多个逗号隔开
+     * 运单生成时间
      */
 
-    private String SETTLE_NO;
+    private Long ORDER_CREATE_TIME;
 
     /**
      * 基地
