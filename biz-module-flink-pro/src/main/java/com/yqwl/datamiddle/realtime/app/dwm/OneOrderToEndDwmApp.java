@@ -250,20 +250,6 @@ public class OneOrderToEndDwmApp {
                         }
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
-//        ootdAddCarNameStream.print("合并了车的流:");
-
-        //filterBsdDs.print("bSD:");
-
-
-//{"database":"data_middle_flink","before":{},
-// "after":{"SAMPLE_STATUS":0,"STATION_CODE":"K","IN_WAREHOUSE_NAME":"照宝库","LAST_UPDATE_DATE":1652206207000000,
-// "EFFECT_FLAG":"1","IDNUM":9513,"BRAND_CODE":"LFPH","SAMPLE_U_T_C":1652205865000000,
-// "BATCH_CODE":"20220510180425313f57d9e75cc1445cda2e847b962d2763d","FILE_STATUS":0,"IS_CORRECT":-1,
-// "MOTORCYCLETYPE_NAME":"红旗","MSG_ID":"7fc1dc4d-d18c-413c-ac27-889e4b271472","CREATE_TIMESTAMP":1652206207578087,
-// "IN_WAREHOUSE_CODE":"K","SHOP_NO":"K","OPERATE_TYPE":"InStock","OPERATOR_ID":"805","BRAND_NAME":"红旗",
-// "VIN":"LFPHC7CE4N2A04481","FILE_TYPE":0,"MOTORCYCLETYPE_CODE":"EQM5","STATION_TYPE":"TypeD","PUSH_BATCH":"9f62fb8f-352b-4768-8798-b83bd85c3074"},
-// "type":"insert","tableName":"dwd_vlms_base_station_data","ts":1654614547474}
-
 
         //==============================================dwd_base_station_data处理====================================================================//
         // 过滤出BASE_STATION_DATA的表
