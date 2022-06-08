@@ -96,7 +96,6 @@ public class OneOrderToEndDwmApp {
             }
         }).uid("filterDwd_vlms_base_station_data_epc").name("filterDwd_vlms_base_station_data_epc");
 
-        filterBsdEpcDs.print("epcFilter数据输出:");
         //BASE_STATION_DATA_EPC
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
             @Override
@@ -105,28 +104,30 @@ public class OneOrderToEndDwmApp {
                 DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
                 Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
                 dataBsdEpc.setTs(ts);
+                String vin = dataBsdEpc.getVIN();
+                if ("LFV5A24G1D3015609".equals(vin)){
+                    log.info(vin);
+                }
                 return dataBsdEpc;
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
 
-        mapBsdEpc.print("epc数据输出:");
         mapBsdEpc.addSink(JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE )\n" +
                         "VALUES\n" +
-                        "        (?, ?, ?, ? ) \n" +
+                        "        ( ?, ?, ? ,?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "  VIN=?, CP9_OFFLINE_TIME=? ,BASE_NAME=?,\n" +
+                        "   CP9_OFFLINE_TIME=? ,BASE_NAME=?,\n" +
                         "        BASE_CODE=?",
                 (ps, epc) -> {
                     ps.setString(1, epc.getVIN());
-                    ps.setLong(2, epc.getCP9_OFFLINE_TIME());
+                    ps.setLong  (2, epc.getCP9_OFFLINE_TIME());
                     ps.setString(3, epc.getBASE_NAME());
                     ps.setString(4, epc.getBASE_CODE());
-                    ps.setString(5, epc.getVIN());
-                    ps.setLong(6, epc.getCP9_OFFLINE_TIME());
-                    ps.setString(7, epc.getBASE_NAME());
-                    ps.setString(8, epc.getBASE_CODE());
+                    ps.setLong  (5, epc.getCP9_OFFLINE_TIME());
+                    ps.setString(6, epc.getBASE_NAME());
+                    ps.setString(7, epc.getBASE_CODE());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)
@@ -141,7 +142,7 @@ public class OneOrderToEndDwmApp {
                         .build())).uid("baseStationDataEpcSink").name("baseStationDataEpcSink");
         //==============================================dwd_base_station_data_epc处理 END====================================================================//
 
-        //==============================================dwm_vlms_sptb02处理====================================================================//
+        //==============================================dwm_vlms_sptb02处理START=============================================================================//
         //2.进行数据过滤
         SingleOutputStreamOperator<String> filterSptb02 = mysqlSource.filter(new RichFilterFunction<String>() {
             @Override
@@ -158,7 +159,7 @@ public class OneOrderToEndDwmApp {
                 return false;
             }
         });
-
+        filterSptb02.print("filterSptb02:");
         //3.进行实体类转换
         //转换sptb02为实体类
         SingleOutputStreamOperator<OotdTransition> mapOotdTransition = filterSptb02.map(new MapFunction<String, OotdTransition>() {
@@ -167,9 +168,9 @@ public class OneOrderToEndDwmApp {
                 OotdTransition ootdTransition = new OotdTransition();
                 JSONObject jsonObject = JSON.parseObject(sptb02Value);
                 DwmSptb02 dwmSptb02 = jsonObject.getObject("after", DwmSptb02.class);
-                String cjsdbh = dwmSptb02.getCJSDBH();
-                String vehicle_code = dwmSptb02.getVEHICLE_CODE();      //车型
+                String cjsdbh = dwmSptb02.getCJSDBH();                  //结算单编号
                 String vvin = dwmSptb02.getVVIN();                      //底盘号
+                String vehicle_code = dwmSptb02.getVEHICLE_CODE();      //车型
                 Long ddjrq = dwmSptb02.getDDJRQ();                      //整车物流接收STD日期
                 String cjhdh = dwmSptb02.getCJHDH();                    //任务单号
                 Long dpzrq = dwmSptb02.getDPZRQ();                      //配板日期
@@ -230,7 +231,7 @@ public class OneOrderToEndDwmApp {
                 return ootdTransition;
             }
         });
-
+        mapOotdTransition.print("实体类:");
         //4.根据车型代码,查出车辆名称
         SingleOutputStreamOperator<OotdTransition> ootdAddCarNameStream = AsyncDataStream.unorderedWait(mapOotdTransition,
                 new DimAsyncFunction<OotdTransition>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_mdac12", "CCPDM") {
@@ -250,6 +251,62 @@ public class OneOrderToEndDwmApp {
                         }
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
+        ootdAddCarNameStream.print("ootd:");
+        //5.sptb02插入mysql
+        ootdAddCarNameStream.addSink( JdbcSink.sink(
+
+                "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, ORDER_CREATE_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
+                        "STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, DEALER_NAME,SETTLEMENT_Y1 )\n" +
+                        "VALUES\n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?) \n" +
+                        "        ON DUPLICATE KEY UPDATE \n" +
+                        "       VEHICLE_CODE=?, ORDER_CREATE_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
+                        "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
+                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '0' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)" ,
+                (ps, epc) -> {
+                    ps.setString(1, epc.getVVIN());
+                    ps.setString(2, epc.getVEHICLE_CODE());
+                    ps.setLong  (3, epc.getDDJRQ());
+                    ps.setString(4, epc.getCJHDH());
+                    ps.setLong  (5, epc.getDPZRQ());
+                    ps.setString(6, epc.getCPZDBH());
+                    ps.setLong  (7, epc.getASSIGN_TIME());
+                    ps.setString(8, epc.getASSIGN_NAME());
+                    ps.setLong  (9, epc.getACTUAL_OUT_TIME());
+                    ps.setLong  (10, epc.getSHIPMENT_TIME());
+                    ps.setString(11, epc.getVJSYDM());
+                    ps.setString(12, epc.getSTART_CITY_NAME());
+                    ps.setString(13, epc.getEND_CITY_NAME());
+                    ps.setString(14, epc.getDEALER_NAME());
+                    ps.setString(15, epc.getCJSDBH());
+                    ps.setString(16, epc.getVEHICLE_CODE());
+                    ps.setLong  (17, epc.getDDJRQ());
+                    ps.setString(18, epc.getCJHDH());
+                    ps.setLong  (19, epc.getDPZRQ());
+                    ps.setString(20, epc.getCPZDBH());
+                    ps.setLong  (21, epc.getASSIGN_TIME());
+                    ps.setString(22, epc.getASSIGN_NAME());
+                    ps.setLong  (23, epc.getACTUAL_OUT_TIME());
+                    ps.setLong  (24, epc.getSHIPMENT_TIME());
+                    ps.setString(25, epc.getVJSYDM());
+                    ps.setString(26, epc.getSTART_CITY_NAME());
+                    ps.setString(27, epc.getEND_CITY_NAME());
+                    ps.setString(28, epc.getDEALER_NAME());
+                    ps.setString(29, epc.getCJSDBH());
+                    ps.setString(30, epc.getCJSDBH());
+                },
+                new JdbcExecutionOptions.Builder()
+                        .withBatchSize(5000)
+                        .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
+                        .build(),
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(MysqlConfig.URL)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
+                        .build()));
+        //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
         //==============================================dwd_base_station_data处理====================================================================//
         // 过滤出BASE_STATION_DATA的表
