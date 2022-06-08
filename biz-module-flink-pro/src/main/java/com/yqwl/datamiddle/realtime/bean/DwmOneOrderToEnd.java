@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 一单到底宽表
  * </p>
  *
- * @author yiqi
+ * @author yuluo
  * @since 2022-06-07
  */
 @Data
