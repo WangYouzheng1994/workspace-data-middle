@@ -39,6 +39,19 @@ public class OracleCDCKafkaApp {
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(600000);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
+        //ck.setCheckpointTimeout(60000);
+        //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
+        //ck.setMinPauseBetweenCheckpoints(500);
+        //同一时间只允许进行一个检查点
+        //ck.setMaxConcurrentCheckpoints(1);
+        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //System.setProperty("HADOOP_USER_NAME", "root");
 
         log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
@@ -66,19 +79,7 @@ public class OracleCDCKafkaApp {
                 .debeziumProperties(properties)
                 .build();
 
-        // CheckpointConfig ck = env.getCheckpointConfig();
-     /*   ck.setCheckpointInterval(10000);
-        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
-        ck.setCheckpointTimeout(60000);
-        //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
-        ck.setMinPauseBetweenCheckpoints(500);
-        //同一时间只允许进行一个检查点
-        ck.setMaxConcurrentCheckpoints(1);*/
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
-        System.setProperty("HADOOP_USER_NAME", "root");
+
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
@@ -122,7 +123,7 @@ public class OracleCDCKafkaApp {
 
         ddjrqFilter.print("结果数据输出:");
         //输出到kafka
-        //ddjrqFilter.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        ddjrqFilter.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");
