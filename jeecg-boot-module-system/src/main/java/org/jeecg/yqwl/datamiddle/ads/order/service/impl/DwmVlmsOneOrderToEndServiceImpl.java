@@ -47,4 +47,14 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
         return oneOrderToEndList;
     }
+
+    /**
+     * 查询同板数量
+     * @return
+     */
+    @Override
+    public Integer selectTotal() {
+        Integer total = dwmVlmsOneOrderToEndMapper.selectTotal();
+        return total;
+    }
 }

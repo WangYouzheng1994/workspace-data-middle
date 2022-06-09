@@ -26,5 +26,7 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
 
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
 
+    Integer selectTotal();
+
 
 }
