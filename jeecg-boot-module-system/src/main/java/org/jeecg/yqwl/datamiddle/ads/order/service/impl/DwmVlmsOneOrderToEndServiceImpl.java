@@ -13,6 +13,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -39,10 +40,23 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     @Override
     public Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria, Page<DwmVlmsOneOrderToEnd> page) {
-        List<DwmVlmsOneOrderToEnd> dwmVlmsOneOrderToEnds = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria, page);
-        // 遍历dwmVlmsOneOrderToEnds
-        // 对每一行的值，查出铜板数量。 并且赋值。
-        return page.setRecords(dwmVlmsOneOrderToEnds);
+        List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria, page);
+        //遍历list,并查询出同板数量赋值
+        for ( int i = 0; i < oneOrderToEndList.size(); i ++ ) {
+            DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(i);
+            //获取配载单编号的值
+            String stowageNoteNo = params.getStowageNoteNo();
+            //查询所有的配载单编号和同板数量
+            List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal();
+            //对得到的结果进行循环
+            for ( int j = 0; j < samePlateNumList.size(); j++ ) {
+                //判断配载单编号的值相同,则设置同板数量
+                if ( stowageNoteNo.equals(samePlateNumList.get(j).getStowageNoteNo())) {
+                    params.setSamePlateNum(samePlateNumList.get(j).getSamePlateNum());
+                }
+            }
+        }
+        return page.setRecords(oneOrderToEndList);
     }
 
     @Override
@@ -56,8 +70,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @return
      */
     @Override
-    public Integer selectTotal() {
-        Integer total = dwmVlmsOneOrderToEndMapper.selectTotal();
+    public List<SelectData> selectTotal() {
+        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
         return total;
     }
 }

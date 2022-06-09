@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
 
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
 
-    Integer selectTotal();
+    List<SelectData> selectTotal();
 
 
 }

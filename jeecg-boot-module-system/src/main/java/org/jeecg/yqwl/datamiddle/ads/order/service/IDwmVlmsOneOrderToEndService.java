@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
 
 import java.util.List;
 
@@ -25,5 +26,5 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
 
     List<DwmVlmsOneOrderToEnd> getDwmVlmsOneOrderToEnd(GetQueryCriteria queryCriteria);
 
-    Integer selectTotal();
+    List<SelectData> selectTotal();
 }
