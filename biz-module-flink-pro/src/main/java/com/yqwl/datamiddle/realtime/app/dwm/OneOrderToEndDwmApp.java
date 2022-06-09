@@ -422,13 +422,13 @@ public class OneOrderToEndDwmApp {
         //5.sptb02与一单到底对应的字段插入mysql
         ootdAddCarNameStream.addSink(JdbcSink.sink(
 
-                "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, ORDER_CREATE_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
+                "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, VEHICLE_RECEIVING_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
                         "STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, DEALER_NAME,SETTLEMENT_Y1" +
                         "START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, IN_END_WATERWAY_TIME, UNLOAD_SHIP_TIME  )\n" +
                         "VALUES\n" +
                         "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "       VEHICLE_CODE=?, ORDER_CREATE_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
+                        "       VEHICLE_CODE=?, VEHICLE_RECEIVING_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
                         "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
                         "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)",
                 (ps, epc) -> {
