@@ -281,6 +281,66 @@ public class WaybillDwmApp {
 
                 60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
 
+        /**
+         * 处理 运输商名称
+         * nvl(y.vcydjc,y.vcydmc) 运输商,
+         * inner join mdac52 y on a.cyssdm = y.ccyddm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac52DS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC52,
+                        "CCYDDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getCYSSDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VCYDJC"))) {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac52DS").name("mdac52DS");
+
+
+        /**
+         * 处理经销商名称
+         * nvl(j.vjxsjc,j.vjxsmc) vscdwmc
+         * left join mdac22 j on a.vdwdm = j.cjxsdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac22DS = AsyncDataStream.unorderedWait(
+                mdac52DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC22,
+                        "CJXSDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getVDWDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VJXSJC"))) {
+                            dwmSptb02.setDEALER_NAME(dimInfoJsonObj.getString("VJXSJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VJXSMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac22DS").name("mdac22DS");
+
+
+
+        //=====================================================分隔线=====================================================//
         //分配及时率  出库及时率  起运及时率 到货及时率
         /**
          * 处理理论出库时间 THEORY_OUT_TIME
@@ -298,7 +358,7 @@ public class WaybillDwmApp {
          * TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
          */
         SingleOutputStreamOperator<DwmSptb02> theoryouttimeDS = AsyncDataStream.unorderedWait(
-                sptc34DS,
+                mdac22DS,
                 new DimAsyncFunction<DwmSptb02>(
                         DimUtil.MYSQL_DB_TYPE,
                         KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG,
