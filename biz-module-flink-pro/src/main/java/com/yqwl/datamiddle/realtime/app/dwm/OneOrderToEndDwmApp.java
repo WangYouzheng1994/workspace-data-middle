@@ -173,7 +173,7 @@ public class OneOrderToEndDwmApp {
                 Long dphscsj = dwmSptb02.getDPHSCSJ();                                      //配板日期
                 String vph = dwmSptb02.getVPH();                                  //配载单编号
                 Long assign_time = dwmSptb02.getASSIGN_TIME();                          //指派运输商日期
-                String ccysdm = dwmSptb02.getCCYSDM();                                  //指派承运商名称
+                String transportName = dwmSptb02.getTRANSPORT_NAME();                                  //指派承运商名称
                 Long actual_out_time = dwmSptb02.getACTUAL_OUT_TIME();                  //出库日期
                 Long shipment_time = dwmSptb02.getSHIPMENT_TIME();                      //起运日期 公路/铁路
                 String vjsydm = dwmSptb02.getVJSYDM();                                  //运输车号
@@ -214,8 +214,8 @@ public class OneOrderToEndDwmApp {
                     if (assign_time != null) {
                         ootdTransition.setASSIGN_TIME(assign_time);
                     }
-                    if (StringUtils.isNotBlank(ccysdm)) {
-                        ootdTransition.setASSIGN_NAME(ccysdm);
+                    if (StringUtils.isNotBlank(transportName)) {
+                        ootdTransition.setASSIGN_NAME(transportName);
                     }
                     if (actual_out_time != null) {
                         ootdTransition.setACTUAL_OUT_TIME(actual_out_time);
@@ -285,7 +285,7 @@ public class OneOrderToEndDwmApp {
                 return ootdTransition;
             }
         });
-        mapOotdTransition.print("实体类:");
+
         //4.根据车型代码,查出车辆名称
         SingleOutputStreamOperator<OotdTransition> ootdAddCarNameStream = AsyncDataStream.unorderedWait(mapOotdTransition,
                 new DimAsyncFunction<OotdTransition>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_mdac12", "CCPDM") {
@@ -304,7 +304,7 @@ public class OneOrderToEndDwmApp {
                         }
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
-        ootdAddCarNameStream.print("ootd:");
+
         //5.sptb02与一单到底对应的字段插入mysql
         ootdAddCarNameStream.addSink( JdbcSink.sink(
 
