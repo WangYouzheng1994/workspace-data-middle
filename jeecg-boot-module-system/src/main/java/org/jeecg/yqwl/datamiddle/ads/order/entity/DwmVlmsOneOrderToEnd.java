@@ -25,21 +25,13 @@ import org.jeecgframework.poi.excel.annotation.Excel;
 @TableName("dwm_vlms_one_order_to_end")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value="dwm_vlms_one_order_to_end_xi对象", description="一单到底")
+@ApiModel(value="dwm_vlms_one_order_to_end对象", description="一单到底")
 public class DwmVlmsOneOrderToEnd {
-    
-//	/**idnum*/
-//	@Excel(name = "idnum", width = 15)
-//    @ApiModelProperty(value = "idnum")
-//	private Long idnum;
+
 	/**车架号 底盘号*/
 	@Excel(name = "底盘号", width = 15)
     @ApiModelProperty(value = "车架号 底盘号")
 	private String vin;
-//	/**车型*/
-//	@Excel(name = "车型", width = 15)
-//    @ApiModelProperty(value = "车型")
-//	private String vehicleType;
 
 
 	/**车型代码*/
@@ -203,11 +195,11 @@ public class DwmVlmsOneOrderToEnd {
     @ApiModelProperty(value = "末端分拨中心 出库时间")
 	private Long outDistributeTime;
 	/**末端分拨中心 指派时间*/
-	@Excel(name = "港/站分拨指派时间", width = 15)
+	@Excel(name = "末端分拨中心 指派时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 指派时间")
 	private Long distributeAssignTime;
 	/**末端分拨中心 承运商名称*/
-	@Excel(name = "港/站分拨承运商", width = 15)
+	@Excel(name = "末端分拨中心 承运商名称", width = 15)
     @ApiModelProperty(value = "末端分拨中心 承运商名称")
 	private String distributeCarrierName;
 	/**末端分拨中心 承运轿车车牌号*/
