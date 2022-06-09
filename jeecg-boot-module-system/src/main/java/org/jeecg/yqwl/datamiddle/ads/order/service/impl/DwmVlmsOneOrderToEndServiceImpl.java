@@ -39,7 +39,10 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     @Override
     public Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria, Page<DwmVlmsOneOrderToEnd> page) {
-        return page.setRecords(dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria,page));
+        List<DwmVlmsOneOrderToEnd> dwmVlmsOneOrderToEnds = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria, page);
+        // 遍历dwmVlmsOneOrderToEnds
+        // 对每一行的值，查出铜板数量。 并且赋值。
+        return page.setRecords(dwmVlmsOneOrderToEnds);
     }
 
     @Override
