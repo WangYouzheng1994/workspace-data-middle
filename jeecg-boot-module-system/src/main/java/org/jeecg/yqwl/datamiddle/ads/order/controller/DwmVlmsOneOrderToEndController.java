@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.jeecg.dingtalk.api.core.vo.PageResult;
+import io.netty.util.internal.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.ss.usermodel.Cell;
@@ -261,8 +263,23 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @PostMapping("/selectOneOrderToEndList")
   public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
 //	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
+
+	  // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
+	  String vin = queryCriteria.getVin();
+	  if (StringUtils.isNotBlank(vin)) {
+		if (StringUtils.contains(vin, ",") && StringUtils.contains(vin, "\n")) {
+			return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
+		}
+		// vin码批量模式： 0 逗号， 1 回车换行
+		if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
+			queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
+		} else if (StringUtils.length(vin) > 2 && StringUtils.contains(vin, "\n")) {
+			queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
+		}
+	  }
+	  // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- END
 	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria,pageList);
+	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria, pageList);
 	  return Result.OK(pageList);
   }
 }

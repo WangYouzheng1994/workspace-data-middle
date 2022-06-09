@@ -2,6 +2,8 @@ package org.jeecg.yqwl.datamiddle.ads.order.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Description   全节点查询从前端传过来的数据
  * @ClassName GetQueryCriteria
@@ -81,4 +83,6 @@ public class GetQueryCriteria {
      * 分页：每页大小
      */
     private Integer pageSize = 20;
+
+    private List<String> vinList;
 }

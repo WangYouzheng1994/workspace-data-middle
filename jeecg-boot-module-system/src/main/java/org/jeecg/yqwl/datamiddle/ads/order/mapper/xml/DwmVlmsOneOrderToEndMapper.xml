@@ -9,9 +9,19 @@
         FROM
             dwm_vlms_one_order_to_end
         <where>
-            <if test="params.vin != null and params.vin != '' ">
-                AND VIN = #{params.vin}
-            </if>
+            <choose>
+                <when test="params.vinList != null">
+                    and VIN IN
+                    <foreach collection="params.vinList" item="value"  index="key" separator="," open="(" close=")">
+                         #{value}
+                    </foreach>
+                </when>
+                <otherwise>
+                    <if test="params.vin != null and params.vin != '' ">
+                        AND VIN = #{params.vin}
+                    </if>
+                </otherwise>
+            </choose>
             <if test="params.baseName != null and params.baseName != '' ">
                 AND BASE_NAME = #{params.baseName}
             </if>
@@ -37,5 +47,7 @@
                 AND CP9_OFFLINE_TIME BETWEEN #{params.cp9OfflineTimeStart} AND #{params.cp9OfflineTimeEnd}
             </if>
         </where>
+
+        order by CP9_OFFLINE_TIME desc
     </select>
 </mapper>
