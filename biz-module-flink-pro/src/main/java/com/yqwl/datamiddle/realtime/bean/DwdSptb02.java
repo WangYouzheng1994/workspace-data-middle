@@ -1192,8 +1192,25 @@ public class DwdSptb02 implements Serializable {
      */
     private Long ACTUAL_OUT_TIME;
 
+    /**
+     * dwd开始站台仓库代码
+     */
+    private String START_WAREHOUSE_CODE;
 
+    /**
+     * dwd到达站台仓库代码
+     */
+    private String END_WAREHOUSE_CODE;
 
+    /**
+     * dwd开始站台仓库名称
+     */
+    private String START_WAREHOUSE_NAME;
+
+    /**
+     * dwd到达站台仓库名称
+     */
+    private String END_WAREHOUSE_NAME;
 
 
     @Override
