@@ -37,17 +37,7 @@
                 AND CP9_OFFLINE_TIME BETWEEN #{params.cp9OfflineTimeStart} AND #{params.cp9OfflineTimeEnd}
             </if>
         </where>
-
-
-
-
-
-
-
-
-
-
-
+        LIMIT  0,20
 
     </select>
 </mapper>
