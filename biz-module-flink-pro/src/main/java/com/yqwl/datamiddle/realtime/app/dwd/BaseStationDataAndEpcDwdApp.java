@@ -162,7 +162,7 @@ public class BaseStationDataAndEpcDwdApp {
         }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
 
         // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdEpcDs = oracleSourceStream.filter(new RichFilterFunction<String>() {
+        DataStream<String> filterBsdEpcDs = dataAndEpcFilter.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
