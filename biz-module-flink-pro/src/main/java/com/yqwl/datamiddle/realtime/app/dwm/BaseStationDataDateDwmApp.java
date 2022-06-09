@@ -247,7 +247,7 @@ public class BaseStationDataDateDwmApp {
 
         //==============================================dwd_base_station_data处理====================================================================//
         // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
+/*        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
@@ -261,10 +261,10 @@ public class BaseStationDataDateDwmApp {
                 }
                 return false;
             }
-        }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");
+        }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");*/
 
         //转换BASE_STATION_DATA为实体类
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
+/*        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
@@ -275,7 +275,7 @@ public class BaseStationDataDateDwmApp {
                 dataBsd.setTs(ts);
                 return dataBsd;
             }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");*/
 
 
 
