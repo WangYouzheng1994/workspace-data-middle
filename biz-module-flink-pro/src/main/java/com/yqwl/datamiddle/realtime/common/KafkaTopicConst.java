@@ -72,6 +72,7 @@ public class KafkaTopicConst {
     //dim topic
     //
     public static final String DIM_VLMS_PROVINCES = "dim_vlms_provinces";
+    public static final String DIM_VLMS_WAREHOUSE_RS = "dim_vlms_warehouse_rs";
 
 
     //dwd topic

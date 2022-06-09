@@ -6,14 +6,19 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.yqwl.datamiddle.realtime.app.func.BaseStationDataSink;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.app.func.SimpleBaseStationDataSink;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -21,9 +26,11 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -39,7 +46,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 对运单 sptb02 表进行统一数据格式 字段统一等
+ * @Description: 消费kafka里topic为dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -62,10 +69,8 @@ public class WaybillDwmApp {
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
-        //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setBootstrapServers(KafkaUtil.KAFKA_SERVER)
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
@@ -276,6 +281,66 @@ public class WaybillDwmApp {
 
                 60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
 
+        /**
+         * 处理 运输商名称
+         * nvl(y.vcydjc,y.vcydmc) 运输商,
+         * inner join mdac52 y on a.cyssdm = y.ccyddm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac52DS = AsyncDataStream.unorderedWait(
+                sptc34DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC52,
+                        "CCYDDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getCYSSDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VCYDJC"))) {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac52DS").name("mdac52DS");
+
+
+        /**
+         * 处理经销商名称
+         * nvl(j.vjxsjc,j.vjxsmc) vscdwmc
+         * left join mdac22 j on a.vdwdm = j.cjxsdm
+         */
+        SingleOutputStreamOperator<DwmSptb02> mdac22DS = AsyncDataStream.unorderedWait(
+                mdac52DS,
+                new DimAsyncFunction<DwmSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_MDAC22,
+                        "CJXSDM") {
+
+                    @Override
+                    public Object getKey(DwmSptb02 dwmSptb02) {
+                        return dwmSptb02.getVDWDM();
+                    }
+
+                    @Override
+                    public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VJXSJC"))) {
+                            dwmSptb02.setDEALER_NAME(dimInfoJsonObj.getString("VJXSJC"));
+                        } else {
+                            dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VJXSMC"));
+                        }
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("mdac22DS").name("mdac22DS");
+
+
+
+        //=====================================================分隔线=====================================================//
         //分配及时率  出库及时率  起运及时率 到货及时率
         /**
          * 处理理论出库时间 THEORY_OUT_TIME
@@ -293,7 +358,7 @@ public class WaybillDwmApp {
          * TODO:马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
          */
         SingleOutputStreamOperator<DwmSptb02> theoryouttimeDS = AsyncDataStream.unorderedWait(
-                sptc34DS,
+                mdac22DS,
                 new DimAsyncFunction<DwmSptb02>(
                         DimUtil.MYSQL_DB_TYPE,
                         KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG,
@@ -636,6 +701,32 @@ public class WaybillDwmApp {
         }).uid("dwmSptb02Window").name("dwmSptb02Window");
 
         dwmSptb02Window.addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+
+
+        //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
+        //读取mysql配置
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        //读取mysql binlog
+        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
+                .hostname(props.getStr("cdc.mysql.hostname"))
+                .port(props.getInt("cdc.mysql.port"))
+                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
+                .tableList("data_middle_flink.dwd_vlms_base_station_data")
+                .username(props.getStr("cdc.mysql.username"))
+                .password(props.getStr("cdc.mysql.password"))
+                .deserializer(new CustomerDeserialization())
+                .build();
+
+        SingleOutputStreamOperator<String> mysqlStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source").uid("mysqlSource").name("mysqlSource");
+        //将json转成obj
+        SingleOutputStreamOperator<DwdBaseStationData> baseStationDataMap = mysqlStream.map(new MapFunction<String, DwdBaseStationData>() {
+            @Override
+            public DwdBaseStationData map(String json) throws Exception {
+                return JsonPartUtil.getAfterObj(json, DwdBaseStationData.class);
+            }
+        }).uid("baseStationDataMap").name("baseStationDataMap");
+
+        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");
 
 
         log.info("将处理完的数据保存到clickhouse中");

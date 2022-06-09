@@ -8,10 +8,7 @@ import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
-import com.yqwl.datamiddle.realtime.bean.Mdac01;
-import com.yqwl.datamiddle.realtime.bean.ProvincesWide;
-import com.yqwl.datamiddle.realtime.bean.Sptb02d1;
+import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +32,7 @@ import java.time.Duration;
 import java.util.*;
 
 /**
- * @Description: 将oracle中某个表消费到mysql中
+ * @Description: 将oracle中某个表直接cdc同步到mysql中
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -90,9 +87,9 @@ public class OracleCdcSinkMysqlApp {
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
         //将json串转化成jsonObj
-        SingleOutputStreamOperator<Sptb02d1> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, Sptb02d1>() {
+        SingleOutputStreamOperator<SiteWarehouse> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, SiteWarehouse>() {
             @Override
-            public Sptb02d1 map(String json) throws Exception {
+            public SiteWarehouse map(String json) throws Exception {
                 System.out.println(json);
                 JSONObject jsonObj = JSON.parseObject(json);
                 //获取cdc进入kafka的时间
@@ -103,7 +100,7 @@ public class OracleCdcSinkMysqlApp {
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
                 //获取after真实数据后，映射为实体类
-                Sptb02d1 sptb02d1 = JsonPartUtil.getAfterObj(jsonObj, Sptb02d1.class);
+                SiteWarehouse sptb02d1 = JsonPartUtil.getAfterObj(jsonObj, SiteWarehouse.class);
                 log.info("反射后的实例:{}", sptb02d1);
                 //对映射后的实体类为null字段
                 return JsonPartUtil.getBean(sptb02d1);
@@ -111,12 +108,9 @@ public class OracleCdcSinkMysqlApp {
         }).uid("sourceStreamJsonObj").name("sourceStreamJsonObj");
         //sourceStreamJsonObj.print("结果数据输出:");
         //组装sql
-        StringBuffer sql = new StringBuffer();
-        String columnSql = StrUtil.getColumnSql(Sptb02d1.class);
-        String valueSql = StrUtil.getValueSql(Sptb02d1.class);
-        sql.append("replace into ").append(KafkaTopicConst.ODS_VLMS_SPTB02D1).append(columnSql).append(" values ").append(valueSql);
+        String sql = MysqlUtil.getSql(SiteWarehouse.class);
         log.info("组装的插入sql:{}", sql);
-        sourceStreamJsonObj.addSink(JdbcSink.<Sptb02d1>getSink(sql.toString())).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        sourceStreamJsonObj.addSink(JdbcSink.<SiteWarehouse>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql");
         log.info("oracle-cdc-kafka job开始执行");

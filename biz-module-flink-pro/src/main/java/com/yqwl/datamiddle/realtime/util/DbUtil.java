@@ -1,9 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import cn.hutool.setting.dialect.Props;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +9,10 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * druid数据库连接池操作工具类
@@ -105,6 +106,8 @@ public class DbUtil {
             ps.clearBatch();
             connection.commit();//所有语句都执行完毕后才手动提交sql语句
             log.info("批量插入数据成功");
+        } catch (Exception e) {
+            log.error("执行批量插入sql异常:{}", e.getMessage());
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, resultSet);
@@ -139,11 +142,38 @@ public class DbUtil {
                 resultList.add(resultMap);
             }
             log.info(">>>>>>>>>>>> 查询数据:{}", resultList);
+        } catch (Exception e) {
+            log.error("执行查询sql异常:{}", e.getMessage());
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, resultSet);
         }
         return resultList;
+    }
+
+    /**
+     * 执行SQL更新
+     *
+     * @param updateSql
+     * @return
+     * @throws Exception
+     */
+    public static int executeUpdate(String updateSql) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        int index = -1;
+        try {
+            connection = getDruidConnection();
+            statement = connection.createStatement();
+            index = statement.executeUpdate(updateSql);
+            log.info(">>>>>>>>>>>> 更新数据:{}", index);
+        } catch (Exception e) {
+            log.error("执行更新sql异常:{}", e.getMessage());
+        } finally {
+            // 切记!!! 一定要释放资源
+            closeResource(connection, statement, null);
+        }
+        return index;
     }
 
 

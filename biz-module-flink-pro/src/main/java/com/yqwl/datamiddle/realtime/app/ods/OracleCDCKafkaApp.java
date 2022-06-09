@@ -25,7 +25,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 将oracle所有源表数据cdc到kafka的同一个topic中
+ * @Description: 将oracle中其中相关的源表数据cdc同步到kafka的同一个topic中, 名称为:cdc_vlms_unite_oracle
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -36,7 +36,7 @@ public class OracleCDCKafkaApp {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //flink程序重启10次，每次之间间隔10s
+        //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
 
@@ -48,7 +48,7 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        //properties.put("database.serverTimezone", "UTC");
+        properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 

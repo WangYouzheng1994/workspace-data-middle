@@ -351,8 +351,36 @@ public class WaybillDwdApp {
                 },
                 60, TimeUnit.SECONDS).uid("vscztSiteWarehouseDS").name("vscztSiteWarehouseDS");
 
+        /**
+         *  处理 公路单的对应的物理仓库代码对应的类型
+         *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
+         */
+        SingleOutputStreamOperator<DwdSptb02> highwayWarehouseTypeDS = AsyncDataStream.unorderedWait(
+                vscztSiteWarehouseDS,
+                new DimAsyncFunction<DwdSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS,
+                        "VWLCKDM") {
+
+                    @Override
+                    public Object getKey(DwdSptb02 dwdSptb02) {
+                        String vwlckdm = dwdSptb02.getVWLCKDM();
+                        log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vwlckdm);
+                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                            return vwlckdm;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwdSptb02 dwdSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(dimInfoJsonObj.getString("WAREHOUSE_TYPE"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("highwayWarehouseTypeDS").name("highwayWarehouseTypeDS");
+
         //将实体类映射成json
-        SingleOutputStreamOperator<String> mapJson = vscztSiteWarehouseDS.map(new MapFunction<DwdSptb02, String>() {
+        SingleOutputStreamOperator<String> mapJson = highwayWarehouseTypeDS.map(new MapFunction<DwdSptb02, String>() {
             @Override
             public String map(DwdSptb02 obj) throws Exception {
                 DwdSptb02 bean = JsonPartUtil.getBean(obj);
