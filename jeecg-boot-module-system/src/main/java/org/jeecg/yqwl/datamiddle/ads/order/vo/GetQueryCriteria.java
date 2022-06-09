@@ -71,4 +71,14 @@ public class GetQueryCriteria {
      * cp9下线接车日期_结束
      */
     private Long cp9OfflineTimeEnd;
+
+    /**
+     * 分页：页码
+     */
+    private Integer pageNo = 1;
+
+    /**
+     * 分页：每页大小
+     */
+    private Integer pageSize = 20;
 }
