@@ -170,8 +170,8 @@ public class OneOrderToEndDwmApp {
                 String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      //车型
                 Long ddjrq = dwmSptb02.getDDJRQ();                                      //整车物流接收STD日期
                 String cjhdh = dwmSptb02.getCJHDH();                                    //任务单号
-                Long dpzrq = dwmSptb02.getDPZRQ();                                      //配板日期
-                String cpzdbh = dwmSptb02.getCPZDBH();                                  //配载单编号
+                Long dphscsj = dwmSptb02.getDPHSCSJ();                                      //配板日期
+                String vph = dwmSptb02.getVPH();                                  //配载单编号
                 Long assign_time = dwmSptb02.getASSIGN_TIME();                          //指派运输商日期
                 String ccysdm = dwmSptb02.getCCYSDM();                                  //指派承运商名称
                 Long actual_out_time = dwmSptb02.getACTUAL_OUT_TIME();                  //出库日期
@@ -205,11 +205,11 @@ public class OneOrderToEndDwmApp {
                     if (StringUtils.isNotBlank(cjhdh)) {
                         ootdTransition.setCJHDH(cjhdh);
                     }
-                    if (dpzrq != null) {
-                        ootdTransition.setDPZRQ(dpzrq);
+                    if (dphscsj != null) {
+                        ootdTransition.setDPZRQ(dphscsj);
                     }
-                    if (StringUtils.isNotBlank(cpzdbh)) {
-                        ootdTransition.setCPZDBH(cpzdbh);
+                    if (StringUtils.isNotBlank(vph)) {
+                        ootdTransition.setCPZDBH(vph);
                     }
                     if (assign_time != null) {
                         ootdTransition.setASSIGN_TIME(assign_time);
