@@ -1277,18 +1277,85 @@ public class DwmSptb02 implements Serializable {
     private Integer SITE_FLAG;
 
     /**
+     * 铁路车箱列数类型
      * 1 (b3.nsjsl /10 >= 26)
      * 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)
      * 3 b3.nsjsl /10 <15
      */
     private Integer RAILWAY_TRAIN_TYPE;
 
-
     /**
-     * dwd车型代码
+     * 车型代码
      */
     private String VEHICLE_CODE;
 
+    /**
+     * 开始站台仓库代码
+     */
+    private String START_WAREHOUSE_CODE;
+
+    /**
+     * 到达站台仓库代码
+     */
+    private String END_WAREHOUSE_CODE;
+
+    /**
+     * 开始站台仓库名称
+     */
+    private String START_WAREHOUSE_NAME;
+
+    /**
+     * 到达站台仓库名称
+     */
+    private String END_WAREHOUSE_NAME;
+
+    /**
+     * 入开始站台时间 应用于铁路
+     */
+
+    private Long IN_START_PLATFORM_TIME;
+
+    /**
+     * 出开始站台时间 应用于铁路
+     */
+
+    private Long OUT_START_PLATFORM_TIME;
+
+    /**
+     * 入目的站台时间 应用于铁路
+     */
+
+    private Long IN_END_PLATFORM_TIME;
+
+    /**
+     * 卸车时间  应用于铁路
+     */
+
+    private Long UNLOAD_RAILWAY_TIME;
+
+    /**
+     * 入开始港口时间 应用于水路
+     */
+
+    private Long IN_START_WATERWAY_TIME;
+
+    /**
+     * 出开始港口时间 应用于水路
+     */
+
+    private Long END_START_WATERWAY_TIME;
+
+    /**
+     * 入目的港口时间 应用于水路
+     */
+
+    private Long IN_END_WATERWAY_TIME;
+
+    /**
+     * 卸船时间 应用水路
+     */
+
+    private Long UNLOAD_SHIP_TIME;
 
 
     @Override

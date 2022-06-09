@@ -42,7 +42,7 @@ public class DwmOneOrderToEnd implements Serializable {
     private String VEHICLE_NAME;
 
     /**
-     * 底盘号
+     * 品牌
      */
 
     private String BRAND;

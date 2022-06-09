@@ -225,6 +225,22 @@ public class OneOrderToEndDwmApp {
                         ootdTransition.setDEALER_NAME(dealer_name);
                     }
                 }
+
+                //=====================================铁水运单处理=====================================================//
+                String vysfs = dwmSptb02.getVYSFS();
+                if (StringUtils.isNotBlank(vysfs)) {
+                    //铁路
+                    if ("T".equals(vysfs) || "L1".equals(vysfs)) {
+                        //dwmSptb02Vo.setSTART_PLATFORM_NAME(dwmSptb02.getSTART_WAREHOUSE_NAME());
+                        //dwmSptb02Vo.setEND_PLATFORM_NAME(dwmSptb02.getEND_WAREHOUSE_NAME());
+                    }
+                    //水路
+                    if ("S".equals(vysfs)) {
+                        //dwmSptb02Vo.setSTART__NAME(dwmSptb02.getSTART_WAREHOUSE_NAME());
+                        //dwmSptb02Vo.setEND_PLATFORM_NAME(dwmSptb02.getEND_WAREHOUSE_NAME());
+                    }
+                }
+
                 return ootdTransition;
             }
         });
