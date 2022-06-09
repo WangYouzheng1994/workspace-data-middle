@@ -1,9 +1,11 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
  * <p>
@@ -77,6 +79,9 @@ public class SiteWarehouse implements Serializable {
 
 
     private Long WAREHOUSE_UPDATETIME;
+
+    @JSONField(serialize = false)
+    private Timestamp ts;
 
 
 }

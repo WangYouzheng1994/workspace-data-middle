@@ -123,4 +123,68 @@ public class OotdTransition {
      * 经销商代码*(名称)
      */
     private String DEALER_NAME;
+
+    /**
+     * 开始站台 应用于铁路 如青岛站
+     */
+    private String START_PLATFORM_NAME;
+
+    /**
+     * 目的站台 应用于铁路 如潍坊站
+     */
+    private String END_PLATFORM_NAME;
+
+    /**
+     * 入开始站台时间 应用于铁路
+     */
+    private Long IN_START_PLATFORM_TIME;
+
+    /**
+     * 出开始站台时间 应用于铁路
+     */
+    private Long OUT_START_PLATFORM_TIME;
+
+    /**
+     * 入目的站台时间 应用于铁路
+     */
+    private Long IN_END_PLATFORM_TIME;
+
+    /**
+     * 卸车时间 应用于铁路
+     */
+    private Long UNLOAD_RAILWAY_TIME;
+
+    /**
+     * 开始港口名称 应用于水路
+     */
+    private String START_WATERWAY_NAME;
+
+    /**
+     * 目的港口名称 应用于水路
+     */
+    private String END_WATERWAY_NAME;
+
+    /**
+     * 入开始港口时间 应用于水路
+     */
+    private Long IN_START_WATERWAY_TIME;
+
+    /**
+     * 出开始港口时间 应用于水路
+     */
+    private Long END_START_WATERWAY_TIME;
+
+    /**
+     * 入目的港口时间 应用于水路
+     */
+    private Long IN_END_WATERWAY_TIME;
+
+    /**
+     * 卸船时间 应用于水路
+     */
+    private Long UNLOAD_SHIP_TIME;
+
+
+
+
 }
