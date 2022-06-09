@@ -22,7 +22,7 @@ import org.jeecgframework.poi.excel.annotation.Excel;
  * @Version: V1.0
  */
 @Data
-@TableName("dwm_vlms_one_order_to_end_xi")
+@TableName("dwm_vlms_one_order_to_end")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value="dwm_vlms_one_order_to_end_xi对象", description="一单到底")
