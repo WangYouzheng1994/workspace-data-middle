@@ -50,4 +50,13 @@
 
         order by CP9_OFFLINE_TIME desc
     </select>
+<!--    查询同板数量 -->
+    <select id="selectTotal" resultType="java.lang.Integer">
+        SELECT
+               COUNT(VIN) AS SAME_PLATE_NUM
+        FROM
+             dwm_vlms_one_order_to_end
+        GROUP BY
+            STOWAGE_NOTE_NO
+    </select>
 </mapper>

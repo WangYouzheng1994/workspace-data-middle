@@ -24,4 +24,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
     Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria,Page<DwmVlmsOneOrderToEnd> page);
 
     List<DwmVlmsOneOrderToEnd> getDwmVlmsOneOrderToEnd(GetQueryCriteria queryCriteria);
+
+    Integer selectTotal();
 }
