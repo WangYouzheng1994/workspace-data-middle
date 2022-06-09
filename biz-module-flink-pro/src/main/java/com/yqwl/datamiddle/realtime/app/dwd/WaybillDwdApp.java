@@ -46,7 +46,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 对运单 sptb02 表进行统一数据格式 字段统一等
+ * @Description: 消费kafka里topic为ods_vlms_sptb02的数据，对其中一些字段进行统一或拓宽
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -58,14 +58,14 @@ public class WaybillDwdApp {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
-        env.setParallelism(2);
+        env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
-      /*  CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(10000);
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
-        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
@@ -286,9 +286,73 @@ public class WaybillDwdApp {
                 },
                 60, TimeUnit.SECONDS).uid("mdac32DS").name("mdac32DS");
 
+        /**
+         *  处理 发车站台 对应的仓库代码 仓库名称
+         *  from sptb02 a
+         *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
+         *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
+         */
+        SingleOutputStreamOperator<DwdSptb02> vfcztSiteWarehouseDS = AsyncDataStream.unorderedWait(
+                mdac32DS,
+                new DimAsyncFunction<DwdSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE,
+                        "VWLCKDM",
+                        " AND `TYPE` = 'CONTRAST'") {
+
+                    @Override
+                    public Object getKey(DwdSptb02 dwdSptb02) {
+                        String vfczt = dwdSptb02.getVFCZT();
+                        log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
+                        if (StringUtils.isNotEmpty(vfczt)) {
+                            return vfczt;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwdSptb02 dwdSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwdSptb02.setSTART_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
+                        dwdSptb02.setSTART_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("vfcztSiteWarehouseDS").name("vfcztSiteWarehouseDS");
+
+
+        /**
+         *  处理 收车站台 对应的仓库代码 仓库名称
+         *  from sptb02 a
+         *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
+         *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
+         */
+        SingleOutputStreamOperator<DwdSptb02> vscztSiteWarehouseDS = AsyncDataStream.unorderedWait(
+                vfcztSiteWarehouseDS,
+                new DimAsyncFunction<DwdSptb02>(
+                        DimUtil.MYSQL_DB_TYPE,
+                        KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE,
+                        "VWLCKDM",
+                        " AND `TYPE` = 'CONTRAST'") {
+
+                    @Override
+                    public Object getKey(DwdSptb02 dwdSptb02) {
+                        String vsczt = dwdSptb02.getVSCZT();
+                        log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
+                        if (StringUtils.isNotEmpty(vsczt)) {
+                            return vsczt;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void join(DwdSptb02 dwdSptb02, JSONObject dimInfoJsonObj) throws Exception {
+                        dwdSptb02.setEND_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
+                        dwdSptb02.setEND_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
+                    }
+                },
+                60, TimeUnit.SECONDS).uid("vscztSiteWarehouseDS").name("vscztSiteWarehouseDS");
 
         //将实体类映射成json
-        SingleOutputStreamOperator<String> mapJson = mdac32DS.map(new MapFunction<DwdSptb02, String>() {
+        SingleOutputStreamOperator<String> mapJson = vscztSiteWarehouseDS.map(new MapFunction<DwdSptb02, String>() {
             @Override
             public String map(DwdSptb02 obj) throws Exception {
                 DwdSptb02 bean = JsonPartUtil.getBean(obj);
@@ -307,8 +371,7 @@ public class WaybillDwdApp {
         mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
 
 
-        /* 7.开窗,按照数量(后续改为按照时间窗口)*/
-     /*   log.info("将处理完的数据保存到mysql中");
+        log.info("将处理完的数据保存到mysql中");
         mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         mapJson.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<String, List<DwdSptb02>, TimeWindow>() {
             @Override
@@ -322,7 +385,7 @@ public class WaybillDwdApp {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");*/
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
 
 
         env.execute("sptb02-sink-kafka-dwd");
