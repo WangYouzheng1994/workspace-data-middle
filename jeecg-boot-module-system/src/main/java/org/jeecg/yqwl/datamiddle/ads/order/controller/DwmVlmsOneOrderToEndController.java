@@ -181,13 +181,10 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @AutoLog(value = "一单到底-按条件查询")
   @ApiOperation(value="一单到底-按条件查询", notes="一单到底-按条件查询")
   @PostMapping("/selectOneOrderToEndList")
-  public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria,
-										   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-										   @RequestParam(name="pageSize", defaultValue="20") Integer pageSize){
+  public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
 //	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
-	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo,pageSize);
+	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
 	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria,pageList);
 	  return Result.OK(pageList);
   }
-
 }
