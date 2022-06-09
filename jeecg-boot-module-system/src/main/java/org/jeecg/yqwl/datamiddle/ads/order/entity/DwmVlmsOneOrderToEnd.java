@@ -189,7 +189,7 @@ public class DwmVlmsOneOrderToEnd {
 	/**末端分拨中心 入库时间*/
 	@Excel(name = "目的港/站缓存区入库时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 入库时间")
-	private Integer inDistributeTime;
+	private Long inDistributeTime;
 	/**末端分拨中心 出库时间*/
 	@Excel(name = "目的港/站缓存区出库时间", width = 15)
     @ApiModelProperty(value = "末端分拨中心 出库时间")
