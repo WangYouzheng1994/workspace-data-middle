@@ -191,7 +191,7 @@ public class OneOrderToEndDwmApp {
 
         //3.入库时间
         mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? WHERE e.VIN = ? AND e.LEAVE_FACTORY_TIME < ? AND a.`TYPE` = 'T1'",
+                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? WHERE e.VIN = ? AND e.LEAVE_FACTORY_TIME < ? AND a.`WAREHOUSE_TYPE` = 'T1'",
                 (ps, epc) -> {
                     ps.setLong(1, epc.getSAMPLE_U_T_C());
                     ps.setString(2, epc.getVIN());

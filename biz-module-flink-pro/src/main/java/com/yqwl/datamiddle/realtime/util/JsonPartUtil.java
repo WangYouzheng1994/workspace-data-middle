@@ -161,6 +161,17 @@ public class JsonPartUtil {
      * @param json
      * @return
      */
+    public static JSONObject getAfterObj(String json) {
+        JSONObject jsonObj = JSONObject.parseObject(json);
+        return jsonObj.getJSONObject(AFTER);
+    }
+
+    /**
+     * 获取after部分数据
+     *
+     * @param json
+     * @return
+     */
     public static JSONObject getAfterObj(JSONObject json) {
         return json.getJSONObject(AFTER);
     }

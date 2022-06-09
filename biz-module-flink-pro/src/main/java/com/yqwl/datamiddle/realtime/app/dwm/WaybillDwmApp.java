@@ -6,14 +6,19 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.yqwl.datamiddle.realtime.app.func.BaseStationDataSink;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.app.func.SimpleBaseStationDataSink;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -21,9 +26,11 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
@@ -39,7 +46,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 对运单 sptb02 表进行统一数据格式 字段统一等
+ * @Description: 消费kafka里topic为dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -62,10 +69,8 @@ public class WaybillDwmApp {
         System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
-        //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setBootstrapServers(KafkaUtil.KAFKA_SERVER)
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)//消费 dwd 层 sptb02表  dwd_vlms_sptb02
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
@@ -636,6 +641,32 @@ public class WaybillDwmApp {
         }).uid("dwmSptb02Window").name("dwmSptb02Window");
 
         dwmSptb02Window.addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+
+
+        //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
+        //读取mysql配置
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        //读取mysql binlog
+        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
+                .hostname(props.getStr("cdc.mysql.hostname"))
+                .port(props.getInt("cdc.mysql.port"))
+                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
+                .tableList("data_middle_flink.dwd_vlms_base_station_data")
+                .username(props.getStr("cdc.mysql.username"))
+                .password(props.getStr("cdc.mysql.password"))
+                .deserializer(new CustomerDeserialization())
+                .build();
+
+        SingleOutputStreamOperator<String> mysqlStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL-Source").uid("mysqlSource").name("mysqlSource");
+        //将json转成obj
+        SingleOutputStreamOperator<DwdBaseStationData> baseStationDataMap = mysqlStream.map(new MapFunction<String, DwdBaseStationData>() {
+            @Override
+            public DwdBaseStationData map(String json) throws Exception {
+                return JsonPartUtil.getAfterObj(json, DwdBaseStationData.class);
+            }
+        }).uid("baseStationDataMap").name("baseStationDataMap");
+
+        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");
 
 
         log.info("将处理完的数据保存到clickhouse中");

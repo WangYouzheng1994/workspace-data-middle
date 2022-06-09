@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 消费kafka下同一个topic，将表进行分流
+ * @Description: 消费kafka下topic名称为:cdc_vlms_unite_oracle中的数据，定时查询 table_process配置表中数据，将数据分流进kafka或mysql中
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
@@ -55,7 +55,7 @@ public class ConsumerKafkaODSApp {
         //====================================stream env配置===============================================//
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        //flink程序重启10次，每次之间间隔10s
+        //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(2);
         log.info("初始化流处理环境完成");

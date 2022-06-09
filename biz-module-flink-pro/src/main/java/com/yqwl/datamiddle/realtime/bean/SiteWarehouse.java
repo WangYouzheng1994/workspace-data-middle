@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,6 +16,7 @@ import java.sql.Timestamp;
  * @author yiqi
  * @since 2022-05-18
  */
+@TableName("ods_vlms_site_warehouse")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class SiteWarehouse implements Serializable {

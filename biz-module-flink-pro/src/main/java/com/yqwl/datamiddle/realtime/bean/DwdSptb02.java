@@ -1212,6 +1212,11 @@ public class DwdSptb02 implements Serializable {
      */
     private String END_WAREHOUSE_NAME;
 
+    /**
+     * 公路单物理仓库代码对应的仓库类型 CONTRAST基地库 WAREHOUSE 分拨中心
+     */
+    private String HIGHWAY_WAREHOUSE_TYPE;
+
 
     @Override
     public String toString() {
