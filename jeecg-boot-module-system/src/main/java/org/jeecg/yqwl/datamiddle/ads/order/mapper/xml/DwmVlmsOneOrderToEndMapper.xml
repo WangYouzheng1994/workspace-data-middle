@@ -7,7 +7,7 @@
         SELECT
                *
         FROM
-            dwm_vlms_one_order_to_end
+            dwm_vlms_one_order_to_end_xi
         <where>
             <if test="params.vin != null and params.vin != '' ">
                 AND VIN = #{params.vin}

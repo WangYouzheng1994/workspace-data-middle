@@ -22,10 +22,10 @@ import org.jeecgframework.poi.excel.annotation.Excel;
  * @Version: V1.0
  */
 @Data
-@TableName("dwm_vlms_one_order_to_end")
+@TableName("dwm_vlms_one_order_to_end_xi")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value="dwm_vlms_one_order_to_end对象", description="一单到底")
+@ApiModel(value="dwm_vlms_one_order_to_end_xi对象", description="一单到底")
 public class DwmVlmsOneOrderToEnd {
     
 //	/**idnum*/
@@ -36,10 +36,22 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "底盘号", width = 15)
     @ApiModelProperty(value = "车架号 底盘号")
 	private String vin;
-	/**车型*/
-	@Excel(name = "车型", width = 15)
-    @ApiModelProperty(value = "车型")
-	private String vehicleType;
+//	/**车型*/
+//	@Excel(name = "车型", width = 15)
+//    @ApiModelProperty(value = "车型")
+//	private String vehicleType;
+
+
+	/**车型代码*/
+	@Excel(name = "车型代码", width = 15)
+	@ApiModelProperty(value = "车型代码")
+	private String vehicleCode;
+
+	/**车型名称*/
+	@Excel(name = "车型名称", width = 15)
+	@ApiModelProperty(value = "车型名称")
+	private String vehicleName;
+
 	/**品牌*/
 	@Excel(name = "品牌", width = 15)
     @ApiModelProperty(value = "品牌")
@@ -56,6 +68,12 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "入库日期  ", width = 15)
     @ApiModelProperty(value = "入库时间  及入一汽物流基地")
 	private Long inSiteTime;
+
+	/**仓库代码*/
+	@Excel(name = "仓库代码", width = 15)
+	@ApiModelProperty(value = "仓库代码")
+	private String inWarehouseCode;
+
 	/**入库名称*/
 	@Excel(name = "入库仓库", width = 15)
     @ApiModelProperty(value = "入库名称")
@@ -208,6 +226,12 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "经销商确认到货时间", width = 15)
     @ApiModelProperty(value = "最终到货时间")
 	private Long finalSiteTime;
+
+	/**运单生成时间*/
+	@Excel(name = "运单生成时间", width = 15)
+	@ApiModelProperty(value = "运单生成时间")
+	private Long orderCreateTime;
+
 	/**结算单编号 多个逗号隔开*/
 	@Excel(name = "结算单编号 多个逗号隔开", width = 15)
     @ApiModelProperty(value = "结算单编号 多个逗号隔开")
@@ -217,6 +241,11 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "基地", width = 15)
 	@ApiModelProperty(value = "基地")
 	private String baseName;
+
+	/**基地代码*/
+	@Excel(name = "基地代码", width = 15)
+	@ApiModelProperty(value = "基地代码")
+	private String baseCode;
 
 	/**整车物流接收STD日期*/
 	@Excel(name = "整车物流接收STD日期", width = 15)
@@ -232,5 +261,25 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "港/站分拨承运轿运车车位数", width = 15)
 	@ApiModelProperty(value = "末端分拨中心 轿车数量")
 	private Integer distributeVehicleNum;
+
+	/**第一个运单的结算单编号*/
+	@Excel(name = "第一个运单的结算单编号", width = 15)
+	@ApiModelProperty(value = "第一个运单的结算单编号")
+	private String settlementY1;
+
+	/**铁路单结算单编号*/
+	@Excel(name = "铁路单结算单编号", width = 15)
+	@ApiModelProperty(value = "铁路单结算单编号")
+	private String railwaySettlementNo;
+
+	/**水路单结算单编号*/
+	@Excel(name = "水路单结算单编号", width = 15)
+	@ApiModelProperty(value = "水路单结算单编号")
+	private String waterwaySettlementNo;
+
+	/**末端配送结算单编号*/
+	@Excel(name = "末端配送结算单编号", width = 15)
+	@ApiModelProperty(value = "末端配送结算单编号")
+	private String endDistributeNo;
 
 }
