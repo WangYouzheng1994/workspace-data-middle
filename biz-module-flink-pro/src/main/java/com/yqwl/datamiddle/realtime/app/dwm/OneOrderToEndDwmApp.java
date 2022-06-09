@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -119,10 +120,10 @@ public class OneOrderToEndDwmApp {
                         "        BASE_CODE=?",
                 (ps, epc) -> {
                     ps.setString(1, epc.getVIN());
-                    ps.setLong  (2, epc.getCP9_OFFLINE_TIME());
+                    ps.setLong(2, epc.getCP9_OFFLINE_TIME());
                     ps.setString(3, epc.getBASE_NAME());
                     ps.setString(4, epc.getBASE_CODE());
-                    ps.setLong  (5, epc.getCP9_OFFLINE_TIME());
+                    ps.setLong(5, epc.getCP9_OFFLINE_TIME());
                     ps.setString(6, epc.getBASE_NAME());
                     ps.setString(7, epc.getBASE_CODE());
                 },
@@ -138,6 +139,108 @@ public class OneOrderToEndDwmApp {
                         .withPassword(MysqlConfig.PASSWORD)
                         .build())).uid("baseStationDataEpcSink").name("baseStationDataEpcSink");
         //==============================================dwd_base_station_data_epc处理 END====================================================================//
+
+        //==============================================dwd_base_station_data处理 START==========================================================================//
+        // 1.过滤出BASE_STATION_DATA的表
+        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String mysqlDataStream) throws Exception {
+                JSONObject jo = JSON.parseObject(mysqlDataStream);
+                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data")) {
+                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
+                    String vin = after.getVIN();
+                    if (vin != null) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+        }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");
+
+        //2.转换BASE_STATION_DATA为实体类
+        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
+            @Override
+            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
+                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
+                Timestamp ts = jsonObject.getTimestamp("ts");
+                dataBsd.setTs(ts);
+                return dataBsd;
+            }
+        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+        //3.插入mysql
+        mapBsd.addSink(JdbcSink.sink(
+                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ?  WHERE VIN = ? ",
+                (ps, epc) -> {
+                    ps.setString(1, epc.getIN_WAREHOUSE_NAME());
+                    ps.setString(2, epc.getIN_WAREHOUSE_CODE());
+                    ps.setString(3, epc.getVIN());
+                },
+                new JdbcExecutionOptions.Builder()
+                        .withBatchSize(5000)
+                        .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
+                        .build(),
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(MysqlConfig.URL)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
+                        .build())).uid("baseStationDataSink").name("baseStationDataSink");
+
+        //3.入库时间
+        mapBsd.addSink(JdbcSink.sink(
+                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? WHERE e.VIN = ? AND e.LEAVE_FACTORY_TIME < ? AND a.`TYPE` = 'T1'",
+                (ps, epc) -> {
+                    ps.setLong(1, epc.getSAMPLE_U_T_C());
+                    ps.setString(2, epc.getVIN());
+                    ps.setLong(3, epc.getSAMPLE_U_T_C());
+                },
+                new JdbcExecutionOptions.Builder()
+                        .withBatchSize(5000)
+                        .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
+                        .build(),
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(MysqlConfig.URL)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
+                        .build())).uid("baseStationDataSink").name("baseStationDataSink");
+
+        SingleOutputStreamOperator<DwdBaseStationData> outStockFilter = mapBsd.filter(new FilterFunction<DwdBaseStationData>() {
+            @Override
+            public boolean filter(DwdBaseStationData data) throws Exception {
+                String operateType = data.getOPERATE_TYPE();
+                return "OutStock".equals(operateType);
+            }
+        }).uid("outStockFilter").name("outStockFilter");
+
+        //出厂日期
+        outStockFilter.addSink(JdbcSink.sink(
+                "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME == 0 OR LEAVE_FACTORY_TIME > ? )",
+                (ps, epc) -> {
+                    ps.setLong(1, epc.getSAMPLE_U_T_C());
+                    ps.setString(2, epc.getVIN());
+                    ps.setLong(3, epc.getSAMPLE_U_T_C());
+                    ps.setLong(4, epc.getSAMPLE_U_T_C());
+                },
+                new JdbcExecutionOptions.Builder()
+                        .withBatchSize(5000)
+                        .withBatchIntervalMs(5000L)
+                        .withMaxRetries(2)
+                        .build(),
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                        .withUrl(MysqlConfig.URL)
+                        .withDriverName(MysqlConfig.DRIVER)
+                        .withUsername(MysqlConfig.USERNAME)
+                        .withPassword(MysqlConfig.PASSWORD)
+                        .build())).uid("baseStationDataSink").name("baseStationDataSink");
+
+
+        //==============================================dwd_base_station_data处理 END==========================================================================//
+
 
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
         //2.进行数据过滤
@@ -191,6 +294,7 @@ public class OneOrderToEndDwmApp {
                 Long end_start_waterway_time = dwmSptb02.getEND_START_WATERWAY_TIME();  //水路的出开始港口时间
                 Long in_end_waterway_time = dwmSptb02.getIN_END_WATERWAY_TIME();        //水路的入目的港口时间
                 Long unload_ship_time = dwmSptb02.getUNLOAD_SHIP_TIME();                //水路的卸船时间
+                String highwayWarehouseType = dwmSptb02.getHIGHWAY_WAREHOUSE_TYPE();    //公路运单物理仓库对应的仓库类型
                 if (StringUtils.isNotBlank(cjsdbh)) {
                     ootdTransition.setCJSDBH(cjsdbh);
                     if (StringUtils.isNotBlank(vehicle_code)) {
@@ -239,46 +343,55 @@ public class OneOrderToEndDwmApp {
                     if (StringUtils.isNotBlank(vysfs)) {
                         //铁路运输方式
                         if ("T".equals(vysfs) || "L1".equals(vysfs)) {
-                            if (StringUtils.isNotBlank(start_warehouse_name)){
+                            if (StringUtils.isNotBlank(start_warehouse_name)) {
                                 ootdTransition.setSTART_PLATFORM_NAME(start_city_name);              //开始站台仓库名称
                             }
-                            if (StringUtils.isNotBlank(end_warehouse_name)){
+                            if (StringUtils.isNotBlank(end_warehouse_name)) {
                                 ootdTransition.setEND_PLATFORM_NAME(end_warehouse_name);             //到达站台仓库名称
                             }
-                            if (in_start_platform_time != null){
+                            if (in_start_platform_time != null) {
                                 ootdTransition.setIN_START_PLATFORM_TIME(in_start_platform_time);    //铁路的入开始站台时间
                             }
-                            if (out_start_platform_time != null){
+                            if (out_start_platform_time != null) {
                                 ootdTransition.setOUT_START_PLATFORM_TIME(out_start_platform_time);  //铁路的出开始站台时间
                             }
-                            if (in_end_platform_time != null){
+                            if (in_end_platform_time != null) {
                                 ootdTransition.setIN_END_PLATFORM_TIME(in_end_platform_time);        //铁路的入目的站台时间
                             }
-                            if (unload_railway_time != null){
+                            if (unload_railway_time != null) {
                                 ootdTransition.setUNLOAD_RAILWAY_TIME(unload_railway_time);          //铁路的卸车时间
                             }
                         }
                         //水路运输方式
                         if ("S".equals(vysfs)) {
-                            if (StringUtils.isNotBlank(start_warehouse_name)){
+                            if (StringUtils.isNotBlank(start_warehouse_name)) {
                                 ootdTransition.setSTART_PLATFORM_NAME(start_city_name);              //开始站台仓库名称
                             }
-                            if (StringUtils.isNotBlank(end_warehouse_name)){
+                            if (StringUtils.isNotBlank(end_warehouse_name)) {
                                 ootdTransition.setEND_PLATFORM_NAME(end_warehouse_name);             //到达站台仓库名称
                             }
-                            if (in_start_waterway_time != null){
+                            if (in_start_waterway_time != null) {
                                 ootdTransition.setIN_START_WATERWAY_TIME(in_start_waterway_time);    //水路的入开始港口时间
                             }
-                            if (end_start_waterway_time != null){
+                            if (end_start_waterway_time != null) {
                                 ootdTransition.setEND_START_WATERWAY_TIME(end_start_waterway_time);  //水路的出开始港口时间
                             }
-                            if (in_end_waterway_time != null){
+                            if (in_end_waterway_time != null) {
                                 ootdTransition.setIN_END_WATERWAY_TIME(in_end_waterway_time);        //水路的入目的港口时间
                             }
-                            if (unload_ship_time != null){
+                            if (unload_ship_time != null) {
                                 ootdTransition.setUNLOAD_RAILWAY_TIME(unload_ship_time);             //水路的卸船时间
                             }
                         }
+
+                        //=====================================末端配送处理=====================================================//
+                        //运单为公路运单且物理仓库类型为分拨中心的为末端配送
+                        if ("G".equals(vysfs) && "T2".equals(highwayWarehouseType)) {
+
+                        }
+
+
+
                     }
                 }
 
@@ -297,6 +410,7 @@ public class OneOrderToEndDwmApp {
                         }
                         return "此条sql无vehicle_code";
                     }
+
                     @Override
                     public void join(OotdTransition ootd, JSONObject dimInfoJsonObj) throws Exception {
                         if (dimInfoJsonObj.getString("CCPDM") != null) {
@@ -306,7 +420,7 @@ public class OneOrderToEndDwmApp {
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
         ootdAddCarNameStream.print("ootd:");
         //5.sptb02与一单到底对应的字段插入mysql
-        ootdAddCarNameStream.addSink( JdbcSink.sink(
+        ootdAddCarNameStream.addSink(JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, ORDER_CREATE_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
                         "STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, DEALER_NAME,SETTLEMENT_Y1" +
@@ -316,18 +430,18 @@ public class OneOrderToEndDwmApp {
                         "        ON DUPLICATE KEY UPDATE \n" +
                         "       VEHICLE_CODE=?, ORDER_CREATE_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
                         "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
-                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)" ,
+                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)",
                 (ps, epc) -> {
-                    ps.setString(1,  epc.getVVIN());
-                    ps.setString(2,  epc.getVEHICLE_CODE());
-                    ps.setLong  (3,  epc.getDDJRQ());
-                    ps.setString(4,  epc.getCJHDH());
-                    ps.setLong  (5,  epc.getDPZRQ());
-                    ps.setString(6,  epc.getCPZDBH());
-                    ps.setLong  (7,  epc.getASSIGN_TIME());
-                    ps.setString(8,  epc.getASSIGN_NAME());
-                    ps.setLong  (9,  epc.getACTUAL_OUT_TIME());
-                    ps.setLong  (10, epc.getSHIPMENT_TIME());
+                    ps.setString(1, epc.getVVIN());
+                    ps.setString(2, epc.getVEHICLE_CODE());
+                    ps.setLong(3, epc.getDDJRQ());
+                    ps.setString(4, epc.getCJHDH());
+                    ps.setLong(5, epc.getDPZRQ());
+                    ps.setString(6, epc.getCPZDBH());
+                    ps.setLong(7, epc.getASSIGN_TIME());
+                    ps.setString(8, epc.getASSIGN_NAME());
+                    ps.setLong(9, epc.getACTUAL_OUT_TIME());
+                    ps.setLong(10, epc.getSHIPMENT_TIME());
                     ps.setString(11, epc.getVJSYDM());
                     ps.setString(12, epc.getSTART_CITY_NAME());
                     ps.setString(13, epc.getEND_CITY_NAME());
@@ -336,26 +450,26 @@ public class OneOrderToEndDwmApp {
                     //新添加铁水出入站台/港口的十二个字段
                     ps.setString(16, epc.getSTART_PLATFORM_NAME());      //铁路开始站台
                     ps.setString(17, epc.getEND_PLATFORM_NAME());        //铁路目的站台
-                    ps.setLong  (18, epc.getIN_START_PLATFORM_TIME());   //铁路入开始站台时间
-                    ps.setLong  (19, epc.getOUT_START_PLATFORM_TIME());  //铁路出开始站台时间
-                    ps.setLong  (20, epc.getIN_END_PLATFORM_TIME());     //铁路入目的站台时间
-                    ps.setLong  (21, epc.getUNLOAD_RAILWAY_TIME());      //铁路卸车时间
+                    ps.setLong(18, epc.getIN_START_PLATFORM_TIME());   //铁路入开始站台时间
+                    ps.setLong(19, epc.getOUT_START_PLATFORM_TIME());  //铁路出开始站台时间
+                    ps.setLong(20, epc.getIN_END_PLATFORM_TIME());     //铁路入目的站台时间
+                    ps.setLong(21, epc.getUNLOAD_RAILWAY_TIME());      //铁路卸车时间
                     ps.setString(22, epc.getSTART_WATERWAY_NAME());      //水路开始港口名称
                     ps.setString(23, epc.getEND_WATERWAY_NAME());        //水路目的港口名称
-                    ps.setLong  (24, epc.getIN_START_WATERWAY_TIME());   //水路入开始港口时间
-                    ps.setLong  (25, epc.getEND_START_WATERWAY_TIME());  //水路出开始港口时间
-                    ps.setLong  (26, epc.getIN_END_WATERWAY_TIME());     //水路入目的港口时间
-                    ps.setLong  (27, epc.getUNLOAD_SHIP_TIME());         //水路卸船时间
+                    ps.setLong(24, epc.getIN_START_WATERWAY_TIME());   //水路入开始港口时间
+                    ps.setLong(25, epc.getEND_START_WATERWAY_TIME());  //水路出开始港口时间
+                    ps.setLong(26, epc.getIN_END_WATERWAY_TIME());     //水路入目的港口时间
+                    ps.setLong(27, epc.getUNLOAD_SHIP_TIME());         //水路卸船时间
 
                     ps.setString(28, epc.getVEHICLE_CODE());
-                    ps.setLong  (29, epc.getDDJRQ());
+                    ps.setLong(29, epc.getDDJRQ());
                     ps.setString(30, epc.getCJHDH());
-                    ps.setLong  (31, epc.getDPZRQ());
+                    ps.setLong(31, epc.getDPZRQ());
                     ps.setString(32, epc.getCPZDBH());
-                    ps.setLong  (33, epc.getASSIGN_TIME());
+                    ps.setLong(33, epc.getASSIGN_TIME());
                     ps.setString(34, epc.getASSIGN_NAME());
-                    ps.setLong  (35, epc.getACTUAL_OUT_TIME());
-                    ps.setLong  (36, epc.getSHIPMENT_TIME());
+                    ps.setLong(35, epc.getACTUAL_OUT_TIME());
+                    ps.setLong(36, epc.getSHIPMENT_TIME());
                     ps.setString(37, epc.getVJSYDM());
                     ps.setString(38, epc.getSTART_CITY_NAME());
                     ps.setString(39, epc.getEND_CITY_NAME());
@@ -365,16 +479,16 @@ public class OneOrderToEndDwmApp {
                     //新添加铁水出入站台/港口的十二个字段
                     ps.setString(43, epc.getSTART_PLATFORM_NAME());      //铁路开始站台
                     ps.setString(44, epc.getEND_PLATFORM_NAME());        //铁路目的站台
-                    ps.setLong  (45, epc.getIN_START_PLATFORM_TIME());   //铁路入开始站台时间
-                    ps.setLong  (46, epc.getOUT_START_PLATFORM_TIME());  //铁路出开始站台时间
-                    ps.setLong  (47, epc.getIN_END_PLATFORM_TIME());     //铁路入目的站台时间
-                    ps.setLong  (48, epc.getUNLOAD_RAILWAY_TIME());      //铁路卸车时间
+                    ps.setLong(45, epc.getIN_START_PLATFORM_TIME());   //铁路入开始站台时间
+                    ps.setLong(46, epc.getOUT_START_PLATFORM_TIME());  //铁路出开始站台时间
+                    ps.setLong(47, epc.getIN_END_PLATFORM_TIME());     //铁路入目的站台时间
+                    ps.setLong(48, epc.getUNLOAD_RAILWAY_TIME());      //铁路卸车时间
                     ps.setString(49, epc.getSTART_WATERWAY_NAME());      //水路开始港口名称
                     ps.setString(50, epc.getEND_WATERWAY_NAME());        //水路目的港口名称
-                    ps.setLong  (51, epc.getIN_START_WATERWAY_TIME());   //水路入开始港口时间
-                    ps.setLong  (52, epc.getEND_START_WATERWAY_TIME());  //水路出开始港口时间
-                    ps.setLong  (53, epc.getIN_END_WATERWAY_TIME());     //水路入目的港口时间
-                    ps.setLong  (54, epc.getUNLOAD_SHIP_TIME());         //水路卸船时间
+                    ps.setLong(51, epc.getIN_START_WATERWAY_TIME());   //水路入开始港口时间
+                    ps.setLong(52, epc.getEND_START_WATERWAY_TIME());  //水路出开始港口时间
+                    ps.setLong(53, epc.getIN_END_WATERWAY_TIME());     //水路入目的港口时间
+                    ps.setLong(54, epc.getUNLOAD_SHIP_TIME());         //水路卸船时间
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)
@@ -389,56 +503,6 @@ public class OneOrderToEndDwmApp {
                         .build()));
         //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
-        //==============================================dwd_base_station_data处理==========================================================================//
-        // 1.过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data")) {
-                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");
-
-        //2.转换BASE_STATION_DATA为实体类
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
-            @Override
-            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
-                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
-                Timestamp ts = jsonObject.getTimestamp("ts");
-                dataBsd.setTs(ts);
-                return dataBsd;
-            }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
-        //3.插入mysql
-        mapBsd.addSink(JdbcSink.sink(
-
-                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ?  WHERE VIN = ? ",
-
-                (ps, epc) -> {
-                    ps.setString(1, epc.getIN_WAREHOUSE_NAME());
-                    ps.setString(2, epc.getIN_WAREHOUSE_CODE());
-                    ps.setString(3, epc.getVIN());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink").name("baseStationDataSink");
 
         env.execute("一单到底合表开始");
         log.info("base_station_data job任务开始执行");
