@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.2
  */
 @Slf4j
-public class BaseStationDataAndEpcDwdApp {
+public class BaseStationDataAndEpcDwdAppEpc {
     //2021-06-01 00:00:00
     private static final long START = 1622476800000L;
     //2022-12-31 23:59:59
@@ -89,7 +89,7 @@ public class BaseStationDataAndEpcDwdApp {
                 .port(props.getInt("cdc.oracle.port"))
                 .database(props.getStr("cdc.oracle.database"))
                 .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
-                .tableList("TDS_LJ.BASE_STATION_DATA", "TDS_LJ.BASE_STATION_DATA_EPC")
+                .tableList("TDS_LJ.BASE_STATION_DATA_EPC")
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
@@ -109,20 +109,7 @@ public class BaseStationDataAndEpcDwdApp {
                 JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
                 String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
 
-                if (BASE_STATION_DATA.equals(tableNameStr)) {
-                    //获取上报完成时间
-                    String sample_u_t_c = afterObj.getString("SAMPLE_U_T_C");
-                    if (StringUtils.isNotEmpty(sample_u_t_c)) {
-                        long cutSampleTime = Long.parseLong(sample_u_t_c) / 1000;
-                        if (cutSampleTime >= START && cutSampleTime <= END) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
+
 
                 if (BASE_STATION_DATA_EPC.equals(tableNameStr)) {
                     //获取上报完成时间
@@ -144,22 +131,7 @@ public class BaseStationDataAndEpcDwdApp {
 
 
         //2.进行数据过滤
-        // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = dataAndEpcFilter.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String s) throws Exception {
-                JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("BASE_STATION_DATA")) {
-                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
+
 
         // 过滤出BASE_STATION_DATA的表
         DataStream<String> filterBsdEpcDs = dataAndEpcFilter.filter(new RichFilterFunction<String>() {
@@ -225,17 +197,7 @@ public class BaseStationDataAndEpcDwdApp {
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
         mapBsdEpc.print("合并基地名称字段后:");
-        //BASE_STATION_DATA
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
-            @Override
-            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
-                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
-                Timestamp ts = jsonObject.getTimestamp("ts");
-                dataBsd.setTs(ts);
-                return dataBsd;
-            }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+
 
         // 4.指定事件时间字段
         //DwdBaseStationDataEpc指定事件时间
@@ -248,56 +210,13 @@ public class BaseStationDataAndEpcDwdApp {
                                 return ts.getTime();
                             }
                         })).uid("assIgnDwdBaseStationDataEpcEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
-        //DwdBaseStationData 指定事件时间
-        SingleOutputStreamOperator<DwdBaseStationData> dwdBaseStationDataWithTS = mapBsd.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<DwdBaseStationData>forBoundedOutOfOrderness(Duration.ofMinutes(5))
-                        .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationData>() {
-                            @Override
-                            public long extractTimestamp(DwdBaseStationData dwdBaseStationData, long l) {
-                                Timestamp ts = dwdBaseStationData.getTs();
-                                return ts.getTime();
-                            }
-                        })).uid("assIgnDwdBaseStationDataEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
+
 
         //5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
         SingleOutputStreamOperator<DwdBaseStationDataEpc> map = dwdBaseStationDataEpcWithTS.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station());
 
-        //6.1处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
-        // provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
-                dwdBaseStationDataWithTS,
-                new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_rfid_warehouse", "WAREHOUSE_CODE") {
-                    @Override
-                    public Object getKey(DwdBaseStationData dwdBsd) {
-                        if (StringUtils.isNotEmpty(dwdBsd.getSHOP_NO())) {
-                            String shop_no = dwdBsd.getSHOP_NO();
-                            return shop_no;
-                        }
-                        return "此条sql无SHOP_NO";
-                    }
 
-                    @Override
-                    public void join(DwdBaseStationData dBsd, JSONObject dimInfoJsonObj) {
-                        if (dimInfoJsonObj.getString("WAREHOUSE_CODE") != null) {
-                            dBsd.setIN_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
-                            dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
-                        }
-                    }
-                }, 60, TimeUnit.SECONDS).uid("base+rfid");
 
-        //7.开窗,按照时间窗口存储到mysql
-        //BASE_STATION_DATA
-        outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        outSingleOutputStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationData, List<DwdBaseStationData>, TimeWindow>() {
-            @Override
-            public void apply(TimeWindow window, Iterable<DwdBaseStationData> iterable, Collector<List<DwdBaseStationData>> collector) throws Exception {
-                ArrayList<DwdBaseStationData> es = Lists.newArrayList(iterable);
-                log.info("插入sql");
-                if (es.size() > 0) {
-                    collector.collect(es);
-                }
-            }
-        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysqDsb").name("sink-mysqldsb");
 
         //BASE_STATION_DATA_EPC
         map.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
