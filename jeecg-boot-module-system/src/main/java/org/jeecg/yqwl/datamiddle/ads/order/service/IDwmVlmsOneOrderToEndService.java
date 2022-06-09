@@ -22,4 +22,6 @@ import java.util.List;
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
 
     Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria,Page<DwmVlmsOneOrderToEnd> page);
+
+    List<DwmVlmsOneOrderToEnd> getDwmVlmsOneOrderToEnd(GetQueryCriteria queryCriteria);
 }
