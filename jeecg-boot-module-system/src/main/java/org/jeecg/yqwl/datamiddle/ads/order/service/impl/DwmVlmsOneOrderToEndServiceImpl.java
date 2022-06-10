@@ -3,7 +3,9 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
@@ -50,9 +52,14 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal();
             //对得到的结果进行循环
             for ( int j = 0; j < samePlateNumList.size(); j++ ) {
-                //判断配载单编号的值相同,则设置同板数量
-                if ( stowageNoteNo.equals(samePlateNumList.get(j).getStowageNoteNo())) {
-                    params.setSamePlateNum(samePlateNumList.get(j).getSamePlateNum());
+                //获取配载单编号
+                String noteNo = samePlateNumList.get(j).getStowageNoteNo();
+                //添加配载单编号不为空,配载单编号为空不计算
+                if ( StringUtils.isNotEmpty(stowageNoteNo) && StringUtils.isNotEmpty(noteNo) ) {
+                    //判断配载单编号的值相同,则设置同板数量
+                    if ( stowageNoteNo.equals(noteNo)) {
+                        params.setSamePlateNum(samePlateNumList.get(j).getSamePlateNum());
+                    }
                 }
             }
         }
