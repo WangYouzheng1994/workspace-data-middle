@@ -89,7 +89,7 @@ public class OneOrderToEndDwmApp {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data_epc")) {
+                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data_epc")) {
                     DwdBaseStationDataEpc after = jo.getObject("after", DwdBaseStationDataEpc.class);
                     String vin = after.getVIN();
                     if (vin != null) {
@@ -150,7 +150,7 @@ public class OneOrderToEndDwmApp {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data")) {
+                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data_copy1")) {
                     DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
                     String vin = after.getVIN();
                     if (vin != null) {
@@ -221,7 +221,7 @@ public class OneOrderToEndDwmApp {
             }
         }).uid("outStockFilter").name("outStockFilter");
 
- /*       //出厂日期
+        //出厂日期
         outStockFilter.addSink(JdbcSink.sink(
                 "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME == 0 OR LEAVE_FACTORY_TIME > ? )",
                 (ps, epc) -> {
@@ -240,7 +240,7 @@ public class OneOrderToEndDwmApp {
                         .withDriverName(MysqlConfig.DRIVER)
                         .withUsername(MysqlConfig.USERNAME)
                         .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink3").name("baseStationDataSink3");*/
+                        .build())).uid("baseStationDataSink3").name("baseStationDataSink3");
 
 
         //==============================================dwd_base_station_data处理 END==========================================================================//
@@ -252,7 +252,7 @@ public class OneOrderToEndDwmApp {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwm_vlms_sptb02")) {
+                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwm_vlms_sptb02")) {
                     DwmSptb02 after = jo.getObject("after", DwmSptb02.class);
                     String cjsdbh = after.getCJSDBH();
                     if (cjsdbh != null) {
@@ -412,7 +412,7 @@ public class OneOrderToEndDwmApp {
                             String vehicle_code = ootd.getVEHICLE_CODE();
                             return vehicle_code;
                         }
-                        return "此条sql无vehicle_code";
+                        return null;
                     }
 
                     @Override
