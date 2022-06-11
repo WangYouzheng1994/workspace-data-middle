@@ -101,7 +101,7 @@ public class BaseStationDataAndEpcDwdAppBds {
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
         //过滤 大于 2021-06-01 00:00:00的数据
-        SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
+      /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
             @Override
             public boolean filter(String json) throws Exception {
                 //要转换的时间格式
@@ -146,13 +146,13 @@ public class BaseStationDataAndEpcDwdAppBds {
                 }
                 return false;
             }
-        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");
+        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");*/
 
 
         //3. 进行实体类的转换 I:添加kafka中ts字段作为当前时间戳 II.取cp中前4位数字翻译成基地名称作为基地的字段
 
         //BASE_STATION_DATA
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
+        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = oracleSourceStream.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
@@ -189,7 +189,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                             String shop_no = dwdBsd.getSHOP_NO();
                             return shop_no;
                         }
-                        return "此条sql无SHOP_NO";
+                        return null;
                     }
 
                     @Override
