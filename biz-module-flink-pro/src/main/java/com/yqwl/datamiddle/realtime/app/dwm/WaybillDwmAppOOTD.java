@@ -88,7 +88,7 @@ public class WaybillDwmAppOOTD {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_middle_flink") && jo.getString("tableName").equals("dwm_vlms_one_order_to_end")) {
+                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwm_vlms_one_order_to_end")) {
                     DwdBaseStationDataEpc after = jo.getObject("after", DwdBaseStationDataEpc.class);
                     String vin = after.getVIN();
                     if (vin != null) {
