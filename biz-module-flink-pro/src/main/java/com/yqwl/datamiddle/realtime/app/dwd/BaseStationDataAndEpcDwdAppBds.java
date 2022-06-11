@@ -208,7 +208,7 @@ public class BaseStationDataAndEpcDwdAppBds {
 
         // 4.指定事件时间字段
 
-        //DwdBaseStationData 指定事件时间
+      /*  //DwdBaseStationData 指定事件时间
         SingleOutputStreamOperator<DwdBaseStationData> dwdBaseStationDataWithTS = mapBsd.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<DwdBaseStationData>forBoundedOutOfOrderness(Duration.ofMinutes(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationData>() {
@@ -219,12 +219,12 @@ public class BaseStationDataAndEpcDwdAppBds {
                             }
                         })).uid("assIgnDwdBaseStationDataEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
 
-
+*/
 
         //6.1处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
         // provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
-                dwdBaseStationDataWithTS,
+                mapBsd,
                 new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_rfid_warehouse", "WAREHOUSE_CODE") {
                     @Override
                     public Object getKey(DwdBaseStationData dwdBsd) {
