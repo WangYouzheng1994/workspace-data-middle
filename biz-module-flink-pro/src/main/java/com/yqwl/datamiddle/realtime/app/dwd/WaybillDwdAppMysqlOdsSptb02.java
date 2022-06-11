@@ -41,8 +41,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 消费kafka里topic为ods_vlms_sptb02的数据，对其中一些字段进行统一或拓宽
- * @Author: muqing
- * @Date: 2022/05/06
+ * @Author: xiaofeng
+ * @Date: 2022/06/12
  * @Version: V1.0
  */
 @Slf4j
