@@ -65,6 +65,8 @@ public class ClickHouseUtil {
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withDriverName(ClickhouseConfig.CLICKHOUSE_DRIVER)
                         .withUrl(ClickhouseConfig.CLICKHOUSE_URL)
+                        .withUsername(ClickhouseConfig.CLICKHOUSE_USERNAME)
+                        .withPassword(ClickhouseConfig.CLICKHOUSE_PASSWORD)
                         .build());
     }
 }
