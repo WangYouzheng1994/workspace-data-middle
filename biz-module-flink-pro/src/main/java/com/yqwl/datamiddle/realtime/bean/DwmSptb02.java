@@ -599,7 +599,7 @@ public class DwmSptb02 implements Serializable {
      * 返单大序号  number 转 int
      */
 
-    private String NFDDXH;
+    private Integer NFDDXH;
 
     /**
      * 发车站台
