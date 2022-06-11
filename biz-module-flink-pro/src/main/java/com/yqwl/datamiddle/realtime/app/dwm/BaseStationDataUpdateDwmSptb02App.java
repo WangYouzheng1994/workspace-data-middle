@@ -18,7 +18,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class BaseStationDataUpdateOneOrderApp {
+public class BaseStationDataUpdateDwmSptb02App {
 
     public static void main(String[] args) throws Exception {
         // 获取执行环境:
