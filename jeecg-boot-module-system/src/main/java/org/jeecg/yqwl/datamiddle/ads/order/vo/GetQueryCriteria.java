@@ -85,4 +85,9 @@ public class GetQueryCriteria {
     private Integer pageSize = 20;
 
     private List<String> vinList;
+
+    /**
+     * 导出选择的vin集合
+     */
+    private List<String> selectionsList;
 }

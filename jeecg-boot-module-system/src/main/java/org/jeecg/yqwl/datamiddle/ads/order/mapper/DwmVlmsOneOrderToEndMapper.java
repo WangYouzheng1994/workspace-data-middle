@@ -20,13 +20,25 @@ import java.util.List;
  */
 public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderToEnd> {
 
-
+    /**
+     * 按条件分页查询
+     * @param queryCriteria
+     * @param page
+     * @return
+     */
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria,  Page<DwmVlmsOneOrderToEnd> page);
 
+    /**
+     * 导出
+     * @param queryCriteria
+     * @return
+     */
+    List<DwmVlmsOneOrderToEnd> export(@Param("params") GetQueryCriteria queryCriteria);
 
-
-    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
-
+    /**
+     * 同板数量
+     * @return
+     */
     List<SelectData> selectTotal();
 
 
