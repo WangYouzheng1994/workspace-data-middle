@@ -59,7 +59,50 @@ public class BaseStationDataAndEpcDwdAppBds {
     private static final String BASE_STATION_DATA_EPC = "BASE_STATION_DATA_EPC";
 
     public static void main(String[] args) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        Configuration con = new Configuration();
+        /**
+         *  -Djobmanager.memory.process.size=768m \
+         *         -Djobmanager.memory.off-heap.size=256m \
+         *         -Djobmanager.memory.jvm-metaspace.size=256m \
+         *         -Djobmanager.memory.jvm-overhead.fraction=0.1 \
+         *         -Djobmanager.memory.jvm-overhead.min=32m \
+         *         -Djobmanager.memory.jvm-overhead.max=128m \
+         *         -Dtaskmanager.memory.process.size=1684m \
+         *         -Dtaskmanager.memory.framework.heap.size=256m \
+         *         -Dtaskmanager.memory.task.heap.size=768m \
+         *         -Dtaskmanager.memory.managed.size=16m \
+         *         -Dtaskmanager.memory.framework.off-heap.size=128m \
+         *         -Dtaskmanager.memory.task.off-heap.size=128m \
+         *         -Dtaskmanager.memory.network.min=32m \
+         *         -Dtaskmanager.memory.network.max=128m \
+         *         -Dtaskmanager.memory.network.fraction=0.1 \
+         *         -Dtaskmanager.memory.jvm-metaspace.size=128m \
+         *         -Dtaskmanager.memory.jvm-overhead.min=128m \
+         *         -Dtaskmanager.memory.jvm-overhead.max=256m \
+         *         -Dtaskmanager.memory.jvm-overhead.fraction=0.1 \
+         *         -Dtaskmanager.numberOfTaskSlots=4 \
+         */
+        con.setString("jobmanager.memory.process.size", "768m");
+        con.setString("jobmanager.memory.off-heap.size", "256m");
+        con.setString("jobmanager.memory.jvm-metaspace.size", "256m");
+        con.setString("jobmanager.memory.jvm-overhead.fraction", "0.1");
+        con.setString("jobmanager.memory.jvm-overhead.min", "32m");
+        con.setString("jobmanager.memory.jvm-overhead.max", "128m");
+        con.setString("taskmanager.memory.process.size", "1684m");
+        con.setString("taskmanager.memory.framework.heap.size", "256m");
+        con.setString("taskmanager.memory.task.heap.size", "768m");
+        con.setString("taskmanager.memory.managed.size", "16m");
+        con.setString("taskmanager.memory.framework.off-heap.size", "128m");
+        con.setString("taskmanager.memory.framework.heap.size", "128m");
+        con.setString("taskmanager.memory.network.min", "32m");
+        con.setString("taskmanager.memory.network.max", "128m");
+        con.setString("taskmanager.memory.network.fraction", "0.1");
+        con.setString("taskmanager.memory.jvm-metaspace.size", "128m");
+        con.setString("taskmanager.memory.jvm-overhead.min", "128m");
+        con.setString("taskmanager.memory.jvm-overhead.max", "256m");
+        con.setString("taskmanager.memory.jvm-overhead.fraction", "0.1");
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(con);
+
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
