@@ -152,7 +152,7 @@ public class OneOrderToEndDwmAppBDS {
 
         //出厂日期
         outStockFilter.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME == 0 OR LEAVE_FACTORY_TIME > ? )",
+                "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME = 0 OR LEAVE_FACTORY_TIME > ? )",
                 (ps, epc) -> {
                     ps.setLong(1, epc.getSAMPLE_U_T_C());
                     ps.setString(2, epc.getVIN());
