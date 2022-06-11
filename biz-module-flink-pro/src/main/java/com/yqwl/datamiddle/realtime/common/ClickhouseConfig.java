@@ -6,8 +6,8 @@ package com.yqwl.datamiddle.realtime.common;
 public class ClickhouseConfig {
 
     // ClickHouse_Url
-    public static final String CLICKHOUSE_URL = "jdbc:clickhouse://192.168.3.95:8123/default";
-    //public static final String CLICKHOUSE_URL = "jdbc:clickhouse://10.123.175.195:8123/default";
+    //public static final String CLICKHOUSE_URL = "jdbc:clickhouse://192.168.3.95:8123/default";
+    public static final String CLICKHOUSE_URL = "jdbc:clickhouse://10.123.175.195:8123/default";
 
     // ClickHouse_Driver
     public static final String CLICKHOUSE_DRIVER = "ru.yandex.clickhouse.ClickHouseDriver";
