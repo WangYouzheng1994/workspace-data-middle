@@ -119,7 +119,8 @@ public class WaybillDwmApp {
                         String ccpdm = dimInfoJsonObj.getString("CCPDM");
                         log.info("sptb02d1DS阶段获取到的CCPDM:{}", ccpdm);
                         dwmSptb02.setVVIN(vvin);
-                        dwmSptb02.setCPCDBH(ccpdm);
+//                        dwmSptb02.setCPCDBH(ccpdm);
+                        dwmSptb02.setVEHICLE_CODE(ccpdm); //车型代码
                     }
                 },
                 60, TimeUnit.SECONDS).uid("sptb02d1DS").name("sptb02d1DS");
