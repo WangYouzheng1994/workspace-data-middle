@@ -3,45 +3,29 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.*;
-import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.util.Collector;
 
 import java.sql.Timestamp;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class OneOrderToEndDwmApp {
+public class OneOrderToEndDwmAppSPTB02 {
 
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
@@ -83,167 +67,6 @@ public class OneOrderToEndDwmApp {
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
-        //==============================================dwd_base_station_data_epc处理 START====================================================================//
-        //2.过滤出BASE_STATION_DATA_Epc的表
-        DataStream<String> filterBsdEpcDs = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data_epc")) {
-                    DwdBaseStationDataEpc after = jo.getObject("after", DwdBaseStationDataEpc.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterDwd_vlms_base_station_data_epc").name("filterDwd_vlms_base_station_data_epc");
-
-        //3.转实体类 BASE_STATION_DATA_EPC
-        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwdBaseStationDataEpc>() {
-            @Override
-            public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
-                DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
-                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
-                dataBsdEpc.setTs(ts);
-                String vin = dataBsdEpc.getVIN();
-                return dataBsdEpc;
-            }
-        }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
-        //4.插入mysql
-        mapBsdEpc.addSink(JdbcSink.sink(
-
-                "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE )\n" +
-                        "VALUES\n" +
-                        "        ( ?, ?, ? ,?) \n" +
-                        "        ON DUPLICATE KEY UPDATE \n" +
-                        "   CP9_OFFLINE_TIME=? ,BASE_NAME=?,\n" +
-                        "        BASE_CODE=?",
-                (ps, epc) -> {
-                    ps.setString(1, epc.getVIN());
-                    ps.setLong(2, epc.getCP9_OFFLINE_TIME());
-                    ps.setString(3, epc.getBASE_NAME());
-                    ps.setString(4, epc.getBASE_CODE());
-                    ps.setLong(5, epc.getCP9_OFFLINE_TIME());
-                    ps.setString(6, epc.getBASE_NAME());
-                    ps.setString(7, epc.getBASE_CODE());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataEpcSink").name("baseStationDataEpcSink");
-        //==============================================dwd_base_station_data_epc处理 END====================================================================//
-
-        //==============================================dwd_base_station_data处理 START==========================================================================//
-        // 1.过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwd_vlms_base_station_data_copy1")) {
-                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterDwd_vlms_base_station_data").name("filterDwd_vlms_base_station_data");
-
-        //2.转换BASE_STATION_DATA为实体类
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = filterBsdDs.map(new MapFunction<String, DwdBaseStationData>() {
-            @Override
-            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
-                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
-                Timestamp ts = jsonObject.getTimestamp("ts");
-                dataBsd.setTs(ts);
-                return dataBsd;
-            }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
-        //3.插入mysql
-        mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ?  WHERE VIN = ? ",
-                (ps, epc) -> {
-                    ps.setString(1, epc.getIN_WAREHOUSE_NAME());
-                    ps.setString(2, epc.getIN_WAREHOUSE_CODE());
-                    ps.setString(3, epc.getVIN());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink1").name("baseStationDataSink1");
-
-        //3.入库时间
-        mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? WHERE e.VIN = ? AND e.LEAVE_FACTORY_TIME < ? AND a.`WAREHOUSE_TYPE` = 'T1'",
-                (ps, epc) -> {
-                    ps.setLong(1, epc.getSAMPLE_U_T_C());
-                    ps.setString(2, epc.getVIN());
-                    ps.setLong(3, epc.getSAMPLE_U_T_C());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink2").name("baseStationDataSink2");
-
-        SingleOutputStreamOperator<DwdBaseStationData> outStockFilter = mapBsd.filter(new FilterFunction<DwdBaseStationData>() {
-            @Override
-            public boolean filter(DwdBaseStationData data) throws Exception {
-                String operateType = data.getOPERATE_TYPE();
-                return "OutStock".equals(operateType);
-            }
-        }).uid("outStockFilter").name("outStockFilter");
-
-        //出厂日期
-        outStockFilter.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME == 0 OR LEAVE_FACTORY_TIME > ? )",
-                (ps, epc) -> {
-                    ps.setLong(1, epc.getSAMPLE_U_T_C());
-                    ps.setString(2, epc.getVIN());
-                    ps.setLong(3, epc.getSAMPLE_U_T_C());
-                    ps.setLong(4, epc.getSAMPLE_U_T_C());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink3").name("baseStationDataSink3");
-
-
-        //==============================================dwd_base_station_data处理 END==========================================================================//
 
 
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
