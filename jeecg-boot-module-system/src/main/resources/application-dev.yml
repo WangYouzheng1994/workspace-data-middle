@@ -145,7 +145,7 @@ spring:
 #          maxWait: 6000
 #          driverClassName: ru.yandex.clickhouse.ClickHouseDriver
 #        # 多数据源配置
-        slave0:
+        slave_0:
           url: jdbc:clickhouse://192.168.3.95:8123/default
           username:
           password:
@@ -154,7 +154,7 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
-        slave1:
+        slave_1:
           url: jdbc:clickhouse://192.168.3.96:8123/default
           username:
           password:
@@ -163,7 +163,7 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
-        slave2:
+        slave_2:
           url: jdbc:clickhouse://192.168.3.97:8123/default
           username:
           password:

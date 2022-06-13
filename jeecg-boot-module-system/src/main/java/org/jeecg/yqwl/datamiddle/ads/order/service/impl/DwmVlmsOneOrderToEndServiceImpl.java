@@ -34,7 +34,7 @@ import java.util.List;
  */
 
 @Slf4j
-@DS("slave0")
+@DS("slave")
 @Service
 public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrderToEndMapper, DwmVlmsOneOrderToEnd> implements IDwmVlmsOneOrderToEndService {
 
