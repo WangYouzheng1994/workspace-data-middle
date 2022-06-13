@@ -124,10 +124,9 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
                 return;
             }
             druidConnection = getDruidConnection();
-            StringBuffer sb = new StringBuffer();
 
             String tableName = StringUtils.EMPTY;
-            StringBuffer placeholder = new StringBuffer();
+            StringBuilder placeholder = new StringBuilder();
 
             // 获取要渲染的 插入列。
             Class<?> entityClass = value.get(0).getClass();
