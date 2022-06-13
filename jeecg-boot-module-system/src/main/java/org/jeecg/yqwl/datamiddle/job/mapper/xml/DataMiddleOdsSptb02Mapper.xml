@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsSptb02Mapper">
+
+
+    <select id="getOdsVlmsSptb02" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.Sptb02">
+
+                SELECT
+                    IDNUM AS rn,
+                    a.*
+                FROM
+                    ( SELECT
+                          t.*
+                      FROM ods_vlms_sptb02 t
+                    ) a
+                limit #{limitStart} ,
+                      #{limitEnd} ;
+    </select>
+
+    <select id="getTablValues"  parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.TableParams" resultType="map">
+              SELECT
+                  t.*
+              FROM ${params.tableName} t
+              <where>
+                  <if test=" params.field != null and params.values != null">
+                      AND ${params.field} = #{params.values}
+                  </if>
+                  <if test=" params.type != null and params.typeValues != null">
+                      AND ${params.type} = #{params.typeValues}
+                  </if>
+              </where>
+    </select>
+
+
+
+</mapper>

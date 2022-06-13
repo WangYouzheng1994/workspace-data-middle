@@ -172,6 +172,11 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
+        wareHouse:
+            url: jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+            username: fengqiwulian
+            password: fengqiwulian
+            driver-class-name: com.mysql.cj.jdbc.Driver
   #redis 配置
   redis:
     database: 11
@@ -187,7 +192,7 @@ spring:
     port: 6379
 #mybatis plus 设置
 mybatis-plus:
-  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml,classpath*:org/jeecg/yqwl/datamiddle/ads/order/**/xml/**Mapper.xml
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml,classpath*:org/jeecg/yqwl/datamiddle/ads/order/**/xml/**Mapper.xml,classpath*:org/jeecg/yqwl/datamiddle/job/mapper/xml/**.xml
   global-config:
     # 关闭MP3.0自带的banner
     banner: false
