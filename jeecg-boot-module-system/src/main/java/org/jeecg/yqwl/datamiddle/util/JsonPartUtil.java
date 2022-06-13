@@ -2,7 +2,6 @@ package org.jeecg.yqwl.datamiddle.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.yqwl.datamiddle.realtime.bean.Mdac01;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
@@ -360,7 +359,6 @@ public class JsonPartUtil {
 
         String afterStr = JsonPartUtil.getAfterStr(json);
         String beforeStr = JsonPartUtil.getBeforeStr(json);
-        Mdac01 mdac01 = JsonPartUtil.getAfterObj(json, Mdac01.class);
 
 
     }
