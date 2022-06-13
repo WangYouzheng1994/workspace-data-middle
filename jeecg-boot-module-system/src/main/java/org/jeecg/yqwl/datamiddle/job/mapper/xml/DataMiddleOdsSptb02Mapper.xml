@@ -12,6 +12,11 @@
                     ( SELECT
                           t.*
                       FROM ods_vlms_sptb02 t
+                      <where>
+                          <if test="startDateStr != null and endDateStr != null" >
+                              DDJRQ <![CDATA[>]]> #{startDateStr} AND DDJRQ <![CDATA[<]]> #{endDateStr}
+                          </if>
+                      </where>
                     ) a
                 limit #{limitStart} ,
                       #{limitEnd} ;
@@ -25,11 +30,1831 @@
                   <if test=" params.field != null and params.values != null">
                       AND ${params.field} = #{params.values}
                   </if>
-                  <if test=" params.type != null and params.typeValues != null">
-                      AND ${params.type} = #{params.typeValues}
-                  </if>
               </where>
+              limit 1;
     </select>
+
+    <!--插入到DwdSptb02表-->
+    <insert id="addDwdSptb02" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02"  >
+        insert into dwd_vlms_sptb02 (
+        <if test=" params.CJSDBH != null ">
+            CJSDBH  ,
+        </if>
+        <if test=" params.DDJRQ != null ">
+            DDJRQ  ,
+        </if>
+        <if test=" params.NYDFY != null ">
+            NYDFY  ,
+        </if>
+        <if test=" params.NKCFY != null ">
+            NKCFY  ,
+        </if>
+        <if test=" params.NSFFY != null ">
+            NSFFY  ,
+        </if>
+        <if test=" params.DJSSJ != null ">
+            DJSSJ  ,
+        </if>
+        <if test=" params.VJSYDM != null ">
+            VJSYDM  ,
+        </if>
+        <if test=" params.CZT != null ">
+            CZT  ,
+        </if>
+        <if test=" params.NJSDYCS != null ">
+            NJSDYCS  ,
+        </if>
+
+        <if test=" params.NTCDYCS != null ">
+            NTCDYCS ,
+        </if>
+        <if test=" params.VBZ != null ">
+            VBZ ,
+        </if>
+        <if test=" params.CYSFS_ZJGS != null ">
+            CYSFS_ZJGS  ,
+        </if>
+        <if test=" params.VWXDWDM != null ">
+            VWXDWDM  ,
+        </if>
+        <if test=" params.VYSCDM != null ">
+            VYSCDM  ,
+        </if>
+        <if test=" params.VZSJDM != null ">
+            VZSJDM  ,
+        </if>
+        <if test=" params.VFSJDM != null ">
+            VFSJDM  ,
+        </if>
+        <if test=" params.CYSLX != null ">
+            CYSLX  ,
+        </if>
+        <if test=" params.CCZYDM != null ">
+            CCZYDM  ,
+        </if>
+
+        <if test=" params.DZPSJ != null ">
+            DZPSJ  ,
+        </if>
+        <if test=" params.CZPYDM != null ">
+            CZPYDM  ,
+        </if>
+        <if test=" params.DFCDJSJ != null ">
+            DFCDJSJ  ,
+        </if>
+        <if test=" params.CDJYDM != null ">
+            CDJYDM  ,
+        </if>
+        <if test=" params.CCYSDM != null ">
+            CCYSDM  ,
+        </if>
+        <if test=" params.CYSSDM != null ">
+            CYSSDM  ,
+        </if>
+        <if test=" params.DCYSZPSJ != null ">
+            DCYSZPSJ  ,
+        </if>
+        <if test=" params.DYSSZPSJ != null ">
+            DYSSZPSJ  ,
+        </if>
+        <if test=" params.CCYZPYDM != null ">
+            CCYZPYDM  ,
+        </if>
+
+        <if test=" params.CYSZPYDM != null ">
+            CYSZPYDM  ,
+        </if>
+        <if test=" params.DDHSJ != null ">
+            DDHSJ  ,
+        </if>
+        <if test=" params.CPCDBH != null ">
+            CPCDBH  ,
+        </if>
+        <if test=" params.NPHID != null ">
+            NPHID  ,
+        </if>
+        <if test=" params.DZCSJ != null ">
+            DZCSJ  ,
+        </if>
+        <if test=" params.DYJWCSJ != null ">
+            DYJWCSJ  ,
+        </if>
+        <if test=" params.CFWM != null ">
+            CFWM  ,
+        </if>
+        <if test=" params.CZJBS != null ">
+            CZJBS  ,
+        </if>
+        <if test=" params.DCKRQ != null ">
+            DCKRQ  ,
+        </if>
+
+        <if test=" params.CZFBH != null ">
+            CZFBH  ,
+        </if>
+        <if test=" params.DBCSJ != null ">
+            DBCSJ  ,
+        </if>
+        <if test=" params.VCKKGYDM != null ">
+            VCKKGYDM  ,
+        </if>
+        <if test=" params.VYSFS != null ">
+            VYSFS  ,
+        </if>
+        <if test=" params.CFYDD != null ">
+            CFYDD  ,
+        </if>
+        <if test=" params.VWLCKDM != null ">
+            VWLCKDM  ,
+        </if>
+        <if test=" params.CYDLX != null ">
+            CYDLX  ,
+        </if>
+        <if test=" params.VDWDM != null ">
+            VDWDM  ,
+        </if>
+        <if test=" params.VSCDZ != null ">
+            VSCDZ  ,
+        </if>
+
+        <if test=" params.CDHDDM != null ">
+            CDHDDM  ,
+        </if>
+        <if test=" params.CCLBS != null ">
+            CCLBS  ,
+        </if>
+        <if test=" params.DCKQRSJ != null ">
+            DCKQRSJ  ,
+        </if>
+        <if test=" params.CJKBS != null ">
+            CJKBS  ,
+        </if>
+        <if test=" params.DJKRQ != null ">
+            DJKRQ  ,
+        </if>
+        <if test=" params.CJHDH != null ">
+            CJHDH  ,
+        </if>
+        <if test=" params.CHTCODE != null ">
+            CHTCODE  ,
+        </if>
+        <if test=" params.VQRBZ != null ">
+            VQRBZ  ,
+        </if>
+        <if test=" params.CQRR != null ">
+            CQRR  ,
+        </if>
+
+        <if test=" params.DJYSJ != null ">
+            DJYSJ  ,
+        </if>
+        <if test=" params.CJYCH != null ">
+            CJYCH  ,
+        </if>
+        <if test=" params.CXSQRR != null ">
+            CXSQRR  ,
+        </if>
+        <if test=" params.DXSQRSJ != null ">
+            DXSQRSJ  ,
+        </if>
+        <if test=" params.VXSBZ != null ">
+            VXSBZ  ,
+        </if>
+        <if test=" params.DYSXD != null ">
+            DYSXD  ,
+        </if>
+        <if test=" params.DCKJSSJ != null ">
+            DCKJSSJ ,
+        </if>
+        <if test=" params.DCKXD != null ">
+            DCKXD  ,
+        </if>
+        <if test=" params.NFJYF != null ">
+            NFJYF  ,
+        </if>
+
+        <if test=" params.CPZBS != null ">
+            CPZBS ,
+        </if>
+        <if test=" params.DPZRQ != null ">
+            DPZRQ  ,
+        </if>
+        <if test=" params.CPZCZY != null ">
+            CPZCZY  ,
+        </if>
+        <if test=" params.CPZDBH != null ">
+            CPZDBH  ,
+        </if>
+        <if test=" params.CPZDXH != null ">
+            CPZDXH  ,
+        </if>
+        <if test=" params.CFPBS != null ">
+            CFPBS  ,
+        </if>
+        <if test=" params.DDCDKSJ != null ">
+            DDCDKSJ  ,
+        </if>
+        <if test=" params.DGPSDHSJ != null ">
+            DGPSDHSJ  ,
+        </if>
+        <if test=" params.DSJCFSJ != null ">
+            DSJCFSJ  ,
+        </if>
+
+        <if test=" params.CYCZT != null ">
+            CYCZT  ,
+        </if>
+        <if test=" params.CDKHDM != null ">
+            CDKHDM ,
+        </if>
+        <if test=" params.DYJDHSJ != null ">
+            DYJDHSJ  ,
+        </if>
+        <if test=" params.VSJPZH != null ">
+            VSJPZH  ,
+        </if>
+        <if test=" params.VBZ1 != null ">
+            VBZ1  ,
+        </if>
+        <if test=" params.VDHPJ != null ">
+            VDHPJ  ,
+        </if>
+        <if test=" params.DGPSHCSJ != null ">
+            DGPSHCSJ  ,
+        </if>
+        <if test=" params.VPH != null ">
+            VPH  ,
+        </if>
+        <if test=" params.DPHSCSJ != null ">
+            DPHSCSJ  ,
+        </if>
+
+        <if test=" params.VPBBS != null ">
+            VPBBS  ,
+        </if>
+        <if test=" params.VDKHQRBS != null ">
+            VDKHQRBS  ,
+        </if>
+        <if test=" params.DLLLCSJ != null ">
+            DLLLCSJ  ,
+        </if>
+        <if test=" params.CGLFQRCZY != null ">
+            CGLFQRCZY  ,
+        </if>
+        <if test=" params.DGLFQRSJ != null ">
+            DGLFQRSJ  ,
+        </if>
+        <if test=" params.CGS != null ">
+            CGS  ,
+        </if>
+        <if test=" params.CBYJQRBS != null ">
+            CBYJQRBS  ,
+        </if>
+        <if test=" params.CBYJQRCZY != null ">
+            CBYJQRCZY  ,
+        </if>
+        <if test=" params.DBYJQRSJ != null ">
+            DBYJQRSJ  ,
+        </if>
+
+        <if test=" params.CCYSDM_O != null ">
+            CCYSDM_O  ,
+        </if>
+        <if test=" params.CYSSDM_O != null ">
+            CYSSDM_O ,
+        </if>
+        <if test=" params.CGLFBZ != null ">
+            CGLFBZ  ,
+        </if>
+        <if test=" params.CGPSYCYY != null ">
+            CGPSYCYY  ,
+        </if>
+        <if test=" params.CZPYCLX != null ">
+            CZPYCLX  ,
+        </if>
+        <if test=" params.NFDDXH != null ">
+            NFDDXH  ,
+        </if>
+        <if test=" params.VFCZT != null ">
+            VFCZT ,
+        </if>
+        <if test=" params.VSCZT != null ">
+            VSCZT  ,
+        </if>
+        <if test=" params.CQWH != null ">
+            CQWH  ,
+        </if>
+
+        <if test=" params.CZJGSDM != null ">
+            CZJGSDM  ,
+        </if>
+        <if test=" params.CZFBH2 != null ">
+            CZFBH2  ,
+        </if>
+        <if test=" params.CJSDBH2 != null ">
+            CJSDBH2  ,
+        </if>
+        <if test=" params.CZFBH3 != null ">
+            CZFBH3  ,
+        </if>
+        <if test=" params.CZFBH4 != null ">
+            CZFBH4  ,
+        </if>
+        <if test=" params.DTVSJCSJ != null ">
+            DTVSJCSJ  ,
+        </if>
+        <if test=" params.DTVSCFSJ != null ">
+            DTVSCFSJ  ,
+        </if>
+        <if test=" params.DTVSDHSJ != null ">
+            DTVSDHSJ  ,
+        </if>
+        <if test=" params.DTVSFCSJ != null ">
+            DTVSFCSJ  ,
+        </if>
+
+        <if test=" params.CTVSPH != null ">
+            CTVSPH  ,
+        </if>
+        <if test=" params.VEHID != null ">
+            VEHID ,
+        </if>
+        <if test=" params.DTVSJCSJ2 != null ">
+            DTVSJCSJ2  ,
+        </if>
+        <if test=" params.DSTAMP != null ">
+            DSTAMP ,
+        </if>
+        <if test=" params.CJCSF != null ">
+            CJCSF ,
+        </if>
+        <if test=" params.CJCCS != null ">
+            CJCCS  ,
+        </if>
+        <if test=" params.NLJDS != null ">
+            NLJDS  ,
+        </if>
+        <if test=" params.CXMCBD_ZB != null ">
+            CXMCBD_ZB  ,
+        </if>
+        <if test=" params.CXMCBD_JD != null ">
+            CXMCBD_JD  ,
+        </if>
+
+        <if test=" params.CBS_GJZF != null ">
+            CBS_GJZF  ,
+        </if>
+        <if test=" params.CJSDBH_LAST != null ">
+            CJSDBH_LAST  ,
+        </if>
+        <if test=" params.CCYBZ != null ">
+            CCYBZ  ,
+        </if>
+        <if test=" params.CJXSBZ != null ">
+            CJXSBZ  ,
+        </if>
+        <if test=" params.CXSBZ != null ">
+            CXSBZ  ,
+        </if>
+        <if test=" params.CXSDDBH != null ">
+            CXSDDBH  ,
+        </if>
+        <if test=" params.PTBS != null ">
+            PTBS  ,
+        </if>
+        <if test=" params.CYYSDM_PT != null ">
+            CYYSDM_PT  ,
+        </if>
+        <if test=" params.CXSGSDM != null ">
+            CXSGSDM  ,
+        </if>
+
+        <if test=" params.VXSGSMC != null ">
+            VXSGSMC  ,
+        </if>
+        <if test=" params.NJCFDXH != null ">
+            NJCFDXH  ,
+        </if>
+        <if test=" params.CBS_SCJJ != null ">
+            CBS_SCJJ  ,
+        </if>
+        <if test=" params.CBS_BCBBLX != null ">
+            CBS_BCBBLX  ,
+        </if>
+        <if test=" params.DATE_SCJJ != null ">
+            DATE_SCJJ  ,
+        </if>
+        <if test=" params.CBS_CUSCONFIRM != null ">
+            CBS_CUSCONFIRM  ,
+        </if>
+        <if test=" params.CBS_OPERDEPART != null ">
+            CBS_OPERDEPART  ,
+        </if>
+        <if test=" params.DZCWCSJ != null ">
+            DZCWCSJ  ,
+        </if>
+        <if test=" params.DDDZTSJ != null ">
+            DDDZTSJ  ,
+        </if>
+
+        <if test=" params.IS_SYNC != null ">
+            IS_SYNC ,
+        </if>
+        <if test=" params.EV_FLAG != null ">
+            EV_FLAG  ,
+        </if>
+        <if test=" params.SV_FLAG != null ">
+            SV_FLAG  ,
+        </if>
+        <if test=" params.INTER_CODE != null ">
+            INTER_CODE  ,
+        </if>
+        <if test=" params.NAME_FROM != null ">
+            NAME_FROM  ,
+        </if>
+        <if test=" params.NAME_TO != null ">
+            NAME_TO  ,
+        </if>
+        <if test=" params.SEN_PERSON != null ">
+            SEN_PERSON  ,
+        </if>
+        <if test=" params.REC_PERSON != null ">
+            REC_PERSON  ,
+        </if>
+        <if test=" params.PERSON_PHONE != null ">
+            PERSON_PHONE  ,
+        </if>
+
+        <if test=" params.ADDRESS_FROM != null ">
+            ADDRESS_FROM  ,
+        </if>
+        <if test=" params.ADDRESS_TO != null ">
+            ADDRESS_TO  ,
+        </if>
+        <if test=" params.REQ_DATE != null ">
+            REQ_DATE ,
+        </if>
+        <if test=" params.FH_DATE != null ">
+            FH_DATE  ,
+        </if>
+        <if test=" params.SUBMI != null ">
+            SUBMI  ,
+        </if>
+        <if test=" params.DEPTM != null ">
+            DEPTM  ,
+        </if>
+        <if test=" params.INFO != null ">
+            INFO  ,
+        </if>
+        <if test=" params.CARTYPE != null ">
+            CARTYPE  ,
+        </if>
+        <if test=" params.NAME2 != null ">
+            NAME2 ,
+        </if>
+
+        <if test=" params.ZF_CONFIRM_CCZYDM != null ">
+            ZF_CONFIRM_CCZYDM  ,
+        </if>
+        <if test=" params.ZF_CONFIRM_CCZYMC != null ">
+            ZF_CONFIRM_CCZYMC  ,
+        </if>
+        <if test=" params.ZF_CONFIRM_DCZRQ != null ">
+            ZF_CONFIRM_DCZRQ  ,
+        </if>
+        <if test=" params.DTLLHSCSJ != null ">
+            DTLLHSCSJ  ,
+        </if>
+        <if test=" params.NLJDS_GPS != null ">
+            NLJDS_GPS ,
+        </if>
+        <if test=" params.DDHSJ_GPS != null ">
+            DDHSJ_GPS  ,
+        </if>
+        <if test=" params.DDHSJ_XT != null ">
+            DDHSJ_XT  ,
+        </if>
+        <if test=" params.DZTXCSJ != null ">
+            DZTXCSJ  ,
+        </if>
+        <if test=" params.DYJDHSJ_BM != null ">
+            DYJDHSJ_BM  ,
+        </if>
+
+        <if test=" params.DFDYJDHSJ_BM != null ">
+            DFDYJDHSJ_BM  ,
+        </if>
+        <if test=" params.CZFBH_BMCBC != null ">
+            CZFBH_BMCBC  ,
+        </if>
+        <if test=" params.CJSBH_BMCBC != null ">
+            CJSBH_BMCBC  ,
+        </if>
+        <if test=" params.VDHPJ_BMCBC != null ">
+            VDHPJ_BMCBC ,
+        </if>
+        <if test=" params.SV_TYPE != null ">
+            SV_TYPE ,
+        </if>
+        <if test=" params.CZT_JS_TS != null ">
+            CZT_JS_TS  ,
+        </if>
+        <if test=" params.CZT_ZF_TS != null ">
+            CZT_ZF_TS ,
+        </if>
+        <if test=" params.NBZWLSJ_DZ != null ">
+            NBZWLSJ_DZ  ,
+        </if>
+        <if test=" params.DBZDHSJ_DZ != null ">
+            DBZDHSJ_DZ  ,
+        </if>
+
+        <if test=" params.CTCBS != null ">
+            CTCBS ,
+        </if>
+        <if test=" params.WAREHOUSE_CREATETIME != null ">
+            WAREHOUSE_CREATETIME ,
+        </if>
+        <if test=" params.WAREHOUSE_UPDATETIME != null ">
+            WAREHOUSE_UPDATETIME  ,
+        </if>
+        <if test=" params.TRAFFIC_TYPE != null ">
+            TRAFFIC_TYPE  ,
+        </if>
+        <if test=" params.SHIPMENT_TIME != null ">
+            SHIPMENT_TIME  ,
+        </if>
+        <if test=" params.PLAN_RELEASE_TIME != null ">
+            PLAN_RELEASE_TIME  ,
+        </if>
+        <if test=" params.ASSIGN_TIME != null ">
+            ASSIGN_TIME  ,
+        </if>
+        <if test=" params.DOT_SITE_TIME != null ">
+            DOT_SITE_TIME  ,
+        </if>
+        <if test=" params.FINAL_SITE_TIME != null ">
+            FINAL_SITE_TIME  ,
+        </if>
+        <if test=" params.ORDER_CREATE_TIME != null ">
+            ORDER_CREATE_TIME  ,
+        </if>
+        <if test=" params.BASE_CODE != null ">
+            BASE_CODE ,
+        </if>
+        <if test=" params.TRANS_MODE_CODE != null ">
+            TRANS_MODE_CODE ,
+        </if>
+        <if test=" params.HOST_COM_CODE != null ">
+            HOST_COM_CODE  ,
+        </if>
+        <if test=" params.THEORY_SHIPMENT_TIME != null ">
+            THEORY_SHIPMENT_TIME  ,
+        </if>
+        <if test=" params.THEORY_OUT_TIME != null ">
+            THEORY_OUT_TIME  ,
+        </if>
+        <if test=" params.THEORY_SITE_TIME != null ">
+            THEORY_SITE_TIME ,
+        </if>
+        <if test=" params.START_PROVINCE_CODE != null ">
+            START_PROVINCE_CODE,
+        </if>
+        <if test=" params.START_CITY_CODE != null ">
+            START_CITY_CODE  ,
+        </if>
+        <if test=" params.END_PROVINCE_CODE != null ">
+            END_PROVINCE_CODE  ,
+        </if>
+        <if test=" params.END_CITY_CODE != null ">
+            END_CITY_CODE  ,
+        </if>
+        <if test=" params.ACTUAL_OUT_TIME != null ">
+            ACTUAL_OUT_TIME  ,
+        </if>
+        <if test=" params.START_WAREHOUSE_CODE != null ">
+            START_WAREHOUSE_CODE  ,
+        </if>
+        <if test=" params.END_WAREHOUSE_CODE != null ">
+            END_WAREHOUSE_CODE  ,
+        </if>
+        <if test=" params.START_WAREHOUSE_NAME != null ">
+            START_WAREHOUSE_NAME  ,
+        </if>
+        <if test=" params.END_WAREHOUSE_NAME != null ">
+            END_WAREHOUSE_NAME  ,
+        </if>
+        <if test=" params.HIGHWAY_WAREHOUSE_TYPE != null ">
+            HIGHWAY_WAREHOUSE_TYPE
+        </if>
+        )
+
+        values (
+        <if test=" params.CJSDBH != null ">
+              #{params.CJSDBH} ,
+        </if>
+        <if test=" params.DDJRQ != null ">
+              #{params.DDJRQ} ,
+        </if>
+        <if test=" params.NYDFY != null ">
+             #{params.NYDFY} ,
+        </if>
+        <if test=" params.NKCFY != null ">
+              #{params.NKCFY} ,
+        </if>
+        <if test=" params.NSFFY != null ">
+              #{params.NSFFY} ,
+        </if>
+        <if test=" params.DJSSJ != null ">
+              #{params.DJSSJ} ,
+        </if>
+        <if test=" params.VJSYDM != null ">
+             #{params.VJSYDM} ,
+        </if>
+        <if test=" params.CZT != null ">
+              #{params.CZT} ,
+        </if>
+        <if test=" params.NJSDYCS != null ">
+              #{params.NJSDYCS} ,
+        </if>
+
+        <if test=" params.NTCDYCS != null ">
+              #{params.NTCDYCS} ,
+        </if>
+        <if test=" params.VBZ != null ">
+              #{params.VBZ} ,
+        </if>
+        <if test=" params.CYSFS_ZJGS != null ">
+              #{params.CYSFS_ZJGS} ,
+        </if>
+        <if test=" params.VWXDWDM != null ">
+              #{params.VWXDWDM} ,
+        </if>
+        <if test=" params.VYSCDM != null ">
+            #{params.VYSCDM},
+        </if>
+        <if test=" params.VZSJDM != null ">
+             #{params.VZSJDM},
+        </if>
+        <if test=" params.VFSJDM != null ">
+             #{params.VFSJDM},
+        </if>
+        <if test=" params.CYSLX != null ">
+              #{params.CYSLX} ,
+        </if>
+        <if test=" params.CCZYDM != null ">
+              #{params.CCZYDM} ,
+        </if>
+
+        <if test=" params.DZPSJ != null ">
+              #{params.DZPSJ} ,
+        </if>
+        <if test=" params.CZPYDM != null ">
+              #{params.CZPYDM} ,
+        </if>
+        <if test=" params.DFCDJSJ != null ">
+              #{params.DFCDJSJ} ,
+        </if>
+        <if test=" params.CDJYDM != null ">
+              #{params.CDJYDM} ,
+        </if>
+        <if test=" params.CCYSDM != null ">
+              #{params.CCYSDM} ,
+        </if>
+        <if test=" params.CYSSDM != null ">
+              #{params.CYSSDM} ,
+        </if>
+        <if test=" params.DCYSZPSJ != null ">
+              #{params.DCYSZPSJ} ,
+        </if>
+        <if test=" params.DYSSZPSJ != null ">
+              #{params.DYSSZPSJ} ,
+        </if>
+        <if test=" params.CCYZPYDM != null ">
+              #{params.CCYZPYDM} ,
+        </if>
+
+        <if test=" params.CYSZPYDM != null ">
+              #{params.CYSZPYDM} ,
+        </if>
+        <if test=" params.DDHSJ != null ">
+             #{params.DDHSJ} ,
+        </if>
+        <if test=" params.CPCDBH != null ">
+              #{params.CPCDBH} ,
+        </if>
+        <if test=" params.NPHID != null ">
+              #{params.NPHID} ,
+        </if>
+        <if test=" params.DZCSJ != null ">
+              #{params.DZCSJ} ,
+        </if>
+        <if test=" params.DYJWCSJ != null ">
+              #{params.DYJWCSJ} ,
+        </if>
+        <if test=" params.CFWM != null ">
+              #{params.CFWM} ,
+        </if>
+        <if test=" params.CZJBS != null ">
+              #{params.CZJBS} ,
+        </if>
+        <if test=" params.DCKRQ != null ">
+              #{params.DCKRQ} ,
+        </if>
+
+        <if test=" params.CZFBH != null ">
+              #{params.CZFBH} ,
+        </if>
+        <if test=" params.DBCSJ != null ">
+              #{params.DBCSJ} ,
+        </if>
+        <if test=" params.VCKKGYDM != null ">
+              #{params.VCKKGYDM} ,
+        </if>
+        <if test=" params.VYSFS != null ">
+              #{params.VYSFS} ,
+        </if>
+        <if test=" params.CFYDD != null ">
+              #{params.CFYDD} ,
+        </if>
+        <if test=" params.VWLCKDM != null ">
+              #{params.VWLCKDM} ,
+        </if>
+        <if test=" params.CYDLX != null ">
+              #{params.CYDLX} ,
+        </if>
+        <if test=" params.VDWDM != null ">
+              #{params.VDWDM} ,
+        </if>
+        <if test=" params.VSCDZ != null ">
+              #{params.VSCDZ} ,
+        </if>
+
+        <if test=" params.CDHDDM != null ">
+              #{params.CDHDDM} ,
+        </if>
+        <if test=" params.CCLBS != null ">
+              #{params.CCLBS} ,
+        </if>
+        <if test=" params.DCKQRSJ != null ">
+              #{params.DCKQRSJ} ,
+        </if>
+        <if test=" params.CJKBS != null ">
+              #{params.CJKBS} ,
+        </if>
+        <if test=" params.DJKRQ != null ">
+              #{params.DJKRQ} ,
+        </if>
+        <if test=" params.CJHDH != null ">
+             #{params.CJHDH} ,
+        </if>
+        <if test=" params.CHTCODE != null ">
+              #{params.CHTCODE} ,
+        </if>
+        <if test=" params.VQRBZ != null ">
+              #{params.VQRBZ} ,
+        </if>
+        <if test=" params.CQRR != null ">
+             #{params.CQRR} ,
+        </if>
+
+        <if test=" params.DJYSJ != null ">
+              #{params.DJYSJ} ,
+        </if>
+        <if test=" params.CJYCH != null ">
+              #{params.CJYCH} ,
+        </if>
+        <if test=" params.CXSQRR != null ">
+              #{params.CXSQRR} ,
+        </if>
+        <if test=" params.DXSQRSJ != null ">
+              #{params.DXSQRSJ} ,
+        </if>
+        <if test=" params.VXSBZ != null ">
+             #{params.VXSBZ} ,
+        </if>
+        <if test=" params.DYSXD != null ">
+              #{params.DYSXD} ,
+        </if>
+        <if test=" params.DCKJSSJ != null ">
+              #{params.DCKJSSJ} ,
+        </if>
+        <if test=" params.DCKXD != null ">
+              #{params.DCKXD} ,
+        </if>
+        <if test=" params.NFJYF != null ">
+              #{params.NFJYF} ,
+        </if>
+
+        <if test=" params.CPZBS != null ">
+              #{params.CPZBS} ,
+        </if>
+        <if test=" params.DPZRQ != null ">
+              #{params.DPZRQ} ,
+        </if>
+        <if test=" params.CPZCZY != null ">
+              #{params.CPZCZY} ,
+        </if>
+        <if test=" params.CPZDBH != null ">
+              #{params.CPZDBH} ,
+        </if>
+        <if test=" params.CPZDXH != null ">
+             #{params.CPZDXH} ,
+        </if>
+        <if test=" params.CFPBS != null ">
+              #{params.CFPBS} ,
+        </if>
+        <if test=" params.DDCDKSJ != null ">
+              #{params.DDCDKSJ} ,
+        </if>
+        <if test=" params.DGPSDHSJ != null ">
+              #{params.DGPSDHSJ} ,
+        </if>
+        <if test=" params.DSJCFSJ != null ">
+              #{params.DSJCFSJ} ,
+        </if>
+
+        <if test=" params.CYCZT != null ">
+              #{params.CYCZT} ,
+        </if>
+        <if test=" params.CDKHDM != null ">
+              #{params.CDKHDM} ,
+        </if>
+        <if test=" params.DYJDHSJ != null ">
+              #{params.DYJDHSJ} ,
+        </if>
+        <if test=" params.VSJPZH != null ">
+              #{params.VSJPZH} ,
+        </if>
+        <if test=" params.VBZ1 != null ">
+              #{params.VBZ1} ,
+        </if>
+        <if test=" params.VDHPJ != null ">
+              #{params.VDHPJ} ,
+        </if>
+        <if test=" params.DGPSHCSJ != null ">
+              #{params.DGPSHCSJ} ,
+        </if>
+        <if test=" params.VPH != null ">
+              #{params.VPH} ,
+        </if>
+        <if test=" params.DPHSCSJ != null ">
+              #{params.DPHSCSJ} ,
+        </if>
+
+        <if test=" params.VPBBS != null ">
+              #{params.VPBBS} ,
+        </if>
+        <if test=" params.VDKHQRBS != null ">
+              #{params.VDKHQRBS} ,
+        </if>
+        <if test=" params.DLLLCSJ != null ">
+             #{params.DLLLCSJ} ,
+        </if>
+        <if test=" params.CGLFQRCZY != null ">
+             #{params.CGLFQRCZY} ,
+        </if>
+        <if test=" params.DGLFQRSJ != null ">
+              #{params.DGLFQRSJ} ,
+        </if>
+        <if test=" params.CGS != null ">
+             #{params.CGS} ,
+        </if>
+        <if test=" params.CBYJQRBS != null ">
+              #{params.CBYJQRBS} ,
+        </if>
+        <if test=" params.CBYJQRCZY != null ">
+              #{params.CBYJQRCZY} ,
+        </if>
+        <if test=" params.DBYJQRSJ != null ">
+              #{params.DBYJQRSJ} ,
+        </if>
+
+        <if test=" params.CCYSDM_O != null ">
+              #{params.CCYSDM_O} ,
+        </if>
+        <if test=" params.CYSSDM_O != null ">
+              #{params.CYSSDM_O} ,
+        </if>
+        <if test=" params.CGLFBZ != null ">
+             #{params.CGLFBZ} ,
+        </if>
+        <if test=" params.CGPSYCYY != null ">
+              #{params.CGPSYCYY} ,
+        </if>
+        <if test=" params.CZPYCLX != null ">
+             #{params.CZPYCLX} ,
+        </if>
+        <if test=" params.NFDDXH != null ">
+             #{params.NFDDXH} ,
+        </if>
+        <if test=" params.VFCZT != null ">
+              #{params.VFCZT} ,
+        </if>
+        <if test=" params.VSCZT != null ">
+              #{params.VSCZT} ,
+        </if>
+        <if test=" params.CQWH != null ">
+             #{params.CQWH} ,
+        </if>
+
+        <if test=" params.CZJGSDM != null ">
+             #{params.CZJGSDM} ,
+        </if>
+        <if test=" params.CZFBH2 != null ">
+             #{params.CZFBH2} ,
+        </if>
+        <if test=" params.CJSDBH2 != null ">
+              #{params.CJSDBH2} ,
+        </if>
+        <if test=" params.CZFBH3 != null ">
+             #{params.CZFBH3} ,
+        </if>
+        <if test=" params.CZFBH4 != null ">
+              #{params.CZFBH4} ,
+        </if>
+        <if test=" params.DTVSJCSJ != null ">
+              #{params.DTVSJCSJ} ,
+        </if>
+        <if test=" params.DTVSCFSJ != null ">
+              #{params.DTVSCFSJ} ,
+        </if>
+        <if test=" params.DTVSDHSJ != null ">
+              #{params.DTVSDHSJ} ,
+        </if>
+        <if test=" params.DTVSFCSJ != null ">
+              #{params.DTVSFCSJ} ,
+        </if>
+
+        <if test=" params.CTVSPH != null ">
+             #{params.CTVSPH} ,
+        </if>
+        <if test=" params.VEHID != null ">
+              #{params.VEHID} ,
+        </if>
+        <if test=" params.DTVSJCSJ2 != null ">
+              #{params.DTVSJCSJ2} ,
+        </if>
+        <if test=" params.DSTAMP != null ">
+              #{params.DSTAMP} ,
+        </if>
+        <if test=" params.CJCSF != null ">
+              #{params.CJCSF} ,
+        </if>
+        <if test=" params.CJCCS != null ">
+              #{params.CJCCS} ,
+        </if>
+        <if test=" params.NLJDS != null ">
+             #{params.NLJDS} ,
+        </if>
+        <if test=" params.CXMCBD_ZB != null ">
+              #{params.CXMCBD_ZB} ,
+        </if>
+        <if test=" params.CXMCBD_JD != null ">
+              #{params.CXMCBD_JD} ,
+        </if>
+
+        <if test=" params.CBS_GJZF != null ">
+              #{params.CBS_GJZF} ,
+        </if>
+        <if test=" params.CJSDBH_LAST != null ">
+              #{params.CJSDBH_LAST} ,
+        </if>
+        <if test=" params.CCYBZ != null ">
+              #{params.CCYBZ} ,
+        </if>
+        <if test=" params.CJXSBZ != null ">
+              #{params.CJXSBZ} ,
+        </if>
+        <if test=" params.CXSBZ != null ">
+              #{params.CXSBZ} ,
+        </if>
+        <if test=" params.CXSDDBH != null ">
+              #{params.CXSDDBH} ,
+        </if>
+        <if test=" params.PTBS != null ">
+              #{params.PTBS} ,
+        </if>
+        <if test=" params.CYYSDM_PT != null ">
+              #{params.CYYSDM_PT} ,
+        </if>
+        <if test=" params.CXSGSDM != null ">
+              #{params.CXSGSDM} ,
+        </if>
+
+        <if test=" params.VXSGSMC != null ">
+             #{params.VXSGSMC} ,
+        </if>
+        <if test=" params.NJCFDXH != null ">
+             #{params.NJCFDXH} ,
+        </if>
+        <if test=" params.CBS_SCJJ != null ">
+            #{params.CBS_SCJJ} ,
+        </if>
+        <if test=" params.CBS_BCBBLX != null ">
+              #{params.CBS_BCBBLX} ,
+        </if>
+        <if test=" params.DATE_SCJJ != null ">
+              #{params.DATE_SCJJ} ,
+        </if>
+        <if test=" params.CBS_CUSCONFIRM != null ">
+             #{params.CBS_CUSCONFIRM} ,
+        </if>
+        <if test=" params.CBS_OPERDEPART != null ">
+              #{params.CBS_OPERDEPART} ,
+        </if>
+        <if test=" params.DZCWCSJ != null ">
+               #{params.DZCWCSJ} ,
+        </if>
+        <if test=" params.DDDZTSJ != null ">
+              #{params.DDDZTSJ} ,
+        </if>
+
+        <if test=" params.IS_SYNC != null ">
+              #{params.IS_SYNC} ,
+        </if>
+        <if test=" params.EV_FLAG != null ">
+               #{params.EV_FLAG} ,
+        </if>
+        <if test=" params.SV_FLAG != null ">
+               #{params.SV_FLAG} ,
+        </if>
+        <if test=" params.INTER_CODE != null ">
+               #{params.INTER_CODE} ,
+        </if>
+        <if test=" params.NAME_FROM != null ">
+               #{params.NAME_FROM} ,
+        </if>
+        <if test=" params.NAME_TO != null ">
+               #{params.NAME_TO} ,
+        </if>
+        <if test=" params.SEN_PERSON != null ">
+               #{params.SEN_PERSON} ,
+        </if>
+        <if test=" params.REC_PERSON != null ">
+               #{params.REC_PERSON} ,
+        </if>
+        <if test=" params.PERSON_PHONE != null ">
+              #{params.PERSON_PHONE} ,
+        </if>
+
+        <if test=" params.ADDRESS_FROM != null ">
+               #{params.ADDRESS_FROM} ,
+        </if>
+        <if test=" params.ADDRESS_TO != null ">
+               #{params.ADDRESS_TO} ,
+        </if>
+        <if test=" params.REQ_DATE != null ">
+               #{params.REQ_DATE} ,
+        </if>
+        <if test=" params.FH_DATE != null ">
+               #{params.FH_DATE} ,
+        </if>
+        <if test=" params.SUBMI != null ">
+               #{params.SUBMI} ,
+        </if>
+        <if test=" params.DEPTM != null ">
+               #{params.DEPTM} ,
+        </if>
+        <if test=" params.INFO != null ">
+               #{params.INFO} ,
+        </if>
+        <if test=" params.CARTYPE != null ">
+               #{params.CARTYPE} ,
+        </if>
+        <if test=" params.NAME2 != null ">
+               #{params.NAME2} ,
+        </if>
+
+        <if test=" params.ZF_CONFIRM_CCZYDM != null ">
+               #{params.ZF_CONFIRM_CCZYDM} ,
+        </if>
+        <if test=" params.ZF_CONFIRM_CCZYMC != null ">
+               #{params.ZF_CONFIRM_CCZYMC} ,
+        </if>
+        <if test=" params.ZF_CONFIRM_DCZRQ != null ">
+               #{params.ZF_CONFIRM_DCZRQ} ,
+        </if>
+        <if test=" params.DTLLHSCSJ != null ">
+               #{params.DTLLHSCSJ} ,
+        </if>
+        <if test=" params.NLJDS_GPS != null ">
+               #{params.NLJDS_GPS} ,
+        </if>
+        <if test=" params.DDHSJ_GPS != null ">
+              #{params.DDHSJ_GPS} ,
+        </if>
+        <if test=" params.DDHSJ_XT != null ">
+               #{params.DDHSJ_XT} ,
+        </if>
+        <if test=" params.DZTXCSJ != null ">
+              #{params.DZTXCSJ} ,
+        </if>
+        <if test=" params.DYJDHSJ_BM != null ">
+               #{params.DYJDHSJ_BM} ,
+        </if>
+
+        <if test=" params.DFDYJDHSJ_BM != null ">
+               #{params.DFDYJDHSJ_BM} ,
+        </if>
+        <if test=" params.CZFBH_BMCBC != null ">
+               #{params.CZFBH_BMCBC} ,
+        </if>
+        <if test=" params.CJSBH_BMCBC != null ">
+               #{params.CJSBH_BMCBC} ,
+        </if>
+        <if test=" params.VDHPJ_BMCBC != null ">
+              #{params.VDHPJ_BMCBC} ,
+        </if>
+        <if test=" params.SV_TYPE != null ">
+               #{params.SV_TYPE} ,
+        </if>
+        <if test=" params.CZT_JS_TS != null ">
+              #{params.CZT_JS_TS} ,
+        </if>
+        <if test=" params.CZT_ZF_TS != null ">
+               #{params.CZT_ZF_TS} ,
+        </if>
+        <if test=" params.NBZWLSJ_DZ != null ">
+               #{params.NBZWLSJ_DZ} ,
+        </if>
+        <if test=" params.DBZDHSJ_DZ != null ">
+               #{params.DBZDHSJ_DZ} ,
+        </if>
+
+        <if test=" params.CTCBS != null ">
+              #{params.CTCBS} ,
+        </if>
+        <if test=" params.WAREHOUSE_CREATETIME != null ">
+               #{params.WAREHOUSE_CREATETIME} ,
+        </if>
+        <if test=" params.WAREHOUSE_UPDATETIME != null ">
+               #{params.WAREHOUSE_UPDATETIME} ,
+        </if>
+        <if test=" params.TRAFFIC_TYPE != null ">
+              #{params.TRAFFIC_TYPE} ,
+        </if>
+        <if test=" params.SHIPMENT_TIME != null ">
+               #{params.SHIPMENT_TIME} ,
+        </if>
+        <if test=" params.PLAN_RELEASE_TIME != null ">
+               #{params.PLAN_RELEASE_TIME} ,
+        </if>
+        <if test=" params.ASSIGN_TIME != null ">
+               #{params.ASSIGN_TIME} ,
+        </if>
+        <if test=" params.DOT_SITE_TIME != null ">
+               #{params.DOT_SITE_TIME} ,
+        </if>
+        <if test=" params.FINAL_SITE_TIME != null ">
+              #{params.FINAL_SITE_TIME} ,
+        </if>
+        <if test=" params.ORDER_CREATE_TIME != null ">
+               #{params.ORDER_CREATE_TIME} ,
+        </if>
+        <if test=" params.BASE_CODE != null ">
+               #{params.BASE_CODE} ,
+        </if>
+        <if test=" params.TRANS_MODE_CODE != null ">
+               #{params.TRANS_MODE_CODE} ,
+        </if>
+        <if test=" params.HOST_COM_CODE != null ">
+               #{params.HOST_COM_CODE} ,
+        </if>
+        <if test=" params.THEORY_SHIPMENT_TIME != null ">
+               #{params.THEORY_SHIPMENT_TIME} ,
+        </if>
+        <if test=" params.THEORY_OUT_TIME != null ">
+               #{params.THEORY_OUT_TIME} ,
+        </if>
+        <if test=" params.THEORY_SITE_TIME != null ">
+               #{params.THEORY_SITE_TIME} ,
+        </if>
+        <if test=" params.START_PROVINCE_CODE != null ">
+               #{params.START_PROVINCE_CODE} ,
+        </if>
+        <if test=" params.START_CITY_CODE != null ">
+               #{params.START_CITY_CODE} ,
+        </if>
+        <if test=" params.END_PROVINCE_CODE != null ">
+               #{params.END_PROVINCE_CODE} ,
+        </if>
+        <if test=" params.END_CITY_CODE != null ">
+               #{params.END_CITY_CODE} ,
+        </if>
+        <if test=" params.ACTUAL_OUT_TIME != null ">
+               #{params.ACTUAL_OUT_TIME} ,
+        </if>
+        <if test=" params.START_WAREHOUSE_CODE != null ">
+               #{params.START_WAREHOUSE_CODE} ,
+        </if>
+        <if test=" params.END_WAREHOUSE_CODE != null ">
+               #{params.END_WAREHOUSE_CODE} ,
+        </if>
+        <if test=" params.START_WAREHOUSE_NAME != null ">
+               #{params.START_WAREHOUSE_NAME} ,
+        </if>
+        <if test=" params.END_WAREHOUSE_NAME != null ">
+               #{params.END_WAREHOUSE_NAME} ,
+        </if>
+        <if test=" params.HIGHWAY_WAREHOUSE_TYPE != null ">
+               #{params.HIGHWAY_WAREHOUSE_TYPE}
+        </if>
+        )
+            ON DUPLICATE KEY UPDATE
+        <if test=" params.CJSDBH != null ">
+            CJSDBH = VALUES(CJSDBH) ,
+        </if>
+        <if test=" params.DDJRQ != null ">
+            DDJRQ = VALUES(DDJRQ) ,
+        </if>
+        <if test=" params.NYDFY != null ">
+            NYDFY = VALUES(NYDFY) ,
+        </if>
+        <if test=" params.NKCFY != null ">
+            NKCFY = VALUES(NKCFY) ,
+        </if>
+        <if test=" params.NSFFY != null ">
+            NSFFY = VALUES(NSFFY) ,
+        </if>
+        <if test=" params.DJSSJ != null ">
+            DJSSJ = VALUES(DJSSJ) ,
+        </if>
+        <if test=" params.VJSYDM != null ">
+            VJSYDM = VALUES(VJSYDM) ,
+        </if>
+        <if test=" params.CZT != null ">
+            CZT = VALUES(CZT) ,
+        </if>
+        <if test=" params.NJSDYCS != null ">
+            NJSDYCS = VALUES(NJSDYCS) ,
+        </if>
+        <if test=" params.NTCDYCS != null ">
+            NTCDYCS = VALUES(NTCDYCS) ,
+        </if>
+        <if test=" params.VBZ != null ">
+            VBZ = VALUES(VBZ) ,
+        </if>
+        <if test=" params.CYSFS_ZJGS != null ">
+            CYSFS_ZJGS = VALUES(CYSFS_ZJGS) ,
+        </if>
+        <if test=" params.VWXDWDM != null ">
+            VWXDWDM = VALUES(VWXDWDM) ,
+        </if>
+        <if test=" params.VYSCDM != null ">
+            VYSCDM = VALUES(VYSCDM) ,
+        </if>
+        <if test=" params.VZSJDM != null ">
+            VZSJDM  = VALUES(VZSJDM),
+        </if>
+        <if test=" params.VFSJDM != null ">
+            VFSJDM = VALUES(VFSJDM) ,
+        </if>
+        <if test=" params.CYSLX != null ">
+            CYSLX = VALUES(CYSLX) ,
+        </if>
+        <if test=" params.CCZYDM != null ">
+            CCZYDM = VALUES(CCZYDM) ,
+        </if>
+        <if test=" params.DZPSJ != null ">
+            DZPSJ = VALUES(DZPSJ) ,
+        </if>
+        <if test=" params.CZPYDM != null ">
+            CZPYDM = VALUES(CZPYDM) ,
+        </if>
+        <if test=" params.DFCDJSJ != null ">
+            DFCDJSJ = VALUES(DFCDJSJ) ,
+        </if>
+        <if test=" params.CDJYDM != null ">
+            CDJYDM = VALUES(CDJYDM) ,
+        </if>
+        <if test=" params.CCYSDM != null ">
+            CCYSDM = VALUES(CCYSDM) ,
+        </if>
+        <if test=" params.CYSSDM != null ">
+            CYSSDM = VALUES(CYSSDM) ,
+        </if>
+        <if test=" params.DCYSZPSJ != null ">
+            DCYSZPSJ = VALUES(DCYSZPSJ) ,
+        </if>
+        <if test=" params.DYSSZPSJ != null ">
+            DYSSZPSJ = VALUES(DYSSZPSJ) ,
+        </if>
+        <if test=" params.CCYZPYDM != null ">
+            CCYZPYDM = VALUES(CCYZPYDM) ,
+        </if>
+        <if test=" params.CYSZPYDM != null ">
+            CYSZPYDM = VALUES(CYSZPYDM) ,
+        </if>
+        <if test=" params.DDHSJ != null ">
+            DDHSJ = VALUES(DDHSJ) ,
+        </if>
+        <if test=" params.CPCDBH != null ">
+            CPCDBH = VALUES(CPCDBH) ,
+        </if>
+        <if test=" params.NPHID != null ">
+            NPHID = VALUES(NPHID) ,
+        </if>
+        <if test=" params.DZCSJ != null ">
+            DZCSJ = VALUES(DZCSJ) ,
+        </if>
+        <if test=" params.DYJWCSJ != null ">
+            DYJWCSJ = VALUES(DYJWCSJ) ,
+        </if>
+        <if test=" params.CFWM != null ">
+            CFWM = VALUES(CFWM) ,
+        </if>
+        <if test=" params.CZJBS != null ">
+            CZJBS = VALUES(CZJBS) ,
+        </if>
+        <if test=" params.DCKRQ != null ">
+            DCKRQ = VALUES(DCKRQ) ,
+        </if>
+        <if test=" params.CZFBH != null ">
+            CZFBH = VALUES(CZFBH) ,
+        </if>
+        <if test=" params.DBCSJ != null ">
+            DBCSJ = VALUES(DBCSJ) ,
+        </if>
+        <if test=" params.VCKKGYDM != null ">
+            VCKKGYDM = VALUES(VCKKGYDM) ,
+        </if>
+        <if test=" params.VYSFS != null ">
+            VYSFS = VALUES(VYSFS) ,
+        </if>
+        <if test=" params.CFYDD != null ">
+            CFYDD = VALUES(CFYDD) ,
+        </if>
+        <if test=" params.VWLCKDM != null ">
+            VWLCKDM = VALUES(VWLCKDM) ,
+        </if>
+        <if test=" params.CYDLX != null ">
+            CYDLX = VALUES(CYDLX) ,
+        </if>
+        <if test=" params.VDWDM != null ">
+            VDWDM = VALUES(VDWDM) ,
+        </if>
+        <if test=" params.VSCDZ != null ">
+            VSCDZ = VALUES(VSCDZ) ,
+        </if>
+        <if test=" params.CDHDDM != null ">
+            CDHDDM = VALUES(CDHDDM) ,
+        </if>
+        <if test=" params.CCLBS != null ">
+            CCLBS = VALUES(CCLBS) ,
+        </if>
+        <if test=" params.DCKQRSJ != null ">
+            DCKQRSJ = VALUES(DCKQRSJ) ,
+        </if>
+        <if test=" params.CJKBS != null ">
+            CJKBS = VALUES(CJKBS) ,
+        </if>
+        <if test=" params.DJKRQ != null ">
+            DJKRQ = VALUES(DJKRQ) ,
+        </if>
+        <if test=" params.CJHDH != null ">
+            CJHDH = VALUES(CJHDH) ,
+        </if>
+        <if test=" params.CHTCODE != null ">
+            CHTCODE = VALUES(CHTCODE) ,
+        </if>
+        <if test=" params.VQRBZ != null ">
+            VQRBZ = VALUES(VQRBZ) ,
+        </if>
+        <if test=" params.CQRR != null ">
+            CQRR = VALUES(CQRR) ,
+        </if>
+        <if test=" params.DJYSJ != null ">
+            DJYSJ = VALUES(DJYSJ) ,
+        </if>
+        <if test=" params.CJYCH != null ">
+            CJYCH = VALUES(CJYCH) ,
+        </if>
+        <if test=" params.CXSQRR != null ">
+            CXSQRR = VALUES(CXSQRR) ,
+        </if>
+        <if test=" params.DXSQRSJ != null ">
+            DXSQRSJ = VALUES(DXSQRSJ) ,
+        </if>
+        <if test=" params.VXSBZ != null ">
+            VXSBZ = VALUES(VXSBZ) ,
+        </if>
+        <if test=" params.DYSXD != null ">
+            DYSXD = VALUES(DYSXD) ,
+        </if>
+        <if test=" params.DCKJSSJ != null ">
+            DCKJSSJ = VALUES(DCKJSSJ) ,
+        </if>
+        <if test=" params.DCKXD != null ">
+            DCKXD = VALUES(DCKXD) ,
+        </if>
+        <if test=" params.NFJYF != null ">
+            NFJYF = VALUES(NFJYF) ,
+        </if>
+        <if test=" params.CPZBS != null ">
+            CPZBS = VALUES(CPZBS) ,
+        </if>
+        <if test=" params.DPZRQ != null ">
+            DPZRQ = VALUES(DPZRQ) ,
+        </if>
+        <if test=" params.CPZCZY != null ">
+            CPZCZY = VALUES(CPZCZY) ,
+        </if>
+        <if test=" params.CPZDBH != null ">
+            CPZDBH = VALUES(CPZDBH) ,
+        </if>
+        <if test=" params.CPZDXH != null ">
+            CPZDXH = VALUES(CPZDXH) ,
+        </if>
+        <if test=" params.CFPBS != null ">
+            CFPBS = VALUES(CFPBS) ,
+        </if>
+        <if test=" params.DDCDKSJ != null ">
+            DDCDKSJ = VALUES(DDCDKSJ) ,
+        </if>
+        <if test=" params.DGPSDHSJ != null ">
+            DGPSDHSJ = VALUES(DGPSDHSJ) ,
+        </if>
+        <if test=" params.DSJCFSJ != null ">
+            DSJCFSJ = VALUES(DSJCFSJ) ,
+        </if>
+        <if test=" params.CYCZT != null ">
+            CYCZT = VALUES(CYCZT) ,
+        </if>
+        <if test=" params.CDKHDM != null ">
+            CDKHDM = VALUES(CDKHDM) ,
+        </if>
+        <if test=" params.DYJDHSJ != null ">
+            DYJDHSJ = VALUES(DYJDHSJ) ,
+        </if>
+        <if test=" params.VSJPZH != null ">
+            VSJPZH = VALUES(VSJPZH) ,
+        </if>
+        <if test=" params.VBZ1 != null ">
+            VBZ1 = VALUES(VBZ1) ,
+        </if>
+        <if test=" params.VDHPJ != null ">
+            VDHPJ = VALUES(VDHPJ) ,
+        </if>
+        <if test=" params.DGPSHCSJ != null ">
+            DGPSHCSJ = VALUES(DGPSHCSJ) ,
+        </if>
+        <if test=" params.VPH != null ">
+            VPH = VALUES(VPH) ,
+        </if>
+        <if test=" params.DPHSCSJ != null ">
+            DPHSCSJ = VALUES(DPHSCSJ) ,
+        </if>
+        <if test=" params.VPBBS != null ">
+            VPBBS = VALUES(VPBBS) ,
+        </if>
+        <if test=" params.VDKHQRBS != null ">
+            VDKHQRBS = VALUES(VDKHQRBS) ,
+        </if>
+        <if test=" params.DLLLCSJ != null ">
+            DLLLCSJ = VALUES(DLLLCSJ) ,
+        </if>
+        <if test=" params.CGLFQRCZY != null ">
+            CGLFQRCZY = VALUES(CGLFQRCZY) ,
+        </if>
+        <if test=" params.DGLFQRSJ != null ">
+            DGLFQRSJ = VALUES(DGLFQRSJ) ,
+        </if>
+        <if test=" params.CGS != null ">
+            CGS = VALUES(CGS) ,
+        </if>
+        <if test=" params.CBYJQRBS != null ">
+            CBYJQRBS = VALUES(CBYJQRBS) ,
+        </if>
+        <if test=" params.CBYJQRCZY != null ">
+            CBYJQRCZY = VALUES(CBYJQRCZY) ,
+        </if>
+        <if test=" params.DBYJQRSJ != null ">
+            DBYJQRSJ = VALUES(DBYJQRSJ) ,
+        </if>
+        <if test=" params.CCYSDM_O != null ">
+            CCYSDM_O = VALUES(CCYSDM_O) ,
+        </if>
+        <if test=" params.CYSSDM_O != null ">
+            CYSSDM_O = VALUES(CYSSDM_O) ,
+        </if>
+        <if test=" params.CGLFBZ != null ">
+            CGLFBZ = VALUES(CGLFBZ) ,
+        </if>
+        <if test=" params.CGPSYCYY != null ">
+            CGPSYCYY = VALUES(CGPSYCYY) ,
+        </if>
+        <if test=" params.CZPYCLX != null ">
+            CZPYCLX = VALUES(CZPYCLX) ,
+        </if>
+        <if test=" params.NFDDXH != null ">
+            NFDDXH = VALUES(NFDDXH) ,
+        </if>
+        <if test=" params.VFCZT != null ">
+            VFCZT = VALUES(VFCZT) ,
+        </if>
+        <if test=" params.VSCZT != null ">
+            VSCZT = VALUES(VSCZT) ,
+        </if>
+        <if test=" params.CQWH != null ">
+            CQWH = VALUES(CQWH) ,
+        </if>
+        <if test=" params.CZJGSDM != null ">
+            CZJGSDM = VALUES(CZJGSDM) ,
+        </if>
+        <if test=" params.CZFBH2 != null ">
+            CZFBH2 = VALUES(CZFBH2) ,
+        </if>
+        <if test=" params.CJSDBH2 != null ">
+            CJSDBH2 = VALUES(CJSDBH2) ,
+        </if>
+        <if test=" params.CZFBH3 != null ">
+            CZFBH3 = VALUES(CZFBH3) ,
+        </if>
+        <if test=" params.CZFBH4 != null ">
+            CZFBH4 = VALUES(CZFBH4) ,
+        </if>
+        <if test=" params.DTVSJCSJ != null ">
+            DTVSJCSJ = VALUES(DTVSJCSJ) ,
+        </if>
+        <if test=" params.DTVSCFSJ != null ">
+            DTVSCFSJ = VALUES(DTVSCFSJ) ,
+        </if>
+        <if test=" params.DTVSDHSJ != null ">
+            DTVSDHSJ = VALUES(DTVSDHSJ) ,
+        </if>
+        <if test=" params.DTVSFCSJ != null ">
+            DTVSFCSJ = VALUES(DTVSFCSJ) ,
+        </if>
+        <if test=" params.CTVSPH != null ">
+            CTVSPH = VALUES(CTVSPH) ,
+        </if>
+        <if test=" params.VEHID != null ">
+            VEHID = VALUES(VEHID) ,
+        </if>
+        <if test=" params.DTVSJCSJ2 != null ">
+            DTVSJCSJ2 = VALUES(DTVSJCSJ2) ,
+        </if>
+        <if test=" params.DSTAMP != null ">
+            DSTAMP = VALUES(DSTAMP) ,
+        </if>
+        <if test=" params.CJCSF != null ">
+            CJCSF = VALUES(CJCSF) ,
+        </if>
+        <if test=" params.CJCCS != null ">
+            CJCCS = VALUES(CJCCS) ,
+        </if>
+        <if test=" params.NLJDS != null ">
+            NLJDS = VALUES(NLJDS) ,
+        </if>
+        <if test=" params.CXMCBD_ZB != null ">
+            CXMCBD_ZB = VALUES(CXMCBD_ZB) ,
+        </if>
+        <if test=" params.CXMCBD_JD != null ">
+            CXMCBD_JD = VALUES(CXMCBD_JD) ,
+        </if>
+        <if test=" params.CBS_GJZF != null ">
+            CBS_GJZF = VALUES(CBS_GJZF) ,
+        </if>
+        <if test=" params.CJSDBH_LAST != null ">
+            CJSDBH_LAST = VALUES(CJSDBH_LAST) ,
+        </if>
+        <if test=" params.CCYBZ != null ">
+            CCYBZ = VALUES(CCYBZ) ,
+        </if>
+        <if test=" params.CJXSBZ != null ">
+            CJXSBZ = VALUES(CJXSBZ) ,
+        </if>
+        <if test=" params.CXSBZ != null ">
+            CXSBZ = VALUES(CXSBZ) ,
+        </if>
+        <if test=" params.CXSDDBH != null ">
+            CXSDDBH = VALUES(CXSDDBH) ,
+        </if>
+        <if test=" params.PTBS != null ">
+            PTBS = VALUES(PTBS) ,
+        </if>
+        <if test=" params.CYYSDM_PT != null ">
+            CYYSDM_PT = VALUES(CYYSDM_PT) ,
+        </if>
+        <if test=" params.CXSGSDM != null ">
+            CXSGSDM = VALUES(CXSGSDM) ,
+        </if>
+        <if test=" params.VXSGSMC != null ">
+            VXSGSMC = VALUES(VXSGSMC) ,
+        </if>
+        <if test=" params.NJCFDXH != null ">
+            NJCFDXH = VALUES(NJCFDXH) ,
+        </if>
+        <if test=" params.CBS_SCJJ != null ">
+            CBS_SCJJ = VALUES(CBS_SCJJ) ,
+        </if>
+        <if test=" params.CBS_BCBBLX != null ">
+            CBS_BCBBLX = VALUES(CBS_BCBBLX) ,
+        </if>
+        <if test=" params.DATE_SCJJ != null ">
+            DATE_SCJJ = VALUES(DATE_SCJJ) ,
+        </if>
+        <if test=" params.CBS_CUSCONFIRM != null ">
+            CBS_CUSCONFIRM = VALUES(CBS_CUSCONFIRM) ,
+        </if>
+        <if test=" params.CBS_OPERDEPART != null ">
+            CBS_OPERDEPART = VALUES(CBS_OPERDEPART) ,
+        </if>
+        <if test=" params.DZCWCSJ != null ">
+            DZCWCSJ = VALUES(DZCWCSJ) ,
+        </if>
+        <if test=" params.DDDZTSJ != null ">
+            DDDZTSJ = VALUES(DDDZTSJ) ,
+        </if>
+        <if test=" params.IS_SYNC != null ">
+            IS_SYNC = VALUES(IS_SYNC) ,
+        </if>
+        <if test=" params.EV_FLAG != null ">
+            EV_FLAG = VALUES(EV_FLAG) ,
+        </if>
+        <if test=" params.SV_FLAG != null ">
+            SV_FLAG = VALUES(SV_FLAG) ,
+        </if>
+        <if test=" params.INTER_CODE != null ">
+            INTER_CODE = VALUES(INTER_CODE) ,
+        </if>
+        <if test=" params.NAME_FROM != null ">
+            NAME_FROM = VALUES(NAME_FROM) ,
+        </if>
+        <if test=" params.NAME_TO != null ">
+            NAME_TO = VALUES(NAME_TO) ,
+        </if>
+        <if test=" params.SEN_PERSON != null ">
+            SEN_PERSON = VALUES(SEN_PERSON) ,
+        </if>
+        <if test=" params.REC_PERSON != null ">
+            REC_PERSON = VALUES(REC_PERSON) ,
+        </if>
+        <if test=" params.PERSON_PHONE != null ">
+            PERSON_PHONE = VALUES(PERSON_PHONE) ,
+        </if>
+        <if test=" params.ADDRESS_FROM != null ">
+            ADDRESS_FROM = VALUES(ADDRESS_FROM) ,
+        </if>
+        <if test=" params.ADDRESS_TO != null ">
+            ADDRESS_TO = VALUES(ADDRESS_TO) ,
+        </if>
+        <if test=" params.REQ_DATE != null ">
+            REQ_DATE = VALUES(REQ_DATE) ,
+        </if>
+        <if test=" params.FH_DATE != null ">
+            FH_DATE = VALUES(FH_DATE) ,
+        </if>
+        <if test=" params.SUBMI != null ">
+            SUBMI = VALUES(SUBMI) ,
+        </if>
+        <if test=" params.DEPTM != null ">
+            DEPTM = VALUES(DEPTM) ,
+        </if>
+        <if test=" params.INFO != null ">
+            INFO = VALUES(INFO) ,
+        </if>
+        <if test=" params.CARTYPE != null ">
+            CARTYPE = VALUES(CARTYPE) ,
+        </if>
+        <if test=" params.NAME2 != null ">
+            NAME2 = VALUES(NAME2) ,
+        </if>
+        <if test=" params.ZF_CONFIRM_CCZYDM != null ">
+            ZF_CONFIRM_CCZYDM = VALUES(ZF_CONFIRM_CCZYDM) ,
+        </if>
+        <if test=" params.ZF_CONFIRM_CCZYMC != null ">
+            ZF_CONFIRM_CCZYMC = VALUES(ZF_CONFIRM_CCZYMC) ,
+        </if>
+        <if test=" params.ZF_CONFIRM_DCZRQ != null ">
+            ZF_CONFIRM_DCZRQ = VALUES(ZF_CONFIRM_DCZRQ) ,
+        </if>
+        <if test=" params.DTLLHSCSJ != null ">
+            DTLLHSCSJ = VALUES(DTLLHSCSJ) ,
+        </if>
+        <if test=" params.NLJDS_GPS != null ">
+            NLJDS_GPS = VALUES(NLJDS_GPS) ,
+        </if>
+        <if test=" params.DDHSJ_GPS != null ">
+            DDHSJ_GPS = VALUES(DDHSJ_GPS) ,
+        </if>
+        <if test=" params.DDHSJ_XT != null ">
+            DDHSJ_XT = VALUES(DDHSJ_XT) ,
+        </if>
+        <if test=" params.DZTXCSJ != null ">
+            DZTXCSJ = VALUES(DZTXCSJ) ,
+        </if>
+        <if test=" params.DYJDHSJ_BM != null ">
+            DYJDHSJ_BM = VALUES(DYJDHSJ_BM) ,
+        </if>
+        <if test=" params.DFDYJDHSJ_BM != null ">
+            DFDYJDHSJ_BM = VALUES(DFDYJDHSJ_BM) ,
+        </if>
+        <if test=" params.CZFBH_BMCBC != null ">
+            CZFBH_BMCBC = VALUES(CZFBH_BMCBC) ,
+        </if>
+        <if test=" params.CJSBH_BMCBC != null ">
+            CJSBH_BMCBC = VALUES(CJSBH_BMCBC) ,
+        </if>
+        <if test=" params.VDHPJ_BMCBC != null ">
+            VDHPJ_BMCBC = VALUES(VDHPJ_BMCBC) ,
+        </if>
+        <if test=" params.SV_TYPE != null ">
+            SV_TYPE = VALUES(SV_TYPE) ,
+        </if>
+        <if test=" params.CZT_JS_TS != null ">
+            CZT_JS_TS = VALUES(CZT_JS_TS) ,
+        </if>
+        <if test=" params.CZT_ZF_TS != null ">
+            CZT_ZF_TS = VALUES(CZT_ZF_TS) ,
+        </if>
+        <if test=" params.NBZWLSJ_DZ != null ">
+            NBZWLSJ_DZ = VALUES(NBZWLSJ_DZ) ,
+        </if>
+        <if test=" params.DBZDHSJ_DZ != null ">
+            DBZDHSJ_DZ = VALUES(DBZDHSJ_DZ) ,
+        </if>
+        <if test=" params.CTCBS != null ">
+            CTCBS = VALUES(CTCBS) ,
+        </if>
+        <if test=" params.WAREHOUSE_CREATETIME != null ">
+            WAREHOUSE_CREATETIME = VALUES(WAREHOUSE_CREATETIME) ,
+        </if>
+        <if test=" params.WAREHOUSE_UPDATETIME != null ">
+            WAREHOUSE_UPDATETIME = VALUES(WAREHOUSE_UPDATETIME) ,
+        </if>
+        <if test=" params.TRAFFIC_TYPE != null ">
+            TRAFFIC_TYPE = VALUES(TRAFFIC_TYPE) ,
+        </if>
+        <if test=" params.SHIPMENT_TIME != null ">
+            SHIPMENT_TIME = VALUES(SHIPMENT_TIME) ,
+        </if>
+        <if test=" params.PLAN_RELEASE_TIME != null ">
+            PLAN_RELEASE_TIME = VALUES(PLAN_RELEASE_TIME) ,
+        </if>
+        <if test=" params.ASSIGN_TIME != null ">
+            ASSIGN_TIME = VALUES(ASSIGN_TIME) ,
+        </if>
+        <if test=" params.DOT_SITE_TIME != null ">
+            DOT_SITE_TIME = VALUES(DOT_SITE_TIME) ,
+        </if>
+        <if test=" params.FINAL_SITE_TIME != null ">
+            FINAL_SITE_TIME = VALUES(FINAL_SITE_TIME) ,
+        </if>
+        <if test=" params.ORDER_CREATE_TIME != null ">
+            ORDER_CREATE_TIME = VALUES(ORDER_CREATE_TIME) ,
+        </if>
+        <if test=" params.BASE_CODE != null ">
+            BASE_CODE = VALUES(BASE_CODE) ,
+        </if>
+        <if test=" params.TRANS_MODE_CODE != null ">
+            TRANS_MODE_CODE = VALUES(TRANS_MODE_CODE) ,
+        </if>
+        <if test=" params.HOST_COM_CODE != null ">
+            HOST_COM_CODE = VALUES(HOST_COM_CODE) ,
+        </if>
+        <if test=" params.THEORY_SHIPMENT_TIME != null ">
+            THEORY_SHIPMENT_TIME = VALUES(THEORY_SHIPMENT_TIME) ,
+        </if>
+        <if test=" params.THEORY_OUT_TIME != null ">
+            THEORY_OUT_TIME = VALUES(THEORY_OUT_TIME) ,
+        </if>
+        <if test=" params.THEORY_SITE_TIME != null ">
+            THEORY_SITE_TIME = VALUES(THEORY_SITE_TIME) ,
+        </if>
+        <if test=" params.START_PROVINCE_CODE != null ">
+            START_PROVINCE_CODE = VALUES(START_PROVINCE_CODE) ,
+        </if>
+        <if test=" params.START_CITY_CODE != null ">
+            START_CITY_CODE = VALUES(START_CITY_CODE) ,
+        </if>
+        <if test=" params.END_PROVINCE_CODE != null ">
+            END_PROVINCE_CODE = VALUES(END_PROVINCE_CODE) ,
+        </if>
+        <if test=" params.END_CITY_CODE != null ">
+            END_CITY_CODE = VALUES(END_CITY_CODE) ,
+        </if>
+        <if test=" params.ACTUAL_OUT_TIME != null ">
+            ACTUAL_OUT_TIME = VALUES(ACTUAL_OUT_TIME) ,
+        </if>
+        <if test=" params.START_WAREHOUSE_CODE != null ">
+            START_WAREHOUSE_CODE = VALUES(START_WAREHOUSE_CODE) ,
+        </if>
+        <if test=" params.END_WAREHOUSE_CODE != null ">
+            END_WAREHOUSE_CODE = VALUES(END_WAREHOUSE_CODE) ,
+        </if>
+        <if test=" params.START_WAREHOUSE_NAME != null ">
+            START_WAREHOUSE_NAME = VALUES(START_WAREHOUSE_NAME) ,
+        </if>
+        <if test=" params.END_WAREHOUSE_NAME != null ">
+            END_WAREHOUSE_NAME = VALUES(END_WAREHOUSE_NAME) ,
+        </if>
+        <if test=" params.HIGHWAY_WAREHOUSE_TYPE != null ">
+            HIGHWAY_WAREHOUSE_TYPE = VALUES(HIGHWAY_WAREHOUSE_TYPE)
+        </if>
+
+    </insert>
 
 
 

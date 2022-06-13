@@ -25,13 +25,5 @@ public class TableParams {
      */
     private String values;
 
-    /**
-     * site_warehouse 仓库的种类字段
-     */
-    private String type;
 
-    /**
-     * site_warehouse 仓库的种类值
-     */
-    private String typeValues;
 }

@@ -4,32 +4,35 @@ import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.collections.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.Sptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.TableParams;
+import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsSptb02Service;
+import org.jeecg.yqwl.datamiddle.util.JsonPartUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
- * @Description:
+ * @Description: 具体实现的代码
  * @Author: XiaoFeng
  * @Date: 2022/6/13 15:40
  * @Version: V1.0
  */
 @Slf4j
 @Service
-public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Service {
+public class DataMiddleOdsSptb02ServiceImpl extends ServiceImpl<DataMiddleOdsSptb02Mapper, DwdSptb02> implements DataMiddleOdsSptb02Service {
     @Resource
     private DataMiddleOdsSptb02Mapper dataMiddleOdsSptb02Mapper;
 
@@ -40,10 +43,10 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
     @Override
     public void getOdsVlmsSptb02() {
         log.info("开始查询ods_sptb02数据");
+        Long nowTime = System.currentTimeMillis();   //获取当前的时间戳
+        Long end = nowTime - ((nowTime + TimeZone.getDefault().getRawOffset()) % (24 * 60 * 60 * 1000L)); //当前0点的时间戳
+        Long begin= end - 1296000000L ;  //获取15天前的时间戳
 
-        //todo:15天以前到现在
-        String begin = DateUtils.getToday4Dawn(); //2022-06-13 00:00:00
-        String end = DateUtils.getToday4Night();  //2022-06-13 23:59:59
         boolean hasNext = true;
         Integer limit = 500;
         Integer rowNum=0;
@@ -202,8 +205,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                 String vfczt = sptb02.getVFCZT();
                 if (StringUtils.isNotBlank(vfczt)){
                     tableParams.setValues(vfczt);
-                    tableParams.setType("TYPE");
-                    tableParams.setTypeValues("CONTRAST");
+
                     String startWareHouseCode ="";
                     String startWareHouseName="";
                     Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
@@ -230,8 +232,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                 String vsczt = sptb02.getVSCZT();
                 if (StringUtils.isNotBlank(vsczt)){
                     tableParams.setValues(vsczt);
-                    tableParams.setType("TYPE");
-                    tableParams.setTypeValues("CONTRAST");
+
                     String endWareHouseCode ="";
                     String endWareHouseName="";
                     Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
@@ -254,8 +255,6 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                  */
                 tableParams.setTableName("dim_vlms_warehouse_rs");
                 tableParams.setField("VWLCKDM");
-                tableParams.setType(null);
-                tableParams.setTypeValues(null);
                 String vwlckdm = sptb02.getVWLCKDM();
                 String HIGHWAY_WAREHOUSE_TYPE="";
                 if (StringUtils.isNotBlank(vwlckdm)){
@@ -267,9 +266,15 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                             dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(HIGHWAY_WAREHOUSE_TYPE);
                         }
                     }
-                    String gld = dwdSptb02.toString();
-                    log.info("加了公路单的sptb02: {}",gld);
+
                 }
+                DwdSptb02 dwdSptb02All = JsonPartUtil.getBean(dwdSptb02);
+                Integer integer = this.dataMiddleOdsSptb02Mapper.addDwdSptb02(dwdSptb02All);
+                log.info("插入数据: {}" ,integer);
+
+
+                //--------------------------------------------维表添加完成---------------------------------------------------------//
+            //--------------------------------------------插入dwd_sptb02-----------------------------------------------------//
 
             }
 
