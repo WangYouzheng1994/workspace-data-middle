@@ -26,6 +26,13 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/cglib/cglib -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+
         <!--   Flink CDC 4 Oracle     -->
         <dependency>
             <groupId>com.ververica</groupId>
@@ -233,9 +240,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>oracle-cdc-kafka</finalName>
+                            <!--<finalName>oracle-cdc-kafka</finalName>-->
                             <!--<finalName>consumer-kafka-divide</finalName>-->
-                            <!--<finalName>consumer-kafka-dwd-sptb02</finalName>-->
+                            <finalName>WaybillDwmApp</finalName>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
@@ -270,9 +277,10 @@
                                     <resource>META-INF/spring.schemas</resource>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>
+                                   <!-- <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>-->
                                     <!--<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>-->
                                     <!--<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>-->
+                                    <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmApp</mainClass>
                                 </transformer>
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
