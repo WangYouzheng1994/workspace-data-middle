@@ -603,6 +603,7 @@ public class DwdSptb02 implements Serializable {
 
     private String NFDDXH;
 
+
     /**
      * 发车站台
      */
