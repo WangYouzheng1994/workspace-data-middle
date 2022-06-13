@@ -207,7 +207,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
             try {
                 preparedStatement.execute();
             } catch (Exception e) {
-                log.error("sql执行错误异常:{}", e.getMessage());
+                log.error(e.getMessage(), e);
             }
         } finally {
             closeResource(druidConnection, preparedStatement, null);
