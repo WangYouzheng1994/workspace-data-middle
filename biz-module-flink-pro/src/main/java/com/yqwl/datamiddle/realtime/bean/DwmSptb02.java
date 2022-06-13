@@ -1363,9 +1363,5 @@ public class DwmSptb02 implements Serializable {
     private Long UNLOAD_SHIP_TIME;
 
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
-    }
 
 }
