@@ -87,7 +87,7 @@ public class GetQueryCriteria {
     private List<String> vinList;
 
     /**
-     * 导出选择的vin集合
+     * 过滤条件
      */
-    private List<String> selectionsList;
+    private String selections;
 }
