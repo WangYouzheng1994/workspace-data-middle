@@ -23,6 +23,7 @@
         <oracle.cdc.version>2.1.1</oracle.cdc.version>
         <mysql.cdc.version>2.1.1</mysql.cdc.version>
 <!--        <log4j.version>2.16.0</log4j.version>-->
+        <fastjson.version>2.0.7</fastjson.version>
     </properties>
 
     <dependencies>
@@ -94,7 +95,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.68</version>
+            <version>${fastjson.version}</version>
         </dependency>
         <!--如果保存检查点到 hdfs 上，需要引入此依赖 如果不引用hadoop的包 会出现flink连接不到hdfs-->
         <dependency>
