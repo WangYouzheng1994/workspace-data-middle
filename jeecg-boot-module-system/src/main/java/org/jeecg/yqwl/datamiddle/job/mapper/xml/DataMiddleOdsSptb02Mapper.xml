@@ -17,7 +17,7 @@
                       #{limitEnd} ;
     </select>
 
-    <select id="getTablValues"  parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.TableParams" resultType="map">
+    <select id="getTableValues"  parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.TableParams" resultType="map">
               SELECT
                   t.*
               FROM ${params.tableName} t

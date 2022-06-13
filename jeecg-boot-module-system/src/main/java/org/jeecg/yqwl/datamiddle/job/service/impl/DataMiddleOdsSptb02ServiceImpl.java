@@ -178,7 +178,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                     tableParams.setValues(cdhddm);
                     String csqdm ="";
                     String csxdm="";
-                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTablValues(tableParams);
+                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
                     if (tablValues !=null){
                         csqdm= (String) tablValues.get("CSQDM");
                         csxdm = (String) tablValues.get("CSXDM");
@@ -206,7 +206,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                     tableParams.setTypeValues("CONTRAST");
                     String startWareHouseCode ="";
                     String startWareHouseName="";
-                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTablValues(tableParams);
+                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
                     if (tablValues !=null){
                         startWareHouseCode= (String) tablValues.get("WAREHOUSE_CODE");
                         startWareHouseName = (String) tablValues.get("WAREHOUSE_NAME");
@@ -234,7 +234,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                     tableParams.setTypeValues("CONTRAST");
                     String endWareHouseCode ="";
                     String endWareHouseName="";
-                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTablValues(tableParams);
+                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
                     if (tablValues !=null){
                         endWareHouseCode= (String) tablValues.get("WAREHOUSE_CODE");
                         endWareHouseName = (String) tablValues.get("WAREHOUSE_NAME");
@@ -260,7 +260,7 @@ public class DataMiddleOdsSptb02ServiceImpl implements DataMiddleOdsSptb02Servic
                 String HIGHWAY_WAREHOUSE_TYPE="";
                 if (StringUtils.isNotBlank(vwlckdm)){
                     tableParams.setValues(vwlckdm);
-                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTablValues(tableParams);
+                    Map tablValues = this.dataMiddleOdsSptb02Mapper.getTableValues(tableParams);
                     if (tablValues !=null){
                         HIGHWAY_WAREHOUSE_TYPE=(String) tablValues.get("WAREHOUSE_TYPE");
                         if (StringUtils.isNotBlank(HIGHWAY_WAREHOUSE_TYPE)){

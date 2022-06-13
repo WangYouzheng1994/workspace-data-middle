@@ -20,6 +20,6 @@ public interface DataMiddleOdsSptb02Mapper {
 
     List<Sptb02> getOdsVlmsSptb02(@Param("rowNumber") Integer rowNumber, @Param("startDateStr")String startDateStr, @Param("endDateStr")String endDateStr, @Param("limitStart") Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
-    Map getTablValues(@Param("params") TableParams tableParams);
+    Map getTableValues(@Param("params") TableParams tableParams);
 
 }

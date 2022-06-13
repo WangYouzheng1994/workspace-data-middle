@@ -20,6 +20,21 @@ import org.springframework.util.StringUtils;
  */
 public class DateUtils extends PropertyEditorSupport {
 
+    /**
+     * 获取当天的00：00：00时间
+     * @return
+     */
+    public static String getToday4Dawn() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        return sdf.format(new Date());
+    }
+
+    public static String getToday4Night() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        return sdf.format(new Date());
+    }
+
     public static ThreadLocal<SimpleDateFormat> date_sdf = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
