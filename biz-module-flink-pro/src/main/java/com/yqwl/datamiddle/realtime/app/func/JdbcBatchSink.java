@@ -124,10 +124,9 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
                 return;
             }
             druidConnection = getDruidConnection();
-            StringBuffer sb = new StringBuffer();
 
             String tableName = StringUtils.EMPTY;
-            StringBuffer placeholder = new StringBuffer();
+            StringBuilder placeholder = new StringBuilder();
 
             // 获取要渲染的 插入列。
             Class<?> entityClass = value.get(0).getClass();
@@ -150,12 +149,12 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
             }
 
             // 填充列名
-            StringBuffer sqlsb = new StringBuffer();
+            StringBuilder sqlsb = new StringBuilder();
             sqlsb.append("replace into ");
             sqlsb.append(tableName);
             sqlsb.append(" (");
 
-            StringBuffer columnSb = new StringBuffer();
+            StringBuilder columnSb = new StringBuilder();
 
             for (Field field : fields) {
                 if (field.getAnnotation(TransientSink.class) != null) {
@@ -208,7 +207,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
             try {
                 preparedStatement.execute();
             } catch (Exception e) {
-                log.error("sql执行错误异常:{}", e.getMessage());
+                log.error(e.getMessage(), e);
             }
         } finally {
             closeResource(druidConnection, preparedStatement, null);

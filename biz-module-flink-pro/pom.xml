@@ -23,9 +23,32 @@
         <oracle.cdc.version>2.1.1</oracle.cdc.version>
         <mysql.cdc.version>2.1.1</mysql.cdc.version>
 <!--        <log4j.version>2.16.0</log4j.version>-->
+        <fastjson.version>2.0.7</fastjson.version>
     </properties>
 
     <dependencies>
+
+        <!--mapStruct依赖 高性能对象映射-->
+        <!--mapstruct核心-->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.0.Beta1</version>
+        </dependency>
+        <!--mapstruct编译-->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.0.Beta1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/cglib/cglib -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>3.2.5</version>
+        </dependency>
+
         <!--   Flink CDC 4 Oracle     -->
         <dependency>
             <groupId>com.ververica</groupId>
@@ -72,7 +95,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.68</version>
+            <version>${fastjson.version}</version>
         </dependency>
         <!--如果保存检查点到 hdfs 上，需要引入此依赖 如果不引用hadoop的包 会出现flink连接不到hdfs-->
         <dependency>
@@ -233,9 +256,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>oracle-cdc-kafka</finalName>
+                            <!--<finalName>oracle-cdc-kafka</finalName>-->
                             <!--<finalName>consumer-kafka-divide</finalName>-->
-                            <!--<finalName>consumer-kafka-dwd-sptb02</finalName>-->
+                            <finalName>WaybillDwmApp</finalName>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
@@ -270,9 +293,10 @@
                                     <resource>META-INF/spring.schemas</resource>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>
+                                   <!-- <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>-->
                                     <!--<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>-->
                                     <!--<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>-->
+                                    <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmApp</mainClass>
                                 </transformer>
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>

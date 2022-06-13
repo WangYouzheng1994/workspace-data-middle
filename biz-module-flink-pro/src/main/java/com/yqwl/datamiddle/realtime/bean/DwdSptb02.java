@@ -603,6 +603,7 @@ public class DwdSptb02 implements Serializable {
 
     private String NFDDXH;
 
+
     /**
      * 发车站台
      */
@@ -1217,10 +1218,5 @@ public class DwdSptb02 implements Serializable {
      */
     private String HIGHWAY_WAREHOUSE_TYPE;
 
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
-    }
 
 }
