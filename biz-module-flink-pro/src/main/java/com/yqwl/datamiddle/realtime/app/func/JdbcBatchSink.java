@@ -150,12 +150,12 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
             }
 
             // 填充列名
-            StringBuffer sqlsb = new StringBuffer();
+            StringBuilder sqlsb = new StringBuilder();
             sqlsb.append("replace into ");
             sqlsb.append(tableName);
             sqlsb.append(" (");
 
-            StringBuffer columnSb = new StringBuffer();
+            StringBuilder columnSb = new StringBuilder();
 
             for (Field field : fields) {
                 if (field.getAnnotation(TransientSink.class) != null) {
