@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 
@@ -226,6 +227,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
         //获取查询数据
         List<DwmVlmsOneOrderToEnd> exportList = dwmVlmsOneOrderToEndMapper.export(queryCriteria);
+        //转换时间格式,将Long类型转换成date类型
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //设置新增数据行,从第一行开始
         int rowNum = 1;
         //将列表的数据获取到Excel表中
@@ -242,19 +245,35 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             row1.createCell(1).setCellValue(item.getBrand());//brand
             row1.createCell(2).setCellValue(item.getBaseName());//baseName
             row1.createCell(3).setCellValue(item.getVehicleName());//vehicleName
-            row1.createCell(4).setCellValue(item.getCp9OfflineTime());//cp9OfflineTime
-            row1.createCell(5).setCellValue(item.getLeaveFactoryTime());//leaveFactoryTime
-            row1.createCell(6).setCellValue(item.getInSiteTime());//inSiteTime
+            if ( item.getCp9OfflineTime() != 0 ) {
+                row1.createCell(4).setCellValue(sdf.format(item.getCp9OfflineTime()));//cp9OfflineTime
+            }
+            if ( item.getLeaveFactoryTime() != 0 ) {
+                row1.createCell(5).setCellValue(sdf.format(item.getLeaveFactoryTime()));//leaveFactoryTime
+            }
+            if ( item.getInSiteTime() != 0 ) {
+                row1.createCell(6).setCellValue(sdf.format(item.getInSiteTime()));//inSiteTime
+            }
             row1.createCell(7).setCellValue(item.getInWarehouseName());//inWarehouseName
             row1.createCell(8).setCellValue(item.getTaskNo());//taskNo
-            row1.createCell(9).setCellValue(item.getVehicleReceivingTime());//vehicleReceivingTime
-            row1.createCell(10).setCellValue(item.getStowageNoteTime());//stowageNoteTime
+            if ( item.getVehicleReceivingTime() != 0 ) {
+                row1.createCell(9).setCellValue(sdf.format(item.getVehicleReceivingTime()));//vehicleReceivingTime
+            }
+            if ( item.getStowageNoteTime() != 0 ) {
+                row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime()));//stowageNoteTime
+            }
             row1.createCell(11).setCellValue(item.getStowageNoteNo());//stowageNoteNo
             row1.createCell(12).setCellValue(item.getTrafficType());//trafficType
-            row1.createCell(13).setCellValue(item.getAssignTime());//assignTime
+            if ( item.getAssignTime() != 0 ) {
+                row1.createCell(13).setCellValue(sdf.format(item.getAssignTime()));//assignTime
+            }
             row1.createCell(14).setCellValue(item.getCarrierName());//carrierName
-            row1.createCell(15).setCellValue(item.getActualOutTime());//actualOutTime
-            row1.createCell(16).setCellValue(item.getShipmentTime());//shipmentTime
+            if ( item.getActualOutTime() != 0 ) {
+                row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));//actualOutTime
+            }
+            if ( item.getShipmentTime() != 0 ) {
+                row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime()));//shipmentTime
+            }
             row1.createCell(17).setCellValue(item.getTransportVehicleNo());//transportVehicleNo
             row1.createCell(18).setCellValue(item.getSamePlateNum());//samePlateNum
             row1.createCell(19).setCellValue(item.getVehicleNum());//vehicleNum
@@ -262,26 +281,54 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             row1.createCell(21).setCellValue(item.getEndCityName());//endCityName
             row1.createCell(22).setCellValue(item.getVdwdm());//vdwdm
             row1.createCell(23).setCellValue(item.getStartWaterwayName());//startWaterwayName
-            row1.createCell(24).setCellValue(item.getInStartWaterwayTime());//inStartWaterwayTime
-            row1.createCell(25).setCellValue(item.getEndStartWaterwayTime());//endStartWaterwayTime
+            if ( item.getInStartWaterwayTime() != 0 ) {
+                row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime()));//inStartWaterwayTime
+            }
+            if ( item.getEndStartWaterwayTime() != 0 ) {
+                row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime()));//endStartWaterwayTime
+            }
             row1.createCell(26).setCellValue(item.getEndWaterwayName());//endWaterwayName
-            row1.createCell(27).setCellValue(item.getInEndWaterwayTime());//inEndWaterwayTime
+            if ( item.getInEndWaterwayTime() != 0 ) {
+                row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime()));//inEndWaterwayTime
+            }
             row1.createCell(28).setCellValue(item.getStartPlatformName());//startPlatformName
-            row1.createCell(29).setCellValue(item.getInStartPlatformTime());//inStartPlatformTime
-            row1.createCell(30).setCellValue(item.getOutStartPlatformTime());//outStartPlatformTime
+            if ( item.getInStartPlatformTime() != 0 ) {
+                row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime()));//inStartPlatformTime
+            }
+            if ( item.getOutStartPlatformTime() != 0 ) {
+                row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime()));//outStartPlatformTime
+            }
             row1.createCell(31).setCellValue(item.getEndPlatformName());//endPlatformName
-            row1.createCell(32).setCellValue(item.getInEndPlatformTime());//inEndPlatformTime
-            row1.createCell(33).setCellValue(item.getUnloadShipTime());//unloadShipTime
-            row1.createCell(34).setCellValue(item.getUnloadRailwayTime());//unloadRailwayTime
-            row1.createCell(35).setCellValue(item.getInDistributeTime());//inDistributeTime
-            row1.createCell(36).setCellValue(item.getDistributeAssignTime());//distributeAssignTime
+            if ( item.getInEndPlatformTime() != 0 ) {
+                row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));//inEndPlatformTime
+            }
+            if ( item.getUnloadShipTime() != 0 ) {
+                row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime()));//unloadShipTime
+            }
+            if ( item.getUnloadRailwayTime() != 0 ) {
+                row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));//unloadRailwayTime
+            }
+            if ( item.getInDistributeTime() != 0 ) {
+                row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime()));//inDistributeTime
+            }
+            if ( item.getDistributeAssignTime() != 0 ) {
+                row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));//distributeAssignTime
+            }
             row1.createCell(37).setCellValue(item.getDistributeCarrierName());//distributeCarrierName
             row1.createCell(38).setCellValue(item.getDistributeVehicleNo());//distributeVehicleNo
             row1.createCell(39).setCellValue(item.getDistributeVehicleNum());//distributeVehicleNum
-            row1.createCell(40).setCellValue(item.getOutDistributeTime());//outDistributeTime
-            row1.createCell(41).setCellValue(item.getDistributeShipmentTime());//distributeShipmentTime
-            row1.createCell(42).setCellValue(item.getDotSiteTime());//dotSiteTime
-            row1.createCell(43).setCellValue(item.getFinalSiteTime());//finalSiteTime
+            if ( item.getOutDistributeTime() != 0 ) {
+                row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));//outDistributeTime
+            }
+            if ( item.getDistributeShipmentTime() != 0 ) {
+                row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));//distributeShipmentTime
+            }
+            if ( item.getDotSiteTime() != 0 ) {
+                row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));//dotSiteTime
+            }
+            if ( item.getFinalSiteTime() != 0 ) {
+                row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));//finalSiteTime
+            }
             rowNum ++;
         }
         return wb;
