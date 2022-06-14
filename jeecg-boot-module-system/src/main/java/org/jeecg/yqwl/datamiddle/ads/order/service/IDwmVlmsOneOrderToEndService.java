@@ -19,7 +19,7 @@ import java.util.List;
  * @Date:   2022-06-06
  * @Version: V1.0
  */
-@DS("slave_2")
+@DS("slave_1")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
     /**
      * 按条件分页查询

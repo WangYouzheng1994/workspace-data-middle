@@ -17,7 +17,7 @@ import java.math.BigDecimal;
  * @Date:   2022-05-12
  * @Version: V1.0
  */
-@DS("slave_2")
+@DS("slave_1")
 public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
 
     /**
