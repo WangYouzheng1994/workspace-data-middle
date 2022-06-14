@@ -179,26 +179,26 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //        System.out.println("减8小时操作结束:" + new Date().getTime());
 
 //        System.out.println("开始计算同板数量:" + new Date().getTime());
-        //TODO:计算同板数量
-        for ( int k = 0; k < oneOrderToEndList.size(); k++ ) {
-            DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(k);
-            //获取配载单编号的值
-            String stowageNoteNo = params.getStowageNoteNo();
-            //查询所有的配载单编号和同板数量
-            List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal();
-            //对得到的结果进行循环
-            for ( int j = 0; j < samePlateNumList.size(); j++ ) {
-                //获取配载单编号
-                String noteNo = samePlateNumList.get(j).getStowageNoteNo();
-                //添加配载单编号不为空,配载单编号为空不计算
-                if ( StringUtils.isNotEmpty(stowageNoteNo) && StringUtils.isNotEmpty(noteNo) ) {
-                    //判断配载单编号的值相同,则设置同板数量
-                    if ( stowageNoteNo.equals(noteNo)) {
-                        params.setSamePlateNum(samePlateNumList.get(j).getSamePlateNum());
-                    }
-                }
-            }
-        }
+//        //TODO:计算同板数量
+//        for ( int k = 0; k < oneOrderToEndList.size(); k++ ) {
+//            DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(k);
+//            //获取配载单编号的值
+//            String stowageNoteNo = params.getStowageNoteNo();
+//            //查询所有的配载单编号和同板数量
+//            List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal();
+//            //对得到的结果进行循环
+//            for ( int j = 0; j < samePlateNumList.size(); j++ ) {
+//                //获取配载单编号
+//                String noteNo = samePlateNumList.get(j).getStowageNoteNo();
+//                //添加配载单编号不为空,配载单编号为空不计算
+//                if ( StringUtils.isNotEmpty(stowageNoteNo) && StringUtils.isNotEmpty(noteNo) ) {
+//                    //判断配载单编号的值相同,则设置同板数量
+//                    if ( stowageNoteNo.equals(noteNo)) {
+//                        params.setSamePlateNum(samePlateNumList.get(j).getSamePlateNum());
+//                    }
+//                }
+//            }
+//        }
 //        System.out.println("同板数量计算结束:" + new Date().getTime());
         return page.setRecords(oneOrderToEndList);
     }
