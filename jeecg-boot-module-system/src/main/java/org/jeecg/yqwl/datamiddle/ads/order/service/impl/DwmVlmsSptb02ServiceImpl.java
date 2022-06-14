@@ -33,7 +33,7 @@ import java.util.*;
  * @Version: V1.0
  */
 @Slf4j
-@DS("slave0")
+@DS("slave_2")
 @Service
 public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, DwmVlmsSptb02> implements IDwmVlmsSptb02Service {
     @Resource
