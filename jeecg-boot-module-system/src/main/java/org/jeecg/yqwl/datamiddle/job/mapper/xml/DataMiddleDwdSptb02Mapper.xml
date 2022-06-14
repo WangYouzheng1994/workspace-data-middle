@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleDwdSptb02Mapper">
+
+    <select id="getTableValues" resultType="java.util.Map">
+        SELECT
+        IDNUM AS rn,
+        a.*
+        FROM
+        ( SELECT
+        t.*
+        FROM dwd_vlms_sptb02 t
+        <where>
+            <if test="startDateStr != null and endDateStr != null" >
+                DDJRQ <![CDATA[>=]]> #{startDateStr} AND DDJRQ <![CDATA[<=]]> #{endDateStr}
+            </if>
+        </where>
+        ) a
+        limit #{limitStart} , #{limitEnd} ;
+    </select>
+
+    <select id="getDwdVlmsSptb02" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02">
+        SELECT
+        t.*
+        FROM ${params.tableName} t
+        <where>
+            <if test=" params.field != null and params.values != null">
+                AND ${params.field} = #{params.values}
+            </if>
+        </where>
+        limit 1;
+    </select>
+<!--    数据插入-->
+    <insert id="addDwmSptb02">
+        INSERT INTO
+            dwm_vlms_sptb02
+            (
+
+            ) VALUES (
+
+                             ) ON DUPLICATE KEY UPDATE
+
+    </insert>
+
+</mapper>

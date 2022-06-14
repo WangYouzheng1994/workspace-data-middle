@@ -18,8 +18,10 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @version 1.0
@@ -54,25 +56,82 @@ public class DataMiddleDwdSptb02ServiceImpl extends ServiceImpl<DataMiddleDwdSpt
         int interval = 1;
         do {
             log.info("开始循环数据 !" , interval++ );
-            List<DwdSptb02> dwdSptb02List = this.dataMiddleDwdSptb02Mapper.getDwdVlmsSptb02(rowNum, startTime, endTime, interval, limit);
+            List<DwdSptb02> dwdSptb02List = this.dataMiddleDwdSptb02Mapper.getDwdVlmsSptb02(rowNum, startTime, endTime, rowNum, limit);
             log.info("组装数据进行拉宽处理!");
             //循环
             for ( DwdSptb02 dwdSptb02 : dwdSptb02List ) {
                 DwmSptb02 dwmSptb02 = new DwmSptb02();
                 //复制bean对象的属性
                 BeanUtil.copyProperties(dwdSptb02,dwmSptb02);
-                log.info("复制表到dwmSptb02!");
+                log.info("复制dwdsptb02表到dwmSptb02!");
                 /**
                  * 关联ods_vlms_sptb02d1 获取车架号 VVIN 从mysql中获取
                  */
-                TableParams table = new TableParams();
-                table.setTableName("ods_vlms_sptb02d1");
-                table.setField("CJSDBH");
-                String cjsdbh = dwmSptb02.getCJSDBH();
-                log.info("sptb02d1DS阶段获取到的查询条件值:{}", cjsdbh);
+                TableParams tableParams = new TableParams();
+                tableParams.setTableName("ods_vlms_sptb02d1");
+                tableParams.setField("CJSDBH");
+                String cjsdbh = dwdSptb02.getCJSDBH();
                 if ( StringUtils.isNotEmpty(cjsdbh)) {
-                    table.setValues(cjsdbh);
+                    tableParams.setValues(cjsdbh);
+                    String vvin = "";
+                    String ccpdm = "";
+                    Map tableValues = this.dataMiddleDwdSptb02Mapper.getTableValues(tableParams);
+                    if ( tableValues != null ) {
+                         vvin = (String)tableValues.get("VVIN");
+                         ccpdm = (String)tableValues.get("CCPDM");
+                        if ( StringUtils.isNotEmpty(vvin) ) {
+                            dwmSptb02.setVVIN(vvin);//车架号
+                        }
+                        if ( StringUtils.isNotEmpty(ccpdm) ) {
+                            dwmSptb02.setVEHICLE_CODE(ccpdm); //车型代码
+                        }
+                    }
                 }
+
+                /**
+                 //理论起运时间
+                 //关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
+                 // 获取车架号 VVIN 从mysql中获取
+                 * 查询 ods_vlms_lc_spec_config
+                 * 过滤条件：
+                 * 主机公司代码 CZJGSDM
+                 *
+                 * BASE_CODE(转换保存代码)  ->   CQWH 区位号(基地代码)
+                 *
+                 * TRANS_MODE_CODE       -> 运输方式
+                 */
+                tableParams.setTableName("ods_vlms_lc_spec_config");
+                tableParams.setField("HOST_COM_CODE");
+                tableParams.setField("BASE_CODE");
+                tableParams.setField("TRANS_MODE_CODE");
+                //筛选条件
+                tableParams.setField("STATUS");  //STATUS = '1'
+                tableParams.setField("SPEC_CODE"); //SPEC_CODE = '4'
+                String hostComCode = dwdSptb02.getHOST_COM_CODE();
+                String baseCode = dwdSptb02.getBASE_CODE();
+                String transModeCode = dwdSptb02.getTRANS_MODE_CODE();
+                if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
+                    tableParams.setValues("hostComCode");
+                    tableParams.setValues("baseCode");
+                    tableParams.setValues("transModeCode");
+                    //定义要增加的时间戳
+                    Long outSiteTime = null;
+                    //定义增加的时间步长
+                    String hours = "";
+                    //定义前置节点的代码
+                    String nodeCode = "";
+                    Map tableValues = this.dataMiddleDwdSptb02Mapper.getTableValues(tableParams);
+                    if ( tableValues != null ) {
+                        hours = (String)tableValues.get("STANDARD_HOURS");
+                        nodeCode = (String)tableValues.get("START_CAL_NODE_CODE");
+
+
+                    }
+
+                }
+
+
+
 
             }
         } while(hasNext);
