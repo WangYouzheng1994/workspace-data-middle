@@ -380,5 +380,16 @@ public class DwmOneOrderToEnd implements Serializable {
 
     private String END_DISTRIBUTE_NO;
 
+    /**
+     * 开始物理仓库代码
+     */
+    private String START_PHYSICAL_CODE;
+
+    /**
+     * 结束物理仓库代码
+     */
+    private String END_PHYSICAL_CODE;
+
+
 
 }
