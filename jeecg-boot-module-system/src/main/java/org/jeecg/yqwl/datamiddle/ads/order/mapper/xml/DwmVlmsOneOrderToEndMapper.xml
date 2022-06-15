@@ -70,6 +70,9 @@
                COUNT(VIN) AS SAME_PLATE_NUM,STOWAGE_NOTE_NO
         FROM
              dwm_vlms_one_order_to_end
+        <where>
+            STOWAGE_NOTE_NO = #{stowageNoteNo}
+        </where>
         GROUP BY
             STOWAGE_NOTE_NO
     </select>

@@ -5,6 +5,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.xssf.streaming.SXSSFCell;
@@ -51,7 +52,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     @Override
     public Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria, Page<DwmVlmsOneOrderToEnd> page) {
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria, page);
-//        System.out.println("减8小时操作开始:" + new Date().getTime());
         //遍历list,并查询出同板数量赋值
         for ( int i = 0; i < oneOrderToEndList.size(); i ++ ) {
             DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(i);
@@ -175,35 +175,19 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                 Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
                 params.setFinalSiteTime(finalSiteTime);
             }
+
+            //查询配载单编号
+            String stowageNoteNo = params.getStowageNoteNo();
+            //TODO:计算同板数量
+            if (StringUtils.isNotBlank(stowageNoteNo)) {
+                List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal(stowageNoteNo);
+                if ( CollectionUtils.isNotEmpty(samePlateNumList) ) {
+                    params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
+                }
+            }
         }
-//        System.out.println("减8小时操作结束:" + new Date().getTime());
-//        System.out.println("开始计算同板数量:" + new Date().getTime());
-//        //TODO:计算同板数量
-//        for ( int k = 0; k < oneOrderToEndList.size(); k++ ) {
-//            DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(k);
-//            //获取配载单编号的值
-//            String stowageNoteNo = params.getStowageNoteNo();
-//            //查询所有的配载单编号和同板数量
-//            List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal();
-//            //对得到的结果进行循环
-//            for ( int j = 0; j < samePlateNumList.size(); j++ ) {
-//                //获取配载单编号
-//                String noteNo = samePlateNumList.get(j).getStowageNoteNo();
-//                Integer samePlateNum = samePlateNumList.get(j).getSamePlateNum();
-//                //添加配载单编号不为空,配载单编号为空不计算
-//                if ( StringUtils.isNotEmpty(stowageNoteNo) && StringUtils.isNotEmpty(noteNo) ) {
-//                    //判断配载单编号的值相同,则设置同板数量
-//                    if ( stowageNoteNo.equals(noteNo)) {
-//                        params.setSamePlateNum(samePlateNum);
-//                    }
-//                }
-//            }
-//        }
-//
-//        System.out.println("同板数量计算结束:" + new Date().getTime());
         return page.setRecords(oneOrderToEndList);
     }
-
 
     /**
      * 查询同板数量
@@ -211,7 +195,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     @Override
     public List<SelectData> selectTotal() {
-        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
-        return total;
+//        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
+        return null;
     }
 }

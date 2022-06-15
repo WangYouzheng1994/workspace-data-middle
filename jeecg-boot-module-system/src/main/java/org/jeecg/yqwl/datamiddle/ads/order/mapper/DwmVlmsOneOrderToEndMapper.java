@@ -33,7 +33,7 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
      * 同板数量
      * @return
      */
-    List<SelectData> selectTotal();
+    List<SelectData> selectTotal(@Param("stowageNoteNo") String stowageNoteNo);
 
 
 }
