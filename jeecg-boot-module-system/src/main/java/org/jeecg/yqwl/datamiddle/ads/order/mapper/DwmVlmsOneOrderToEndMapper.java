@@ -28,12 +28,6 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
      */
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria,  Page<DwmVlmsOneOrderToEnd> page);
 
-    /**
-     * 导出
-     * @param queryCriteria
-     * @return
-     */
-    List<DwmVlmsOneOrderToEnd> export(@Param("params") GetQueryCriteria queryCriteria);
 
     /**
      * 同板数量

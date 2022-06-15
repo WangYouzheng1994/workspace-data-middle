@@ -15,7 +15,7 @@
             dwm_vlms_one_order_to_end
         <where>
             <choose>
-                <when test="params.vinList != null">
+                <when test="params.vinList != null or params.selections != null ">
                     and VIN IN
                     <foreach collection="params.vinList" item="value"  index="key" separator="," open="(" close=")">
                          #{value}
@@ -36,10 +36,10 @@
             <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
                 AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
             </if>
-            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != '' ">
+            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != '' and (params.leaveFactoryTimeStart = params.leaveFactoryTimeStart + 28800000)">
                 AND LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
             </if>
-            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != '' ">
+            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != '' and (params.leaveFactoryTimeEnd = params.leaveFactoryTimeEnd + 28800000) ">
                 AND LEAVE_FACTORY_TIME <![CDATA[ <= ]]>  #{params.leaveFactoryTimeEnd}
             </if>
             <if test="params.startCityName != null and params.startCityName != '' ">
@@ -48,20 +48,19 @@
             <if test="params.endCityName != null and params.endCityName != '' ">
                 AND END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != '' ">
+            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != '' and (params.inSiteTimeStart = params.inSiteTimeStart + 28800000) ">
                 AND IN_SITE_TIME <![CDATA[ >= ]]> #{params.inSiteTimeStart}
             </if>
-            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != ''  ">
+            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != '' and (params.inSiteTimeEnd = params.inSiteTimeEnd + 28800000) ">
                 AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != ''  ">
+            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != '' and (params.cp9OfflineTimeStart = params.cp9OfflineTimeStart + 28800000) ">
                 AND CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
             </if>
-            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != ''  ">
+            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != '' and (params.cp9OfflineTimeEnd = params.cp9OfflineTimeEnd + 28800000) ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
         </where>
-
         order by CP9_OFFLINE_TIME desc
     </select>
 

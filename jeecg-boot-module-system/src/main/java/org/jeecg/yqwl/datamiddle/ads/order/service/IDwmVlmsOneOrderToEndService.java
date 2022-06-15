@@ -29,12 +29,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria,Page<DwmVlmsOneOrderToEnd> page);
 
-    /**
-     * 导出
-     * @param queryCriteria
-     * @return
-     */
-    SXSSFWorkbook export(GetQueryCriteria queryCriteria);
 
     /**
      * 同板数量
