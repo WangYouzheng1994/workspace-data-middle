@@ -61,7 +61,7 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        properties.put("database.serverTimezone", "UTC");
+        //properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
