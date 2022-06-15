@@ -200,7 +200,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
 //		  System.out.println("查询结束" + System.currentTimeMillis());
 		  for ( DwmVlmsOneOrderToEnd item : pageList ) {
-			  System.out.println(System.currentTimeMillis());
+//			  System.out.println(System.currentTimeMillis());
 
 			  //时间字段转换成年月日时分秒类型
 			  SXSSFRow row1 = sheet.createRow(rowNum);
