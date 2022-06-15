@@ -105,6 +105,11 @@ public class OneOrderToEndDwmAppSPTB02 {
                 Long in_end_waterway_time = dwmSptb02.getIN_END_WATERWAY_TIME();        //水路的入目的港口时间
                 Long unload_ship_time = dwmSptb02.getUNLOAD_SHIP_TIME();                //水路的卸船时间
                 String highwayWarehouseType = dwmSptb02.getHIGHWAY_WAREHOUSE_TYPE();    //公路运单物理仓库对应的仓库类型
+                Long warehouse_createtime = dwmSptb02.getWAREHOUSE_CREATETIME();        //记录创建时间
+                Long warehouse_updatetime = dwmSptb02.getWAREHOUSE_UPDATETIME();        //记录更新时间
+                ootdTransition.setWAREHOUSE_CREATETIME(warehouse_createtime);
+                ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);
+
                 if (StringUtils.isNotBlank(cjsdbh)) {
                     ootdTransition.setCJSDBH(cjsdbh);
                     if (StringUtils.isNotBlank(vehicle_code)) {
@@ -235,14 +240,16 @@ public class OneOrderToEndDwmAppSPTB02 {
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, VEHICLE_CODE, VEHICLE_NAME, VEHICLE_RECEIVING_TIME, TASK_NO, PLAN_RELEASE_TIME, " +
                         "STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, DEALER_NAME,SETTLEMENT_Y1," +
-                        "START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, IN_END_WATERWAY_TIME, UNLOAD_SHIP_TIME  )\n" +
+                        "START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
+                        "IN_END_WATERWAY_TIME, UNLOAD_SHIP_TIME, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME  )\n" +
                         "VALUES\n" +
-                        "        ( ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
                         "       VEHICLE_CODE=?,VEHICLE_NAME=?, VEHICLE_RECEIVING_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
                         "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
                         "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)," +
-                        "START_PLATFORM_NAME = ?, END_PLATFORM_NAME = ?, IN_START_PLATFORM_TIME = ?, OUT_START_PLATFORM_TIME = ?, IN_END_PLATFORM_TIME = ?, UNLOAD_RAILWAY_TIME = ?, START_WATERWAY_NAME = ?, END_WATERWAY_NAME = ?, IN_START_WATERWAY_TIME = ?, END_START_WATERWAY_TIME = ?, IN_END_WATERWAY_TIME = ?, UNLOAD_SHIP_TIME = ?  ",
+                        "START_PLATFORM_NAME = ?, END_PLATFORM_NAME = ?, IN_START_PLATFORM_TIME = ?, OUT_START_PLATFORM_TIME = ?, IN_END_PLATFORM_TIME = ?, UNLOAD_RAILWAY_TIME = ?, START_WATERWAY_NAME = ?, END_WATERWAY_NAME = ?, IN_START_WATERWAY_TIME = ?, " +
+                        "END_START_WATERWAY_TIME = ?, IN_END_WATERWAY_TIME = ?, UNLOAD_SHIP_TIME = ? , WAREHOUSE_CREATETIME = ?, WAREHOUSE_UPDATETIME = ? ",
                 (ps, epc) -> {
                     String vvin = epc.getVVIN();                                        //底盘号
                     String vehicle_code = epc.getVEHICLE_CODE();                        //车型
@@ -563,10 +570,12 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }else {
                         ps.setLong  (56, 0L);                    //水路卸船时间
                     }
+                    ps.setLong  (57, epc.getWAREHOUSE_CREATETIME());
+                    ps.setLong  (58, epc.getWAREHOUSE_UPDATETIME());
 
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
+                        .withBatchSize(10000)
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(2)
                         .build(),
