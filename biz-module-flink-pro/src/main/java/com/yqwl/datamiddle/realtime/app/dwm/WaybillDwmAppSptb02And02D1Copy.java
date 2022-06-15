@@ -83,6 +83,8 @@ public class WaybillDwmAppSptb02And02D1Copy {
             public void processElement(String value, Context ctx, Collector<DwmSptb02> out) throws Exception {
                 //获取真实数据
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
+                dwmSptb02.setSTART_PHYSICAL_CODE(dwmSptb02.getVFCZT());
+                dwmSptb02.setEND_PHYSICAL_CODE(dwmSptb02.getVSCZT());
 
                 /**
                  * 根据结算单编号查询vin码 产品代码

@@ -185,6 +185,12 @@ public class OotdTransition {
     private Long UNLOAD_SHIP_TIME;
 
 
+    private Long WAREHOUSE_CREATETIME;
+
+
+    private Long WAREHOUSE_UPDATETIME;
+
+
 
 
 }
