@@ -65,17 +65,17 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
             //查询配载单编号
             String stowageNoteNo = params.getStowageNoteNo();
-            //TODO:计算同板数量
+            //计算同板数量
             if (StringUtils.isNotBlank(stowageNoteNo)) {
-                if (samePlateNumMap.containsKey(stowageNoteNo)) {
-                    params.setSamePlateNum(samePlateNumMap.get(stowageNoteNo));
-                } else {
-                    List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal(stowageNoteNo);
-                    if ( CollectionUtils.isNotEmpty(samePlateNumList) ) {
-                        samePlateNumMap.put(stowageNoteNo, samePlateNumList.get(0).getSamePlateNum());
-                        params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
-                    }
-                }
+//                if (samePlateNumMap.containsKey(stowageNoteNo)) {
+//                    params.setSamePlateNum(samePlateNumMap.get(stowageNoteNo));
+//                } else {
+//                    List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal(stowageNoteNo);
+//                    if ( CollectionUtils.isNotEmpty(samePlateNumList) ) {
+//                        samePlateNumMap.put(stowageNoteNo, samePlateNumList.get(0).getSamePlateNum());
+//                        params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
+//                    }
+//                }
             }
         }
         System.out.println("查询方法结束" + System.currentTimeMillis());
