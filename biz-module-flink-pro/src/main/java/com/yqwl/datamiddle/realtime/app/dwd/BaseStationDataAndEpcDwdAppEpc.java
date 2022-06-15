@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dwd;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
@@ -157,8 +157,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
             public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
-                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
-                dataBsdEpc.setTs(ts);
+                dataBsdEpc.setTs(jsonObject.getLong("ts"));//取ts作为时间戳字段
                 /**
                  * 得到cp,取前四位,转基地名称:
                  *                        '0431',
@@ -206,8 +205,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                         .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationDataEpc>() {
                             @Override
                             public long extractTimestamp(DwdBaseStationDataEpc dwdBaseStationDataEpc, long l) {
-                                Timestamp ts = dwdBaseStationDataEpc.getTs();
-                                return ts.getTime();
+                                return dwdBaseStationDataEpc.getTs();
                             }
                         })).uid("assIgnDwdBaseStationDataEpcEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
 

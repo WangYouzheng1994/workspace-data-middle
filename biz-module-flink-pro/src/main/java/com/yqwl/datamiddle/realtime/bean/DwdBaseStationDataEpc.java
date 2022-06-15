@@ -108,5 +108,5 @@ public class DwdBaseStationDataEpc implements Serializable {
      * 新增更新时间字段
      */
     @TransientSink
-    private Timestamp ts;
+    private Long ts;
 }

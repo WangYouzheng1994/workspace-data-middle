@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
@@ -46,7 +46,7 @@ public class OneOrderToEndDwmAppEPC {
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -65,7 +65,7 @@ public class OneOrderToEndDwmAppEPC {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList(StrUtil.getStrList(props.getStr("cdc.mysql.table.list"), ","))
+                .tableList("data_flink.dwd_vlms_base_station_data_epc")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
@@ -97,9 +97,8 @@ public class OneOrderToEndDwmAppEPC {
             public DwdBaseStationDataEpc map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 DwdBaseStationDataEpc dataBsdEpc = jsonObject.getObject("after", DwdBaseStationDataEpc.class);
-                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
+                Long ts = jsonObject.getLong("ts"); //取ts作为时间戳字段
                 dataBsdEpc.setTs(ts);
-                String vin = dataBsdEpc.getVIN();
                 return dataBsdEpc;
             }
         }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");

@@ -1,13 +1,18 @@
 package com.yqwl.datamiddle.realtime.util;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.base.CaseFormat;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.enums.TableName;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.java.tuple.Tuple2;
+import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -22,11 +27,9 @@ import java.util.Objects;
  * @Date: 2021/12/28 11:09
  * @Version: V1.0
  */
+@Slf4j
 public class MysqlUtil {
 
-    private static final String URL = "jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=utf8&serverTimezone=UTC&useSSL=false&rewriteBatchedStatements=true";
-    private static final String USERNAME = "fengqiwulian";
-    private static final String PASSWORD = "fengqiwulian";
 
     /**
      * mysql 查询方法，根据给定的 class 类型 返回对应类型的元素列表
@@ -42,16 +45,10 @@ public class MysqlUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            //注册驱动
-            Class.forName(MysqlConfig.DRIVER);
-            //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-            //建立连接
-            //conn = DriverManager.getConnection(MysqlConfig.URL, MysqlConfig.USERNAME, MysqlConfig.PASSWORD);
+            //获取连接
             conn = DbUtil.getDruidConnection();
-            //conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             //创建数据库操作对象
             ps = conn.prepareStatement(sql);
-
             //执行 SQL 语句
             rs = ps.executeQuery();
             //处理结果集
@@ -137,6 +134,56 @@ public class MysqlUtil {
         sql.append("values");
         sql.append(" (").append(StringUtils.join(valueList, ",")).append(") ");
         return sql.toString();
+    }
+
+
+    public static JSONObject querySingle(String tableName, String sql, Object... value) {
+        String redisKey = "dwm:vlms:" + tableName.toLowerCase() + ":";
+        for (int i = 0; i < value.length; i++) {
+            Object fieldValue = value[i];
+            if (i > 0) {
+                redisKey += ":";
+            }
+            redisKey += fieldValue;
+        }
+        log.info("redisKey:{}", redisKey);
+        //从Redis中获取数据
+        Jedis jedis = null;
+        //维度数据的json字符串形式
+        String dimJsonStr = null;
+        //维度数据的json对象形式
+        JSONObject dimJsonObj = null;
+        try {
+            //获取jedis客户端
+            jedis = RedisUtil.getJedis();
+            //根据key到Redis中查询value
+            dimJsonStr = jedis.get(redisKey);
+            //判断是否从Redis中查询到了数据
+            if (dimJsonStr != null && dimJsonStr.length() > 0) {
+                dimJsonObj = JSON.parseObject(dimJsonStr);
+            } else {
+                List<JSONObject> dimList = DbUtil.queryList(sql, JSONObject.class, false);
+                //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
+                if (dimList.size() > 0) {
+                    dimJsonObj = dimList.get(0);
+                    //将查询出来的数据放到Redis中缓存起来
+                    if (jedis != null) {
+                        jedis.setex(redisKey, 3600 * 24, dimJsonObj.toJSONString());
+                    }
+                } else {
+                    log.info("维度数据没有找到:{}", sql);
+                }
+                dimList = null;
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            //关闭Jedis
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return dimJsonObj;
     }
 
 

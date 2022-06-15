@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dwd;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
@@ -59,51 +59,10 @@ public class BaseStationDataAndEpcDwdAppBds {
     private static final String BASE_STATION_DATA_EPC = "BASE_STATION_DATA_EPC";
 
     public static void main(String[] args) throws Exception {
-        Configuration con = new Configuration();
-        /**
-         *  -Djobmanager.memory.process.size=768m \
-         *         -Djobmanager.memory.off-heap.size=256m \
-         *         -Djobmanager.memory.jvm-metaspace.size=256m \
-         *         -Djobmanager.memory.jvm-overhead.fraction=0.1 \
-         *         -Djobmanager.memory.jvm-overhead.min=32m \
-         *         -Djobmanager.memory.jvm-overhead.max=128m \
-         *         -Dtaskmanager.memory.process.size=1684m \
-         *         -Dtaskmanager.memory.framework.heap.size=256m \
-         *         -Dtaskmanager.memory.task.heap.size=768m \
-         *         -Dtaskmanager.memory.managed.size=16m \
-         *         -Dtaskmanager.memory.framework.off-heap.size=128m \
-         *         -Dtaskmanager.memory.task.off-heap.size=128m \
-         *         -Dtaskmanager.memory.network.min=32m \
-         *         -Dtaskmanager.memory.network.max=128m \
-         *         -Dtaskmanager.memory.network.fraction=0.1 \
-         *         -Dtaskmanager.memory.jvm-metaspace.size=128m \
-         *         -Dtaskmanager.memory.jvm-overhead.min=128m \
-         *         -Dtaskmanager.memory.jvm-overhead.max=256m \
-         *         -Dtaskmanager.memory.jvm-overhead.fraction=0.1 \
-         *         -Dtaskmanager.numberOfTaskSlots=4 \
-         */
-        con.setString("jobmanager.memory.process.size", "768m");
-        con.setString("jobmanager.memory.off-heap.size", "256m");
-        con.setString("jobmanager.memory.jvm-metaspace.size", "256m");
-        con.setString("jobmanager.memory.jvm-overhead.fraction", "0.1");
-        con.setString("jobmanager.memory.jvm-overhead.min", "32m");
-        con.setString("jobmanager.memory.jvm-overhead.max", "128m");
-        con.setString("taskmanager.memory.process.size", "1684m");
-        con.setString("taskmanager.memory.framework.heap.size", "256m");
-        con.setString("taskmanager.memory.task.heap.size", "768m");
-        con.setString("taskmanager.memory.managed.size", "16m");
-        con.setString("taskmanager.memory.framework.off-heap.size", "128m");
-        con.setString("taskmanager.memory.framework.heap.size", "128m");
-        con.setString("taskmanager.memory.network.min", "32m");
-        con.setString("taskmanager.memory.network.max", "128m");
-        con.setString("taskmanager.memory.network.fraction", "0.1");
-        con.setString("taskmanager.memory.jvm-metaspace.size", "128m");
-        con.setString("taskmanager.memory.jvm-overhead.min", "128m");
-        con.setString("taskmanager.memory.jvm-overhead.max", "256m");
-        con.setString("taskmanager.memory.jvm-overhead.fraction", "0.1");
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(con);
 
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -142,7 +101,7 @@ public class BaseStationDataAndEpcDwdAppBds {
 
         // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
-
+       // oracleSourceStream.print("source 输出：");
         //过滤 大于 2021-06-01 00:00:00的数据
       /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
             @Override
@@ -194,13 +153,13 @@ public class BaseStationDataAndEpcDwdAppBds {
 
         //3. 进行实体类的转换 I:添加kafka中ts字段作为当前时间戳 II.取cp中前4位数字翻译成基地名称作为基地的字段
 
-        //BASE_STATION_DATA
+       //BASE_STATION_DATA
         SingleOutputStreamOperator<DwdBaseStationData> mapBsd = oracleSourceStream.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
                 DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
-                Timestamp ts = jsonObject.getTimestamp("ts");
+                Long ts = jsonObject.getLong("ts");
                 dataBsd.setTs(ts);
                 return dataBsd;
             }
@@ -243,7 +202,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                         }
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+rfid");
-
+        mapBsd.print("数据输出：");
         //7.开窗,按照时间窗口存储到mysql
         //BASE_STATION_DATA
         outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
@@ -260,11 +219,9 @@ public class BaseStationDataAndEpcDwdAppBds {
 
 
 
-        try {
+
             env.execute("OracleSinkMysql");
-        } catch (Exception e) {
-            log.error("stream invoke error", e);
-        }
+
     }
 
 

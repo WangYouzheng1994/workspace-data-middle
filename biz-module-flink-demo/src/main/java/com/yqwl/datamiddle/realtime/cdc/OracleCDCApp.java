@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.cdc;
 import cn.hutool.setting.dialect.Props;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
+import com.ververica.cdc.debezium.StringDebeziumDeserializationSchema;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
@@ -37,7 +38,7 @@ public class OracleCDCApp {
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
         properties.put("database.serverTimezone", "UTC");
-        properties.put("database.serverTimezone", "Asia/Shanghai");
+        //properties.put("database.serverTimezone", "Asia/Shanghai");
 
 
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
@@ -67,7 +68,7 @@ public class OracleCDCApp {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(props.getStr("kafka.hostname"),
                 KafkaTopicConst.ORACLE_TOPIC_NAME,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORACLE_TOPIC_NAME));
-        source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        //source.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         env.execute("oracle-cdc-kafka");
 //        LOGGER.info("出现了~");
     }

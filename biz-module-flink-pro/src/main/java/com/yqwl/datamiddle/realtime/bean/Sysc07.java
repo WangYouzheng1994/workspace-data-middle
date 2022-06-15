@@ -147,6 +147,6 @@ public class Sysc07 implements Serializable {
 
 
     @JSONField(serialize = false)
-    private Timestamp ts;
+    private Long ts;
 
 }

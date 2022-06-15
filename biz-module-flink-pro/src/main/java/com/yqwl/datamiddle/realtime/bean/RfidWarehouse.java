@@ -119,6 +119,6 @@ public class RfidWarehouse implements Serializable {
     private Long WAREHOUSE_UPDATETIME;
 
     @JSONField(serialize = false)
-    private Timestamp ts;
+    private Long ts;
 
 }

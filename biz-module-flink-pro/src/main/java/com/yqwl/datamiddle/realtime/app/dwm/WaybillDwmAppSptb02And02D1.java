@@ -3,8 +3,8 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
@@ -80,6 +80,7 @@ public class WaybillDwmAppSptb02And02D1 {
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
+        mysqlSource.print("mysql數據源");
         // 2.过滤出Sptb02的表
         DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
             @Override
@@ -111,7 +112,7 @@ public class WaybillDwmAppSptb02And02D1 {
 
         //4.根据车型代码,查出车辆名称
         SingleOutputStreamOperator<DwmSptb02> ootdAddCarNameStream = AsyncDataStream.unorderedWait(mapBsd,
-                new DimAsyncFunction<DwmSptb02>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_sptb02d1", "VVIN,CCPDM") {
+                new DimAsyncFunction<DwmSptb02>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_sptb02d1", "VVIN") {
                     @Override
                     public Object getKey(DwmSptb02 ootd) {
                         if (StringUtils.isNotBlank(ootd.getCJSDBH())) {
@@ -133,9 +134,9 @@ public class WaybillDwmAppSptb02And02D1 {
                 }, 60, TimeUnit.SECONDS).uid("sptb02+02d1c").name("sptb02+02d1c");
 
 
-        /**
+/*        *//**
          * 关联ods_vlms_sptb02d1 获取车架号 VVIN 从mysql中获取
-         */
+         *//*
         SingleOutputStreamOperator<DwmSptb02> sptb02d1DS = AsyncDataStream.unorderedWait(
                 mapBsd,
                 new DimAsyncFunction<DwmSptb02>(
@@ -166,7 +167,7 @@ public class WaybillDwmAppSptb02And02D1 {
                         dwmSptb02.setVEHICLE_CODE(ccpdm); //车型代码
                     }
                 },
-                60, TimeUnit.SECONDS).uid("sptb02d1DS").name("sptb02d1DS");
+                60, TimeUnit.SECONDS).uid("sptb02d1DS").name("sptb02d1DS");*/
         /**
          //理论起运时间
          //关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
@@ -180,7 +181,7 @@ public class WaybillDwmAppSptb02And02D1 {
          * TRANS_MODE_CODE       -> 运输方式
          */
         SingleOutputStreamOperator<DwmSptb02> theoryShipmentTimeDS = AsyncDataStream.unorderedWait(
-                sptb02d1DS,
+                ootdAddCarNameStream,
                 /**
                  * HOST_COM_CODE,   主机公司代码
                  * BASE_CODE,       基地代码
@@ -750,7 +751,7 @@ public class WaybillDwmAppSptb02And02D1 {
 
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-clickhouse-dwm");
+        env.execute("dsd_sptb02+ods_02d1=dwmSptb02");
         log.info("sptb02dwd层job任务开始执行");
     }
 }

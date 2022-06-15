@@ -120,7 +120,7 @@ public class Mdac01 implements Serializable {
      * 更新时间
      */
     @JSONField(serialize = false)
-    private Timestamp ts;
+    private Long ts;
 
 
 }

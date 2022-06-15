@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
 import cn.hutool.setting.dialect.Props;
+import com.yqwl.datamiddle.realtime.common.JedisConfig;
 import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -21,20 +22,19 @@ public class RedisUtil {
         if (jedisPool == null) {
             synchronized (RedisUtil.class) {
                 if (jedisPool == null) {
-                    Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
                     JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-                    jedisPoolConfig.setMaxTotal(props.getInt("redis.MaxTotal")); //最大可用连接数
+                    jedisPoolConfig.setMaxTotal(JedisConfig.MAX_TOTAL); //最大可用连接数
                     jedisPoolConfig.setBlockWhenExhausted(true); //连接耗尽是否等待
-                    jedisPoolConfig.setMaxWaitMillis(props.getInt("redis.MaxWaitMillis")); //等待时间
-                    jedisPoolConfig.setMaxIdle(props.getInt("redis.MaxIdle")); //最大闲置连接数
-                    jedisPoolConfig.setMinIdle(props.getInt("redis.MinIdle")); //最小闲置连接数
+                    jedisPoolConfig.setMaxWaitMillis(JedisConfig.MAX_WAIT_MILLIS); //等待时间
+                    jedisPoolConfig.setMaxIdle(JedisConfig.MAX_IDLE); //最大闲置连接数
+                    jedisPoolConfig.setMinIdle(JedisConfig.MIN_IDLE); //最小闲置连接数
                     jedisPoolConfig.setTestOnBorrow(false); //取连接的时候进行一下测试 ping pong
                     jedisPool = new JedisPool(
                             jedisPoolConfig,
-                            props.getStr("redis.hostname"),
-                            props.getInt("redis.port"),
-                            props.getInt("redis.timeout"),
-                            props.getStr("redis.password"));
+                            JedisConfig.HOSTNAME,
+                            JedisConfig.PORT,
+                            JedisConfig.TIMEOUT,
+                            JedisConfig.PASSWORD);
                 }
             }
         }

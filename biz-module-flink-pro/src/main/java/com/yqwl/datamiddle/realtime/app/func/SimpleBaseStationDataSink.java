@@ -27,9 +27,12 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
         // 查询开始站台的运单记录
         //当前查询到记录值为空，从来没有被更新过
         if (IN_STORE.equals(operateType)) {
+            log.info("vvin码：" + data.getVIN());
             String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_PLATFORM_TIME=" + data.getSAMPLE_U_T_C() + " WHERE VYSFS IN ('L1', 'T') AND START_WAREHOUSE_CODE='"
                     + data.getIN_WAREHOUSE_CODE() + "' AND VVIN='" + data.getVIN() + "' AND ( IN_START_PLATFORM_TIME = 0 OR IN_START_PLATFORM_TIME > " + data.getSAMPLE_U_T_C() + " )";
-            DbUtil.executeUpdate(inSql);
+            log.info("执行sql："+ inSql);
+            int i = DbUtil.executeUpdate(inSql);
+            log.info("执行结果："+ i);
         }
         // 1.2 处理开始站台的出站台时间
         if (OUT_STOCK.equals(operateType)) {

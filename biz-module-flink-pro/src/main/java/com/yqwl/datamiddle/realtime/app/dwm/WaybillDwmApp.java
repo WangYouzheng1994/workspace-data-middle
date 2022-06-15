@@ -3,8 +3,8 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.BaseStationDataSink;
@@ -89,6 +89,7 @@ public class WaybillDwmApp {
         }).uid("objStream").name("objStream");
         log.info("将kafka中after里数据转化成实例对象");
 
+        objStream.print("source转换成实体类输出===>");
 
         /**
          * 关联ods_vlms_sptb02d1 获取车架号 VVIN 从mysql中获取
@@ -679,6 +680,7 @@ public class WaybillDwmApp {
             }
         }).uid("endData").name("endData");
 
+        endData.print("最终数据输出：");
         //====================================sink clickhouse===============================================//
         //组装sql
         //StringBuffer sql = new StringBuffer();
@@ -690,7 +692,7 @@ public class WaybillDwmApp {
 
 
         //====================================sink mysql===============================================//
-        SingleOutputStreamOperator<DwmSptb02> dwmSptb02Watermark = endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
+      /*  SingleOutputStreamOperator<DwmSptb02> dwmSptb02Watermark = endData.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
         SingleOutputStreamOperator<List<DwmSptb02>> dwmSptb02Window = dwmSptb02Watermark.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwmSptb02, List<DwmSptb02>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<DwmSptb02> iterable, Collector<List<DwmSptb02>> collector) throws Exception {
@@ -701,10 +703,10 @@ public class WaybillDwmApp {
             }
         }).uid("dwmSptb02Window").name("dwmSptb02Window");
 
-        dwmSptb02Window.addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+        dwmSptb02Window.addSink(JdbcSink.<DwmSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");*/
 
 
-        //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
+/*        //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
         //读取mysql配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         //读取mysql binlog
@@ -712,7 +714,7 @@ public class WaybillDwmApp {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList("data_middle_flink.dwd_vlms_base_station_data")
+                .tableList("data_flink.dwd_vlms_base_station_data")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization())
@@ -727,11 +729,11 @@ public class WaybillDwmApp {
             }
         }).uid("baseStationDataMap").name("baseStationDataMap");
 
-        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");
+        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");*/
 
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-clickhouse-dwm");
+        env.execute("WaybillDwmApp");
         log.info("sptb02dwd层job任务开始执行");
     }
 }

@@ -23,85 +23,85 @@ import java.sql.Timestamp;
 public class DimWarehouseRS {
     
 	/**idnum*/
-	private java.lang.Integer idnum;
+	private Integer idnum;
 
 	/**站点代码*/
-	private java.lang.String vwlckdm;
+	private String vwlckdm;
 
 	/**站点名称*/
-	private java.lang.String vwlckmc;
+	private String vwlckmc;
 
 	/**库房ID*/
-	private java.lang.Integer warehouse_Id;
+	private Integer warehouse_Id;
 
 	/**库房代码*/
-	private java.lang.String warehouse_Code;
+	private String warehouse_Code;
 
 	/**库房名称*/
-	private java.lang.String warehouse_Name;
+	private String warehouse_Name;
 
 	/**备注*/
-	private java.lang.String cbz;
+	private String cbz;
 
 	/**操作日期*/
-	private java.lang.Long dczrq;
+	private Long dczrq;
 
 	/**操作员*/
-	private java.lang.String cczydm;
+	private String cczydm;
 
 	/**类型：对照contrast；仓库：warehouse*/
-	private java.lang.String type;
+	private String type;
 
 	/**id*/
-	private java.lang.Integer id;
+	private Integer id;
 
 	/**归属基地*/
-	private java.lang.String part_Base;
+	private String part_Base;
 
 	/**库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）*/
-	private java.lang.String warehouse_Type;
+	private String warehouse_Type;
 
 	/**站台对应的城市*/
-	private java.lang.String city;
+	private String city;
 
 	/**默认在库量  number 转 int*/
-	private java.lang.Integer defalut_Value;
+	private Integer defalut_Value;
 
 	/**标准库容     number 转 int*/
-	private java.lang.Integer bzkr;
+	private Integer bzkr;
 
 	/**最大库容     number 转 int*/
-	private java.lang.Integer zdkr;
+	private Integer zdkr;
 
 	/**数据中台代码*/
-	private java.lang.String datacenter_Code;
+	private String datacenter_Code;
 
 	/**顺序 2019 12 23 宋琳添加   number 转 int*/
-	private java.lang.Integer sequence;
+	private Integer sequence;
 
 	/**省份2019 12 23 宋琳添加*/
-	private java.lang.String province;
+	private String province;
 
 	/**整车数据代码*/
-	private java.lang.String zc_Code;
+	private String zc_Code;
 
 	/**主机公司代码 1 大众  2 奔腾 3解放  17 红旗  29 马自达*/
-	private java.lang.String czjgsdm;
+	private String czjgsdm;
 
 	/**数据中台代码备份*/
-	private java.lang.String datacenter_Code_Bzk;
+	private String datacenter_Code_Bzk;
 
 	/**所属省份*/
-	private java.lang.String provice;
+	private String provice;
 
 	/**warehouseCreatetime*/
-	private java.lang.Long warehouse_Createtime;
+	private Long warehouse_Createtime;
 
 	/**warehouseUpdatetime*/
-	private java.lang.Long warehouse_Updatetime;
+	private Long warehouse_Updatetime;
 
 	@TransientSink
-	private Timestamp ts;
+	private Long ts;
 
 	public DimWarehouseRS(RfidWarehouse rfidWarehouse,SiteWarehouse siteWarehouse){
 		mergeRfid(rfidWarehouse);
@@ -137,10 +137,8 @@ public class DimWarehouseRS {
 	}
 	public void mergeRfid(RfidWarehouse rfidWarehouse){
 		if (rfidWarehouse !=null){
-			this.ts=rfidWarehouse.getTs();
-			Timestamp ts=rfidWarehouse.getTs();
-			Long time = ts.getTime();
-			this.warehouse_Createtime=time;
+			this.ts = rfidWarehouse.getTs();
+			this.warehouse_Createtime=rfidWarehouse.getTs();
 
 			if (rfidWarehouse.getID()!=null){
 				this.id=rfidWarehouse.getID();

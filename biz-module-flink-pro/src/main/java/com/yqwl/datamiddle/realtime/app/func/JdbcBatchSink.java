@@ -32,7 +32,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
     @Override
     public void open(Configuration parameters) {
         try {
-            Thread.sleep(500L);
+            Thread.sleep(1000L);
             // 创建连接
             getDruidDataSource();
         } catch (Exception e) {
@@ -190,7 +190,7 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
                 }
             }
 
-            //log.info("组装生成的执行sql:{}", sqlsb.toString());
+//            log.info("组装生成的执行sql:{}", sqlsb.toString());
             preparedStatement = druidConnection.prepareStatement(sqlsb.toString());
 
             // preparestatement 往里面填充放值。

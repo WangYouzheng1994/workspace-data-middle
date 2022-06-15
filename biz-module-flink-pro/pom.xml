@@ -25,6 +25,7 @@
 <!--        <log4j.version>2.16.0</log4j.version>-->
         <fastjson.version>2.0.7</fastjson.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
+        <fastjson2.version>2.0.7</fastjson2.version>
     </properties>
 
     <dependencies>
@@ -93,10 +94,15 @@
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>${fastjson2.version}</version>
         </dependency>
         <!--如果保存检查点到 hdfs 上，需要引入此依赖 如果不引用hadoop的包 会出现flink连接不到hdfs-->
         <dependency>

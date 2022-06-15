@@ -1,6 +1,6 @@
 package com.yqwl.datamiddle.realtime.app.func;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.util.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +71,7 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                     public void run() {
                         try {
                             //发送异步请求
-                            long start = System.currentTimeMillis();
+//                            long start = System.currentTimeMillis();
                             //从流中事实数据获取key值
                             Object key = getKey(obj);
                             log.info("获取的查询条件values值:{}", key);
@@ -84,15 +84,16 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
                                 join(obj, dimInfoJsonObj);
                             }
                             //System.out.println("维度关联后的对象:" + obj);
-                            long end = System.currentTimeMillis();
+//                            long end = System.currentTimeMillis();
                             //System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
-                            log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
+//                            log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
                             //将关联后的数据继续向下传递
-                            resultFuture.complete(Arrays.asList(obj));
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw new RuntimeException(tableName + "维度异步查询失败");
                         }
+                        resultFuture.complete(Arrays.asList(obj));
                     }
                 }
         );

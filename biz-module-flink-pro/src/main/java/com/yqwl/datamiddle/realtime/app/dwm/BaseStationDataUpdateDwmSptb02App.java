@@ -23,7 +23,7 @@ public class BaseStationDataUpdateDwmSptb02App {
     public static void main(String[] args) throws Exception {
         // 获取执行环境:
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
         //读取mysql配置

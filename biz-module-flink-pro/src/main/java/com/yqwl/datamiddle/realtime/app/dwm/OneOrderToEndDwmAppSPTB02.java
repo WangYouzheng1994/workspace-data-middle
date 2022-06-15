@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.*;
@@ -40,7 +40,7 @@ public class OneOrderToEndDwmAppSPTB02 {
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -59,7 +59,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList(StrUtil.getStrList(props.getStr("cdc.mysql.table.list"), ","))
+                .tableList("data_flink.dwm_vlms_sptb02")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
@@ -70,26 +70,9 @@ public class OneOrderToEndDwmAppSPTB02 {
 
 
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
-        //2.进行数据过滤
-        SingleOutputStreamOperator<String> filterSptb02 = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwm_vlms_sptb02")) {
-                    DwmSptb02 after = jo.getObject("after", DwmSptb02.class);
-                    String cjsdbh = after.getCJSDBH();
-                    if (cjsdbh != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        });
-        filterSptb02.print("filterSptb02:");
         //3.进行实体类转换
         //转换sptb02为实体类
-        SingleOutputStreamOperator<OotdTransition> mapOotdTransition = filterSptb02.map(new MapFunction<String, OotdTransition>() {
+        SingleOutputStreamOperator<OotdTransition> mapOotdTransition = mysqlSource.map(new MapFunction<String, OotdTransition>() {
             @Override
             public OotdTransition map(String sptb02Value) throws Exception {
                 OotdTransition ootdTransition = new OotdTransition();
@@ -246,6 +229,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
                 }, 60, TimeUnit.SECONDS).uid("base+VEHICLE_NMAE").name("base+VEHICLE_NMAE");
 
+        //ootdAddCarNameStream.print("结果数据输出：");
         //5.sptb02与一单到底对应的字段插入mysql
         ootdAddCarNameStream.addSink(JdbcSink.sink(
 
@@ -595,7 +579,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
 
-        env.execute("一单到底合表开始");
+        env.execute("Dwm_SPTB02合OneOrderToEnd");
         log.info("base_station_data job任务开始执行");
 
     }

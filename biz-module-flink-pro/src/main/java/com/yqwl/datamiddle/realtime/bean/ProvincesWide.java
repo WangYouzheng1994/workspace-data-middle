@@ -52,7 +52,7 @@ public class ProvincesWide {
     private Long warehouseUpdatetime;
     //新加kafka的ts时间戳
     @TransientSink
-    private Timestamp ts;
+    private Long ts;
     //新加合并表的字段
     @TransientSink
     private String cdsdm08;
@@ -82,9 +82,7 @@ public class ProvincesWide {
 
             if (provincesWide2.getTs() !=null){
                 this.ts=provincesWide2.getTs();
-                Timestamp ts = provincesWide2.getTs();
-                Long time = ts.getTime();
-                this.warehouseCreatetime=time;
+                this.warehouseCreatetime = provincesWide2.getTs();
             }
 //            提前给nvl( d.cdsdm, b.csxdm ) cdsdm 中的cdsdm给赋值
             if (provincesWide2.getCdsdm() !=null){

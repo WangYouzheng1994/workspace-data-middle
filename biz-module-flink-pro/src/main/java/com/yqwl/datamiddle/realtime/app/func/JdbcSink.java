@@ -81,9 +81,9 @@ public class JdbcSink {
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(5000)
+                        .withBatchSize(10000)
                         .withBatchIntervalMs(5000L)
-                        .withMaxRetries(2)
+                        .withMaxRetries(5)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                         .withDriverName(MysqlConfig.DRIVER)

@@ -307,8 +307,8 @@ public class DbUtil {
         druidDataSource.setPassword(MysqlConfig.PASSWORD);
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
-        druidDataSource.setMaxActive(20);
-        druidDataSource.setInitialSize(10);
+        druidDataSource.setMaxActive(1500);
+        druidDataSource.setInitialSize(50);
         druidDataSource.setMinIdle(1);
         druidDataSource.setMaxWait(60000);
 

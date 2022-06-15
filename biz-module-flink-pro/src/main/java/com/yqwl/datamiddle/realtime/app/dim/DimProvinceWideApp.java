@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dim;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.Mdac01;
@@ -151,7 +151,7 @@ public class DimProvinceWideApp {
             public Sysc07 map(String data) throws Exception {
                 JSONObject jo = JSON.parseObject(data);
                 Sysc07 sysc07 = jo.getObject("after", Sysc07.class);
-                Timestamp ts = jo.getTimestamp("ts");
+                Long ts = jo.getLong("ts");
                 sysc07.setTs(ts);
                 return sysc07;
             }
@@ -163,7 +163,7 @@ public class DimProvinceWideApp {
             public Sysc08 map(String data) throws Exception {
                 JSONObject jo = JSON.parseObject(data);
                 Sysc08 sysc08 = jo.getObject("after", Sysc08.class);
-                Timestamp ts = jo.getTimestamp("ts");
+                Long ts = jo.getLong("ts");
                 sysc08.setTs(ts);
                 return sysc08;
             }
@@ -175,7 +175,7 @@ public class DimProvinceWideApp {
             public Mdac01 map(String data) throws Exception {
                 JSONObject jo = JSON.parseObject(data);
                 Mdac01 mdac01 = jo.getObject("after", Mdac01.class);
-                Timestamp ts = jo.getTimestamp("ts");
+                Long ts = jo.getLong("ts");
                 mdac01.setTs(ts);
                 return mdac01;
             }
@@ -188,8 +188,7 @@ public class DimProvinceWideApp {
                         .withTimestampAssigner(new SerializableTimestampAssigner<Sysc07>() {
                             @Override
                             public long extractTimestamp(Sysc07 sysc07, long recordTimestamp) {
-                                Timestamp ts = sysc07.getTs();
-                                return ts.getTime();
+                                return sysc07.getTs();
                             }
                         })
         ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
@@ -200,9 +199,7 @@ public class DimProvinceWideApp {
                         .withTimestampAssigner(new SerializableTimestampAssigner<Sysc08>() {
                             @Override
                             public long extractTimestamp(Sysc08 sysc08, long recordTimestamp) {
-                                Timestamp ts = sysc08.getTs();
-                                Long time = ts.getTime();
-                                return time;
+                                return sysc08.getTs();
                             }
                         })
         ).uid("Sysc08WithTsDS").name("Sysc08WithTsDS");
@@ -213,9 +210,7 @@ public class DimProvinceWideApp {
                         .withTimestampAssigner(new SerializableTimestampAssigner<Mdac01>() {
                             @Override
                             public long extractTimestamp(Mdac01 mdac01, long recordTimestamp) {
-                                Timestamp ts = mdac01.getTs();
-                                Long time = ts.getTime();
-                                return time;
+                                return mdac01.getTs();
                             }
                         })
         ).uid("Mdac01WithTsDS").name("Mdac01WithTsDS");

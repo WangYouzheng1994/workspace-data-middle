@@ -1,6 +1,6 @@
 package com.yqwl.datamiddle.realtime.app.func;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +40,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
      * @throws Exception
      */
     @Override
-    public void invoke(JSONObject jsonObj, SinkFunction.Context context) throws Exception {
+    public void invoke(JSONObject jsonObj, Context context) throws Exception {
         //获取目标表的名称
         String tableName = jsonObj.getString("sink_table");
         //获取json中data数据   data数据就是经过过滤之后  保留的业务表中字段

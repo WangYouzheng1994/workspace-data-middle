@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dim;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.oracle.OracleSource;
@@ -125,7 +125,7 @@ public class DimWarehouseRSWideApp {
             public SiteWarehouse map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 SiteWarehouse dataSite = jsonObject.getObject("after", SiteWarehouse.class);
-                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
+                Long ts = jsonObject.getLong("ts"); //取ts作为时间戳字段
                 dataSite.setTs(ts);
                 return dataSite;
             }
@@ -136,7 +136,7 @@ public class DimWarehouseRSWideApp {
             public RfidWarehouse map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 RfidWarehouse dataRfid = jsonObject.getObject("after", RfidWarehouse.class);
-                Timestamp ts = jsonObject.getTimestamp("ts"); //取ts作为时间戳字段
+                Long ts = jsonObject.getLong("ts"); //取ts作为时间戳字段
                 dataRfid.setTs(ts);
                 return dataRfid;
             }
@@ -149,8 +149,7 @@ public class DimWarehouseRSWideApp {
                         .withTimestampAssigner(new SerializableTimestampAssigner<SiteWarehouse>() {
                             @Override
                             public long extractTimestamp(SiteWarehouse siteWarehouse, long recordTimestamp) {
-                                Timestamp ts = siteWarehouse.getTs();
-                                return ts.getTime();
+                                return siteWarehouse.getTs();
                             }
                         })
         ).uid("SiteWarehouseTsDS").name("SiteWarehouseTsDS");
@@ -160,8 +159,7 @@ public class DimWarehouseRSWideApp {
                         .withTimestampAssigner(new SerializableTimestampAssigner<RfidWarehouse>() {
                             @Override
                             public long extractTimestamp(RfidWarehouse siteWarehouse, long recordTimestamp) {
-                                Timestamp ts = siteWarehouse.getTs();
-                                return ts.getTime();
+                                return siteWarehouse.getTs();
                             }
                         })
         ).uid("RfidWarehouseTsDS").name("RfidWarehouseTsDS");

@@ -1,8 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.func;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.common.OperateTypeConst;
 import com.yqwl.datamiddle.realtime.common.PhoenixConfig;

@@ -1,28 +1,21 @@
 package com.yqwl.datamiddle.realtime.app.dwd;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
-import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.beans.BeanCopier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -31,7 +24,6 @@ import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.ArrayList;
@@ -47,6 +39,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwdAppMysqlOdsSptb02 {
+    //2021-06-01 00:00:00
+    private static final long START = 1609430400000L;
+    //2022-12-31 23:59:59
+    private static final long END = 1672502399000L;
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
@@ -60,7 +56,7 @@ public class WaybillDwdAppMysqlOdsSptb02 {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
         //mysql消费源相关参数配置
@@ -69,7 +65,7 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList(StrUtil.getStrList(props.getStr("cdc.mysql.table.list"), ","))
+                .tableList("data_flink.ods_vlms_sptb02")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
@@ -77,36 +73,18 @@ public class WaybillDwdAppMysqlOdsSptb02 {
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
-        // 2.过滤出Sptb02的表
-        DataStream<String> filterBsdDs = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("ods_vlms_sptb02")) {
-                    Sptb02 after = jo.getObject("after", Sptb02.class);
-                    String cjsdbh = after.getCJSDBH();
-                    if (cjsdbh != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterods_vlms_sptb02").name("filterods_vlms_sptb02");
-
         //3.转换Sptb02为实体类
-        SingleOutputStreamOperator<Sptb02> mapBsd = filterBsdDs.map(new MapFunction<String, Sptb02>() {
+        SingleOutputStreamOperator<Sptb02> mapBsd = mysqlSource.map(new MapFunction<String, Sptb02>() {
             @Override
             public Sptb02 map(String kafkaBsdValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
                 Sptb02 dataBsd = jsonObject.getObject("after", Sptb02.class);
-//                Timestamp ts = jsonObject.getTimestamp("ts");
-//                dataBsd.setTs(ts);
                 return dataBsd;
             }
         }).uid("transitionSptb02").name("transitionSptb02");
         //对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mapBsd.process(new ProcessFunction<Sptb02, DwdSptb02>() {
+
             @Override
             public void processElement(Sptb02 sptb02, Context context, Collector<DwdSptb02> collector) throws Exception {
                 //System.out.println("processElement方法开始时，数据值：" + sptb02);
@@ -115,7 +93,7 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 DwdSptb02 dwdSptb02 = new DwdSptb02();
                 //将sptb02属性值copy到dwdSptb02
                 //BeanUtils.copyProperties(sptb02, dwdSptb02);
-                BeanUtil.copyProperties(sptb02, dwdSptb02);
+                //BeanUtil.copyProperties(sptb02, dwdSptb02);
                 //System.out.println("属性copy后值：" + dwdSptb02.toString());
                 log.info("Sptb02属性复制到DwdSptb02后数据:{}", dwdSptb02);
                 //获取原数据的运输方式
@@ -226,18 +204,18 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 //对保存的数据为null的填充默认值
                 //DwdSptb02 bean = JsonPartUtil.getBean(dwdSptb02);
                 //实际保存的值为after里的值
-                System.out.println("处理完的数据填充后的值:" + dwdSptb02.toString());
-                log.info("处理完的数据填充后的值:" + dwdSptb02.toString());
+//                System.out.println("处理完的数据填充后的值:" + dwdSptb02.toString());
+//                log.info("处理完的数据填充后的值:" + dwdSptb02.toString());
                 collector.collect(dwdSptb02);
             }
         }).uid("dataDwdProcess").name("dataDwdProcess");
 
 
-        /**
+  /*      *//**
          *  处理 物理仓库信息 省区代码 市县代码
          *  inner join sptc34 b on a.vwlckdm = b.vwlckdm
          *  inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
-         */
+         *//*
         SingleOutputStreamOperator<DwdSptb02> sptc34DS = AsyncDataStream.unorderedWait(
                 dataDwdProcess,
                 new DimAsyncFunction<DwdSptb02>(
@@ -261,13 +239,13 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                         dwdSptb02.setSTART_CITY_CODE(dimInfoJsonObj.getString("VSXDM"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
+                60, TimeUnit.SECONDS).disableChaining().uid("sptc34DS").name("sptc34DS");
 
-        /**
+        *//**
          *  处理 经销商到货地 省区代码 市县代码
          *  inner join mdac32 e on a.cdhddm = e.cdhddm
          *  inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
-         */
+         *//*
         SingleOutputStreamOperator<DwdSptb02> mdac32DS = AsyncDataStream.unorderedWait(
                 sptc34DS,
                 new DimAsyncFunction<DwdSptb02>(
@@ -293,12 +271,12 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 },
                 60, TimeUnit.SECONDS).uid("mdac32DS").name("mdac32DS");
 
-        /**
+        *//**
          *  处理 发车站台 对应的仓库代码 仓库名称
          *  from sptb02 a
          *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
          *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
-         */
+         *//*
         SingleOutputStreamOperator<DwdSptb02> vfcztSiteWarehouseDS = AsyncDataStream.unorderedWait(
                 mdac32DS,
                 new DimAsyncFunction<DwdSptb02>(
@@ -326,12 +304,12 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 60, TimeUnit.SECONDS).uid("vfcztSiteWarehouseDS").name("vfcztSiteWarehouseDS");
 
 
-        /**
+        *//**
          *  处理 收车站台 对应的仓库代码 仓库名称
          *  from sptb02 a
          *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
          *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
-         */
+         *//*
         SingleOutputStreamOperator<DwdSptb02> vscztSiteWarehouseDS = AsyncDataStream.unorderedWait(
                 vfcztSiteWarehouseDS,
                 new DimAsyncFunction<DwdSptb02>(
@@ -358,10 +336,10 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                 },
                 60, TimeUnit.SECONDS).uid("vscztSiteWarehouseDS").name("vscztSiteWarehouseDS");
 
-        /**
+        *//**
          *  处理 公路单的对应的物理仓库代码对应的类型
          *  left join site_warehouse c    on a.vfczt = c.vwlckdm and c.type =  'CONTRAST'
-         */
+         *//*
         SingleOutputStreamOperator<DwdSptb02> highwayWarehouseTypeDS = AsyncDataStream.unorderedWait(
                 vscztSiteWarehouseDS,
                 new DimAsyncFunction<DwdSptb02>(
@@ -384,10 +362,10 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                         dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(dimInfoJsonObj.getString("WAREHOUSE_TYPE"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("highwayWarehouseTypeDS").name("highwayWarehouseTypeDS");
+                60, TimeUnit.SECONDS).uid("highwayWarehouseTypeDS").name("highwayWarehouseTypeDS");*/
 
         //将实体类映射成json
-        SingleOutputStreamOperator<String> mapJson = highwayWarehouseTypeDS.map(new MapFunction<DwdSptb02, String>() {
+        SingleOutputStreamOperator<String> mapJson = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
             @Override
             public String map(DwdSptb02 obj) throws Exception {
                 DwdSptb02 bean = JsonPartUtil.getBean(obj);
@@ -396,15 +374,15 @@ public class WaybillDwdAppMysqlOdsSptb02 {
         }).uid("mapJson").name("mapJson");
 
         //组装kafka生产端
-/*        dataDwdProcess.print("数据拉宽后结果输出:");
+     /*   dataDwdProcess.print("数据拉宽后结果输出:");
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.DWD_VLMS_SPTB02_TEST,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02_TEST));
+                KafkaTopicConst.DWD_VLMS_SPTB02,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
-        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");*/
-
+        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
+*/
 
         log.info("将处理完的数据保存到mysql中");
         mapJson.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
@@ -416,6 +394,7 @@ public class WaybillDwdAppMysqlOdsSptb02 {
                     DwdSptb02 dwdSptb02 = JSON.parseObject(s, DwdSptb02.class);
                     list.add(dwdSptb02);
                 }
+                log.info("sql插入");
                 if (list.size() > 0) {
                     collector.collect(list);
                 }
@@ -423,7 +402,7 @@ public class WaybillDwdAppMysqlOdsSptb02 {
         }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
 
 
-        env.execute("sptb02-sink-kafka-dwd");
+        env.execute("WaybillDwdAppMysqlOdsSptb02");
         log.info("sptb02dwd层job任务开始执行");
     }
 }

@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -61,18 +62,19 @@ public class DimUtil {
     public static JSONObject getDimInfo(String dbType, String tableName, String columnName, Object value, String andSql) {
         // 判定是否有多个列值,约定用,号分割
         //System.out.println("获取的value值:" + value);
-        log.info("获取的查询where条件里value值:{}", value);
+//        log.info("获取的查询where条件里value值:{}", value);
         if (Objects.nonNull(value)) {
             if (value instanceof List) {
                 List list = (List) value;
                 if (CollectionUtils.isNotEmpty(list)) {
                     //获取查询的列名
                     String[] columnArr = StringUtils.split(columnName, ",");
-                    List<Tuple2<String, Object>> tupleList = new ArrayList<>();
+                    List<Tuple2<String, Object>> tupleList = new ArrayList<>(columnArr.length);
                     for (int i = 0; i < columnArr.length; i++) {
                         //列名和对应值包装成一个对象
                         tupleList.add(Tuple2.of(columnArr[i], ((List) value).get(i)));
                     }
+                    list = null;
                     return getDimInfo(dbType, tableName, andSql, tupleList.toArray(new Tuple2[]{}));
                 }
             } else {
@@ -150,39 +152,39 @@ public class DimUtil {
         JSONObject dimJsonObj = null;
         try {
             //获取jedis客户端
-            //jedis = RedisUtil.getJedis();
+            jedis = RedisUtil.getJedis();
             //根据key到Redis中查询
-            //dimJsonStr = jedis.get(redisKey);
+            dimJsonStr = jedis.get(redisKey);
             //判断是否从Redis中查询到了数据
-            //if (dimJsonStr != null && dimJsonStr.length() > 0) {
-            //dimJsonObj = JSON.parseObject(dimJsonStr);
-            //} else {
-            //如果在Redis中没有查到数据，需要到Phoenix中查询
-            String sql = "select * from " + tableName + whereSql;
-            //System.out.println("查询维度的SQL:" + sql);
-            log.info("查询维度的SQL:{}", sql);
-            List<JSONObject> dimList = null;
-            if (MYSQL_DB_TYPE.equals(dbType)) {
-                dimList = DbUtil.queryList(sql, JSONObject.class, false);
-            } else if (HBASE_DB_TYPE.equals(dbType)) {
-                dimList = PhoenixUtil.queryList(sql, JSONObject.class);
-            }
-            //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
-            if (dimList != null && dimList.size() > 0) {
-                dimJsonObj = dimList.get(0);
-                //将查询出来的数据放到Redis中缓存起来
-                //if (jedis != null) {
-                //   jedis.setex(redisKey, 3600 * 24, dimJsonObj.toJSONString());
-                // }
+            if (dimJsonStr != null && dimJsonStr.length() > 0) {
+                dimJsonObj = JSON.parseObject(dimJsonStr);
             } else {
-                //System.out.println("维度数据没有找到:" + sql);
-                log.info("维度数据没有找到:{}", sql);
+                //如果在Redis中没有查到数据，需要到Phoenix中查询
+                String sql = "select * from " + tableName + whereSql + "limit 1";
+                //System.out.println("查询维度的SQL:" + sql);
+                log.info("查询维度的SQL:{}", sql);
+                List<JSONObject> dimList = null;
+                if (MYSQL_DB_TYPE.equals(dbType)) {
+                    dimList = DbUtil.queryList(sql, JSONObject.class, false);
+                } else if (HBASE_DB_TYPE.equals(dbType)) {
+                    dimList = PhoenixUtil.queryList(sql, JSONObject.class);
+                }
+                //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
+                if (dimList != null && dimList.size() > 0) {
+                    dimJsonObj = dimList.get(0);
+                    //将查询出来的数据放到Redis中缓存起来
+                    if (jedis != null) {
+                       jedis.setex(redisKey, 3600 * 24, dimJsonObj.toJSONString());
+                     }
+                } else {
+                    //System.out.println("维度数据没有找到:" + sql);
+                    log.info("维度数据没有找到:{}", sql);
+                }
+                dimList = null;
             }
-
-            //}
         } catch (Exception e) {
             //System.out.println("维度查询异常信息:" + e.getMessage());
-            log.info("维度查询异常信息:{}", e.getMessage());
+            log.error( e.getMessage(), e);
             // throw new RuntimeException("从redis中查询维度失败");
         } finally {
             //关闭Jedis
