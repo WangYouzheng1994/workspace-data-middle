@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import cn.hutool.core.date.DateUtil;
 import org.springframework.util.StringUtils;
 
 /**
@@ -29,10 +30,29 @@ public class DateUtils extends PropertyEditorSupport {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         return sdf.format(new Date());
     }
-
+    /**
+     * 获取当天的23：59:59时间
+     * @return
+     */
     public static String getToday4Night() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
         return sdf.format(new Date());
+    }
+
+    /**
+     * 获取当天的00：00：00 13位时间戳
+     * @return
+     */
+    public static Long getToday4DawnLong13() {
+        return DateUtil.beginOfDay(new Date()).toTimestamp().getTime();
+    }
+
+    /**
+     * 获取当天的23：59:59 13位时间戳
+     * @return
+     */
+    public static Long getToday4NightLong13() {
+        return DateUtil.endOfDay(new Date()).toTimestamp().getTime();
     }
 
     public static ThreadLocal<SimpleDateFormat> date_sdf = new ThreadLocal<SimpleDateFormat>() {
