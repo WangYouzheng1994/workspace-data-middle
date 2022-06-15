@@ -180,6 +180,16 @@ public class DwmOneOrderToEnd implements Serializable {
     private String DEALER_NAME;
 
     /**
+     * 开始站台仓库代码
+     */
+    private String START_WAREHOUSE_CODE;
+
+    /**
+     * 到达站台仓库代码
+     */
+    private String END_WAREHOUSE_CODE;
+
+    /**
      * 开始站台 应用于铁路
      */
 
@@ -214,6 +224,18 @@ public class DwmOneOrderToEnd implements Serializable {
      */
 
     private Long UNLOAD_RAILWAY_TIME;
+
+    /**
+     * 开始港口代码 应用于水路
+     */
+
+    private String START_WATERWAY_CODE;
+
+    /**
+     * 目的港口代码 应用于水路
+     */
+
+    private String END_WATERWAY_CODE;
 
     /**
      * 开始港口名称 应用于水路
