@@ -49,6 +49,10 @@
             <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
+            AND  (VIN,WAREHOUSE_UPDATETIME) IN (
+            SELECT VIN,MAX(WAREHOUSE_UPDATETIME)
+            FROM dwm_vlms_one_order_to_end
+            GROUP BY VIN)
         </where>
     </sql>
 
