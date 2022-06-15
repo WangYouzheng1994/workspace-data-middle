@@ -236,74 +236,105 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 			  if ( item.getStowageNoteTime() != 0 ) {
 				  row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime() ));
 			  }
-			  row1.createCell(11).setCellValue(item.getStowageNoteNo());//stowageNoteNo
-			  row1.createCell(12).setCellValue(item.getTrafficType());//trafficType
+			  //stowageNoteNo
+			  row1.createCell(11).setCellValue(item.getStowageNoteNo());
+			  //trafficType
+			  row1.createCell(12).setCellValue(item.getTrafficType());
+			  //assignTime
 			  if ( item.getAssignTime() != 0 ) {
-				  row1.createCell(13).setCellValue(sdf.format(item.getAssignTime() ));//assignTime
+				  row1.createCell(13).setCellValue(sdf.format(item.getAssignTime() ));
 			  }
-			  row1.createCell(14).setCellValue(item.getCarrierName());//carrierName
+			  //carrierName
+			  row1.createCell(14).setCellValue(item.getCarrierName());
+			  //actualOutTime
 			  if ( item.getActualOutTime() != 0 ) {
-				  row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));//actualOutTime
+				  row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));
 			  }
+			  //shipmentTime
 			  if ( item.getShipmentTime() != 0 ) {
-				  row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime() ));//shipmentTime
+				  row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime() ));
 			  }
-			  row1.createCell(17).setCellValue(item.getTransportVehicleNo());//transportVehicleNo
-
-			  row1.createCell(18).setCellValue(item.getSamePlateNum());//samePlateNum
-
-			  row1.createCell(19).setCellValue(item.getVehicleNum());//vehicleNum
-			  row1.createCell(20).setCellValue(item.getStartCityName());//startCityName
-			  row1.createCell(21).setCellValue(item.getEndCityName());//endCityName
-			  row1.createCell(22).setCellValue(item.getVdwdm());//vdwdm
-			  row1.createCell(23).setCellValue(item.getStartWaterwayName());//startWaterwayName
+			  //transportVehicleNo
+			  row1.createCell(17).setCellValue(item.getTransportVehicleNo());
+			  //samePlateNum
+			  row1.createCell(18).setCellValue(item.getSamePlateNum());
+			  //vehicleNum
+			  row1.createCell(19).setCellValue(item.getVehicleNum());
+			  //startCityName
+			  row1.createCell(20).setCellValue(item.getStartCityName());
+			  //endCityName
+			  row1.createCell(21).setCellValue(item.getEndCityName());
+			  //vdwdm
+			  row1.createCell(22).setCellValue(item.getVdwdm());
+			  //startWaterwayName
+			  row1.createCell(23).setCellValue(item.getStartWaterwayName());
+			  //inStartWaterwayTime
 			  if ( item.getInStartWaterwayTime() != 0 ) {
-				  row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime() ));//inStartWaterwayTime
+				  row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime() ));
 			  }
+			  //endStartWaterwayTime
 			  if ( item.getEndStartWaterwayTime() != 0 ) {
-				  row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime() ));//endStartWaterwayTime
+				  row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime() ));
 			  }
-			  row1.createCell(26).setCellValue(item.getEndWaterwayName());//endWaterwayName
+			  //endWaterwayName
+			  row1.createCell(26).setCellValue(item.getEndWaterwayName());
+			  //inEndWaterwayTime
 			  if ( item.getInEndWaterwayTime() != 0 ) {
-				  row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime() ));//inEndWaterwayTime
+				  row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime() ));
 			  }
-			  row1.createCell(28).setCellValue(item.getStartPlatformName());//startPlatformName
+			  //startPlatformName
+			  row1.createCell(28).setCellValue(item.getStartPlatformName());
+			  //inStartPlatformTime
 			  if ( item.getInStartPlatformTime() != 0 ) {
-				  row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime() ));//inStartPlatformTime
+				  row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime() ));
 			  }
+			  //outStartPlatformTime
 			  if ( item.getOutStartPlatformTime() != 0 ) {
-				  row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime() ));//outStartPlatformTime
+				  row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime() ));
 			  }
-			  row1.createCell(31).setCellValue(item.getEndPlatformName());//endPlatformName
+			  //endPlatformName
+			  row1.createCell(31).setCellValue(item.getEndPlatformName());
+			  //inEndPlatformTime
 			  if ( item.getInEndPlatformTime() != 0 ) {
-				  row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));//inEndPlatformTime
+				  row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));
 			  }
+			  //unloadShipTime
 			  if ( item.getUnloadShipTime() != 0 ) {
-				  row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime() ));//unloadShipTime
+				  row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime() ));
 			  }
+			  //unloadRailwayTime
 			  if ( item.getUnloadRailwayTime() != 0 ) {
-				  row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));//unloadRailwayTime
+				  row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));
 			  }
+			  //inDistributeTime
 			  if ( item.getInDistributeTime() != 0 ) {
-				  row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime() ));//inDistributeTime
+				  row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime() ));
 			  }
+			  //distributeAssignTime
 			  if ( item.getDistributeAssignTime() != 0 ) {
-				  row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));//distributeAssignTime
+				  row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));
 			  }
-			  row1.createCell(37).setCellValue(item.getDistributeCarrierName());//distributeCarrierName
-			  row1.createCell(38).setCellValue(item.getDistributeVehicleNo());//distributeVehicleNo
-			  row1.createCell(39).setCellValue(item.getDistributeVehicleNum());//distributeVehicleNum
+			  //distributeCarrierName
+			  row1.createCell(37).setCellValue(item.getDistributeCarrierName());
+			  //distributeVehicleNo
+			  row1.createCell(38).setCellValue(item.getDistributeVehicleNo());
+			  //distributeVehicleNum
+			  row1.createCell(39).setCellValue(item.getDistributeVehicleNum());
+			  //outDistributeTime
 			  if ( item.getOutDistributeTime() != 0 ) {
-				  row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));//outDistributeTime
+				  row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));
 			  }
+			  //distributeShipmentTime
 			  if ( item.getDistributeShipmentTime() != 0 ) {
-				  row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));//distributeShipmentTime
+				  row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));
 			  }
+			  //dotSiteTime
 			  if ( item.getDotSiteTime() != 0 ) {
-				  row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));//dotSiteTime
+				  row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));
 			  }
+			  //finalSiteTime
 			  if ( item.getFinalSiteTime() != 0 ) {
-				  row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));//finalSiteTime
+				  row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));
 			  }
 			  rowNum ++;
 		  }
@@ -350,8 +381,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @ApiOperation(value="一单到底-按条件查询", notes="一单到底-按条件查询")
   @PostMapping("/selectOneOrderToEndList")
   public Result<Page<DwmVlmsOneOrderToEnd>> selectOneOrderToEndList(@RequestBody GetQueryCriteria queryCriteria){
-//	  Result<Page<DwmVlmsOneOrderToEnd>> result = new Result<Page<DwmVlmsOneOrderToEnd>>();
-
 	  // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
 	  String vin = queryCriteria.getVin();
 	  if (StringUtils.isNotBlank(vin)) {

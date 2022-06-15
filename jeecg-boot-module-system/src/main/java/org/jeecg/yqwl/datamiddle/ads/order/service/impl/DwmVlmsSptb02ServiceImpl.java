@@ -3,7 +3,6 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ import java.util.*;
  * @Version: V1.0
  */
 @Slf4j
-@DS("slave_2")
+@DS("slave")
 @Service
 public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, DwmVlmsSptb02> implements IDwmVlmsSptb02Service {
     @Resource
