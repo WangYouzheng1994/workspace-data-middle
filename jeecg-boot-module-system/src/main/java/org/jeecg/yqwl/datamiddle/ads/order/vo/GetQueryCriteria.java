@@ -86,6 +86,10 @@ public class GetQueryCriteria {
 
     private List<String> vinList;
 
+    private Integer limitStart;
+
+    private Integer limitEnd;
+
     /**
      * 过滤条件
      */

@@ -4,7 +4,6 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
-import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
@@ -23,10 +22,16 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
     /**
      * 按条件分页查询
      * @param queryCriteria
-     * @param page
      * @return
      */
-    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria,  Page<DwmVlmsOneOrderToEnd> page);
+    Integer countOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
+
+    /**
+     * 按条件分页查询
+     * @param queryCriteria
+     * @return
+     */
+    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
 
 
     /**

@@ -1,23 +1,15 @@
 package org.jeecg.yqwl.datamiddle.ads.order.controller;
 
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.stream.Collectors;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.jeecg.dingtalk.api.core.vo.PageResult;
 import io.netty.util.internal.StringUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -25,33 +17,20 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
-import org.jeecg.common.util.oConvertUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
-import org.jeecg.modules.demo.test.entity.JeecgDemo;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
-import org.jeecgframework.poi.excel.ExcelImportUtil;
-import org.jeecgframework.poi.excel.def.NormalExcelConstants;
-import org.jeecgframework.poi.excel.entity.ExportParams;
-import org.jeecgframework.poi.excel.entity.ImportParams;
-import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.ModelAndView;
-import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import reactor.core.publisher.Mono;
 
 /**
  * @Description: 一单到底
@@ -165,8 +144,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
    */
   @AutoLog(value = "导出")
   @ApiOperation(value="导出", notes="导出")
-  @GetMapping(value = "/exportXls")
+  @PostMapping(value = "/exportXls")
   public void exportXls(@RequestBody GetQueryCriteria queryCriteria ,HttpServletResponse response) throws IOException {
+	  System.out.println(System.currentTimeMillis());
 	  //创建工作簿
 	  SXSSFWorkbook wb = new SXSSFWorkbook();
 	  //在工作簿中创建sheet页
@@ -198,113 +178,146 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 	  if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
 		  queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
 	  }
-	  //TODO:过滤选中的数据
+	  // TODO:过滤选中的数据
 	  String selections = queryCriteria.getSelections();
 	  if ( StringUtil.length(selections) > 2  ) {
 		  queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections,",")));
 	  }
-	  //获取查询数据
-	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria, pageList);
-	  List<DwmVlmsOneOrderToEnd> records = pageList.getRecords();
-	  for ( DwmVlmsOneOrderToEnd item : records ) {
-		  //时间字段转换成年月日时分秒类型
-		  SXSSFRow row1 = sheet.createRow(rowNum);
-		  row1.createCell(0).setCellValue(item.getVin());//vin
-		  row1.createCell(1).setCellValue(item.getBrand());//brand
-		  row1.createCell(2).setCellValue(item.getBaseName());//baseName
-		  row1.createCell(3).setCellValue(item.getVehicleName());//vehicleName
-		  if ( item.getCp9OfflineTime() != 0 ) {
-			  row1.createCell(4).setCellValue(sdf.format(item.getCp9OfflineTime()));//cp9OfflineTime
-		  }
-		  if ( item.getLeaveFactoryTime() != 0 ) {
-			  row1.createCell(5).setCellValue(sdf.format(item.getLeaveFactoryTime() ));//leaveFactoryTime
-		  }
-		  if ( item.getInSiteTime() != 0 ) {
-			  row1.createCell(6).setCellValue(sdf.format(item.getInSiteTime()));//inSiteTime
-		  }
-		  row1.createCell(7).setCellValue(item.getInWarehouseName());//inWarehouseName
-		  row1.createCell(8).setCellValue(item.getTaskNo());//taskNo
-		  if ( item.getVehicleReceivingTime() != 0 ) {
-			  row1.createCell(9).setCellValue(sdf.format(item.getVehicleReceivingTime()));//vehicleReceivingTime
-		  }
-		  if ( item.getStowageNoteTime() != 0 ) {
-			  row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime() ));//stowageNoteTime
-		  }
-		  row1.createCell(11).setCellValue(item.getStowageNoteNo());//stowageNoteNo
-		  row1.createCell(12).setCellValue(item.getTrafficType());//trafficType
-		  if ( item.getAssignTime() != 0 ) {
-			  row1.createCell(13).setCellValue(sdf.format(item.getAssignTime() ));//assignTime
-		  }
-		  row1.createCell(14).setCellValue(item.getCarrierName());//carrierName
-		  if ( item.getActualOutTime() != 0 ) {
-			  row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));//actualOutTime
-		  }
-		  if ( item.getShipmentTime() != 0 ) {
-			  row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime() ));//shipmentTime
-		  }
-		  row1.createCell(17).setCellValue(item.getTransportVehicleNo());//transportVehicleNo
 
-		  row1.createCell(18).setCellValue(item.getSamePlateNum());//samePlateNum
+	  Integer pageNo = 1;
+	  Integer pageSize = 5000;
 
-		  row1.createCell(19).setCellValue(item.getVehicleNum());//vehicleNum
-		  row1.createCell(20).setCellValue(item.getStartCityName());//startCityName
-		  row1.createCell(21).setCellValue(item.getEndCityName());//endCityName
-		  row1.createCell(22).setCellValue(item.getVdwdm());//vdwdm
-		  row1.createCell(23).setCellValue(item.getStartWaterwayName());//startWaterwayName
-		  if ( item.getInStartWaterwayTime() != 0 ) {
-			  row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime() ));//inStartWaterwayTime
-		  }
-		  if ( item.getEndStartWaterwayTime() != 0 ) {
-			  row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime() ));//endStartWaterwayTime
-		  }
-		  row1.createCell(26).setCellValue(item.getEndWaterwayName());//endWaterwayName
-		  if ( item.getInEndWaterwayTime() != 0 ) {
-			  row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime() ));//inEndWaterwayTime
-		  }
-		  row1.createCell(28).setCellValue(item.getStartPlatformName());//startPlatformName
-		  if ( item.getInStartPlatformTime() != 0 ) {
-			  row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime() ));//inStartPlatformTime
-		  }
-		  if ( item.getOutStartPlatformTime() != 0 ) {
-			  row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime() ));//outStartPlatformTime
-		  }
-		  row1.createCell(31).setCellValue(item.getEndPlatformName());//endPlatformName
-		  if ( item.getInEndPlatformTime() != 0 ) {
-			  row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));//inEndPlatformTime
-		  }
-		  if ( item.getUnloadShipTime() != 0 ) {
-			  row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime() ));//unloadShipTime
-		  }
-		  if ( item.getUnloadRailwayTime() != 0 ) {
-			  row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));//unloadRailwayTime
-		  }
-		  if ( item.getInDistributeTime() != 0 ) {
-			  row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime() ));//inDistributeTime
-		  }
-		  if ( item.getDistributeAssignTime() != 0 ) {
-			  row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));//distributeAssignTime
-		  }
-		  row1.createCell(37).setCellValue(item.getDistributeCarrierName());//distributeCarrierName
-		  row1.createCell(38).setCellValue(item.getDistributeVehicleNo());//distributeVehicleNo
-		  row1.createCell(39).setCellValue(item.getDistributeVehicleNum());//distributeVehicleNum
-		  if ( item.getOutDistributeTime() != 0 ) {
-			  row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));//outDistributeTime
-		  }
-		  if ( item.getDistributeShipmentTime() != 0 ) {
-			  row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));//distributeShipmentTime
-		  }
-		  if ( item.getDotSiteTime() != 0 ) {
-			  row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));//dotSiteTime
-		  }
-		  if ( item.getFinalSiteTime() != 0 ) {
-			  row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));//finalSiteTime
-		  }
-		  rowNum ++;
-	  }
+	  boolean intervalFlag = true;
+	  queryCriteria.setPageSize(pageSize);
 
-	  //导出Excel
-//	  SXSSFWorkbook export = dwmVlmsOneOrderToEndService.export(queryCriteria);
+	  List<DwmVlmsOneOrderToEnd> pageList = null;
+
+	  do {
+		  queryCriteria.setPageNo(pageNo);
+
+		  //获取查询数据
+//		  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo, pageSize);
+		  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+		  System.out.println("查询结束" + System.currentTimeMillis());
+		  for ( DwmVlmsOneOrderToEnd item : pageList ) {
+			  System.out.println(System.currentTimeMillis());
+
+			  //时间字段转换成年月日时分秒类型
+			  SXSSFRow row1 = sheet.createRow(rowNum);
+			  //vin
+			  row1.createCell(0).setCellValue(item.getVin());
+			  //brand
+			  row1.createCell(1).setCellValue(item.getBrand());
+			  //baseName
+			  row1.createCell(2).setCellValue(item.getBaseName());
+			  //vehicleName
+			  row1.createCell(3).setCellValue(item.getVehicleName());
+			  //cp9OfflineTime
+			  if ( item.getCp9OfflineTime() != 0 ) {
+				  row1.createCell(4).setCellValue(sdf.format(item.getCp9OfflineTime()));
+			  }
+			  //leaveFactoryTime
+			  if ( item.getLeaveFactoryTime() != 0 ) {
+				  row1.createCell(5).setCellValue(sdf.format(item.getLeaveFactoryTime() ));
+			  }
+			  //inSiteTime
+			  if ( item.getInSiteTime() != 0 ) {
+				  row1.createCell(6).setCellValue(sdf.format(item.getInSiteTime()));
+			  }
+			  //inWarehouseName
+			  row1.createCell(7).setCellValue(item.getInWarehouseName());
+			  //taskNo
+			  row1.createCell(8).setCellValue(item.getTaskNo());
+			  //vehicleReceivingTime
+			  if ( item.getVehicleReceivingTime() != 0 ) {
+				  row1.createCell(9).setCellValue(sdf.format(item.getVehicleReceivingTime()));
+			  }
+			  //stowageNoteTime
+			  if ( item.getStowageNoteTime() != 0 ) {
+				  row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime() ));
+			  }
+			  row1.createCell(11).setCellValue(item.getStowageNoteNo());//stowageNoteNo
+			  row1.createCell(12).setCellValue(item.getTrafficType());//trafficType
+			  if ( item.getAssignTime() != 0 ) {
+				  row1.createCell(13).setCellValue(sdf.format(item.getAssignTime() ));//assignTime
+			  }
+			  row1.createCell(14).setCellValue(item.getCarrierName());//carrierName
+			  if ( item.getActualOutTime() != 0 ) {
+				  row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));//actualOutTime
+			  }
+			  if ( item.getShipmentTime() != 0 ) {
+				  row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime() ));//shipmentTime
+			  }
+			  row1.createCell(17).setCellValue(item.getTransportVehicleNo());//transportVehicleNo
+
+			  row1.createCell(18).setCellValue(item.getSamePlateNum());//samePlateNum
+
+			  row1.createCell(19).setCellValue(item.getVehicleNum());//vehicleNum
+			  row1.createCell(20).setCellValue(item.getStartCityName());//startCityName
+			  row1.createCell(21).setCellValue(item.getEndCityName());//endCityName
+			  row1.createCell(22).setCellValue(item.getVdwdm());//vdwdm
+			  row1.createCell(23).setCellValue(item.getStartWaterwayName());//startWaterwayName
+			  if ( item.getInStartWaterwayTime() != 0 ) {
+				  row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime() ));//inStartWaterwayTime
+			  }
+			  if ( item.getEndStartWaterwayTime() != 0 ) {
+				  row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime() ));//endStartWaterwayTime
+			  }
+			  row1.createCell(26).setCellValue(item.getEndWaterwayName());//endWaterwayName
+			  if ( item.getInEndWaterwayTime() != 0 ) {
+				  row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime() ));//inEndWaterwayTime
+			  }
+			  row1.createCell(28).setCellValue(item.getStartPlatformName());//startPlatformName
+			  if ( item.getInStartPlatformTime() != 0 ) {
+				  row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime() ));//inStartPlatformTime
+			  }
+			  if ( item.getOutStartPlatformTime() != 0 ) {
+				  row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime() ));//outStartPlatformTime
+			  }
+			  row1.createCell(31).setCellValue(item.getEndPlatformName());//endPlatformName
+			  if ( item.getInEndPlatformTime() != 0 ) {
+				  row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));//inEndPlatformTime
+			  }
+			  if ( item.getUnloadShipTime() != 0 ) {
+				  row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime() ));//unloadShipTime
+			  }
+			  if ( item.getUnloadRailwayTime() != 0 ) {
+				  row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));//unloadRailwayTime
+			  }
+			  if ( item.getInDistributeTime() != 0 ) {
+				  row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime() ));//inDistributeTime
+			  }
+			  if ( item.getDistributeAssignTime() != 0 ) {
+				  row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));//distributeAssignTime
+			  }
+			  row1.createCell(37).setCellValue(item.getDistributeCarrierName());//distributeCarrierName
+			  row1.createCell(38).setCellValue(item.getDistributeVehicleNo());//distributeVehicleNo
+			  row1.createCell(39).setCellValue(item.getDistributeVehicleNum());//distributeVehicleNum
+			  if ( item.getOutDistributeTime() != 0 ) {
+				  row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));//outDistributeTime
+			  }
+			  if ( item.getDistributeShipmentTime() != 0 ) {
+				  row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));//distributeShipmentTime
+			  }
+			  if ( item.getDotSiteTime() != 0 ) {
+				  row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));//dotSiteTime
+			  }
+			  if ( item.getFinalSiteTime() != 0 ) {
+				  row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));//finalSiteTime
+			  }
+			  rowNum ++;
+		  }
+
+		  // 如果没有查询到数据  或者 分页查询的数量不符合pageSize 那么终止循环
+		  if (CollectionUtils.isEmpty(pageList) || CollectionUtils.size(pageList) < pageSize ) {
+			  intervalFlag = false;
+		  } else {
+			  pageNo++;
+		  }
+	  } while(intervalFlag);
+
+	  System.out.println("搞了"+pageNo + "次 结束时间:"+System.currentTimeMillis());
+
 	  //设置内容类型
 	  response.setContentType("application/vnd.ms-excel;charset=utf-8");
 	  OutputStream outputStream = response.getOutputStream();
@@ -353,8 +366,11 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		}
 	  }
 	  // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- END
-	  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-	  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria, pageList);
-	  return Result.OK(pageList);
+	  Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
+	  Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+	  List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+	  page.setRecords(pageList);
+	  page.setTotal(total);
+	  return Result.OK(page);
   }
 }
