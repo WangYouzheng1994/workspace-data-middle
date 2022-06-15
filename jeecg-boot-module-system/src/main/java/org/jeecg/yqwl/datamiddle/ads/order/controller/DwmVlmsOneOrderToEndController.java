@@ -183,7 +183,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 	  if ( StringUtil.length(selections) > 2  ) {
 		  queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections,",")));
 	  }
-
+	  formatQueryTime(queryCriteria);
 	  Integer pageNo = 1;
 	  Integer pageSize = 5000;
 
@@ -199,12 +199,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  queryCriteria.setPageNo(pageNo);
 
 		  //获取查询数据
-//		  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo, pageSize);
 		  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
-//		  System.out.println("查询结束" + System.currentTimeMillis());
 		  for ( DwmVlmsOneOrderToEnd item : pageList ) {
-//			  System.out.println(System.currentTimeMillis());
-
 			  //时间字段转换成年月日时分秒类型
 			  SXSSFRow row1 = sheet.createRow(rowNum);
 			  //vin
@@ -354,8 +350,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  }
 	  } while(intervalFlag);
 
-//	  System.out.println("搞了"+pageNo + "次 结束时间:"+System.currentTimeMillis());
-
 	  //设置内容类型
 	  response.setContentType("application/vnd.ms-excel;charset=utf-8");
 	  OutputStream outputStream = response.getOutputStream();
@@ -401,6 +395,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 			queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
 		}
 	  }
+
+	  formatQueryTime(queryCriteria);
 	  // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- END
 	  Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
 	  Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
@@ -409,4 +405,24 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 	  page.setTotal(total);
 	  return Result.OK(page);
   }
+	private void formatQueryTime(GetQueryCriteria queryCriteria) {
+		if (queryCriteria.getLeaveFactoryTimeStart() != null) {
+			queryCriteria.setLeaveFactoryTimeStart(queryCriteria.getLeaveFactoryTimeStart() + 28800000);
+		}
+		if (queryCriteria.getLeaveFactoryTimeStart() != null) {
+			queryCriteria.setLeaveFactoryTimeEnd(queryCriteria.getLeaveFactoryTimeEnd()+ 28800000);
+		}
+		if (queryCriteria.getInSiteTimeStart() != null) {
+			queryCriteria.setInSiteTimeStart(queryCriteria.getInSiteTimeStart()+ 28800000);
+		}
+		if (queryCriteria.getInSiteTimeEnd() != null) {
+			queryCriteria.setInSiteTimeEnd(queryCriteria.getInSiteTimeEnd()+ 28800000);
+		}
+		if (queryCriteria.getCp9OfflineTimeStart() != null) {
+			queryCriteria.setCp9OfflineTimeStart(queryCriteria.getCp9OfflineTimeStart()+ 28800000);
+		}
+		if (queryCriteria.getCp9OfflineTimeEnd() != null) {
+			queryCriteria.setCp9OfflineTimeEnd(queryCriteria.getCp9OfflineTimeEnd()+ 28800000);
+		}
+	}
 }

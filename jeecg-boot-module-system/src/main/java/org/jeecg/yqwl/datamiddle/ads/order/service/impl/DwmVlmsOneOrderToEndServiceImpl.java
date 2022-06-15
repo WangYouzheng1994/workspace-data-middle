@@ -45,9 +45,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
-//        System.out.println("查询开始" + System.currentTimeMillis());
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
-//        System.out.println("查询结束" + System.currentTimeMillis());
         //遍历list,并查询出同板数量赋值
         Map<String, Integer> samePlateNumMap = new HashMap<>();
 
@@ -78,7 +76,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //                }
             }
         }
-//        System.out.println("查询方法结束" + System.currentTimeMillis());
         return oneOrderToEndList;
     }
 
