@@ -2,23 +2,19 @@ package org.jeecg.yqwl.datamiddle.job.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.phoenix.shaded.com.ibm.icu.text.SimpleDateFormat;
-import org.apache.phoenix.shaded.com.ibm.icu.util.Calendar;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.TableParams;
-import org.jeecg.yqwl.datamiddle.ads.order.enums.TableName;
 import org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleDwdSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleDwdSptb02Service;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

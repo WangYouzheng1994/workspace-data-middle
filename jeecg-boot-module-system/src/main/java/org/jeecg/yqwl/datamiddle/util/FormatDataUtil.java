@@ -19,6 +19,7 @@ import java.util.*;
  * @Version: V1.0
  */
 public class FormatDataUtil {
+
     /**
      * 根据前端起始结束 获取 大屏图标用的x轴 时间列表
      * @param baseBrandTime

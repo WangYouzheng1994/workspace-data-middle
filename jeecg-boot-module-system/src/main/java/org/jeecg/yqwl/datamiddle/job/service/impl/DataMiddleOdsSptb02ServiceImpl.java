@@ -1,6 +1,7 @@
 package org.jeecg.yqwl.datamiddle.job.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.dynamic.datasource.annotation.DS;
@@ -25,7 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * @Description: 具体实现的代码
+ * @Description: 定时任务查询OdsSptb02具体实现的代码
  * @Author: XiaoFeng
  * @Date: 2022/6/13 15:40
  * @Version: V1.0
@@ -43,12 +44,11 @@ public class DataMiddleOdsSptb02ServiceImpl extends ServiceImpl<DataMiddleOdsSpt
     @Override
     public void getOdsVlmsSptb02() {
         log.info("开始查询ods_sptb02数据");
-        Long nowTime = System.currentTimeMillis();   //获取当前的时间戳
-        Long end = nowTime - ((nowTime + TimeZone.getDefault().getRawOffset()) % (24 * 60 * 60 * 1000L)); //当前0点的时间戳
+        Long end = DateUtils.getToday4DawnLong13();
         Long begin= end - 1296000000L ;  //获取15天前的时间戳
 
         boolean hasNext = true;
-        Integer limit = 500;
+        int limit = 500;
         Integer rowNum=0;
         int interval = 1;
         do {

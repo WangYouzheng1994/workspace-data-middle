@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper">
+
+    <resultMap id="baseStationDataMap" type="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData" >
+        <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
+        <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
+        <result column="IN_WAREHOUSE_CODE" property="IN_WAREHOUSE_CODE" jdbcType="VARCHAR"/>
+        <result column="IN_WAREHOUSE_NAME" property="IN_WAREHOUSE_NAME" jdbcType="VARCHAR"/>
+        <result column="VWLCKDM" property="WLCKDM" jdbcType="VARCHAR"></result>
+        <result column="OPERATE_TYPE" property="OPERATE_TYPE" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="baseStationDataMapEpc" type="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData" >
+        <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
+        <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
+        <result column="IN_WAREHOUSE_CODE" property="IN_WAREHOUSE_CODE" jdbcType="VARCHAR"/>
+        <result column="IN_WAREHOUSE_NAME" property="IN_WAREHOUSE_NAME" jdbcType="VARCHAR"/>
+        <result column="OPERATE_TYPE" property="OPERATE_TYPE" jdbcType="VARCHAR"/>
+    </resultMap>
+    <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
+    <select id="getOdsVlmsBaseStationData" resultMap="baseStationDataMap">
+        SELECT t.SAMPLE_U_T_C,
+               t.VIN,
+               t.SHOP_NO,
+               t.OPERATE_TYPE,
+               t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE,
+               t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME,
+               t2.VWLCKDM
+        FROM  ods_vlms_base_station_data t
+        LEFT JOIN dim_vlms_warehouse_rs t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
+        WHERE
+        SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
+        AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+    </select>
+    <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
+    <select id="getOdsVlmsBaseStationDataEpc" resultMap="baseStationDataMapEpc">
+        SELECT t.*,
+               t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE,
+               t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME
+        FROM  ods_vlms_base_station_data t
+                  LEFT JOIN ods_vlms_rfid_warehouse t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
+        WHERE
+            SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
+          AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+    </select>
+
+    <!--插入一单到底dwm_vlms_one_order_to_end的表-->
+    <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
+        insert into dwm_vlms_one_order_to_end (
+            VIN,
+        <if test=" params.inWarehouseCode !=null">
+            IN_WAREHOUSE_CODE,
+        </if>
+        <if test=" params.inWarehouseName !=null">
+            IN_WAREHOUSE_NAME
+        </if>
+            )  values (
+            #{params.vin} ,
+        <if test=" params.inWarehouseCode !=null">
+            #{params.inWarehouseCode},
+        </if>
+        <if test=" params.inWarehouseName !=null">
+            #{params.inWarehouseName}
+        </if>
+        ) ON DUPLICATE KEY UPDATE
+        <if test=" params.inWarehouseCode !=null">
+            IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE),
+        </if>
+        <if test=" params.inWarehouseName !=null">
+            IN_WAREHOUSE_NAME=VALUES(IN_WAREHOUSE_NAME)
+        </if>
+    </insert>
+    
+    <!--更新一单到底的入库时间-->
+    <update id="updateOOTDInSiteTime">
+        UPDATE dwm_vlms_one_order_to_end e
+            JOIN dim_vlms_warehouse_rs a
+        SET IN_SITE_TIME = #{SAMPLE_U_T_C}
+        WHERE e.VIN = #{VIN}
+            AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
+            AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
+    </update>
+</mapper>

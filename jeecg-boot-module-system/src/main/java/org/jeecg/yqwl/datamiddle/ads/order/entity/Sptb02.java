@@ -1071,9 +1071,9 @@ public class Sptb02 implements Serializable {
 
 
     /**
+     * 代码逻辑需要,新加字段
      * RowNum
      */
-
     private Integer Rn;
 
 }

@@ -24,11 +24,12 @@ public class GetOdsSptb02 {
      * 每天23:59:59秒拉一次，
      * 每天10分钟拉一次。
      */
-    @Schedules({@Scheduled(cron = "59 59 23 * * ? "), @Scheduled(cron = "* 0/10 * * * ? ")})
-    public void getSptb02HandleInfo() {
-        log.info("开始运行【获取OdsSptb02数据任务");
-        this.dataMiddleOdsSptb02Service.getOdsVlmsSptb02();
-        log.info("结束运行【获取OdsSptb02数据任务】任务");
-    }
+//    @Schedules({@Scheduled(cron = "59 59 23 * * ? "), @Scheduled(cron = "* 0/10 * * * ? ")})
+//    public void getSptb02HandleInfo() {
+//        log.info("开始运行【获取OdsSptb02数据任务");
+//        this.dataMiddleOdsSptb02Service.getOdsVlmsSptb02();
+//        log.info("结束运行【获取OdsSptb02数据任务】任务");
+//    }
+
 
 }

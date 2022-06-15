@@ -7,7 +7,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 
 /**
- * @Description: 定时任务接口
+ * @Description: OdsSptb02定时任务接口
  * @Author: xiaofeng
  * @Date:   2022-06-13
  * @Version: V1.0

@@ -1,9 +1,9 @@
 package org.jeecg.yqwl.datamiddle.ads.order.entity;
 
-import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
-import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.CamelUnderline;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.TableName;
 
 import java.io.Serializable;
 
