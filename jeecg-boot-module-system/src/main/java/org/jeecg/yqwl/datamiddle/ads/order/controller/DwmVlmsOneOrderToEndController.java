@@ -192,6 +192,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
 	  List<DwmVlmsOneOrderToEnd> pageList = null;
 
+	  Integer maxSize = 200000;
+	  Integer currentSize = 0;
+
 	  do {
 		  queryCriteria.setPageNo(pageNo);
 
@@ -344,6 +347,10 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 			  intervalFlag = false;
 		  } else {
 			  pageNo++;
+		  }
+		  currentSize++;
+		  if (currentSize >= maxSize) {
+			  intervalFlag = false;
 		  }
 	  } while(intervalFlag);
 

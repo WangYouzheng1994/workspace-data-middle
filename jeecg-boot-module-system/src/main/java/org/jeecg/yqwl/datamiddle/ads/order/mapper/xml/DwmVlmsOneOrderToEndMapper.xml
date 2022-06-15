@@ -45,10 +45,10 @@
             <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
                 AND TOEND.STOWAGE_NOTE_NO = #{params.stowageNoteNo}
             </if>
-            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != '' and (params.leaveFactoryTimeStart = params.leaveFactoryTimeStart + 28800000)">
+            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != 0 and (params.leaveFactoryTimeStart = params.leaveFactoryTimeStart + 28800000)">
                 AND TOEND.LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
             </if>
-            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != '' and (params.leaveFactoryTimeEnd = params.leaveFactoryTimeEnd + 28800000) ">
+            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != 0 and (params.leaveFactoryTimeEnd = params.leaveFactoryTimeEnd + 28800000) ">
                 AND TOEND.LEAVE_FACTORY_TIME <![CDATA[ <= ]]>  #{params.leaveFactoryTimeEnd}
             </if>
             <if test="params.startCityName != null and params.startCityName != '' ">
@@ -57,16 +57,16 @@
             <if test="params.endCityName != null and params.endCityName != '' ">
                 AND TOEND.END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != '' and (params.inSiteTimeStart = params.inSiteTimeStart + 28800000) ">
+            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != 0 and (params.inSiteTimeStart = params.inSiteTimeStart + 28800000) ">
                 AND TOEND.IN_SITE_TIME <![CDATA[ >= ]]> #{params.inSiteTimeStart}
             </if>
-            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != '' and (params.inSiteTimeEnd = params.inSiteTimeEnd + 28800000) ">
+            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0 and (params.inSiteTimeEnd = params.inSiteTimeEnd + 28800000) ">
                 AND TOEND.IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != '' and (params.cp9OfflineTimeStart = params.cp9OfflineTimeStart + 28800000) ">
+            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != 0 and (params.cp9OfflineTimeStart = params.cp9OfflineTimeStart + 28800000) ">
                 AND TOEND.CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
             </if>
-            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != '' and (params.cp9OfflineTimeEnd = params.cp9OfflineTimeEnd + 28800000) ">
+            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 and (params.cp9OfflineTimeEnd = params.cp9OfflineTimeEnd + 28800000) ">
                 AND TOEND.CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
         </where>
@@ -111,10 +111,10 @@
             <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
                 AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
             </if>
-            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != '' and (params.leaveFactoryTimeStart = params.leaveFactoryTimeStart + 28800000)">
+            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != 0 and (params.leaveFactoryTimeStart = params.leaveFactoryTimeStart + 28800000)">
                 AND LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
             </if>
-            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != '' and (params.leaveFactoryTimeEnd = params.leaveFactoryTimeEnd + 28800000) ">
+            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != 0 and (params.leaveFactoryTimeEnd = params.leaveFactoryTimeEnd + 28800000) ">
                 AND LEAVE_FACTORY_TIME <![CDATA[ <= ]]>  #{params.leaveFactoryTimeEnd}
             </if>
             <if test="params.startCityName != null and params.startCityName != '' ">
@@ -123,16 +123,16 @@
             <if test="params.endCityName != null and params.endCityName != '' ">
                 AND END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != '' and (params.inSiteTimeStart = params.inSiteTimeStart + 28800000) ">
+            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != 0 and (params.inSiteTimeStart = params.inSiteTimeStart + 28800000) ">
                 AND IN_SITE_TIME <![CDATA[ >= ]]> #{params.inSiteTimeStart}
             </if>
-            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != '' and (params.inSiteTimeEnd = params.inSiteTimeEnd + 28800000) ">
+            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0 and (params.inSiteTimeEnd = params.inSiteTimeEnd + 28800000) ">
                 AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != '' and (params.cp9OfflineTimeStart = params.cp9OfflineTimeStart + 28800000) ">
+            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != 0 and (params.cp9OfflineTimeStart = params.cp9OfflineTimeStart + 28800000) ">
                 AND CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
             </if>
-            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != '' and (params.cp9OfflineTimeEnd = params.cp9OfflineTimeEnd + 28800000) ">
+            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 and (params.cp9OfflineTimeEnd = params.cp9OfflineTimeEnd + 28800000) ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
         </where>
