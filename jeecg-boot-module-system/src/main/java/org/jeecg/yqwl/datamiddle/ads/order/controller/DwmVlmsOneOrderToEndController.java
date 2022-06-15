@@ -146,7 +146,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @ApiOperation(value="导出", notes="导出")
   @PostMapping(value = "/exportXls")
   public void exportXls(@RequestBody GetQueryCriteria queryCriteria ,HttpServletResponse response) throws IOException {
-	  System.out.println(System.currentTimeMillis());
+//	  System.out.println(System.currentTimeMillis());
 	  //创建工作簿
 	  SXSSFWorkbook wb = new SXSSFWorkbook();
 	  //在工作簿中创建sheet页
@@ -198,7 +198,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  //获取查询数据
 //		  Page<DwmVlmsOneOrderToEnd> pageList = new Page<DwmVlmsOneOrderToEnd>(pageNo, pageSize);
 		  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
-		  System.out.println("查询结束" + System.currentTimeMillis());
+//		  System.out.println("查询结束" + System.currentTimeMillis());
 		  for ( DwmVlmsOneOrderToEnd item : pageList ) {
 			  System.out.println(System.currentTimeMillis());
 
@@ -347,7 +347,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  }
 	  } while(intervalFlag);
 
-	  System.out.println("搞了"+pageNo + "次 结束时间:"+System.currentTimeMillis());
+//	  System.out.println("搞了"+pageNo + "次 结束时间:"+System.currentTimeMillis());
 
 	  //设置内容类型
 	  response.setContentType("application/vnd.ms-excel;charset=utf-8");
