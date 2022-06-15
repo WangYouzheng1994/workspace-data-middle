@@ -84,7 +84,7 @@ public class OracleCDCKafkaApp {
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
         //sptb02过滤 大于 2021-06-01 00:00:00的数据
-        SingleOutputStreamOperator<String> ddjrqFilter = oracleSourceStream.filter(new FilterFunction<String>() {
+/*        SingleOutputStreamOperator<String> ddjrqFilter = oracleSourceStream.filter(new FilterFunction<String>() {
             @Override
             public boolean filter(String json) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(json);
@@ -113,7 +113,7 @@ public class OracleCDCKafkaApp {
                 }
                 return true;
             }
-        }).uid("ddjrqFilter").name("ddjrqFilter");
+        }).uid("ddjrqFilter").name("ddjrqFilter");*/
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -121,9 +121,8 @@ public class OracleCDCKafkaApp {
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
 
-        ddjrqFilter.print("结果数据输出:");
         //输出到kafka
-        ddjrqFilter.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        oracleSourceStream.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");
