@@ -38,7 +38,7 @@ public class OracleCDCKafkaApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(10, TimeUnit.SECONDS)));
-        env.setParallelism(2);
+        env.setParallelism(1);
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
