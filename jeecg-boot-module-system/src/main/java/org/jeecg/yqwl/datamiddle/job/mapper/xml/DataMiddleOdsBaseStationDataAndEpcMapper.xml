@@ -81,7 +81,7 @@
             , BASE_NAME
         </if>
             ) VALUES (
-        #{params.VIN} , #{params.WareHouseTime}
+        #{params.VIN} , #{params.WAREHOUSE_CREATETIME}
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , #{params.BASE_CODE}
         </if>
@@ -109,7 +109,7 @@
             , IN_WAREHOUSE_NAME
         </if>
             )  values (
-            #{params.vin} , #{params.WareHouseTime}
+            #{params.vin} , #{params.WAREHOUSE_CREATETIME}
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             , #{params.inWarehouseCode}
         </if>
