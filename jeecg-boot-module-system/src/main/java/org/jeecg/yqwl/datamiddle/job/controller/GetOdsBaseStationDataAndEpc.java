@@ -31,7 +31,7 @@ public class GetOdsBaseStationDataAndEpc extends JeecgController<BaseStationData
      * 每天23:59:59秒拉一次，
      * 每天10分钟拉一次。
      */
-    @Schedules({@Scheduled(cron = "59 59 23 * * ? "), @Scheduled(cron = "0/5 * * * * ? ")})
+    @Schedules({@Scheduled(cron = "59 59 23 * * ? "), @Scheduled(cron = "* 0/10 * * * ? ")})
     public void getBaseStationData(){
         log.info("开始运行OdsBaseStationData & Epc 数据任务");
         dataAndEpcService.getOdsVlmsBaseStationDataAndEpc();
