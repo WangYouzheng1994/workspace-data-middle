@@ -190,6 +190,11 @@ public class OotdTransition {
 
     private Long WAREHOUSE_UPDATETIME;
 
+    /**
+     * 品牌
+     */
+    private String BRAND;
+
 
 
 
