@@ -277,7 +277,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
         String sql = MysqlUtil.getSql(DwdSptb02.class);
         dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
 
-        env.execute("sptb02-sink-kafka-dwd");
+        env.execute("sptb02-sink-mysql-dwd");
         log.info("sptb02dwd层job任务开始执行");
     }
 }
