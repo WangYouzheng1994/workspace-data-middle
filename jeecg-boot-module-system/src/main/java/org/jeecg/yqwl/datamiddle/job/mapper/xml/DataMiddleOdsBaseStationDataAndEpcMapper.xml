@@ -81,7 +81,7 @@
             , BASE_NAME
         </if>
             ) VALUES (
-        #{params.VIN} , #{params.WAREHOUSE_CREATETIME}
+        #{params.VIN} , #{params.WAREHOUSE_UPDATETIME}
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , #{params.BASE_CODE}
         </if>
@@ -96,6 +96,7 @@
         <if test=" params.BASE_NAME !=null and params.BASE_NAME != ''">
             , BASE_NAME = VALUES(BASE_NAME)
         </if>
+            , WAREHOUSE_UPDATETIME = VALUES(WAREHOUSE_UPDATETIME)
     </insert>
 
     <!--插入一单到底dwm_vlms_one_order_to_end的表 -->
