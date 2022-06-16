@@ -99,6 +99,7 @@
             , #{params.BASE_NAME}
         </if>
         ) ON DUPLICATE KEY UPDATE
+        VIN = VALUES(VIN)
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             BASE_CODE = VALUES(BASE_CODE)
         </if>
@@ -126,6 +127,7 @@
             , #{params.inWarehouseName}
         </if>
         ) ON DUPLICATE KEY UPDATE
+        VIN = VALUES(VIN)
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE)
         </if>
