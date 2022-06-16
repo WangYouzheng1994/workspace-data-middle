@@ -7,6 +7,7 @@ import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.BaseStationDataEpc;
+import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OracleCdcSinkMysqlSptb02App {
-    //2021-01-01 00:00:00
-    //private static final long START = 1609430400000L;
-    //2022-01-01 00:00:00
-    private static final long START = 1638288000000L;
+    //2020-01-01 00:00:00
+    private static final long START = 1577808000000L;
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
 
@@ -60,7 +59,7 @@ public class OracleCdcSinkMysqlSptb02App {
                 .port(props.getInt("cdc.oracle.port"))
                 .database(props.getStr("cdc.oracle.database"))
                 .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
-                .tableList("TDS_LJ.BASE_STATION_DATA_EPC")
+                .tableList("TDS_LJ.SPTB02")
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
@@ -84,9 +83,9 @@ public class OracleCdcSinkMysqlSptb02App {
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
-        SingleOutputStreamOperator<BaseStationDataEpc> processBsd = oracleSourceStream.process(new ProcessFunction<String, BaseStationDataEpc>() {
+        SingleOutputStreamOperator<Sptb02> processSptb02 = oracleSourceStream.process(new ProcessFunction<String, Sptb02>() {
             @Override
-            public void processElement(String value, Context ctx, Collector<BaseStationDataEpc> out) throws Exception {
+            public void processElement(String value, Context ctx, Collector<Sptb02> out) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(value);
                 //获取表名
                 String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
@@ -97,54 +96,34 @@ public class OracleCdcSinkMysqlSptb02App {
                 afterObj.put("WAREHOUSE_CREATETIME", tsStr);
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
-                if ("BASE_STATION_DATA_EPC".equals(tableNameStr)) {
+                if ("SPTB02".equals(tableNameStr)) {
                     boolean flag = false;
                     //上报日期
-                    String sample_u_t_c = afterObj.getString("OPERATETIME");
-                    if (StringUtils.isNotEmpty(sample_u_t_c)) {
-                        long sampleLong = Long.parseLong(sample_u_t_c);
+                    String ddjrq = afterObj.getString("DDJRQ");
+                    if (StringUtils.isNotEmpty(ddjrq)) {
+                        long sampleLong = Long.parseLong(ddjrq);
                         if (sampleLong >= START && sampleLong <= END) {
                             flag = true;
                         }
                     }
                     if (flag) {
                         //获取after真实数据后，映射为实体类
-                        BaseStationDataEpc baseStationData = JsonPartUtil.getAfterObj(jsonObj, BaseStationDataEpc.class);
+                        Sptb02 baseStationData = JsonPartUtil.getAfterObj(jsonObj, Sptb02.class);
                         //log.info("反射后的实例:{}", baseStationData);
                         //对映射后的实体类为null字段赋值默认值
-                        BaseStationDataEpc bean = JsonPartUtil.getBean(baseStationData);
+                        Sptb02 bean = JsonPartUtil.getBean(baseStationData);
                         out.collect(bean);
                     }
                 }
             }
-        }).uid("processBsd").name("processBsd");
-        //将json串转化成jsonObj
-/*        SingleOutputStreamOperator<BaseStationData> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, BaseStationData>() {
-            @Override
-            public BaseStationData map(String json) throws Exception {
-                System.out.println(json);
-                JSONObject jsonObj = JSON.parseObject(json);
-                //获取cdc进入kafka的时间
-                String tsStr = JsonPartUtil.getTsStr(jsonObj);
-                //获取after数据
-                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                afterObj.put("WAREHOUSE_CREATETIME", tsStr);
-                afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
-                jsonObj.put("after", afterObj);
-                //获取after真实数据后，映射为实体类
-                BaseStationData sptb02d1 = JsonPartUtil.getAfterObj(jsonObj, BaseStationData.class);
-                log.info("反射后的实例:{}", sptb02d1);
-                //对映射后的实体类为null字段
-                return JsonPartUtil.getBean(sptb02d1);
-            }
-        }).uid("sourceStreamJsonObj").name("sourceStreamJsonObj");*/
-        //sourceStreamJsonObj.print("结果数据输出:");
+        }).uid("processSptb02").name("processSptb02");
+
         //组装sql
-        String sql = MysqlUtil.getSql(BaseStationDataEpc.class);
+        String sql = MysqlUtil.getSql(Sptb02.class);
         log.info("组装的插入sql:{}", sql);
-        processBsd.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        processSptb02.addSink(JdbcSink.<Sptb02>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
-        env.execute("oracle-cdc-mysql");
+        env.execute("oracle-cdc-mysql-sptb02");
         log.info("oracle-cdc-kafka job开始执行");
     }
 }

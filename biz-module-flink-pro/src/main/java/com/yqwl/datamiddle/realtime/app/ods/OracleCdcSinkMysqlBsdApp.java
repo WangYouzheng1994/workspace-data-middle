@@ -30,12 +30,10 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class OracleCdcSinkMysqlApp {
+public class OracleCdcSinkMysqlBsdApp {
 
-    //2021-01-01 00:00:00
-    //private static final long START = 1609430400000L;
-    //2022-01-01 00:00:00
-    private static final long START = 1638288000000L;
+    //2020-01-01 00:00:00
+    private static final long START = 1577808000000L;
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
 
