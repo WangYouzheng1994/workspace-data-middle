@@ -189,7 +189,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 //当前查询到记录值为空，从来没有被更新过
                 if (StringUtils.isNotBlank(in_warehouse_code) && StringUtils.isNotBlank(vin) && StringUtils.isNotBlank(operateType) && sample_u_t_c != null) {
                     if (IN_STORE.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + "WHERE TRAFFIC_TYPE IN ('L1', 'T') AND START_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + "WHERE VYSFS IN ('L1', 'T') AND START_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VVIN='" + baseStationData.getVIN() + "' AND ( IN_START_PLATFORM_TIME = 0 OR IN_START_PLATFORM_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
