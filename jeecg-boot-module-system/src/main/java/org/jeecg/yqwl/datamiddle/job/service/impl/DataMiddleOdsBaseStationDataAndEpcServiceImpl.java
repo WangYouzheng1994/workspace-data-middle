@@ -40,12 +40,13 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         log.info("开始查询OdsBsd的表");
         Long begin13 = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
         Long end13 = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
+        Long nowTime13 = 0L;
         /*Long begin16 = begin13*1000L;
         Long end16 = end13*1000L;*/
-        //        Long begin =1652177391000000L;
-        //        Long end =1652178367000000L;
-        //        Long begin13 =1572661789000L;
-        //        Long end13 =1653943564000L;
+//                Long begin =1652177391000000L;
+//                Long end =1652178367000000L;
+//                Long begin13 =1072661789000L;
+//                Long end13 =1653943564000L;
         boolean epcHasNext = true;
         boolean dataHasNext = true;
         int interval = 1;
@@ -106,14 +107,14 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                             dwdBaseStationDataEpc.setBASE_NAME("");
                             dwdBaseStationDataEpc.setBASE_CODE("");
                         }
-
+                        dwdBaseStationDataEpc.setWAREHOUSE_UPDATETIME(DateUtils.getMillis());
                         // e.插入一单到底的BASE_CODE+BASE_NAME字段(esp)
                         insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
                 }
             }
                 if (operateTime !=null && StringUtils.isNotBlank(vin) ){
                     //注入cp9下线接车日期(esp)
-                    updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin);
+                    updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin, DateUtils.getMillis());
                 }
 
         }
@@ -163,15 +164,15 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 if (sample_u_t_c !=null){
                     dwmVlmsOneOrderToEnd.setSampleutc(sample_u_t_c);
                 }
+                dwmVlmsOneOrderToEnd.setWAREHOUSE_UPDATETIME(DateUtils.getMillis());
                 // a.增加一单到底的 入库代码,名称,采样时间
                 insertStatusNum = this.dataAndEpcMapper.addDwmOOTD(dwmVlmsOneOrderToEnd);
 
                 // b.更新一单到底的 出厂日期字段
                 // c.更新一单到底的 入库时间字段
-                if (
-                        sample_u_t_c !=null && StringUtils.isNotBlank(vin)){
-                    updateLeaveFactoryTime = this.dataAndEpcMapper.updateOOTDLeaveFactoryTime(sample_u_t_c, vin);
-                    updateSiteTime = this.dataAndEpcMapper.updateOOTDInSiteTime(sample_u_t_c, vin);
+                if (sample_u_t_c !=null && StringUtils.isNotBlank(vin)) {
+                    updateLeaveFactoryTime = this.dataAndEpcMapper.updateOOTDLeaveFactoryTime(sample_u_t_c , vin , DateUtils.getMillis() );
+                    updateSiteTime = this.dataAndEpcMapper.updateOOTDInSiteTime(sample_u_t_c, vin ,DateUtils.getMillis());
                 }
 
                 log.info("插入一单到底表的入库代码,名称,采样时间完成: {}",insertStatusNum);

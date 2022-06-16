@@ -224,4 +224,16 @@ public class DwmVlmsOneOrderToEnd {
 	/**采样完成时间*/
 	private Long sampleutc;
 
+	/**
+	 * 新增-创建时间
+	 */
+
+	private Long WAREHOUSE_CREATETIME;
+
+	/**
+	 * 新增-更新时间
+	 */
+
+	private Long WAREHOUSE_UPDATETIME;
+
 }

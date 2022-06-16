@@ -21,7 +21,6 @@ public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<Bas
 
     /**
      * 按照sample_u_t_c时间查询ods_base_station_data的数据
-     * @param rowNumber
      * @param startDateStr
      * @param endDateStr
      * @param limitStart
@@ -45,7 +44,7 @@ public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<Bas
      * @param VIN
      * @return
      */
-    Integer updateOOTDLeaveFactoryTime(@Param("SAMPLE_U_T_C") Long SAMPLE_U_T_C, @Param("VIN") String VIN);
+    Integer updateOOTDLeaveFactoryTime(@Param("SAMPLE_U_T_C") Long SAMPLE_U_T_C, @Param("VIN") String VIN, @Param("WareHouseTime") Long WareHouseTime);
 
     /**
      * 更新一单到底的Cp9(EPC)下线时间
@@ -53,11 +52,11 @@ public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<Bas
      * @param VIN
      * @return
      */
-    Integer updateCp9OffLineTime(@Param("OPERATETIME") Long OPERATETIME, @Param("VIN") String VIN);
+    Integer updateCp9OffLineTime(@Param("OPERATETIME") Long OPERATETIME, @Param("VIN") String VIN, @Param("WareHouseTime") Long WareHouseTime);
     /**
      * 更新一单到底的入库时间
      * @param SAMPLE_U_T_C
      * @param VIN
      */
-    Integer updateOOTDInSiteTime(@Param("SAMPLE_U_T_C") Long SAMPLE_U_T_C, @Param("VIN") String VIN);
+    Integer updateOOTDInSiteTime(@Param("SAMPLE_U_T_C") Long SAMPLE_U_T_C, @Param("VIN") String VIN, @Param("WareHouseTime") Long WareHouseTime);
 }

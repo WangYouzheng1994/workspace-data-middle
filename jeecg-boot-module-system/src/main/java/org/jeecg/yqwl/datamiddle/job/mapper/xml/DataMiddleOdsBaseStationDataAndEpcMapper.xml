@@ -73,7 +73,7 @@
     </select>
     <!--给一单到底表添加基地代码,基地名称的字段    -->
     <insert id="addDwmOOTDBase" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwdBaseStationDataEpc">
-        insert into dwm_vlms_one_order_to_end (VIN
+        insert into dwm_vlms_one_order_to_end (VIN , WAREHOUSE_UPDATETIME
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , BASE_CODE
         </if>
@@ -81,7 +81,7 @@
             , BASE_NAME
         </if>
             ) VALUES (
-        #{params.VIN}
+        #{params.VIN} , #{WareHouseTime}
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , #{params.BASE_CODE}
         </if>
@@ -101,7 +101,7 @@
     <!--插入一单到底dwm_vlms_one_order_to_end的表 -->
     <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
         insert into dwm_vlms_one_order_to_end (
-            VIN
+            VIN , WAREHOUSE_UPDATETIME
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             , IN_WAREHOUSE_CODE
         </if>
@@ -109,7 +109,7 @@
             , IN_WAREHOUSE_NAME
         </if>
             )  values (
-            #{params.vin}
+            #{params.vin} , #{WareHouseTime}
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             , #{params.inWarehouseCode}
         </if>
@@ -129,7 +129,7 @@
     <!--更新一单到底的的Cp9(Epc)下线时间-->
     <update id="updateCp9OffLineTime">
         UPDATE dwm_vlms_one_order_to_end
-        SET CP9_OFFLINE_TIME = #{OPERATETIME}
+        SET CP9_OFFLINE_TIME = #{OPERATETIME}  , WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE
             VIN = #{VIN}
           AND ( CP9_OFFLINE_TIME = 0 OR CP9_OFFLINE_TIME <![CDATA[>]]> #{OPERATETIME} ) ;
@@ -139,7 +139,7 @@
     <update id="updateOOTDInSiteTime">
         UPDATE dwm_vlms_one_order_to_end e
             JOIN dim_vlms_warehouse_rs a
-        SET IN_SITE_TIME = #{SAMPLE_U_T_C}
+        SET IN_SITE_TIME = #{SAMPLE_U_T_C} , WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE e.VIN = #{VIN}
             AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
             AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
@@ -149,7 +149,7 @@
     <update id="updateOOTDLeaveFactoryTime">
         UPDATE dwm_vlms_one_order_to_end d
         JOIN ods_vlms_base_station_data o
-        SET d.LEAVE_FACTORY_TIME = #{SAMPLE_U_T_C}
+        SET d.LEAVE_FACTORY_TIME = #{SAMPLE_U_T_C} , WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE
         d.VIN = #{VIN}
         AND d.CP9_OFFLINE_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
