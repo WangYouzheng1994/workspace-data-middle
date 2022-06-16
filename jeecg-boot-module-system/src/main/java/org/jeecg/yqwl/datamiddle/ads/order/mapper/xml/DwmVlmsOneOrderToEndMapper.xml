@@ -3,58 +3,52 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
     <sql id="where_count_one_to_end">
         <where>
-            AND (VIN, WAREHOUSE_UPDATETIME) IN (
-            SELECT VIN, MAX(WAREHOUSE_UPDATETIME)
-            FROM dwm_vlms_one_order_to_end_01
-            <where>
-                <choose>
-                    <when test="params.vinList != null or params.selections != null ">
-                        and VIN IN
-                        <foreach collection="params.vinList" item="value"  index="key" separator="," open="(" close=")">
-                            #{value}
-                        </foreach>
-                    </when>
-                    <otherwise>
-                        <if test="params.vin != null and params.vin != '' ">
-                            AND VIN = #{params.vin}
-                        </if>
-                    </otherwise>
-                </choose>
-                <if test="params.baseName != null and params.baseName != '' ">
-                    AND BASE_NAME = #{params.baseName}
-                </if>
-                <if test="params.taskNo != null and params.taskNo != '' ">
-                    AND TASK_NO = #{params.taskNo}
-                </if>
-                <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
-                    AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
-                </if>
-                <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != 0">
-                    AND LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
-                </if>
-                <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != 0 ">
-                    AND LEAVE_FACTORY_TIME <![CDATA[ <= ]]>  #{params.leaveFactoryTimeEnd}
-                </if>
-                <if test="params.startCityName != null and params.startCityName != '' ">
-                    AND START_CITY_NAME = #{params.startCityName}
-                </if>
-                <if test="params.endCityName != null and params.endCityName != '' ">
-                    AND END_CITY_NAME = #{params.endCityName}
-                </if>
-                <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != 0">
-                    AND IN_SITE_TIME <![CDATA[ >= ]]> #{params.inSiteTimeStart}
-                </if>
-                <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0">
-                    AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
-                </if>
-                <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != 0  ">
-                    AND CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
-                </if>
-                <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
-                    AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
-                </if>
-            </where>
-            GROUP BY VIN)
+            <choose>
+                <when test="params.vinList != null or params.selections != null ">
+                    and VIN IN
+                    <foreach collection="params.vinList" item="value"  index="key" separator="," open="(" close=")">
+                        #{value}
+                    </foreach>
+                </when>
+                <otherwise>
+                    <if test="params.vin != null and params.vin != '' ">
+                        AND VIN = #{params.vin}
+                    </if>
+                </otherwise>
+            </choose>
+            <if test="params.baseName != null and params.baseName != '' ">
+                AND BASE_NAME = #{params.baseName}
+            </if>
+            <if test="params.taskNo != null and params.taskNo != '' ">
+                AND TASK_NO = #{params.taskNo}
+            </if>
+            <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
+                AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
+            </if>
+            <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != 0">
+                AND LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
+            </if>
+            <if test="params.leaveFactoryTimeEnd != null   and params.leaveFactoryTimeEnd != 0 ">
+                AND LEAVE_FACTORY_TIME <![CDATA[ <= ]]>  #{params.leaveFactoryTimeEnd}
+            </if>
+            <if test="params.startCityName != null and params.startCityName != '' ">
+                AND START_CITY_NAME = #{params.startCityName}
+            </if>
+            <if test="params.endCityName != null and params.endCityName != '' ">
+                AND END_CITY_NAME = #{params.endCityName}
+            </if>
+            <if test="params.inSiteTimeStart != null   and params.inSiteTimeStart != 0">
+                AND IN_SITE_TIME <![CDATA[ >= ]]> #{params.inSiteTimeStart}
+            </if>
+            <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0">
+                AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
+            </if>
+            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != 0  ">
+                AND CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
+            </if>
+            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
+                AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
+            </if>
         </where>
     </sql>
 
@@ -62,7 +56,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
         with  A as (
             select count(*) numbeT, STOWAGE_NOTE_NO  from
-            dwm_vlms_one_order_to_end_01
+            dwm_vlms_one_order_to_end
             group by STOWAGE_NOTE_NO
         )
 
@@ -76,7 +70,7 @@
                DISTRIBUTE_ASSIGN_TIME,DISTRIBUTE_CARRIER_NAME,
             DISTRIBUTE_VEHICLE_NO,DISTRIBUTE_VEHICLE_NUM,OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DOT_SITE_TIME,FINAL_SITE_TIME
         FROM
-            dwm_vlms_one_order_to_end_01 TOEND
+            dwm_vlms_one_order_to_end TOEND
         left join A on TOEND.STOWAGE_NOTE_NO = A.STOWAGE_NOTE_NO
         <include refid="where_count_one_to_end" />
         order by TOEND.CP9_OFFLINE_TIME desc
@@ -88,7 +82,7 @@
 
     <select id="countOneOrderToEndList" resultType="Integer">
         select count(*) from
-        dwm_vlms_one_order_to_end_01
+        dwm_vlms_one_order_to_end
         <include refid="where_count_one_to_end" />
     </select>
 
