@@ -2,9 +2,8 @@ package org.jeecg.yqwl.datamiddle.job.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02;
-import org.jeecg.yqwl.datamiddle.job.service.DataMiddleDwdSptb02Service;
+
+import org.jeecg.yqwl.datamiddle.job.entity.BaseStationData;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsBaseStationDataAndEpcService;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsSptb02Service;
 import org.springframework.beans.factory.annotation.Autowired;

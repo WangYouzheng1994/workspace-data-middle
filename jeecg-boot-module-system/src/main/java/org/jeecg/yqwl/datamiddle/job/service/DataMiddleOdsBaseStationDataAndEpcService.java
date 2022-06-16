@@ -1,8 +1,8 @@
 package org.jeecg.yqwl.datamiddle.job.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.DwdSptb02;
+import org.jeecg.yqwl.datamiddle.job.entity.BaseStationData;
+
 
 /**
  * @Description:OdsBSDAndEpc定时任务接口

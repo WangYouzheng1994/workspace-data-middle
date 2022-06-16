@@ -1,4 +1,4 @@
-package org.jeecg.yqwl.datamiddle.ads.order.entity;
+package org.jeecg.yqwl.datamiddle.job.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -281,5 +281,20 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "结束物理仓库代码  铁水")
 	private String endPhysicalCode;
 
+
+	/**采样完成时间*/
+	private Long sampleutc;
+
+	/**
+	 * 新增-创建时间
+	 */
+
+	private Long WAREHOUSE_CREATETIME;
+
+	/**
+	 * 新增-更新时间
+	 */
+
+	private Long WAREHOUSE_UPDATETIME;
 
 }

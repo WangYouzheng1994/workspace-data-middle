@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper">
     <!--查出    -->
-    <resultMap id="baseStationDataMap" type="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData" >
+    <resultMap id="baseStationDataMap" type="org.jeecg.yqwl.datamiddle.job.entity.BaseStationData" >
         <result column="IDNUM" property="IDNUM" jdbcType="BIGINT"/>
         <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
         <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
@@ -11,7 +11,7 @@
         <result column="OPERATE_TYPE" property="OPERATE_TYPE" jdbcType="VARCHAR"/>
     </resultMap>
     <!--查出仓库名称,仓库代码-->
-    <resultMap id="baseStationDataMapWareHouse" type="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationData" >
+    <resultMap id="baseStationDataMapWareHouse" type="org.jeecg.yqwl.datamiddle.job.entity.BaseStationData" >
         <result column="IDNUM" property="IDNUM" jdbcType="BIGINT"/>
         <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
         <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
@@ -21,7 +21,7 @@
     </resultMap>
 
     <!--查询base_station_data_epc的表数据-->
-    <select id="getBaseStationDataEpcList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationDataEpc">
+    <select id="getBaseStationDataEpcList" resultType="org.jeecg.yqwl.datamiddle.job.entity.DwdBaseStationDataEpc">
         SELECT IDNUM, VIN , CP , OPERATETIME
                   FROM ods_vlms_base_station_data_epc
                   where
@@ -72,7 +72,7 @@
 
     </select>
     <!--给一单到底表添加基地代码,基地名称的字段    -->
-    <insert id="addDwmOOTDBase" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwdBaseStationDataEpc">
+    <insert id="addDwmOOTDBase" parameterType="org.jeecg.yqwl.datamiddle.job.entity.DwdBaseStationDataEpc">
         insert into dwm_vlms_one_order_to_end (VIN , WAREHOUSE_UPDATETIME
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , BASE_CODE
@@ -100,7 +100,7 @@
     </insert>
 
     <!--插入一单到底dwm_vlms_one_order_to_end的表 -->
-    <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
+    <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.job.entity.DwmVlmsOneOrderToEnd">
         insert into dwm_vlms_one_order_to_end (
             VIN , WAREHOUSE_UPDATETIME
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">

@@ -4,7 +4,11 @@ package org.jeecg.yqwl.datamiddle.job.mapper;
 import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.*;
+import org.jeecg.yqwl.datamiddle.job.entity.BaseStationData;
+import org.jeecg.yqwl.datamiddle.job.entity.BaseStationDataEpc;
+import org.jeecg.yqwl.datamiddle.job.entity.DwdBaseStationDataEpc;
+import org.jeecg.yqwl.datamiddle.job.entity.DwmVlmsOneOrderToEnd;
+
 
 import java.util.List;
 import java.util.Map;
