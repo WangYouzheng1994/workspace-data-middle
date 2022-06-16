@@ -1,47 +1,24 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.google.common.collect.Lists;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
-import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.bean.DwmOneOrderToEnd;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
+import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.util.Collector;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -83,26 +60,9 @@ public class WaybillDwmAppOOTD {
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
-        //==============================================dwd_base_station_data_epc处理 START====================================================================//
-        //2.过滤出一单到底的表
-        DataStream<String> filterBsdEpcDs = mysqlSource.filter(new RichFilterFunction<String>() {
-            @Override
-            public boolean filter(String mysqlDataStream) throws Exception {
-                JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("data_flink") && jo.getString("tableName").equals("dwm_vlms_one_order_to_end")) {
-                    DwdBaseStationDataEpc after = jo.getObject("after", DwdBaseStationDataEpc.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
-                    }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterDwmOneOrderToEnd").name("filterDwmOneOrderToEnd");
 
         //3.转实体类 BASE_STATION_DATA_EPC
-        SingleOutputStreamOperator<DwmOneOrderToEnd> mapBsdEpc = filterBsdEpcDs.map(new MapFunction<String, DwmOneOrderToEnd>() {
+        SingleOutputStreamOperator<DwmOneOrderToEnd> mapBsdEpc = mysqlSource.map(new MapFunction<String, DwmOneOrderToEnd>() {
             @Override
             public DwmOneOrderToEnd map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
@@ -117,8 +77,6 @@ public class WaybillDwmAppOOTD {
         mapBsdEpc.addSink(ClickHouseUtil.<DwmOneOrderToEnd>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         mapBsdEpc.print("拉宽后数据输出：");
 
-
-        //====================================sink mysql===============================================//
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-DwmOneOrderToEnd");
