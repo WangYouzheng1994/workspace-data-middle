@@ -91,7 +91,7 @@
         ) ON DUPLICATE KEY UPDATE
         VIN = VALUES(VIN)
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
-            BASE_CODE = VALUES(BASE_CODE)
+           , BASE_CODE = VALUES(BASE_CODE)
         </if>
         <if test=" params.BASE_NAME !=null and params.BASE_NAME != ''">
             , BASE_NAME = VALUES(BASE_NAME)
@@ -117,9 +117,9 @@
             , #{params.inWarehouseName}
         </if>
         ) ON DUPLICATE KEY UPDATE
-        VIN = VALUES(VIN) ,
+        VIN = VALUES(VIN)
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
-            IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE)
+            , IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE)
         </if>
         <if test=" params.inWarehouseName !=null and params.inWarehouseName != '' ">
             , IN_WAREHOUSE_NAME=VALUES(IN_WAREHOUSE_NAME)
@@ -140,7 +140,7 @@
         UPDATE dwm_vlms_one_order_to_end e
             JOIN dim_vlms_warehouse_rs a
         SET IN_SITE_TIME = #{SAMPLE_U_T_C}
-        WHERE e.VIN = #{VIN} ,
+        WHERE e.VIN = #{VIN}
             AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
             AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
     </update>
