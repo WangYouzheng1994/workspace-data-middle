@@ -107,7 +107,7 @@ public class DbUtil {
             connection.commit();//所有语句都执行完毕后才手动提交sql语句
             log.info("批量插入数据成功");
         } catch (Exception e) {
-            log.error("执行批量插入sql异常:{}", e.getMessage());
+            log.error(e.getMessage(), e);
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, resultSet);
@@ -143,7 +143,7 @@ public class DbUtil {
             }
             log.info(">>>>>>>>>>>> 查询数据:{}", resultList);
         } catch (Exception e) {
-            log.error("执行查询sql异常:{}", e.getMessage());
+            log.error(e.getMessage(), e);
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, resultSet);
@@ -168,7 +168,7 @@ public class DbUtil {
             index = statement.executeUpdate(updateSql);
             log.info(">>>>>>>>>>>> 更新数据:{}", index);
         } catch (Exception e) {
-            log.error("执行更新sql异常:{}", e.getMessage());
+            log.error(e.getMessage(), e);
         } finally {
             // 切记!!! 一定要释放资源
             closeResource(connection, statement, null);
