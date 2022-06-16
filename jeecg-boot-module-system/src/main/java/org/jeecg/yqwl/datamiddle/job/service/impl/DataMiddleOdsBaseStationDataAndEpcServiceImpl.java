@@ -38,7 +38,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
     @Override
     public void getOdsVlmsBaseStationDataAndEpc() {
         log.info("开始查询OdsBsd的表");
-        Long begin13 = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
+        Long begin13 = 1577808000000L;   //当天00:00:00的13位时间戳
         Long end13 = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
 //                Long begin =1652177391000000L;
 //                Long end =1652178367000000L;
@@ -278,7 +278,6 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                 }
             }
-            log.info("开始组装数据进行维表拉宽");
             if (CollectionUtils.isNotEmpty(baseStationDataList)) {
                 // 插入的时候做insertOrUpdate
                 if (CollectionUtils.size(baseStationDataList) != limitEndData) {
