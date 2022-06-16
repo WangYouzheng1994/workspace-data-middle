@@ -110,7 +110,7 @@
             , IN_WAREHOUSE_NAME
         </if>
             )  values (
-            #{params.vin} , #{params.WAREHOUSE_CREATETIME}
+            #{params.vin} , #{params.WAREHOUSE_UPDATETIME}
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             , #{params.inWarehouseCode}
         </if>
@@ -125,6 +125,7 @@
         <if test=" params.inWarehouseName !=null and params.inWarehouseName != '' ">
             , IN_WAREHOUSE_NAME=VALUES(IN_WAREHOUSE_NAME)
         </if>
+        , WAREHOUSE_UPDATETIME = VALUES(WAREHOUSE_UPDATETIME)
     </insert>
 
     <!--更新一单到底的的Cp9(Epc)下线时间-->
@@ -144,6 +145,7 @@
         WHERE e.VIN = #{VIN}
             AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
             AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
+            AND (e.IN_SITE_TIME <![CDATA[>]]> #{SAMPLE_U_T_C} or e.IN_SITE_TIME = 0)
     </update>
 
     <!--更新一单到底的出厂日期-->

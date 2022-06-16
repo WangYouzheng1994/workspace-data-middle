@@ -40,9 +40,6 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         log.info("开始查询OdsBsd的表");
         Long begin13 = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
         Long end13 = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
-        Long nowTime13 = 0L;
-        /*Long begin16 = begin13*1000L;
-        Long end16 = end13*1000L;*/
 //                Long begin =1652177391000000L;
 //                Long end =1652178367000000L;
 //                Long begin13 =1072661789000L;
@@ -72,6 +69,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
 
         Integer pageStartEpc = 1;
         Integer limitEndEpc = 500;
+        // 处理base_station_epc --- START
         do {
             log.info("开始循环, {}", interval++);
             //因为是由epc驱动的,所以开始先查epc的数据.
@@ -130,6 +128,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
             }
             dataEpcMapList = null;
         } while(epcHasNext);
+        // 处理base_station_epc --- END
 
         List<BaseStationData> baseStationDataList = null;
 
@@ -187,7 +186,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 //当前查询到记录值为空，从来没有被更新过
                 if (StringUtils.isNotBlank(in_warehouse_code) && StringUtils.isNotBlank(vin) && StringUtils.isNotBlank(operateType) && sample_u_t_c != null) {
                     if (IN_STORE.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET IN_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE TRAFFIC_TYPE IN ('L1', 'T') AND START_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + "WHERE TRAFFIC_TYPE IN ('L1', 'T') AND START_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( IN_START_PLATFORM_TIME = 0 OR IN_START_PLATFORM_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -198,7 +197,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     // 1.2 处理开始站台的出站台时间
                     if (OUT_STOCK.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET OUT_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE TRAFFIC_TYPE IN ('L1', 'T') AND START_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET OUT_START_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS IN ('L1', 'T')  AND START_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( OUT_START_PLATFORM_TIME = 0 OR OUT_START_PLATFORM_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -209,7 +208,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     //1.3 处理目的站台的入站台时间和出站台时间
                     if (IN_STORE.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET IN_END_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE TRAFFIC_TYPE IN ('L1', 'T') AND END_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_END_PLATFORM_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS IN ('L1', 'T') AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( IN_END_PLATFORM_TIME = 0 OR IN_END_PLATFORM_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -220,7 +219,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     //处理出目的站台时间
                     if (OUT_STOCK.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET UNLOAD_RAILWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE TRAFFIC_TYPE in ('L1', 'T') AND END_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET UNLOAD_RAILWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS in ('L1', 'T')  AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( UNLOAD_RAILWAY_TIME = 0 OR UNLOAD_RAILWAY_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -235,7 +234,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     //当前查询到记录值为空，从来没有被更新过
                     if (IN_STORE.equals(operateType)) {
 
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET IN_START_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  TRAFFIC_TYPE = 'S' AND START_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS = 'S' AND START_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( IN_START_WATERWAY_TIME = 0 OR IN_START_WATERWAY_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -246,7 +245,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     // 1.2 处理开始站台的出站台时间
                     if (OUT_STOCK.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET END_START_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  TRAFFIC_TYPE = 'S' AND START_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET END_START_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  VYSFS = 'S' AND START_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( END_START_WATERWAY_TIME = 0 OR END_START_WATERWAY_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -257,7 +256,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     //1.3 处理目的站台的入站台时间和出站台时间
                     if (IN_STORE.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET IN_END_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  TRAFFIC_TYPE = 'S' AND END_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET IN_END_WATERWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  VYSFS = 'S' AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( IN_END_WATERWAY_TIME = 0 OR IN_END_WATERWAY_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);
@@ -268,7 +267,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     }
                     //2.处理出目的站台时间
                     if (OUT_STOCK.equals(operateType)) {
-                        String inSql = "UPDATE dwm_vlms_one_order_to_end SET UNLOAD_SHIP_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE  TRAFFIC_TYPE = 'S' AND END_PHYSICAl_CODE='"
+                        String inSql = "UPDATE dwm_vlms_sptb02 SET UNLOAD_SHIP_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS = 'S' AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VIN='" + baseStationData.getVIN() + "' AND ( UNLOAD_SHIP_TIME = 0 OR UNLOAD_SHIP_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
                             log.info("展示执行的sql:{}", inSql);

@@ -123,11 +123,16 @@ public class OneOrderToEndDwmAppBDS {
 
         //3.入库时间
         mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? WHERE e.VIN = ? AND e.LEAVE_FACTORY_TIME < ? AND a.`WAREHOUSE_TYPE` = 'T1'",
+                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? " +
+                        "WHERE e.VIN = ? " +
+                        "AND e.LEAVE_FACTORY_TIME < ? " +
+                        "AND a.`WAREHOUSE_TYPE` = 'T1' " +
+                        "AND (e.IN_SITE_TIME <![CDATA[>]]> ? or e.IN_SITE_TIME = 0)",
                 (ps, epc) -> {
                     ps.setLong(1, epc.getSAMPLE_U_T_C());
                     ps.setString(2, epc.getVIN());
                     ps.setLong(3, epc.getSAMPLE_U_T_C());
+                    ps.setLong(4, epc.getSAMPLE_U_T_C());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)
@@ -149,6 +154,7 @@ public class OneOrderToEndDwmAppBDS {
             }
         }).uid("outStockFilter").name("outStockFilter");
 
+        // TODO: @See org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper.updateOOTDLeaveFactoryTime 需要新增where语句 By QingSong 2022年6月17日00:21:04
         //出厂日期
         outStockFilter.addSink(JdbcSink.sink(
                 "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME = 0 OR LEAVE_FACTORY_TIME > ? )",
