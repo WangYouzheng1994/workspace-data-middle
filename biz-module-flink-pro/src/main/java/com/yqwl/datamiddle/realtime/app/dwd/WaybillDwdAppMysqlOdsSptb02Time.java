@@ -66,8 +66,8 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                //.tableList("data_middle_flink.ods_vlms_sptb02")
-                .tableList("data_flink.ods_vlms_sptb02_07")
+                .tableList("data_middle_flink.ods_vlms_sptb02")
+                //.tableList("data_flink.ods_vlms_sptb02_07")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
@@ -227,8 +227,8 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
                     String vfczt = dwdSptb02.getVFCZT();
                     log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
                     if (StringUtils.isNotEmpty(vfczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where VWLCKDM = '" + vfczt + "' limit 1 ";
-                        JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, siteWarehouseSql, vfczt);
+                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vfczt + "' limit 1 ";
+                        JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vfczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setSTART_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
                             dwdSptb02.setSTART_WAREHOUSE_NAME(siteWarehouse.getString("WAREHOUSE_NAME"));
@@ -243,8 +243,8 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
                     String vsczt = dwdSptb02.getVSCZT();
                     log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
                     if (StringUtils.isNotEmpty(vsczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where VWLCKDM = '" + vsczt + "' limit 1 ";
-                        JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, siteWarehouseSql, vsczt);
+                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vsczt + "' limit 1 ";
+                        JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vsczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setEND_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
                             dwdSptb02.setEND_WAREHOUSE_NAME(siteWarehouse.getString("WAREHOUSE_NAME"));
