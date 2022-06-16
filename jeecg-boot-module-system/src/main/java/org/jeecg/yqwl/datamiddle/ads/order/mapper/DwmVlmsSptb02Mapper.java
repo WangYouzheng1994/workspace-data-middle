@@ -6,7 +6,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
+
 
 import java.math.BigDecimal;
 import java.util.List;

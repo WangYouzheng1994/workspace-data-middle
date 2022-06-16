@@ -2,7 +2,6 @@ package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.apache.ibatis.annotations.Param;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
@@ -17,7 +16,7 @@ import java.math.BigDecimal;
  * @Date:   2022-05-12
  * @Version: V1.0
  */
-@DS("slave2")
+@DS("slave")
 public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
 
     /**

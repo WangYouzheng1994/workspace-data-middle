@@ -2,6 +2,8 @@ package org.jeecg.yqwl.datamiddle.ads.order.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Description   全节点查询从前端传过来的数据
  * @ClassName GetQueryCriteria
@@ -71,4 +73,25 @@ public class GetQueryCriteria {
      * cp9下线接车日期_结束
      */
     private Long cp9OfflineTimeEnd;
+
+    /**
+     * 分页：页码
+     */
+    private Integer pageNo = 1;
+
+    /**
+     * 分页：每页大小
+     */
+    private Integer pageSize = 20;
+
+    private List<String> vinList;
+
+    private Integer limitStart;
+
+    private Integer limitEnd;
+
+    /**
+     * 过滤条件
+     */
+    private String selections;
 }
