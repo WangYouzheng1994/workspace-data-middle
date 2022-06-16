@@ -78,9 +78,11 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                     vin = baseStationDataEpc.getVIN();
                     operateTime = baseStationDataEpc.getOPERATETIME();
                     if (StringUtils.isNotBlank(cp) && StringUtils.isNotBlank(vin)){
+                        String index = cp.substring(0, 1);
                         // 此处等同于判空 + 判长度
-                        if (StringUtils.length(cp) >= 4) {
+                        if (StringUtils.length(cp) >= 4 ) {
                             String baseCode = cp.substring(0, 4);
+
                             dwdBaseStationDataEpc= new DwdBaseStationDataEpc();
                             dwdBaseStationDataEpc.setVIN(vin);
                             if (StringUtils.equals(baseCode, "0431")) {
@@ -98,7 +100,11 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                             } else if (StringUtils.equals(baseCode, "022C")) {
                                 dwdBaseStationDataEpc.setBASE_NAME("天津");
                                 dwdBaseStationDataEpc.setBASE_CODE("022C");
+                            } else {
+                                dwdBaseStationDataEpc.setBASE_NAME("");
+                                dwdBaseStationDataEpc.setBASE_CODE("");
                             }
+
                             // e.插入一单到底的BASE_CODE+BASE_NAME字段(esp)
                             insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
                     }
