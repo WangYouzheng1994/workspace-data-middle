@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
 
 import org.jeecg.yqwl.datamiddle.job.entity.BaseStationData;
+import org.jeecg.yqwl.datamiddle.job.entity.DwdBaseStationDataEpc;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsBaseStationDataAndEpcService;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsSptb02Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class GetOdsBaseStationDataAndEpc extends JeecgController<BaseStationData, DataMiddleOdsBaseStationDataAndEpcService> {
+public class GetOdsBaseStationDataAndEpc extends JeecgController<DwdBaseStationDataEpc, DataMiddleOdsBaseStationDataAndEpcService> {
     @Autowired
     private DataMiddleOdsBaseStationDataAndEpcService dataAndEpcService;
 
