@@ -67,7 +67,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         Integer updateSiteTime=null;
         Integer updateLeaveFactoryTime=null;
         Integer updateCp9=null;
-        List<BaseStationDataEpc> dataEpcMapList = null;
+        List<DwdBaseStationDataEpc> dataEpcMapList = null;
 
 
         Integer pageStartEpc = 1;
@@ -77,7 +77,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
             log.info("开始循环, {}", interval++);
             //因为是由epc驱动的,所以开始先查epc的数据.
             dataEpcMapList = this.dataAndEpcMapper.getBaseStationDataEpcList(begin13, end13, (pageStartEpc - 1) * limitEndEpc, limitEndEpc);
-            for (BaseStationDataEpc baseStationDataEpc : dataEpcMapList) {
+            for (DwdBaseStationDataEpc baseStationDataEpc : dataEpcMapList) {
                 cp = baseStationDataEpc.getCP();
                 vin = baseStationDataEpc.getVIN();
                 operateTime = baseStationDataEpc.getOPERATETIME();

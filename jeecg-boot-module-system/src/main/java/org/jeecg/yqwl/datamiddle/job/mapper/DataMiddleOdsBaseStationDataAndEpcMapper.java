@@ -21,7 +21,7 @@ import java.util.Map;
  * @Version: V1.0
  */
 public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<DwdBaseStationDataEpc> {
-    List<BaseStationDataEpc>  getBaseStationDataEpcList(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart")Integer limitStart, @Param("limitEnd")Integer limitEnd);
+    List<DwdBaseStationDataEpc>  getBaseStationDataEpcList(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart")Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
     /**
      * 按照sample_u_t_c时间查询ods_base_station_data的数据
