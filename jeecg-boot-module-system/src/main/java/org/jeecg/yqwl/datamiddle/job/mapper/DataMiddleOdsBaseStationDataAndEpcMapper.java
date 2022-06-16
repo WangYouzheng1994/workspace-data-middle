@@ -17,7 +17,7 @@ import java.util.Map;
  * @Version: V1.0
  */
 public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<BaseStationData> {
-    List<BaseStationDataEpc>  getBaseStationDataEpcList(@Param("rowNumber") Integer rowNumber, @Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart") Integer limitStart, @Param("limitEnd")Integer limitEnd);
+    List<BaseStationDataEpc>  getBaseStationDataEpcList(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart")Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
     /**
      * 按照sample_u_t_c时间查询ods_base_station_data的数据
@@ -28,7 +28,7 @@ public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<Bas
      * @param limitEnd
      * @return
      */
-    List<BaseStationData> getOdsVlmsBaseStationData(@Param("rowNumber") Integer rowNumber, @Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart") Integer limitStart, @Param("limitEnd")Integer limitEnd);
+    List<BaseStationData> getOdsVlmsBaseStationData(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart") Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
     /**
      * 插入一单到底的表

@@ -40,15 +40,14 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         log.info("开始查询OdsBsd的表");
         Long begin13 = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
         Long end13 = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
-        Long begin16 = begin13*1000L;
-        Long end16 = end13*1000L;
+        /*Long begin16 = begin13*1000L;
+        Long end16 = end13*1000L;*/
         //        Long begin =1652177391000000L;
         //        Long end =1652178367000000L;
         //        Long begin13 =1572661789000L;
         //        Long end13 =1653943564000L;
-        boolean hasNext = true;
-        int limit = 500;
-        Integer rowNum=0;
+        boolean epcHasNext = true;
+        boolean dataHasNext = true;
         int interval = 1;
 
         DwmVlmsOneOrderToEnd dwmVlmsOneOrderToEnd = null;
@@ -67,55 +66,76 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         Integer updateSiteTime=null;
         Integer updateLeaveFactoryTime=null;
         Integer updateCp9=null;
-        List<BaseStationDataEpc> dataEpcMap=null;
+        List<BaseStationDataEpc> dataEpcMapList = null;
 
+
+        Integer pageStartEpc = 1;
+        Integer limitEndEpc = 500;
         do {
             log.info("开始循环, {}", interval++);
             //因为是由epc驱动的,所以开始先查epc的数据.
-                dataEpcMap = this.dataAndEpcMapper.getBaseStationDataEpcList(rowNum, begin13, end13, rowNum, limit);
-                for (BaseStationDataEpc baseStationDataEpc : dataEpcMap) {
-                    cp = baseStationDataEpc.getCP();
-                    vin = baseStationDataEpc.getVIN();
-                    operateTime = baseStationDataEpc.getOPERATETIME();
-                    if (StringUtils.isNotBlank(cp) && StringUtils.isNotBlank(vin)){
-                        String index = cp.substring(0, 1);
-                        // 此处等同于判空 + 判长度
-                        if (StringUtils.length(cp) >= 4 ) {
-                            String baseCode = cp.substring(0, 4);
+            dataEpcMapList = this.dataAndEpcMapper.getBaseStationDataEpcList(begin13, end13, (pageStartEpc - 1) * limitEndEpc, limitEndEpc);
+            for (BaseStationDataEpc baseStationDataEpc : dataEpcMapList) {
+                cp = baseStationDataEpc.getCP();
+                vin = baseStationDataEpc.getVIN();
+                operateTime = baseStationDataEpc.getOPERATETIME();
+                if (StringUtils.isNotBlank(cp) && StringUtils.isNotBlank(vin)){
+                    String index = cp.substring(0, 1);
+                    // 此处等同于判空 + 判长度
+                    if (StringUtils.length(cp) >= 4 ) {
+                        String baseCode = cp.substring(0, 4);
 
-                            dwdBaseStationDataEpc= new DwdBaseStationDataEpc();
-                            dwdBaseStationDataEpc.setVIN(vin);
-                            if (StringUtils.equals(baseCode, "0431")) {
-                                dwdBaseStationDataEpc.setBASE_NAME("长春");
-                                dwdBaseStationDataEpc.setBASE_CODE("0431");
-                            } else if (StringUtils.equals(baseCode, "0757")) {
-                                dwdBaseStationDataEpc.setBASE_NAME("佛山");
-                                dwdBaseStationDataEpc.setBASE_CODE("0757");
-                            } else if (StringUtils.equals(baseCode, "0532")) {
-                                dwdBaseStationDataEpc.setBASE_NAME("青岛");
-                                dwdBaseStationDataEpc.setBASE_CODE("0532");
-                            } else if (StringUtils.equals(baseCode, "028C")) {
-                                dwdBaseStationDataEpc.setBASE_NAME("成都");
-                                dwdBaseStationDataEpc.setBASE_CODE("028C");
-                            } else if (StringUtils.equals(baseCode, "022C")) {
-                                dwdBaseStationDataEpc.setBASE_NAME("天津");
-                                dwdBaseStationDataEpc.setBASE_CODE("022C");
-                            } else {
-                                dwdBaseStationDataEpc.setBASE_NAME("");
-                                dwdBaseStationDataEpc.setBASE_CODE("");
-                            }
+                        dwdBaseStationDataEpc= new DwdBaseStationDataEpc();
+                        dwdBaseStationDataEpc.setVIN(vin);
+                        if (StringUtils.equals(baseCode, "0431")) {
+                            dwdBaseStationDataEpc.setBASE_NAME("长春");
+                            dwdBaseStationDataEpc.setBASE_CODE("0431");
+                        } else if (StringUtils.equals(baseCode, "0757")) {
+                            dwdBaseStationDataEpc.setBASE_NAME("佛山");
+                            dwdBaseStationDataEpc.setBASE_CODE("0757");
+                        } else if (StringUtils.equals(baseCode, "0532")) {
+                            dwdBaseStationDataEpc.setBASE_NAME("青岛");
+                            dwdBaseStationDataEpc.setBASE_CODE("0532");
+                        } else if (StringUtils.equals(baseCode, "028C")) {
+                            dwdBaseStationDataEpc.setBASE_NAME("成都");
+                            dwdBaseStationDataEpc.setBASE_CODE("028C");
+                        } else if (StringUtils.equals(baseCode, "022C")) {
+                            dwdBaseStationDataEpc.setBASE_NAME("天津");
+                            dwdBaseStationDataEpc.setBASE_CODE("022C");
+                        } else {
+                            dwdBaseStationDataEpc.setBASE_NAME("");
+                            dwdBaseStationDataEpc.setBASE_CODE("");
+                        }
 
-                            // e.插入一单到底的BASE_CODE+BASE_NAME字段(esp)
-                            insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
-                    }
+                        // e.插入一单到底的BASE_CODE+BASE_NAME字段(esp)
+                        insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
                 }
-                    if (operateTime !=null && StringUtils.isNotBlank(vin) ){
-                        //注入cp9下线接车日期(esp)
-                        updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin);
-                    }
-
             }
-            List<BaseStationData> baseStationDataList = this.dataAndEpcMapper.getOdsVlmsBaseStationData(rowNum, begin16, end16, rowNum, limit);
+                if (operateTime !=null && StringUtils.isNotBlank(vin) ){
+                    //注入cp9下线接车日期(esp)
+                    updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin);
+                }
+
+        }
+            if (CollectionUtils.isNotEmpty(dataEpcMapList)) {
+                // 插入的时候做insertOrUpdate
+                if (CollectionUtils.size(dataEpcMapList) != limitEndEpc) {
+                    epcHasNext = false;
+                } else {
+                    pageStartEpc++;
+                }
+            } else {
+                epcHasNext = false;
+            }
+            dataEpcMapList = null;
+        } while(epcHasNext);
+
+        List<BaseStationData> baseStationDataList = null;
+
+        Integer pageStartData = 1;
+        Integer limitEndData = 500;
+        do {
+            baseStationDataList = this.dataAndEpcMapper.getOdsVlmsBaseStationData(begin13, end13, (pageStartData - 1) * limitEndData, limitEndData);
             for (BaseStationData baseStationData : baseStationDataList) {
                 dwmVlmsOneOrderToEnd = new DwmVlmsOneOrderToEnd();
                 // 与rfidWarehouse表联查出来的仓库Code值
@@ -149,7 +169,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 // b.更新一单到底的 出厂日期字段
                 // c.更新一单到底的 入库时间字段
                 if (
-                    sample_u_t_c !=null && StringUtils.isNotBlank(vin)){
+                        sample_u_t_c !=null && StringUtils.isNotBlank(vin)){
                     updateLeaveFactoryTime = this.dataAndEpcMapper.updateOOTDLeaveFactoryTime(sample_u_t_c, vin);
                     updateSiteTime = this.dataAndEpcMapper.updateOOTDInSiteTime(sample_u_t_c, vin);
                 }
@@ -261,16 +281,16 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
             log.info("开始组装数据进行维表拉宽");
             if (CollectionUtils.isNotEmpty(baseStationDataList)) {
                 // 插入的时候做insertOrUpdate
-                Integer rn = baseStationDataList.get(baseStationDataList.size() - 1).getRn();
-                rowNum = rn; // 记录偏移量
-                if (CollectionUtils.size(baseStationDataList) != limit) {
-                    hasNext = false;
+                if (CollectionUtils.size(baseStationDataList) != limitEndData) {
+                    dataHasNext = false;
+                } else{
+                    pageStartData++;
                 }
             } else {
-                hasNext = false;
+                dataHasNext = false;
             }
             baseStationDataList = null;
-        } while(hasNext);
+        } while(dataHasNext);
 
         log.info("结束拉取OdsBsd服务数据");
     }
