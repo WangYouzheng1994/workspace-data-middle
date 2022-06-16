@@ -56,7 +56,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
         with  A as (
             select count(*) numbeT, STOWAGE_NOTE_NO  from
-            dwm_vlms_one_order_to_end
+            dwm_vlms_one_order_to_end_01
             group by STOWAGE_NOTE_NO
         )
 
@@ -70,7 +70,7 @@
                DISTRIBUTE_ASSIGN_TIME,DISTRIBUTE_CARRIER_NAME,
             DISTRIBUTE_VEHICLE_NO,DISTRIBUTE_VEHICLE_NUM,OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DOT_SITE_TIME,FINAL_SITE_TIME
         FROM
-            dwm_vlms_one_order_to_end TOEND
+            dwm_vlms_one_order_to_end_01 TOEND
         left join A on TOEND.STOWAGE_NOTE_NO = A.STOWAGE_NOTE_NO
         <include refid="where_count_one_to_end" />
         order by TOEND.CP9_OFFLINE_TIME desc
@@ -82,7 +82,7 @@
 
     <select id="countOneOrderToEndList" resultType="Integer">
         select count(*) from
-        dwm_vlms_one_order_to_end
+        dwm_vlms_one_order_to_end_01
         <include refid="where_count_one_to_end" />
     </select>
 
