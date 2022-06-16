@@ -87,7 +87,7 @@
         <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
             , BASE_CODE
         </if>
-        <if test=" params.BASE_NAME !=null and params.BASE_NAME ! = ''">
+        <if test=" params.BASE_NAME !=null and params.BASE_NAME != ''">
             , BASE_NAME
         </if>
             ) VALUES (
