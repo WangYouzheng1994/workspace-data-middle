@@ -134,7 +134,7 @@
         SET CP9_OFFLINE_TIME = #{OPERATETIME}  , WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE
             VIN = #{VIN}
-          AND ( CP9_OFFLINE_TIME = 0 OR CP9_OFFLINE_TIME <![CDATA[>]]> #{OPERATETIME} ) ;
+          AND ( CP9_OFFLINE_TIME = 0 OR CP9_OFFLINE_TIME <![CDATA[>]]> #{OPERATETIME} )
     </update>
 
     <!--更新一单到底的入库时间-->
