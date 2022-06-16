@@ -3,9 +3,8 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
     <sql id="where_count_one_to_end">
         <where>
-
-            AND  (VIN,WAREHOUSE_UPDATETIME) IN (
-            SELECT VIN,MAX(WAREHOUSE_UPDATETIME)
+            AND (VIN, WAREHOUSE_UPDATETIME) IN (
+            SELECT VIN, MAX(WAREHOUSE_UPDATETIME)
             FROM dwm_vlms_one_order_to_end_01
             <where>
                 <choose>
@@ -94,15 +93,15 @@
     </select>
 
 <!--        查询同板数量-->
-    <select id="selectTotal" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData">
-        SELECT
-               COUNT(VIN) AS SAME_PLATE_NUM,STOWAGE_NOTE_NO
-        FROM
-             dwm_vlms_one_order_to_end_01
-        <where>
-            STOWAGE_NOTE_NO = #{stowageNoteNo}
-        </where>
-        GROUP BY
-            STOWAGE_NOTE_NO
-    </select>
+<!--    <select id="selectTotal" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData">-->
+<!--        SELECT-->
+<!--               COUNT(VIN) AS SAME_PLATE_NUM,STOWAGE_NOTE_NO-->
+<!--        FROM-->
+<!--             dwm_vlms_one_order_to_end_01-->
+<!--        <where>-->
+<!--            STOWAGE_NOTE_NO = #{stowageNoteNo}-->
+<!--        </where>-->
+<!--        GROUP BY-->
+<!--            STOWAGE_NOTE_NO-->
+<!--    </select>-->
 </mapper>

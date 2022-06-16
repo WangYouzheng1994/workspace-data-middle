@@ -147,13 +147,13 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
   @PostMapping(value = "/exportXls")
   public void exportXls(@RequestBody GetQueryCriteria queryCriteria ,HttpServletResponse response) throws IOException {
 //	  System.out.println(System.currentTimeMillis());
-	  //创建工作簿
+	  // 创建工作簿
 	  SXSSFWorkbook wb = new SXSSFWorkbook();
-	  //在工作簿中创建sheet页
+	  // 在工作簿中创建sheet页
 	  SXSSFSheet sheet = wb.createSheet("sheet1");
-	  //创建行,从0开始
+	  // 创建行,从0开始
 	  SXSSFRow row = sheet.createRow(0);
-	  //获取表头(前端页面一共有44个字段,entity一共是57个字段)
+	  // 获取表头(前端页面一共有44个字段,entity一共是57个字段)
 //	  Field[] fileds = DwmVlmsOneOrderToEnd.class.getDeclaredFields();
 	  String[] headers = new String[]{"底盘号","品牌","基地","车型","CP9下线接车日期","出厂日期","入库日期","入库仓库","任务单号",
 			  "整车物流接收STD日期","配板日期","配板单号","运输方式","指派日期","指派承运商名称","出库日期","起运日期-公路/铁路",
@@ -163,22 +163,19 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 			  "末端分拨中心指派时间","末端分拨承运商","分拨承运轿运车车牌号","港/站分拨承运轿运车车位数","分拨出库时间",
 			  "分拨起运时间","送达时间-DCS到货时间","经销商确认到货时间"};
 	  int i = 0;
-	  //循环遍历表头,作为sheet页的第一行数据
+	  // 循环遍历表头,作为sheet页的第一行数据
 	  for ( String header : headers ) {
-		  //获取表头列
+		  // 获取表头列
 		  SXSSFCell cell = row.createCell(i++);
-		  //为单元格赋值
+		  // 为单元格赋值
 		  cell.setCellValue(header);
 	  }
-	  //转换时间格式,将Long类型转换成date类型
-	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	  //设置新增数据行,从第一行开始
-	  int rowNum = 1;
+
 	  String vin = queryCriteria.getVin();
 	  if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
 		  queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
 	  }
-	  // TODO:过滤选中的数据
+	  // 过滤选中的数据
 	  String selections = queryCriteria.getSelections();
 	  if ( StringUtil.length(selections) > 2  ) {
 		  queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections,",")));
@@ -192,146 +189,151 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
 	  List<DwmVlmsOneOrderToEnd> pageList = null;
 
+	  // 转换时间格式,将Long类型转换成date类型
+	  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	  // 设置新增数据行,从第一行开始
+	  int rowNum = 1;
+
 	  Integer maxSize = 200000;
 	  Integer currentSize = 0;
 
 	  do {
 		  queryCriteria.setPageNo(pageNo);
 
-		  //获取查询数据
+		  // 获取查询数据
 		  pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
 		  for ( DwmVlmsOneOrderToEnd item : pageList ) {
-			  //时间字段转换成年月日时分秒类型
+			  // 时间字段转换成年月日时分秒类型
 			  SXSSFRow row1 = sheet.createRow(rowNum);
-			  //vin
+			  // vin
 			  row1.createCell(0).setCellValue(item.getVin());
-			  //brand
+			  // brand
 			  row1.createCell(1).setCellValue(item.getBrand());
-			  //baseName
+			  // baseName
 			  row1.createCell(2).setCellValue(item.getBaseName());
-			  //vehicleName
+			  // vehicleName
 			  row1.createCell(3).setCellValue(item.getVehicleName());
-			  //cp9OfflineTime
+			  // cp9OfflineTime
 			  if ( item.getCp9OfflineTime() != 0 ) {
 				  row1.createCell(4).setCellValue(sdf.format(item.getCp9OfflineTime()));
 			  }
-			  //leaveFactoryTime
+			  // leaveFactoryTime
 			  if ( item.getLeaveFactoryTime() != 0 ) {
 				  row1.createCell(5).setCellValue(sdf.format(item.getLeaveFactoryTime() ));
 			  }
-			  //inSiteTime
+			  // inSiteTime
 			  if ( item.getInSiteTime() != 0 ) {
 				  row1.createCell(6).setCellValue(sdf.format(item.getInSiteTime()));
 			  }
-			  //inWarehouseName
+			  // inWarehouseName
 			  row1.createCell(7).setCellValue(item.getInWarehouseName());
-			  //taskNo
+			  // taskNo
 			  row1.createCell(8).setCellValue(item.getTaskNo());
-			  //vehicleReceivingTime
+			  // vehicleReceivingTime
 			  if ( item.getVehicleReceivingTime() != 0 ) {
 				  row1.createCell(9).setCellValue(sdf.format(item.getVehicleReceivingTime()));
 			  }
-			  //stowageNoteTime
+			  // stowageNoteTime
 			  if ( item.getStowageNoteTime() != 0 ) {
 				  row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime() ));
 			  }
-			  //stowageNoteNo
+			  // stowageNoteNo
 			  row1.createCell(11).setCellValue(item.getStowageNoteNo());
-			  //trafficType
+			  // trafficType
 			  row1.createCell(12).setCellValue(item.getTrafficType());
-			  //assignTime
+			  // assignTime
 			  if ( item.getAssignTime() != 0 ) {
 				  row1.createCell(13).setCellValue(sdf.format(item.getAssignTime() ));
 			  }
-			  //carrierName
+			  // carrierName
 			  row1.createCell(14).setCellValue(item.getCarrierName());
-			  //actualOutTime
+			  // actualOutTime
 			  if ( item.getActualOutTime() != 0 ) {
 				  row1.createCell(15).setCellValue(sdf.format(item.getActualOutTime()));
 			  }
-			  //shipmentTime
+			  // shipmentTime
 			  if ( item.getShipmentTime() != 0 ) {
 				  row1.createCell(16).setCellValue(sdf.format(item.getShipmentTime() ));
 			  }
-			  //transportVehicleNo
+			  // transportVehicleNo
 			  row1.createCell(17).setCellValue(item.getTransportVehicleNo());
-			  //samePlateNum
+			  // samePlateNum
 			  row1.createCell(18).setCellValue(item.getSamePlateNum());
-			  //vehicleNum
+			  // vehicleNum
 			  row1.createCell(19).setCellValue(item.getVehicleNum());
-			  //startCityName
+			  // startCityName
 			  row1.createCell(20).setCellValue(item.getStartCityName());
-			  //endCityName
+			  // endCityName
 			  row1.createCell(21).setCellValue(item.getEndCityName());
-			  //vdwdm
+			  // vdwdm
 			  row1.createCell(22).setCellValue(item.getVdwdm());
-			  //startWaterwayName
+			  // startWaterwayName
 			  row1.createCell(23).setCellValue(item.getStartWaterwayName());
-			  //inStartWaterwayTime
+			  // inStartWaterwayTime
 			  if ( item.getInStartWaterwayTime() != 0 ) {
 				  row1.createCell(24).setCellValue(sdf.format(item.getInStartWaterwayTime() ));
 			  }
-			  //endStartWaterwayTime
+			  // endStartWaterwayTime
 			  if ( item.getEndStartWaterwayTime() != 0 ) {
 				  row1.createCell(25).setCellValue(sdf.format(item.getEndStartWaterwayTime() ));
 			  }
-			  //endWaterwayName
+			  // endWaterwayName
 			  row1.createCell(26).setCellValue(item.getEndWaterwayName());
-			  //inEndWaterwayTime
+			  // inEndWaterwayTime
 			  if ( item.getInEndWaterwayTime() != 0 ) {
 				  row1.createCell(27).setCellValue(sdf.format(item.getInEndWaterwayTime() ));
 			  }
-			  //startPlatformName
+			  // startPlatformName
 			  row1.createCell(28).setCellValue(item.getStartPlatformName());
-			  //inStartPlatformTime
+			  // inStartPlatformTime
 			  if ( item.getInStartPlatformTime() != 0 ) {
 				  row1.createCell(29).setCellValue(sdf.format(item.getInStartPlatformTime() ));
 			  }
-			  //outStartPlatformTime
+			  // outStartPlatformTime
 			  if ( item.getOutStartPlatformTime() != 0 ) {
 				  row1.createCell(30).setCellValue(sdf.format(item.getOutStartPlatformTime() ));
 			  }
-			  //endPlatformName
+			  // endPlatformName
 			  row1.createCell(31).setCellValue(item.getEndPlatformName());
-			  //inEndPlatformTime
+			  // inEndPlatformTime
 			  if ( item.getInEndPlatformTime() != 0 ) {
 				  row1.createCell(32).setCellValue(sdf.format(item.getInEndPlatformTime()));
 			  }
-			  //unloadShipTime
+			  // unloadShipTime
 			  if ( item.getUnloadShipTime() != 0 ) {
 				  row1.createCell(33).setCellValue(sdf.format(item.getUnloadShipTime() ));
 			  }
-			  //unloadRailwayTime
+			  // unloadRailwayTime
 			  if ( item.getUnloadRailwayTime() != 0 ) {
 				  row1.createCell(34).setCellValue(sdf.format(item.getUnloadRailwayTime()));
 			  }
-			  //inDistributeTime
+			  // inDistributeTime
 			  if ( item.getInDistributeTime() != 0 ) {
 				  row1.createCell(35).setCellValue(sdf.format(item.getInDistributeTime() ));
 			  }
-			  //distributeAssignTime
+			  // distributeAssignTime
 			  if ( item.getDistributeAssignTime() != 0 ) {
 				  row1.createCell(36).setCellValue(sdf.format(item.getDistributeAssignTime()));
 			  }
-			  //distributeCarrierName
+			  // distributeCarrierName
 			  row1.createCell(37).setCellValue(item.getDistributeCarrierName());
-			  //distributeVehicleNo
+			  // distributeVehicleNo
 			  row1.createCell(38).setCellValue(item.getDistributeVehicleNo());
-			  //distributeVehicleNum
+			  // distributeVehicleNum
 			  row1.createCell(39).setCellValue(item.getDistributeVehicleNum());
-			  //outDistributeTime
+			  // outDistributeTime
 			  if ( item.getOutDistributeTime() != 0 ) {
 				  row1.createCell(40).setCellValue(sdf.format(item.getOutDistributeTime()));
 			  }
-			  //distributeShipmentTime
+			  // distributeShipmentTime
 			  if ( item.getDistributeShipmentTime() != 0 ) {
 				  row1.createCell(41).setCellValue(sdf.format(item.getDistributeShipmentTime()));
 			  }
-			  //dotSiteTime
+			  // dotSiteTime
 			  if ( item.getDotSiteTime() != 0 ) {
 				  row1.createCell(42).setCellValue(sdf.format(item.getDotSiteTime()));
 			  }
-			  //finalSiteTime
+			  // finalSiteTime
 			  if ( item.getFinalSiteTime() != 0 ) {
 				  row1.createCell(43).setCellValue(sdf.format(item.getFinalSiteTime()));
 			  }
@@ -350,7 +352,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		  }
 	  } while(intervalFlag);
 
-	  //设置内容类型
+	  // 设置内容类型
 	  response.setContentType("application/vnd.ms-excel;charset=utf-8");
 	  OutputStream outputStream = response.getOutputStream();
 	  response.setHeader("Content-disposition", "attachment;filename=trainingRecord.xls");

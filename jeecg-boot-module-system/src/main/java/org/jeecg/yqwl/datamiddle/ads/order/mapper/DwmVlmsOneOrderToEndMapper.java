@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
+
 
 import java.util.List;
 
@@ -33,11 +33,11 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
 
 
-    /**
-     * 同板数量
-     * @return
-     */
-    List<SelectData> selectTotal(@Param("stowageNoteNo") String stowageNoteNo);
+//    /**
+//     * 同板数量
+//     * @return
+//     */
+//    List<SelectData> selectTotal(@Param("stowageNoteNo") String stowageNoteNo);
 
 
 }

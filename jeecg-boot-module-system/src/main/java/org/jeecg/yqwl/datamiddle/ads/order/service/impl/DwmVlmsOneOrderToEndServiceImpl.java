@@ -2,13 +2,11 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -197,13 +195,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
     }
 
-    /**
-     * 查询同板数量
-     * @return
-     */
-    @Override
-    public List<SelectData> selectTotal(String stowageNoteNo) {
-//        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
-        return null;
-    }
+//    /**
+//     * 查询同板数量
+//     * @return
+//     */
+//    @Override
+//    public List<SelectData> selectTotal(String stowageNoteNo) {
+////        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
+//        return null;
+//    }
 }

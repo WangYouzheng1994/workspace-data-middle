@@ -4,7 +4,6 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.SelectData;
 
 import java.util.List;
 
@@ -27,9 +26,9 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
 
 
-    /**
-     * 同板数量
-     * @return
-     */
-    List<SelectData> selectTotal(String stowageNoteNo);
+//    /**
+//     * 同板数量
+//     * @return
+//     */
+//    List<SelectData> selectTotal(String stowageNoteNo);
 }
