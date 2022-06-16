@@ -2,6 +2,7 @@ package org.jeecg.yqwl.datamiddle.job.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.*;
 import org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper;
 import org.jeecg.yqwl.datamiddle.job.service.DataMiddleOdsBaseStationDataAndEpcService;
@@ -37,12 +38,14 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
     @Override
     public void getOdsVlmsBaseStationDataAndEpc() {
         log.info("开始查询OdsBsd的表");
-//        Long begin = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
-//        Long end = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
-        Long begin =1652177391000000L;
-        Long end =1652178367000000L;
-        Long begin13 =1572661789000L;
-        Long end13 =1653943564000L;
+        Long begin13 = DateUtils.getToday4DawnLong13();   //当天00:00:00的13位时间戳
+        Long end13 = DateUtils.getToday4NightLong13(); //当天23:59:59的13位时间戳
+        Long begin16 = begin13*1000L;
+        Long end16 = end13*1000L;
+        //        Long begin =1652177391000000L;
+        //        Long end =1652178367000000L;
+        //        Long begin13 =1572661789000L;
+        //        Long end13 =1653943564000L;
         boolean hasNext = true;
         int limit = 500;
         Integer rowNum=0;
@@ -53,6 +56,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         String in_warehouse_code = null;
         String in_warehouse_name = null;
         String vin = null;
+        Long operateTime = null;
         String operateType = null;
         Long sample_u_t_c = null;
         String wlckdm = null;
@@ -62,14 +66,18 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
         Integer insertBaseStatusNum=null;
         Integer updateSiteTime=null;
         Integer updateLeaveFactoryTime=null;
+        Integer updateCp9=null;
         List<BaseStationDataEpc> dataEpcMap=null;
+
         do {
             log.info("开始循环, {}", interval++);
+            //todo:上线之前更改一下Mapper中的epc的表
             //因为是由epc驱动的,所以开始先查epc的数据.
                 dataEpcMap = this.dataAndEpcMapper.getBaseStationDataEpcList(rowNum, begin13, end13, rowNum, limit);
                 for (BaseStationDataEpc baseStationDataEpc : dataEpcMap) {
                     cp = baseStationDataEpc.getCP();
                     vin = baseStationDataEpc.getVIN();
+                    operateTime = baseStationDataEpc.getOPERATETIME();
                     if (StringUtils.isNotBlank(cp) && StringUtils.isNotBlank(vin)){
                         // 此处等同于判空 + 判长度
                         if (StringUtils.length(cp) >= 4) {
@@ -96,10 +104,13 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                             insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
                     }
                 }
-                //注入cp9下线接车日期
+                    if (operateTime !=null && StringUtils.isNotBlank(vin) ){
+                        //注入cp9下线接车日期
+                        updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin);
+                    }
 
             }
-            List<BaseStationData> baseStationDataList = this.dataAndEpcMapper.getOdsVlmsBaseStationData(rowNum, begin, end, rowNum, limit);
+            List<BaseStationData> baseStationDataList = this.dataAndEpcMapper.getOdsVlmsBaseStationData(rowNum, begin16, end16, rowNum, limit);
             for (BaseStationData baseStationData : baseStationDataList) {
                 dwmVlmsOneOrderToEnd = new DwmVlmsOneOrderToEnd();
                 // 与rfidWarehouse表联查出来的仓库Code值

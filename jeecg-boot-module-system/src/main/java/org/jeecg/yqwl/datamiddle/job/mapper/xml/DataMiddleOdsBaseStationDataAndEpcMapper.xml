@@ -21,7 +21,7 @@
     <!--查询base_station_data_epc的表数据-->
     <select id="getBaseStationDataEpcList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationDataEpc">
         SELECT VIN , CP , OPERATETIME
-        FROM dwd_vlms_base_station_data_epc
+        FROM ods_vlms_base_station_data_epc
             where
             OPERATETIME <![CDATA[>=]]> #{startDateStr}
             AND OPERATETIME <![CDATA[<=]]> #{endDateStr}
@@ -80,7 +80,7 @@
 
     <!--插入一单到底dwm_vlms_one_order_to_end的表 -->
     <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
-        insert into dwm_vlms_one_order_to_end (
+        insert into ods_vlms_one_order_to_end (
             VIN,
         <if test=" params.inWarehouseCode !=null">
             IN_WAREHOUSE_CODE,
