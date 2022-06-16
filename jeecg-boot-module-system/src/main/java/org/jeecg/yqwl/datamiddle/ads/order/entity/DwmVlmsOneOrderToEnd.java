@@ -63,9 +63,9 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "入库仓库", width = 15)
     @ApiModelProperty(value = "入库名称")
 	private String inWarehouseName;
-	@Excel(name = "入库代码", width = 15)
+	/*@Excel(name = "入库代码", width = 15)
 	@ApiModelProperty(value = "入库代码")
-	private String inWarehouseCode;
+	private String inWarehouseCode;*/
 	/**计划下达时间 取sptb02.dpzrq*/
 	@Excel(name = "计划下达时间", width = 15)
     @ApiModelProperty(value = "计划下达时间 取sptb02.dpzrq")
