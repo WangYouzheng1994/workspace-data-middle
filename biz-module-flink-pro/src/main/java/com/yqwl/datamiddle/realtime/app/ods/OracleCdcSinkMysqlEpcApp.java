@@ -143,7 +143,7 @@ public class OracleCdcSinkMysqlEpcApp {
         log.info("组装的插入sql:{}", sql);
         processBsd.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
-        env.execute("oracle-cdc-mysql");
+        env.execute("oracle-cdc-mysql-epc");
         log.info("oracle-cdc-kafka job开始执行");
     }
 }

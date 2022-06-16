@@ -286,7 +286,7 @@ public class WaybillDwmAppSptb02And02D1Copy {
         dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-clickhouse-dwm");
+        env.execute("sptb02-sink-mysql-dwm");
         log.info("sptb02dwd层job任务开始执行");
     }
 }
