@@ -77,5 +77,11 @@ public class BaseStationDataEpc implements Serializable {
 
     private Long WAREHOUSE_UPDATETIME;
 
+    /**
+     * 代码逻辑需要,新加字段
+     * RowNum
+     */
+    private Integer Rn;
+
 
 }

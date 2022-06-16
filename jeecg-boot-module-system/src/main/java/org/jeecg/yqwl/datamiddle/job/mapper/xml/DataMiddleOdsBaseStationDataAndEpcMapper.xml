@@ -117,7 +117,7 @@
             , #{params.inWarehouseName}
         </if>
         ) ON DUPLICATE KEY UPDATE
-        VIN = VALUES(VIN)
+        VIN = VALUES(VIN) ,
         <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
             IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE)
         </if>
@@ -140,7 +140,7 @@
         UPDATE dwm_vlms_one_order_to_end e
             JOIN dim_vlms_warehouse_rs a
         SET IN_SITE_TIME = #{SAMPLE_U_T_C}
-        WHERE e.VIN = #{VIN}
+        WHERE e.VIN = #{VIN} ,
             AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
             AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
     </update>

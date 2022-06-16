@@ -209,19 +209,16 @@ public class BaseStationData implements Serializable {
      * 代码逻辑需要,新加字段
      * RowNum
      */
-    @TransientSink
-    private Integer Rn;
+    private Integer IDNUM;
 
     /**
      * 入库仓库代码,新加字段
      */
-    @TransientSink
     private String IN_WAREHOUSE_CODE;
 
     /**
      * 入库名称,新加字段
      */
-    @TransientSink
     private String IN_WAREHOUSE_NAME;
 
     /**
