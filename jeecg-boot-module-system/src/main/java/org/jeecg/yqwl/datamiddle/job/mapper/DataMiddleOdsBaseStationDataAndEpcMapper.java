@@ -20,7 +20,7 @@ import java.util.Map;
  * @Date: 2022/6/13 14:58
  * @Version: V1.0
  */
-public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<BaseStationData> {
+public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<DwdBaseStationDataEpc> {
     List<BaseStationDataEpc>  getBaseStationDataEpcList(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart")Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
     /**

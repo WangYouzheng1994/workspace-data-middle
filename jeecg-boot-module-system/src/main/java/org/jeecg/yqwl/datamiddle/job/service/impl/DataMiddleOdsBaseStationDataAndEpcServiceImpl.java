@@ -27,7 +27,7 @@ import java.util.*;
 @Slf4j
 @Service
 @DS("wareHouse")
-public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<DataMiddleOdsBaseStationDataAndEpcMapper, BaseStationData> implements DataMiddleOdsBaseStationDataAndEpcService {
+public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<DataMiddleOdsBaseStationDataAndEpcMapper, DwdBaseStationDataEpc> implements DataMiddleOdsBaseStationDataAndEpcService {
     @Resource
     private DataMiddleOdsBaseStationDataAndEpcMapper dataAndEpcMapper;
 
