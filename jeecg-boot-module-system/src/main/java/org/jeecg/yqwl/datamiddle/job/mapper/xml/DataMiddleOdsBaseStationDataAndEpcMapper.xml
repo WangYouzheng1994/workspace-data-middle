@@ -44,8 +44,8 @@
             FROM  ods_vlms_base_station_data t
                       LEFT JOIN dim_vlms_warehouse_rs t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
             WHERE
-                SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
-              AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+               t.SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
+              AND t.SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
         limit #{limitStart} , #{limitEnd};
 
     </select>
@@ -139,7 +139,7 @@
     <update id="updateOOTDInSiteTime">
         UPDATE dwm_vlms_one_order_to_end e
             JOIN dim_vlms_warehouse_rs a
-        SET IN_SITE_TIME = #{SAMPLE_U_T_C} , WAREHOUSE_UPDATETIME = #{WareHouseTime}
+        SET e.IN_SITE_TIME = #{SAMPLE_U_T_C} , e.WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE e.VIN = #{VIN}
             AND e.LEAVE_FACTORY_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
             AND a.WAREHOUSE_TYPE <![CDATA[=]]> 'T1'
@@ -149,7 +149,7 @@
     <update id="updateOOTDLeaveFactoryTime">
         UPDATE dwm_vlms_one_order_to_end d
         JOIN ods_vlms_base_station_data o
-        SET d.LEAVE_FACTORY_TIME = #{SAMPLE_U_T_C} , WAREHOUSE_UPDATETIME = #{WareHouseTime}
+        SET d.LEAVE_FACTORY_TIME = #{SAMPLE_U_T_C} , d.WAREHOUSE_UPDATETIME = #{WareHouseTime}
         WHERE
         d.VIN = #{VIN}
         AND d.CP9_OFFLINE_TIME <![CDATA[<]]> #{SAMPLE_U_T_C}
