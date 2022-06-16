@@ -409,7 +409,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 		if (queryCriteria.getLeaveFactoryTimeStart() != null) {
 			queryCriteria.setLeaveFactoryTimeStart(queryCriteria.getLeaveFactoryTimeStart() + 28800000);
 		}
-		if (queryCriteria.getLeaveFactoryTimeStart() != null) {
+		if (queryCriteria.getLeaveFactoryTimeEnd() != null) {
 			queryCriteria.setLeaveFactoryTimeEnd(queryCriteria.getLeaveFactoryTimeEnd()+ 28800000);
 		}
 		if (queryCriteria.getInSiteTimeStart() != null) {
