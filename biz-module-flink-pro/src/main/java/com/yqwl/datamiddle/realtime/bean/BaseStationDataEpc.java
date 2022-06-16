@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,11 +14,12 @@ import java.io.Serializable;
  * @author yiqi
  * @since 2022-05-18
  */
+@TableName("ods_vlms_base_station_data_epc")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class BaseStationDataEpc implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    //private static final long serialVersionUID = 1L;
 
     /**
      * 车架号
