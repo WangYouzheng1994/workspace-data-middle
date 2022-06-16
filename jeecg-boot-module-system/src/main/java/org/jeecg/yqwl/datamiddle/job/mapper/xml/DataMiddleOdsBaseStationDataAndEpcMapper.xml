@@ -20,88 +20,117 @@
 
     <!--查询base_station_data_epc的表数据-->
     <select id="getBaseStationDataEpcList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.BaseStationDataEpc">
-        SELECT VIN , CP , OPERATETIME
-        FROM ods_vlms_base_station_data_epc
-            where
-            OPERATETIME <![CDATA[>=]]> #{startDateStr}
-            AND OPERATETIME <![CDATA[<=]]> #{endDateStr}
+        SELECT
+        IDNUM AS rn,
+        a.*
+        FROM
+        (         SELECT IDNUM, VIN , CP , OPERATETIME
+                  FROM ods_vlms_base_station_data_epc
+                  where
+                      OPERATETIME <![CDATA[>=]]> #{startDateStr}
+                    AND OPERATETIME <![CDATA[<=]]> #{endDateStr}
+        ) a
+        limit #{limitStart} ,
+        #{limitEnd} ;
     </select>
     <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
     <select id="getOdsVlmsBaseStationData" resultMap="baseStationDataMap">
-        SELECT t.SAMPLE_U_T_C ,
-               t.VIN ,
-               t.SHOP_NO ,
-               t.OPERATE_TYPE ,
-               t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE ,
-               t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME ,
-               t2.VWLCKDM
-        FROM  ods_vlms_base_station_data t
-        LEFT JOIN dim_vlms_warehouse_rs t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
-        WHERE
-        SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
-        AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+
+        SELECT
+        IDNUM AS rn,
+        a.*
+        FROM
+        (
+            SELECT t.IDNUM,
+                   t.SAMPLE_U_T_C ,
+                   t.VIN ,
+                   t.SHOP_NO ,
+                   t.OPERATE_TYPE ,
+                   t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE ,
+                   t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME ,
+                   t2.VWLCKDM
+            FROM  ods_vlms_base_station_data t
+                      LEFT JOIN dim_vlms_warehouse_rs t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
+            WHERE
+                SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
+              AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+        ) a
+        limit #{limitStart} , #{limitEnd} ;
+
+
     </select>
     <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
     <select id="getOdsVlmsBaseStationDataEpc" resultMap="baseStationDataMapWareHouse">
-        SELECT t.*,
-               t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE,
-               t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME
-        FROM  ods_vlms_base_station_data t
-                  LEFT JOIN ods_vlms_rfid_warehouse t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
-        WHERE
-            SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
-          AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+
+
+        SELECT
+        IDNUM AS rn,
+        a.*
+        FROM
+        ( SELECT t.*,
+                 t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE,
+                 t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME
+          FROM  ods_vlms_base_station_data t
+                    LEFT JOIN ods_vlms_rfid_warehouse t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
+          WHERE
+              SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
+            AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
+        ) a
+        limit #{limitStart} , #{limitEnd} ;
+
+
+
     </select>
     <!--给一单到底表添加基地代码,基地名称的字段    -->
     <insert id="addDwmOOTDBase" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwdBaseStationDataEpc">
-        insert into dwm_vlms_one_order_to_end (VIN,
-        <if test=" params.BASE_CODE !=null">
-            BASE_CODE,
+        insert into dwm_vlms_one_order_to_end (VIN
+        <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
+            , BASE_CODE
         </if>
-        <if test=" params.BASE_NAME !=null">
-            BASE_NAME
+        <if test=" params.BASE_NAME !=null and params.BASE_NAME ! = ''">
+            , BASE_NAME
         </if>
             ) VALUES (
-        #{params.VIN} ,
-        <if test=" params.BASE_CODE !=null">
-            #{params.BASE_CODE} ,
+        #{params.VIN}
+        <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
+            , #{params.BASE_CODE}
         </if>
-        <if test=" params.BASE_NAME !=null">
-            #{params.BASE_NAME}
+        <if test=" params.BASE_NAME !=null and params.BASE_NAME != '' ">
+            , #{params.BASE_NAME}
         </if>
         ) ON DUPLICATE KEY UPDATE
-        <if test=" params.BASE_CODE !=null">
-            BASE_CODE = VALUES(BASE_CODE),
+        <if test=" params.BASE_CODE !=null and params.BASE_CODE != '' ">
+            BASE_CODE = VALUES(BASE_CODE)
         </if>
-        <if test=" params.BASE_NAME !=null">
-            BASE_NAME = VALUES(BASE_NAME)
+        <if test=" params.BASE_NAME !=null and params.BASE_NAME != ''">
+            , BASE_NAME = VALUES(BASE_NAME)
         </if>
     </insert>
 
     <!--插入一单到底dwm_vlms_one_order_to_end的表 -->
     <insert id="addDwmOOTD" parameterType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd">
         insert into ods_vlms_one_order_to_end (
-            VIN,
-        <if test=" params.inWarehouseCode !=null">
-            IN_WAREHOUSE_CODE,
+            VIN
+        <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
+            , IN_WAREHOUSE_CODE
         </if>
-        <if test=" params.inWarehouseName !=null">
-            IN_WAREHOUSE_NAME
+        <if test=" params.inWarehouseName !=null and params.inWarehouseName != '' ">
+            , IN_WAREHOUSE_NAME
         </if>
             )  values (
-            #{params.vin} ,
-        <if test=" params.inWarehouseCode !=null">
-            #{params.inWarehouseCode},
+            #{params.vin}
+        <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
+            , #{params.inWarehouseCode}
         </if>
-        <if test=" params.inWarehouseName !=null">
-            #{params.inWarehouseName}
+        <if test=" params.inWarehouseName !=null and params.inWarehouseName != '' ">
+            , #{params.inWarehouseName}
         </if>
         ) ON DUPLICATE KEY UPDATE
-        <if test=" params.inWarehouseCode !=null">
-            IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE),
+        <if test=" params.inWarehouseCode !=null and params.inWarehouseCode != '' ">
+            IN_WAREHOUSE_CODE=VALUES(IN_WAREHOUSE_CODE)
         </if>
-        <if test=" params.inWarehouseName !=null">
-            IN_WAREHOUSE_NAME=VALUES(IN_WAREHOUSE_NAME)
+        <if test=" params.inWarehouseName !=null and params.inWarehouseName != '' ">
+            , IN_WAREHOUSE_NAME=VALUES(IN_WAREHOUSE_NAME)
         </if>
     </insert>
 

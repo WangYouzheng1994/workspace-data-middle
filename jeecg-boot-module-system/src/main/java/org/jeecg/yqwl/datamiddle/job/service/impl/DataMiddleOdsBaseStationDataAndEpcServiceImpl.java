@@ -71,7 +71,6 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
 
         do {
             log.info("开始循环, {}", interval++);
-            //todo:上线之前更改一下Mapper中的epc的表
             //因为是由epc驱动的,所以开始先查epc的数据.
                 dataEpcMap = this.dataAndEpcMapper.getBaseStationDataEpcList(rowNum, begin13, end13, rowNum, limit);
                 for (BaseStationDataEpc baseStationDataEpc : dataEpcMap) {
@@ -100,12 +99,12 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                                 dwdBaseStationDataEpc.setBASE_NAME("天津");
                                 dwdBaseStationDataEpc.setBASE_CODE("022C");
                             }
-                            // e.插入一单到底的BASE_CODE+BASE_NAME字段
+                            // e.插入一单到底的BASE_CODE+BASE_NAME字段(esp)
                             insertBaseStatusNum = this.dataAndEpcMapper.addDwmOOTDBase(dwdBaseStationDataEpc);
                     }
                 }
                     if (operateTime !=null && StringUtils.isNotBlank(vin) ){
-                        //注入cp9下线接车日期
+                        //注入cp9下线接车日期(esp)
                         updateCp9 = this.dataAndEpcMapper.updateCp9OffLineTime(operateTime, vin);
                     }
 
@@ -153,6 +152,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 log.info("插入一单到底的表基地字段完成: {}",insertBaseStatusNum);
                 log.info("更新一单到底的入库时间完成: {}",updateSiteTime);
                 log.info("更新一单到底的出厂日期完成: {}",updateLeaveFactoryTime);
+                log.info("更新一单到底的cp9下线日期完成: {}",updateCp9);
 
                 //==============================================处理铁路运单=============================================================//
                 //1.查询铁路运单 根据仓库代码 vvin码定位一条记录 ,每一个站台都会有两个时间，入站台时间和出站台时间
