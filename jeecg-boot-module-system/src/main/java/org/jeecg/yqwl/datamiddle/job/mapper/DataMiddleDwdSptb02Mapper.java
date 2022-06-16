@@ -27,7 +27,7 @@ public interface DataMiddleDwdSptb02Mapper extends BaseMapper<DwdSptb02> {
                                             @Param("limitStart") Integer limitStart, @Param("limitEnd") Integer limitEnd);
 
     /**
-     *  关联的维度表 表名
+     * 关联的维度表 表名
      * @param tableParams  表名
      * @return
      */
