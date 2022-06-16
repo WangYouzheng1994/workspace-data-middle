@@ -267,4 +267,15 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "末端配送结算单编号")
 	private String endDistributeNo;
 
+	/**开始物理仓库代码  铁水*/
+	@Excel(name = "开始物理仓库代码  铁水", width = 15)
+	@ApiModelProperty(value = "开始物理仓库代码  铁水")
+	private String startPhysicalCode;
+
+
+	/**结束物理仓库代码  铁水*/
+	@Excel(name = "结束物理仓库代码  铁水", width = 15)
+	@ApiModelProperty(value = "结束物理仓库代码  铁水")
+	private String endPhysicalCode;
+
 }
