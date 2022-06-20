@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper">
-    <!--查出    -->
+    <!--查出仓库名称,仓库代码  -->
     <resultMap id="baseStationDataMap" type="org.jeecg.yqwl.datamiddle.job.entity.BaseStationData" >
-        <result column="IDNUM" property="IDNUM" jdbcType="BIGINT"/>
-        <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
-        <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
-        <result column="IN_WAREHOUSE_CODE" property="IN_WAREHOUSE_CODE" jdbcType="VARCHAR"/>
-        <result column="IN_WAREHOUSE_NAME" property="IN_WAREHOUSE_NAME" jdbcType="VARCHAR"/>
-        <result column="OPERATE_TYPE" property="OPERATE_TYPE" jdbcType="VARCHAR"/>
-    </resultMap>
-    <!--查出仓库名称,仓库代码-->
-    <resultMap id="baseStationDataMapWareHouse" type="org.jeecg.yqwl.datamiddle.job.entity.BaseStationData" >
         <result column="IDNUM" property="IDNUM" jdbcType="BIGINT"/>
         <result column="SAMPLE_U_T_C" property="SAMPLE_U_T_C" jdbcType="BIGINT"/>
         <result column="SHOP_NO" property="SHOP_NO" jdbcType="VARCHAR"/>
@@ -27,10 +18,10 @@
                   where
                       OPERATETIME <![CDATA[>=]]> #{startDateStr}
                     AND OPERATETIME <![CDATA[<=]]> #{endDateStr}
-
         limit #{limitStart} ,
         #{limitEnd};
     </select>
+
     <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
     <select id="getOdsVlmsBaseStationData" resultMap="baseStationDataMap">
             SELECT t.IDNUM,
@@ -47,30 +38,8 @@
                t.SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
               AND t.SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
         limit #{limitStart} , #{limitEnd};
-
     </select>
-    <!--按照sample_u_t_c时间查询当日ods_base_station_data的数据 -->
-    <select id="getOdsVlmsBaseStationDataEpc" resultMap="baseStationDataMapWareHouse">
 
-
-        SELECT
-        IDNUM AS rn,
-        a.*
-        FROM
-        ( SELECT t.*,
-                 t2.WAREHOUSE_CODE IN_WAREHOUSE_CODE,
-                 t2.WAREHOUSE_NAME IN_WAREHOUSE_NAME
-          FROM  ods_vlms_base_station_data t
-                    LEFT JOIN ods_vlms_rfid_warehouse t2 on t.SHOP_NO = t2.WAREHOUSE_CODE
-          WHERE
-              SAMPLE_U_T_C <![CDATA[>=]]> #{startDateStr}
-            AND SAMPLE_U_T_C <![CDATA[<=]]> #{endDateStr}
-        ) a
-        limit #{limitStart} , #{limitEnd} ;
-
-
-
-    </select>
     <!--给一单到底表添加基地代码,基地名称的字段    -->
     <insert id="addDwmOOTDBase" parameterType="org.jeecg.yqwl.datamiddle.job.entity.DwdBaseStationDataEpc">
         insert into dwm_vlms_one_order_to_end (VIN , WAREHOUSE_UPDATETIME

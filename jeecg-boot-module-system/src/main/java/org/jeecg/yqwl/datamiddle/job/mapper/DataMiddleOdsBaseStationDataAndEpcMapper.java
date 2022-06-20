@@ -21,6 +21,7 @@ import java.util.Map;
  * @Version: V1.0
  */
 public interface DataMiddleOdsBaseStationDataAndEpcMapper extends BaseMapper<DwdBaseStationDataEpc> {
+    //todo:全部变为批量插入更新
     List<DwdBaseStationDataEpc>  getBaseStationDataEpcList(@Param("startDateStr")Long startDateStr, @Param("endDateStr")Long endDateStr, @Param("limitStart")Integer limitStart, @Param("limitEnd")Integer limitEnd);
 
     /**
