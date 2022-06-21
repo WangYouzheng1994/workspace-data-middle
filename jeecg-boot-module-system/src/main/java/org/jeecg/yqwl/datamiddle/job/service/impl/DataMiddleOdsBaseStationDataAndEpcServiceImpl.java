@@ -151,8 +151,8 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                 operateType = baseStationData.getOPERATE_TYPE();
                 // 采样完成时间
                 sample_u_t_c = baseStationData.getSAMPLE_U_T_C();
-                // 用wlckdm 匹配运单中的 START_PHYSICAl_CODE, END_PHYSICAl_CODE 取代 START_WAREHOUSE_CODE, END_WAREHOUSE_CODE
-                wlckdm = baseStationData.getWLCKDM();
+                // 用PHYSICAL_CODE 匹配运单中的 START_PHYSICAl_CODE, END_PHYSICAl_CODE 取代 START_WAREHOUSE_CODE, END_WAREHOUSE_CODE
+                wlckdm = baseStationData.getPHYSICAL_CODE();
 
                 if (StringUtils.isNotBlank(in_warehouse_code)){
                     dwmVlmsOneOrderToEnd.setInWarehouseCode(in_warehouse_code);  //入库代码

@@ -221,7 +221,14 @@ public class BaseStationData implements Serializable {
     private String IN_WAREHOUSE_NAME;
 
     /**
-     * 对应运单sptb02中的 fczt sczt wlckdm
+     * 仓库对应类型
      */
-    private String WLCKDM;
+
+    private String WAREHOUSE_TYPE;
+
+    /**
+     * 物理仓库代码
+     */
+
+    private String PHYSICAL_CODE;
 }
