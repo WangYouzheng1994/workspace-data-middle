@@ -233,4 +233,16 @@ public class DwdBaseStationData  {
     @TransientSink
     private Long ts;
 
+    /**
+     * 仓库对应类型
+     */
+
+    private String WAREHOUSE_TYPE;
+
+    /**
+     * 物理仓库代码
+     */
+
+    private String PHYSICAL_CODE;
+
 }

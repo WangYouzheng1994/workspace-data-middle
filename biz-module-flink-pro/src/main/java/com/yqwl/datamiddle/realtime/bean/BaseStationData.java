@@ -202,16 +202,6 @@ public class BaseStationData {
 
     private Long WAREHOUSE_UPDATETIME;
 
-    /**
-     * 仓库对应类型
-     */
 
-    private String WAREHOUSE_TYPE;
-
-    /**
-     * 物理仓库代码
-     */
-
-    private String PHYSICAL_CODE;
 
 }
