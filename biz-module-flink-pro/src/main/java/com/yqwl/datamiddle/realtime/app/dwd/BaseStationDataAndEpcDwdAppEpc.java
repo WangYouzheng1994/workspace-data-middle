@@ -41,33 +41,32 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class BaseStationDataAndEpcDwdAppEpc {
-
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+        // 设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(600000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
         Props props = PropertiesUtil.getProps();
-        //oracle cdc 相关配置
+        // oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        //properties.put("database.serverTimezone", "UTC");
-        //properties.put("database.serverTimezone", "Asia/Shanghai");
+        // properties.put("database.serverTimezone", "UTC");
+        // properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
-        //kafka消费源相关参数配置
+        // kafka消费源相关参数配置
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC)
@@ -78,8 +77,6 @@ public class BaseStationDataAndEpcDwdAppEpc {
 
         // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MySQL-Source").uid("oracleSourceStream").name("oracleSourceStream");
-
-
         SingleOutputStreamOperator<DwdBaseStationDataEpc> epcProcess = oracleSourceStream.process(new ProcessFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public void processElement(String value, Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
@@ -124,15 +121,11 @@ public class BaseStationDataAndEpcDwdAppEpc {
                     out.collect(dataBsdEpc);
                 }
 
-
             }
         }).uid("epcProcess").name("epcProcess");
 
-
-        epcProcess.print("消费数据:");
-
         // 4.指定事件时间字段
-        //DwdBaseStationDataEpc指定事件时间
+        // DwdBaseStationDataEpc指定事件时间
       /*  SingleOutputStreamOperator<DwdBaseStationDataEpc> dwdBaseStationDataEpcWithTS = epcProcess.assignTimestampsAndWatermarks(
                 WatermarkStrategy.<DwdBaseStationDataEpc>forBoundedOutOfOrderness(Duration.ofSeconds(5)))
                         .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationDataEpc>() {
@@ -143,7 +136,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                         })).uid("assIgnDwdBaseStationDataEpcEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
 */
 
-        //5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
+        // 5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapEpc = epcProcess.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station())
                 .uid("mapEpc").name("mapEpc");
 
@@ -154,23 +147,19 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 return JSON.toJSONString(value);
             }
         }).uid("mapEpcJson").name("mapEpcJson");
-        mapEpcJson.print("消费数据:");
+
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 KafkaUtil.KAFKA_SERVER,
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC));
-
         mapEpcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(DwdBaseStationDataEpc.class);
-        log.info("组装的插入sql:{}", sql);
         mapEpc.addSink(JdbcSink.<DwdBaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
-
         env.execute("拉宽bsdEpc表进入dwdBsdEpc");
-
     }
 
     /**
@@ -204,7 +193,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 //    如果'状态后端'已有的操作时间大于'当前流数据'的操作时间则删除'状态后端'中的key(因为取的是第一条下线时间的数据).
                 //    然后再把更早的下线时间存到'状态后端'中.
                 Long oldOperatetime = myMapState.get(vin);
-//                Long oldOperatetime = oldDataEpc.getOPERATETIME();
+                //  Long oldOperatetime = oldDataEpc.getOPERATETIME();
                 if (oldOperatetime > nowOperatetime) {
                     myMapState.remove(vin);
                     myMapState.put(vin, nowOperatetime);

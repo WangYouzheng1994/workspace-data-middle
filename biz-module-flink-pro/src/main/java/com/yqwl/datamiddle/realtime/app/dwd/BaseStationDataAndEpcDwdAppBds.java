@@ -112,7 +112,7 @@ public class BaseStationDataAndEpcDwdAppBds {
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -153,15 +153,10 @@ public class BaseStationDataAndEpcDwdAppBds {
             @Override
             public void processElement(String value, Context ctx, Collector<DwdBaseStationData> out) throws Exception {
                 log.info("process方法开始执行");
-                //1 .转实体类
-                JSONObject jsonObject = JSON.parseObject(value);
-                DwdBaseStationData dwdBaseStationData = jsonObject.getObject("after", DwdBaseStationData.class);
+                // 1 .转实体类
+                DwdBaseStationData dwdBaseStationData = JSON.parseObject(value, DwdBaseStationData.class);
                 String vin = dwdBaseStationData.getVIN();
                 if (StringUtils.isNotBlank(vin)) {
-                    Long ts = jsonObject.getLong("ts");
-                    if (ts != null) {
-                        dwdBaseStationData.setWAREHOUSE_UPDATETIME(ts);
-                    }
                     // 2 .处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
                     String shop_no = dwdBaseStationData.getSHOP_NO();
                     String warehouse_code = "";
@@ -169,9 +164,8 @@ public class BaseStationDataAndEpcDwdAppBds {
                     String warehouse_name = "";
                     // 出入库类型
                     String PHYSICAL_CODE = "";
-                    String operate_type = dwdBaseStationData.getOPERATE_TYPE();
                     if (StringUtils.isNotEmpty(dwdBaseStationData.getSHOP_NO())) {
-                        String bdsSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where WAREHOUSE_CODE = '" + shop_no + "' limit1";
+                        String bdsSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where WAREHOUSE_CODE = '" + shop_no + "' limit 1";
                         JSONObject bdsResult = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, bdsSql, warehouse_code);
                         if (bdsResult != null) {
                             // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
@@ -196,6 +190,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                             }
                         }
                     }
+                    out.collect(dwdBaseStationData);
                 }
             }
         }).uid("dwmBsdProcess").name("dwmBsdProcess");
@@ -209,7 +204,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                 return JSON.toJSONString(obj);
             }
         }).uid("dwmBsdJson").name("dwmBsdJson");
-        //获取kafka生产者
+        // 获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
