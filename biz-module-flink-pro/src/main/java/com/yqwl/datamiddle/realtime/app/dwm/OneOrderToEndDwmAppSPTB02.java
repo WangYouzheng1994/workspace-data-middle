@@ -210,7 +210,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
 
                     //====================================末端配送==============================================//
-                    if ("G".equals(vysfs) && "T2".equals(dwmSptb02.getHIGHWAY_WAREHOUSE_TYPE())) {
+                    if ("G".equals(vysfs) && "T2".equals(highwayWarehouseType)) {
                         //入库时间?
                         //配板时间
                         ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());

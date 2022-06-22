@@ -10,6 +10,7 @@ import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.sql.Timestamp;
@@ -208,8 +210,22 @@ public class BaseStationDataAndEpcDwdAppBds {
                 }
             }
         }).uid("dwmBsdProcess").name("dwmBsdProcess");
+        //--------------------------------存入DwdBaseStationData mysql------------------------------------//
         String bsdSql = MysqlUtil.getSql(DwdBaseStationData.class);
         dwmProcess.addSink(JdbcSink.<DwdBaseStationData>getSink(bsdSql)).uid("sink-mysqDsb").name("sink-mysqldsb");
+        //-------------------------------存入kafkaDwdBaseStationDataTopic--------------------------------//
+        SingleOutputStreamOperator<String> dwmSptb02Json = dwmProcess.map(new MapFunction<DwdBaseStationData, String>() {
+            @Override
+            public String map(DwdBaseStationData obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("dwmBsdJson").name("dwmBsdJson");
+        //获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
+        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
         env.execute("dwdBsd往dwmSptb02赋值,更新Dwm");
 
     }
