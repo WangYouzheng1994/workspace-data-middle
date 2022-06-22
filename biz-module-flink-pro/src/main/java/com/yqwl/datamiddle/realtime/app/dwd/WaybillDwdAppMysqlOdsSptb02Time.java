@@ -66,7 +66,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
 
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02)

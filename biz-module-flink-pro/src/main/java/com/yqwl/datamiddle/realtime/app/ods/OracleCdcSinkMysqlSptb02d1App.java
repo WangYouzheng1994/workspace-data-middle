@@ -60,7 +60,7 @@ public class OracleCdcSinkMysqlSptb02d1App {
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
 
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");

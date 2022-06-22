@@ -68,7 +68,7 @@ public class WaybillDwmAppSptb02Simple {
         //System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
         //mysql消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //kafka消费源相关参数配置
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))

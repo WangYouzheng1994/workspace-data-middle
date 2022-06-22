@@ -45,7 +45,7 @@ public class OracleCdcSinkMysqlEpcApp {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");

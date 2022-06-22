@@ -53,7 +53,7 @@ public class OracleCdcSinkKafkaApp {
 
         log.info("checkpoint设置完成");
         //====================================oracle cdc配置===============================================//
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");

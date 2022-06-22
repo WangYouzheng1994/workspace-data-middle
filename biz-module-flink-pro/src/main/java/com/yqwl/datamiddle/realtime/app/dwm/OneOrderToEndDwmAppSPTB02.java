@@ -52,7 +52,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWM_VLMS_SPTB02)

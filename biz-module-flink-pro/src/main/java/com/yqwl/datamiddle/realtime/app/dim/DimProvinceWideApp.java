@@ -65,7 +65,7 @@ public class DimProvinceWideApp {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
         System.setProperty("HADOOP_USER_NAME", "root");
 
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
 
         // kafka source1 sysc07
         KafkaSource<String> sysc07 = KafkaSource.<String>builder()

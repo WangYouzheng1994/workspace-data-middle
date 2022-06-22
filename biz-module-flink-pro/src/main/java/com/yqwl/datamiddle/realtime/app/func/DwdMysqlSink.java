@@ -38,7 +38,7 @@ public class DwdMysqlSink extends RichSinkFunction<String> {
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
         Class.forName(MysqlConfig.DRIVER);
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }
 

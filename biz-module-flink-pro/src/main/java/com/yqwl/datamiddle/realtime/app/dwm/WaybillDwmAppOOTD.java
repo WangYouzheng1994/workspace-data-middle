@@ -46,7 +46,7 @@ public class WaybillDwmAppOOTD {
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //读取mysql binlog
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("cdc.mysql.hostname"))

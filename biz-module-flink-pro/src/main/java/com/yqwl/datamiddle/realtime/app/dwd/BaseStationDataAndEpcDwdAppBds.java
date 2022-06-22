@@ -83,7 +83,7 @@ public class BaseStationDataAndEpcDwdAppBds {
         log.info("checkpoint设置完成");
 
         //读取oracle连接配置属性
-        /*        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        /*        Props props = PropertiesUtil.getProps();
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
@@ -108,7 +108,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                 .build();*/
 
         //kafka消费源相关参数配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)

@@ -691,7 +691,7 @@ public class WaybillDwmApp {
 
 /*        //====================================消费dwd_vlms_base_station_data的binlog 更新===============================================//
         //读取mysql配置
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        Props props = PropertiesUtil.getProps();
         //读取mysql binlog
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("cdc.mysql.hostname"))
