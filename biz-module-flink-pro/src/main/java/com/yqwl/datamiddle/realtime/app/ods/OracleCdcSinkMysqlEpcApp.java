@@ -27,7 +27,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 将oracle中某个表直接cdc同步到mysql中
+ * @Description: 读oracle源表 BASE_STATION_DATA_EPC 写入mysql和kafka
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
