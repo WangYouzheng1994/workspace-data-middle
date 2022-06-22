@@ -72,7 +72,7 @@ public class WaybillDwmAppOOTD {
         //====================================sink clickhouse===============================================//
 //        组装sql
         StringBuffer sql = new StringBuffer();
-        sql.append("insert into ").append(KafkaTopicConst.DWM_ONE_ORDER_TO_END).append(" values ").append(StrUtil.getValueSql(DwmOneOrderToEnd.class));
+        sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_ONE_ORDER_TO_END).append(" values ").append(StrUtil.getValueSql(DwmOneOrderToEnd.class));
         log.info("组装clickhouse插入sql:{}", sql);
         mapBsdEpc.addSink(ClickHouseUtil.<DwmOneOrderToEnd>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
         mapBsdEpc.print("拉宽后数据输出：");

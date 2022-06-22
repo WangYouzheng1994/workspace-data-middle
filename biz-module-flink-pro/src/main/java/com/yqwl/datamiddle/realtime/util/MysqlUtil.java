@@ -177,6 +177,7 @@ public class MysqlUtil {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            throw e;
         } finally {
             //关闭Jedis
             if (jedis != null) {

@@ -45,13 +45,13 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
         //初始化配置表信息
         initTableProcessMap();
         //开启定时任务,用于不断读取配置表信息 从现在起过 delay 毫秒以后，每隔 period 更新一次
-/*        Timer timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 initTableProcessMap();
             }
-        }, 5000, 5000);*/
+        }, 5000, 5000);
     }
 
     /**

@@ -195,6 +195,61 @@ public class OotdTransition {
      */
     private String BRAND;
 
+    //=============末端配送===================//
+
+    /**
+     * 末端分拨中心 入库时间
+     */
+
+    private Long IN_DISTRIBUTE_TIME;
+
+    /**
+     * 末端分拨中心 配板时间
+     */
+
+    private Long DISTRIBUTE_BOARD_TIME;
+
+    /**
+     * 末端分拨中心 出库时间
+     */
+
+    private Long OUT_DISTRIBUTE_TIME;
+
+    /**
+     * 末端分拨中心 指派时间
+     */
+
+    private Long DISTRIBUTE_ASSIGN_TIME;
+
+    /**
+     * 末端分拨中心 承运商名称
+     */
+
+    private String DISTRIBUTE_CARRIER_NAME;
+
+    /**
+     * 末端分拨中心 承运轿车车牌号
+     */
+
+    private String DISTRIBUTE_VEHICLE_NO;
+
+    /**
+     * 末端分拨中心 起运时间
+     */
+
+    private Long DISTRIBUTE_SHIPMENT_TIME;
+
+    /**
+     * 公路打点到货时间
+     */
+
+    private Long DOT_SITE_TIME;
+
+    /**
+     * 最终到货时间
+     */
+
+    private Long FINAL_SITE_TIME;
 
 
 

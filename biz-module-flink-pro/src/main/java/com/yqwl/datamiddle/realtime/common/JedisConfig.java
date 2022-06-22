@@ -5,8 +5,8 @@ package com.yqwl.datamiddle.realtime.common;
  */
 public class JedisConfig {
 
-    //public static final String HOSTNAME = "192.168.3.95";
-    //public static final String PASSWORD = "fqwl!123";
+    public static final String HOSTNAME = "192.168.3.95";
+    public static final String PASSWORD = "fqwl!123";
     public static final int PORT = 6379;
     public static final int TIMEOUT = 10000;
     public static final int MAX_TOTAL = 1000;
@@ -16,8 +16,8 @@ public class JedisConfig {
 
 
     //线上正式
-    public static final String HOSTNAME = "10.123.175.197";
-    public static final String PASSWORD = "+5BhrREAnCh1ORZn";
+   // public static final String HOSTNAME = "10.123.175.197";
+   // public static final String PASSWORD = "+5BhrREAnCh1ORZn";
 
 
 }

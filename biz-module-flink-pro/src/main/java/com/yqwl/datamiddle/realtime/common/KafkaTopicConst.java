@@ -15,6 +15,9 @@ public class KafkaTopicConst {
     public static final String DWD_VLMS_BASE_STATION_DATA_GROUP_1 = "dwd_vlms_base_station_data_group_1";
     public static final String DWD_VLMS_BASE_STATION_DATA_GROUP_2 = "dwd_vlms_base_station_data_group_2";
     public static final String DWD_VLMS_BASE_STATION_DATA_EPC_GROUP = "dwd_vlms_base_station_data_epc_group";
+    public static final String ODS_VLMS_BASE_STATION_DATA_EPC_GROUP = "ods_vlms_base_station_data_epc_group";
+    public static final String DWM_VLMS_SPTB02_GROUP = "dwm_vlms_sptb02_group";
+
 
     public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
 
@@ -88,7 +91,7 @@ public class KafkaTopicConst {
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
     public static final String DWM_VLMS_SPTB02_TEST1 = "dwm_vlms_sptb02_test1";
 
-    public static final String DWM_ONE_ORDER_TO_END ="dwm_vlms_one_order_to_end";
+    public static final String DWM_VLMS_ONE_ORDER_TO_END ="dwm_vlms_one_order_to_end";
 
 
     //dws topic

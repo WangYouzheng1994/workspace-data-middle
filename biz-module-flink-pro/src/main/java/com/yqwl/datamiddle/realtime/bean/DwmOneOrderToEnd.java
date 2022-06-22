@@ -280,6 +280,12 @@ public class DwmOneOrderToEnd implements Serializable {
     private Long IN_DISTRIBUTE_TIME;
 
     /**
+     * 末端分拨中心 配板时间
+     */
+
+    private Long DISTRIBUTE_BOARD_TIME;
+
+    /**
      * 末端分拨中心 出库时间
      */
 

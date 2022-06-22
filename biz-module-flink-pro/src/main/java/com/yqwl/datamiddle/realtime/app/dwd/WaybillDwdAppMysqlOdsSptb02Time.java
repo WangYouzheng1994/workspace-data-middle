@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.BaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.beanmapper.Sptb02Mapper;
@@ -18,8 +19,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -30,6 +34,7 @@ import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.*;
@@ -47,7 +52,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -56,25 +61,22 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        //System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
-        //mysql消费源相关参数配置
+
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
-                .hostname(props.getStr("cdc.mysql.hostname"))
-                .port(props.getInt("cdc.mysql.port"))
-                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList("data_middle_flink.ods_vlms_sptb02")
-                //.tableList("data_flink.ods_vlms_sptb02_07")
-                .username(props.getStr("cdc.mysql.username"))
-                .password(props.getStr("cdc.mysql.password"))
-                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SPTB02_GROUP)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
         //对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mysqlSource.process(new ProcessFunction<String, DwdSptb02>() {
@@ -170,17 +172,30 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
                      */
                     //获取主机公司代码
                     //sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
+                    //主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
                     String czjgsdm = sptb02.getCZJGSDM();
                     if (StringUtils.isNotEmpty(czjgsdm)) {
+                        //大众 1
                         if ("1".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("1");
                         }
+                        //红旗 2
                         if ("17".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("2");
                         }
+                        //马自达 3
                         if ("29".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("3");
                         }
+                        //奔腾 4
+                        if ("2".equals(czjgsdm)) {
+                            dwdSptb02.setHOST_COM_CODE("4");
+                        }
+                        //解放 5
+                        if ("3".equals(czjgsdm)) {
+                            dwdSptb02.setHOST_COM_CODE("5");
+                        }
+
                     }
                     //添加新的处理逻辑(新加)
                     //10.处理 ACTUAL_OUT_TIME(实际出库时间)  取 sptb02.dckrq字段
@@ -273,6 +288,22 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
             }
         }).uid("dataDwdProcess").name("dataDwdProcess");
 
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
+            @Override
+            public String map(DwdSptb02 obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("dwdSptb02Json").name("dwdSptb02Json");
+        //获取kafka生产者
+       FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.DWD_VLMS_SPTB02,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
+
+        dwdSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
+        //===================================sink mysql=======================================================//
         //mapJson.print("拉宽数据输出：");
         String sql = MysqlUtil.getSql(DwdSptb02.class);
         dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");

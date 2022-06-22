@@ -19,6 +19,9 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -30,6 +33,7 @@ import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.math.BigDecimal;
@@ -65,18 +69,17 @@ public class WaybillDwmAppSptb02And02D1Copy {
         log.info("checkpoint设置完成");
         //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
-                .hostname(props.getStr("cdc.mysql.hostname"))
-                .port(props.getInt("cdc.mysql.port"))
-                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList("data_flink.dwd_vlms_sptb02_02")
-                //.tableList("data_middle_flink.dwd_vlms_sptb02")
-                .username(props.getStr("cdc.mysql.username"))
-                .password(props.getStr("cdc.mysql.password"))
-                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+        //kafka消费源相关参数配置
+        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
+                .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
+
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
         SingleOutputStreamOperator<DwmSptb02> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02>() {
             @Override
@@ -281,6 +284,23 @@ public class WaybillDwmAppSptb02And02D1Copy {
                 }
             }
         }).uid("dwmSptb02Process").name("dwmSptb02Process");
+
+
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> dwmSptb02Json = dwmSptb02Process.map(new MapFunction<DwmSptb02, String>() {
+            @Override
+            public String map(DwmSptb02 obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("dwmSptb02Json").name("dwmSptb02Json");
+        //获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.DWM_VLMS_SPTB02,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
+
+        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getSql(DwmSptb02.class);

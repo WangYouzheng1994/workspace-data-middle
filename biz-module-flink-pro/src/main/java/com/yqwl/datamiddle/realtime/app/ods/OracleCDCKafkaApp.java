@@ -1,15 +1,14 @@
 package com.yqwl.datamiddle.realtime.app.ods;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
+import com.yqwl.datamiddle.realtime.util.KafkaUtil;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -19,8 +18,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +34,7 @@ public class OracleCDCKafkaApp {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(600000);
@@ -82,38 +79,6 @@ public class OracleCDCKafkaApp {
 
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
-
-        //sptb02过滤 大于 2021-06-01 00:00:00的数据
-/*        SingleOutputStreamOperator<String> ddjrqFilter = oracleSourceStream.filter(new FilterFunction<String>() {
-            @Override
-            public boolean filter(String json) throws Exception {
-                JSONObject jsonObj = JSON.parseObject(json);
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
-                if ("SPTB02".equals(tableNameStr)) {
-                    //临界值开始时间
-                    String criticalStart = "2021-06-01 00:00:00";
-                    //临界值结束时间
-                    String criticalEnd = "2022-12-31 23:59:59";
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//要转换的时间格式
-                    Date dateCriticalStart = sdf.parse(criticalStart);
-                    Date dateCriticalEnd = sdf.parse(criticalEnd);
-                    JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                    //运单日期
-                    String ddjrq = afterObj.getString("DDJRQ");
-                    if (StringUtils.isNotEmpty(ddjrq)) {
-                        long ddjrqTime = Long.parseLong(ddjrq);
-                        if (ddjrqTime >= dateCriticalStart.getTime() && ddjrqTime <= dateCriticalEnd.getTime()) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }).uid("ddjrqFilter").name("ddjrqFilter");*/
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
