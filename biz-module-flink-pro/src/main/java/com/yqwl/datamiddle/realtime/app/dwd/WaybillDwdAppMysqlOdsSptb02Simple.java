@@ -39,13 +39,13 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 消费kafka里topic为ods_vlms_sptb02的数据，对其中一些字段进行统一或拓宽
+ * @Description: 消费kafka里topic为ods_vlms_sptb02的数据，对其中一些字段进行统一处理或字段拓宽
  * @Author: xiaofeng
  * @Date: 2022/06/12
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwdAppMysqlOdsSptb02Time {
+public class WaybillDwdAppMysqlOdsSptb02Simple {
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境
