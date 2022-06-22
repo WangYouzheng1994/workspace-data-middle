@@ -10,6 +10,7 @@ import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
+import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -20,15 +21,19 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -45,9 +50,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: <一单到底>Oracle: base_station_data与base_station_data_epc存到Mysql表
+ * 版本更改: 1.3 由kafka到kafka&&mysql
  * @Author: XiaoFeng
  * @Date: 2022/6/02 10:30
- * @Version: V1.2
+ * @Version: V1.3
  */
 @Slf4j
 public class BaseStationDataAndEpcDwdAppBds {
@@ -74,7 +80,8 @@ public class BaseStationDataAndEpcDwdAppBds {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
-        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        //读取oracle连接配置属性
+        /*        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
@@ -85,8 +92,7 @@ public class BaseStationDataAndEpcDwdAppBds {
         //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
 
-        //读取oracle连接配置属性
-        SourceFunction<String> oracleSource = OracleSource.<String>builder()
+                SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
                 .port(props.getInt("cdc.oracle.port"))
                 .database(props.getStr("cdc.oracle.database"))
@@ -97,13 +103,23 @@ public class BaseStationDataAndEpcDwdAppBds {
                 .deserializer(new CustomerDeserialization())
                 .startupOptions(StartupOptions.initial())
                 .debeziumProperties(properties)
+                .build();*/
+
+        //kafka消费源相关参数配置
+        Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
         // 将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
-       // oracleSourceStream.print("source 输出：");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource,WatermarkStrategy.noWatermarks(),"ods_bsd-kafka").uid("oracleSourceStream").name("oracleSourceStream");
+        // oracleSourceStream.print("source 输出：");
         //过滤 大于 2021-06-01 00:00:00的数据
-      /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
+       /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
             @Override
             public boolean filter(String json) throws Exception {
                 //要转换的时间格式
@@ -123,104 +139,78 @@ public class BaseStationDataAndEpcDwdAppBds {
                         }
                     } else {
                         return false;
-                    }
-                }
-
-
+                         }}
                 return true;
             }
         }).uid("dataAndEpcFilter").name("dataAndEpcFilter");
+       */
 
 
-        //2.进行数据过滤
-        // 过滤出BASE_STATION_DATA的表
-        DataStream<String> filterBsdDs = dataAndEpcFilter.filter(new RichFilterFunction<String>() {
+        //vesion1.3 一源到底 kafka->kafka && mysql
+        SingleOutputStreamOperator<DwdBaseStationData> dwmProcess = oracleSourceStream.process(new ProcessFunction<String, DwdBaseStationData>() {
             @Override
-            public boolean filter(String s) throws Exception {
-                JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("BASE_STATION_DATA")) {
-                    DwdBaseStationData after = jo.getObject("after", DwdBaseStationData.class);
-                    String vin = after.getVIN();
-                    if (vin != null) {
-                        return true;
+            public void processElement(String value, Context ctx, Collector<DwdBaseStationData> out) throws Exception {
+                log.info("process方法开始执行");
+                //1 .转实体类
+                JSONObject jsonObject = JSON.parseObject(value);
+                DwdBaseStationData dwdBaseStationData = jsonObject.getObject("after", DwdBaseStationData.class);
+                String vin = dwdBaseStationData.getVIN();
+                if (StringUtils.isNotBlank(vin)) {
+                    Long ts = jsonObject.getLong("ts");
+                    if (ts != null) {
+                        dwdBaseStationData.setTs(ts);
                     }
-                    return false;
-                }
-                return false;
-            }
-        }).uid("filterBASE_STATION_DATA").name("filterBASE_STATION_DATA");*/
-
-
-        //3. 进行实体类的转换 I:添加kafka中ts字段作为当前时间戳 II.取cp中前4位数字翻译成基地名称作为基地的字段
-
-       //BASE_STATION_DATA
-        SingleOutputStreamOperator<DwdBaseStationData> mapBsd = oracleSourceStream.map(new MapFunction<String, DwdBaseStationData>() {
-            @Override
-            public DwdBaseStationData map(String kafkaBsdValue) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(kafkaBsdValue);
-                DwdBaseStationData dataBsd = jsonObject.getObject("after", DwdBaseStationData.class);
-                Long ts = jsonObject.getLong("ts");
-                dataBsd.setTs(ts);
-                return dataBsd;
-            }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
-
-        // 4.指定事件时间字段
-
-      /*  //DwdBaseStationData 指定事件时间
-        SingleOutputStreamOperator<DwdBaseStationData> dwdBaseStationDataWithTS = mapBsd.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<DwdBaseStationData>forBoundedOutOfOrderness(Duration.ofMinutes(5))
-                        .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationData>() {
-                            @Override
-                            public long extractTimestamp(DwdBaseStationData dwdBaseStationData, long l) {
-                                Timestamp ts = dwdBaseStationData.getTs();
-                                return ts.getTime();
+                    // 2 .处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
+                    String shop_no = dwdBaseStationData.getSHOP_NO();
+                    String warehouse_code = "";
+                    String warehouse_type = "";
+                    String warehouse_name = "";
+                    // 出入库类型
+                    String PHYSICAL_CODE = "";
+                    String operate_type = dwdBaseStationData.getOPERATE_TYPE();
+                    if (StringUtils.isNotEmpty(dwdBaseStationData.getSHOP_NO())) {
+                        String bdsSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where WAREHOUSE_CODE = '" + shop_no + "' limit1";
+                        JSONObject bdsResult = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, bdsSql, warehouse_code);
+                        if (bdsResult != null) {
+                            // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
+                            warehouse_type = bdsResult.getString("WAREHOUSE_TYPE");
+                            // 库房代码
+                            warehouse_code = bdsResult.getString("WAREHOUSE_CODE");
+                            // 库房名称
+                            warehouse_name = bdsResult.getString("WAREHOUSE_NAME");
+                            // VWLCKDM 物理仓库代码
+                            PHYSICAL_CODE = bdsResult.getString("VWLCKDM");
+                            if (StringUtils.isNotBlank(warehouse_type)) {
+                                dwdBaseStationData.setWAREHOUSE_TYPE(warehouse_type);
                             }
-                        })).uid("assIgnDwdBaseStationDataEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
-
-*/
-
-        //6.1处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
-        // provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        SingleOutputStreamOperator<DwdBaseStationData> outSingleOutputStreamOperator = AsyncDataStream.unorderedWait(
-                mapBsd,
-                new DimAsyncFunction<DwdBaseStationData>(DimUtil.MYSQL_DB_TYPE, "ods_vlms_rfid_warehouse", "WAREHOUSE_CODE") {
-                    @Override
-                    public Object getKey(DwdBaseStationData dwdBsd) {
-                        if (StringUtils.isNotEmpty(dwdBsd.getSHOP_NO())) {
-                            String shop_no = dwdBsd.getSHOP_NO();
-                            return shop_no;
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public void join(DwdBaseStationData dBsd, JSONObject dimInfoJsonObj) {
-                        if (dimInfoJsonObj.getString("WAREHOUSE_CODE") != null) {
-                            dBsd.setIN_WAREHOUSE_CODE(dimInfoJsonObj.getString("WAREHOUSE_CODE"));
-                            dBsd.setIN_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
+                            if (StringUtils.isNotBlank(warehouse_code)) {
+                                dwdBaseStationData.setIN_WAREHOUSE_CODE(warehouse_code);
+                            }
+                            if (StringUtils.isNotBlank(warehouse_name)) {
+                                dwdBaseStationData.setIN_WAREHOUSE_NAME(warehouse_name);
+                            }
+                            if (StringUtils.isNotBlank(PHYSICAL_CODE)) {
+                                dwdBaseStationData.setPHYSICAL_CODE(PHYSICAL_CODE);
+                            }
                         }
                     }
-                }, 60, TimeUnit.SECONDS).uid("base+rfid");
-        mapBsd.print("数据输出：");
-        //7.开窗,按照时间窗口存储到mysql
-        //BASE_STATION_DATA
-        outSingleOutputStreamOperator.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        outSingleOutputStreamOperator.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DwdBaseStationData, List<DwdBaseStationData>, TimeWindow>() {
-            @Override
-            public void apply(TimeWindow window, Iterable<DwdBaseStationData> iterable, Collector<List<DwdBaseStationData>> collector) throws Exception {
-                ArrayList<DwdBaseStationData> es = Lists.newArrayList(iterable);
-                log.info("插入sql");
-                if (es.size() > 0) {
-                    collector.collect(es);
+                    // 3.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
+                    if (StringUtils.isNotBlank(warehouse_type) && StringUtils.isNotBlank(PHYSICAL_CODE) && StringUtils.isNotBlank(vin) && StringUtils.equals(operate_type, "OutStock")) {
+                        //执行sql前的条件
+                        String dwmSptb02Sql = "UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + PHYSICAL_CODE + "' AND VVIN ='" + vin + "'";
+                        try {
+                            log.info("展示执行的sql:{}", dwmSptb02Sql);
+                            DbUtil.executeUpdate(dwmSptb02Sql);
+                        } catch (Exception e) {
+                            log.error(e.getMessage(), e);
+                        }
+                    }
                 }
             }
-        }).addSink(JdbcSink.<DwdBaseStationData>getBatchSink()).uid("sink-mysqDsb").name("sink-mysqldsb");
-
-
-
-
-            env.execute("OracleSinkMysql");
+        }).uid("dwmBsdProcess").name("dwmBsdProcess");
+        String bsdSql = MysqlUtil.getSql(DwdBaseStationData.class);
+        dwmProcess.addSink(JdbcSink.<DwdBaseStationData>getSink(bsdSql)).uid("sink-mysqDsb").name("sink-mysqldsb");
+        env.execute("dwdBsd往dwmSptb02赋值,更新Dwm");
 
     }
 
