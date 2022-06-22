@@ -85,7 +85,7 @@ public class WaybillDwmAppSptb02Simple {
             @Override
             public void processElement(String value, Context ctx, Collector<DwmSptb02> out) throws Exception {
                 //获取真实数据
-                DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
+                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 if (StringUtils.isNotBlank(dwmSptb02.getCJSDBH())) {
                     dwmSptb02.setSTART_PHYSICAL_CODE(dwmSptb02.getVFCZT());
                     dwmSptb02.setEND_PHYSICAL_CODE(dwmSptb02.getVSCZT());
