@@ -112,7 +112,7 @@ public class BaseStationDataAndEpcDwdAppBds {
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
