@@ -26,6 +26,11 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
         // 获取vin码
         String vin = data.getVIN();
         String wlckdm = data.getPHYSICAL_CODE();
+        String warehouse_type = data.getWAREHOUSE_TYPE();
+        String physical_code = data.getPHYSICAL_CODE();
+        String operate_type = data.getOPERATE_TYPE();
+
+
             //==============================================处理铁路运单=============================================================//
             //1.查询铁路运单 根据仓库代码 vvin码定位一条记录 ,每一个站台都会有两个时间，入站台时间和出站台时间
             // 查询开始站台的运单记录
@@ -86,6 +91,18 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                         + wlckdm + "' AND VVIN='" + vin + "' AND ( UNLOAD_SHIP_TIME = 0 OR UNLOAD_SHIP_TIME > " + data.getSAMPLE_U_T_C() + " )";
                 DbUtil.executeUpdate(inSql);
             }
+            // 2.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
+            if (StringUtils.isNotBlank(warehouse_type) && StringUtils.isNotBlank(physical_code) && StringUtils.isNotBlank(vin) && StringUtils.equals(operate_type, "OutStock")) {
+                //执行sql前的条件
+                String dwmSptb02Sql = "UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + physical_code + "' AND VVIN ='" + vin + "'";
+                try {
+                    log.info("展示执行的sql:{}", dwmSptb02Sql);
+                    DbUtil.executeUpdate(dwmSptb02Sql);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+
     }
 
 }

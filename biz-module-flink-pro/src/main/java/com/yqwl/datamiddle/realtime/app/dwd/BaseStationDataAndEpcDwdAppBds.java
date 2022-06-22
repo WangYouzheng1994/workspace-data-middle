@@ -160,7 +160,7 @@ public class BaseStationDataAndEpcDwdAppBds {
                 if (StringUtils.isNotBlank(vin)) {
                     Long ts = jsonObject.getLong("ts");
                     if (ts != null) {
-                        dwdBaseStationData.setTs(ts);
+                        dwdBaseStationData.setWAREHOUSE_UPDATETIME(ts);
                     }
                     // 2 .处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
                     String shop_no = dwdBaseStationData.getSHOP_NO();
@@ -194,17 +194,6 @@ public class BaseStationDataAndEpcDwdAppBds {
                             if (StringUtils.isNotBlank(PHYSICAL_CODE)) {
                                 dwdBaseStationData.setPHYSICAL_CODE(PHYSICAL_CODE);
                             }
-                        }
-                    }
-                    // 3.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
-                    if (StringUtils.isNotBlank(warehouse_type) && StringUtils.isNotBlank(PHYSICAL_CODE) && StringUtils.isNotBlank(vin) && StringUtils.equals(operate_type, "OutStock")) {
-                        //执行sql前的条件
-                        String dwmSptb02Sql = "UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + PHYSICAL_CODE + "' AND VVIN ='" + vin + "'";
-                        try {
-                            log.info("展示执行的sql:{}", dwmSptb02Sql);
-                            DbUtil.executeUpdate(dwmSptb02Sql);
-                        } catch (Exception e) {
-                            log.error(e.getMessage(), e);
                         }
                     }
                 }
