@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
+    <select id="getSptbTrafficTypeByVin" resultType="String">
+        select TRAFFIC_TYPE from dwm_vlms_sptb02 where VVIN = #{vvin} order by CJSDBH
+    </select>
+
     <!--clickhouse插入数据    -->
     <insert id="insertClickhouse" parameterType="java.util.List" >
         INSERT INTO `default`.dwm_vlms_sptb02(

@@ -113,15 +113,18 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      */
     BigDecimal getTotalOutboundQuantity(@Param("params") GetBaseBrandTime params);
 
-
-
-
-
-
-
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
      * @param params
      */
     void insertClickhouse(@Param("list") List<DwmSptb02VO> params);
+
+
+    /**
+     * 根据vin码获取 trafficType
+     *
+     * @param vvin
+     * @return
+     */
+    List<String> getSptbTrafficTypeByVin(String vvin);
 }

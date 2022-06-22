@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
+import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,8 +23,10 @@ import java.util.Map;
 @Service
 public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrderToEndMapper, DwmVlmsOneOrderToEnd> implements IDwmVlmsOneOrderToEndService {
 
-    @Resource
+    @Autowired
     private DwmVlmsOneOrderToEndMapper dwmVlmsOneOrderToEndMapper;
+    @Autowired
+    private DwmVlmsSptb02Mapper dwmVlmsSptb02Mapper;
 
     @Override
     public Integer countOneOrderToEndList(GetQueryCriteria queryCriteria) {
@@ -47,8 +51,9 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         //遍历list,并查询出同板数量赋值
         Map<String, Integer> samePlateNumMap = new HashMap<>();
 
+        DwmVlmsOneOrderToEnd params = null;
         for ( int i = 0; i < oneOrderToEndList.size(); i ++ ) {
-            DwmVlmsOneOrderToEnd params = oneOrderToEndList.get(i);
+           params = oneOrderToEndList.get(i);
             // 添加逻辑  如果是时间字段  需要在得到的值进行-8小时处理
             // cp9OfflineTime,leaveFactoryTime,inSiteTime,inWarehouseName,taskNo,vehicleReceivingTime,   4
             // stowageNoteTime,stowageNoteNo,trafficType,assignTime,carrierName,actualOutTime,shipmentTime,transportVehicleNo,samePlateNum,   4
@@ -72,6 +77,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //                        params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
 //                    }
 //                }
+            }
+
+            if (StringUtils.isNotBlank(params.getVin())) {
+                List<String> sptbTrafficTypeByVin = this.dwmVlmsSptb02Mapper.getSptbTrafficTypeByVin(params.getVin());
+                params.setTrafficType(StringUtils.join(sptbTrafficTypeByVin, ","));
             }
         }
         return oneOrderToEndList;
