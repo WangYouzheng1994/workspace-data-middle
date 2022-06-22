@@ -80,7 +80,6 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mysqlSource.process(new ProcessFunction<String, DwdSptb02>() {
             @Override
             public void processElement(String value, Context context, Collector<DwdSptb02> collector) throws Exception {
-                JSONObject jsonObject = JSON.parseObject(value);
                 //获取真实数据
                 Sptb02 sptb02 = JSON.parseObject(value, Sptb02.class);
                 if (Objects.nonNull(sptb02) && StringUtils.isNotBlank(sptb02.getCJSDBH())) {
