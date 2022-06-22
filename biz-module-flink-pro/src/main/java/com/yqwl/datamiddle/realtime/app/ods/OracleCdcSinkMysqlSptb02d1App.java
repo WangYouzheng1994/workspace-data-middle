@@ -6,12 +6,9 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02d1;
-import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -20,7 +17,6 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Properties;
@@ -34,15 +30,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OracleCdcSinkMysqlSptb02d1App {
-    //2020-01-01 00:00:00
-    private static final long START = 1577808000000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
 
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(30, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
 
@@ -110,21 +102,6 @@ public class OracleCdcSinkMysqlSptb02d1App {
             }
         }).uid("processBsd").name("processBsd");
 
-        //===================================sink kafka=======================================================//
-        SingleOutputStreamOperator<String> sptb02d1Json = processSptb02d1.map(new MapFunction<Sptb02d1, String>() {
-            @Override
-            public String map(Sptb02d1 obj) throws Exception {
-                return JSON.toJSONString(obj);
-            }
-        }).uid("sptb02Json").name("sptb02Json");
-
-        //获取kafka生产者
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
-                props.getStr("kafka.hostname"),
-                KafkaTopicConst.ODS_VLMS_SPTB02D1,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02D1));
-
-        sptb02d1Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 
         //===================================sink mysql=======================================================//
         //组装sql
