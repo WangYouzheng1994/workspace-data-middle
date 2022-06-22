@@ -8,9 +8,11 @@ import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.BaseStationData;
 import com.yqwl.datamiddle.realtime.bean.BaseStationDataEpc;
+import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -18,6 +20,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Properties;
@@ -39,7 +42,7 @@ public class OracleCdcSinkMysqlEpcApp {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
@@ -78,17 +81,15 @@ public class OracleCdcSinkMysqlEpcApp {
         //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
-        SingleOutputStreamOperator<BaseStationDataEpc> processBsd = oracleSourceStream.process(new ProcessFunction<String, BaseStationDataEpc>() {
+        SingleOutputStreamOperator<BaseStationDataEpc> processEpc = oracleSourceStream.process(new ProcessFunction<String, BaseStationDataEpc>() {
             @Override
             public void processElement(String value, Context ctx, Collector<BaseStationDataEpc> out) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(value);
-                //获取表名
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 //获取cdc时间
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
                 //获取真实数据
@@ -96,52 +97,41 @@ public class OracleCdcSinkMysqlEpcApp {
                 afterObj.put("WAREHOUSE_CREATETIME", tsStr);
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
-                if ("BASE_STATION_DATA_EPC".equals(tableNameStr)) {
-                    boolean flag = false;
-                    //上报日期
-                    String sample_u_t_c = afterObj.getString("OPERATETIME");
-                    if (StringUtils.isNotEmpty(sample_u_t_c)) {
-                        long sampleLong = Long.parseLong(sample_u_t_c);
-                        if (sampleLong >= START && sampleLong <= END) {
-                            flag = true;
-                        }
-                    }
-                    if (flag) {
-                        //获取after真实数据后，映射为实体类
-                        BaseStationDataEpc baseStationData = JsonPartUtil.getAfterObj(jsonObj, BaseStationDataEpc.class);
-                        //log.info("反射后的实例:{}", baseStationData);
-                        //对映射后的实体类为null字段赋值默认值
-                        BaseStationDataEpc bean = JsonPartUtil.getBean(baseStationData);
-                        out.collect(bean);
-                    }
+                //操作时间
+                String sample_u_t_c = afterObj.getString("OPERATETIME");
+                long sampleLong = Long.parseLong(sample_u_t_c);
+                if (sampleLong >= START && sampleLong <= END) {
+                    //获取after真实数据后，映射为实体类
+                    BaseStationDataEpc baseStationData = JsonPartUtil.getAfterObj(jsonObj, BaseStationDataEpc.class);
+                    //log.info("反射后的实例:{}", baseStationData);
+                    //对映射后的实体类为null字段赋值默认值
+                    BaseStationDataEpc bean = JsonPartUtil.getBean(baseStationData);
+                    out.collect(bean);
                 }
             }
-        }).uid("processBsd").name("processBsd");
-        //将json串转化成jsonObj
-/*        SingleOutputStreamOperator<BaseStationData> sourceStreamJsonObj = oracleSourceStream.map(new MapFunction<String, BaseStationData>() {
+        }).uid("processEpc").name("processEpc");
+
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> epcJson = processEpc.map(new MapFunction<BaseStationDataEpc, String>() {
             @Override
-            public BaseStationData map(String json) throws Exception {
-                System.out.println(json);
-                JSONObject jsonObj = JSON.parseObject(json);
-                //获取cdc进入kafka的时间
-                String tsStr = JsonPartUtil.getTsStr(jsonObj);
-                //获取after数据
-                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                afterObj.put("WAREHOUSE_CREATETIME", tsStr);
-                afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
-                jsonObj.put("after", afterObj);
-                //获取after真实数据后，映射为实体类
-                BaseStationData sptb02d1 = JsonPartUtil.getAfterObj(jsonObj, BaseStationData.class);
-                log.info("反射后的实例:{}", sptb02d1);
-                //对映射后的实体类为null字段
-                return JsonPartUtil.getBean(sptb02d1);
+            public String map(BaseStationDataEpc obj) throws Exception {
+                return JSON.toJSONString(obj);
             }
-        }).uid("sourceStreamJsonObj").name("sourceStreamJsonObj");*/
-        //sourceStreamJsonObj.print("结果数据输出:");
+        }).uid("epcJson").name("epcJson");
+
+        //获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC));
+
+        epcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
+        //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(BaseStationDataEpc.class);
         log.info("组装的插入sql:{}", sql);
-        processBsd.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        processEpc.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-epc");
         log.info("oracle-cdc-kafka job开始执行");

@@ -6,9 +6,12 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02d1;
+import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -17,6 +20,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Properties;
@@ -38,7 +42,7 @@ public class OracleCdcSinkMysqlSptb02d1App {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
 
@@ -85,12 +89,10 @@ public class OracleCdcSinkMysqlSptb02d1App {
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
 
-        SingleOutputStreamOperator<Sptb02d1> processBsd = oracleSourceStream.process(new ProcessFunction<String, Sptb02d1>() {
+        SingleOutputStreamOperator<Sptb02d1> processSptb02d1 = oracleSourceStream.process(new ProcessFunction<String, Sptb02d1>() {
             @Override
             public void processElement(String value, Context ctx, Collector<Sptb02d1> out) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(value);
-                //获取表名
-                //String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 //获取cdc时间
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
                 //获取真实数据
@@ -108,10 +110,27 @@ public class OracleCdcSinkMysqlSptb02d1App {
             }
         }).uid("processBsd").name("processBsd");
 
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> sptb02d1Json = processSptb02d1.map(new MapFunction<Sptb02d1, String>() {
+            @Override
+            public String map(Sptb02d1 obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("sptb02Json").name("sptb02Json");
+
+        //获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.ODS_VLMS_SPTB02D1,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02D1));
+
+        sptb02d1Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
+        //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(Sptb02d1.class);
         log.info("组装的插入sql:{}", sql);
-        processBsd.addSink(JdbcSink.<Sptb02d1>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        processSptb02d1.addSink(JdbcSink.<Sptb02d1>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-sptb02d1");
         log.info("oracle-cdc-kafka job开始执行");

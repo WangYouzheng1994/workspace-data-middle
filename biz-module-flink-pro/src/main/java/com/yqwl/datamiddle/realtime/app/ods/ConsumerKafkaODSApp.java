@@ -56,7 +56,7 @@ public class ConsumerKafkaODSApp {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
 
@@ -147,7 +147,7 @@ public class ConsumerKafkaODSApp {
         );
 
         //kafkaDS.print("kafka结果数据输出:");
-       // kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
+        //kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 

@@ -280,7 +280,7 @@
                         <configuration>
                             <!--<finalName>oracle-cdc-kafka</finalName>-->
                             <!--<finalName>consumer-kafka-divide</finalName>-->
-                            <finalName>WaybillDwmApp</finalName>
+                            <finalName>flink-job</finalName>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
@@ -314,12 +314,12 @@
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/spring.schemas</resource>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                   <!-- <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>-->
-                                    <!--<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>-->
-                                    <!--<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>-->
-                                    <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmApp</mainClass>
-                                </transformer>
+                              <!--  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                   &lt;!&ndash; <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>&ndash;&gt;
+                                    &lt;!&ndash;<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>&ndash;&gt;
+                                    &lt;!&ndash;<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>&ndash;&gt;
+                                   &lt;!&ndash; <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmApp</mainClass>&ndash;&gt;
+                                </transformer>-->
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>

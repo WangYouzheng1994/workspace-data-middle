@@ -76,12 +76,12 @@ public class JdbcSink {
                                 preparedStatement.setObject(i + 1, value);
                             }
                         } catch (IllegalAccessException e) {
-                            e.printStackTrace();
+                            throw new RuntimeException(e);
                         }
                     }
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(10000)
+                        .withBatchSize(1000)
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(5)
                         .build(),

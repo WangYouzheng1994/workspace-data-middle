@@ -7,9 +7,11 @@ import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.BaseStationData;
+import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -18,6 +20,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Properties;
@@ -40,7 +43,7 @@ public class OracleCdcSinkMysqlBsdApp {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
 
@@ -91,8 +94,6 @@ public class OracleCdcSinkMysqlBsdApp {
             @Override
             public void processElement(String value, Context ctx, Collector<BaseStationData> out) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(value);
-                //获取表名
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 //获取cdc时间
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
                 //获取真实数据
@@ -100,19 +101,13 @@ public class OracleCdcSinkMysqlBsdApp {
                 afterObj.put("WAREHOUSE_CREATETIME", tsStr);
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
-                if ("BASE_STATION_DATA".equals(tableNameStr)) {
-                    boolean flag = false;
-                    //上报日期
-                    String sample_u_t_c = afterObj.getString("SAMPLE_U_T_C");
-                    if (StringUtils.isNotEmpty(sample_u_t_c)) {
-                        long sampleLong = Long.parseLong(sample_u_t_c) / 1000;
-                        //时间戳 16位处理为13位
-                        afterObj.put("SAMPLE_U_T_C", sampleLong);
-                        if (sampleLong >= START && sampleLong <= END) {
-                            flag = true;
-                        }
-                    }
-                    if (flag) {
+                //上报日期
+                String sample_u_t_c = afterObj.getString("SAMPLE_U_T_C");
+                if (StringUtils.isNotEmpty(sample_u_t_c)) {
+                    long sampleLong = Long.parseLong(sample_u_t_c) / 1000;
+                    //时间戳 16位处理为13位
+                    afterObj.put("SAMPLE_U_T_C", sampleLong);
+                    if (sampleLong >= START && sampleLong <= END) {
                         //获取after真实数据后，映射为实体类
                         BaseStationData baseStationData = JsonPartUtil.getAfterObj(jsonObj, BaseStationData.class);
                         //log.info("反射后的实例:{}", baseStationData);
@@ -120,16 +115,33 @@ public class OracleCdcSinkMysqlBsdApp {
                         BaseStationData bean = JsonPartUtil.getBean(baseStationData);
                         out.collect(bean);
                     }
-            }
-        }
-    }).uid("processBsd").name("processBsd");
+                }
 
-    //组装sql
+            }
+        }).uid("processBsd").name("processBsd");
+
+
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> bsdJson = processBsd.map(new MapFunction<BaseStationData, String>() {
+            @Override
+            public String map(BaseStationData obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("bsdJson").name("bsdJson");
+        //获取kafka生产者
+       FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA));
+
+        bsdJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        //===================================sink mysql=======================================================//
+        //组装sql
         String sql = MysqlUtil.getSql(BaseStationData.class);
-        log.info("组装的插入sql:{}",sql);
-        processBsd.addSink(JdbcSink.<BaseStationData> getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        log.info("组装的插入sql:{}", sql);
+        processBsd.addSink(JdbcSink.<BaseStationData>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-bsd");
         log.info("oracle-cdc-kafka job开始执行");
-}
+    }
 }

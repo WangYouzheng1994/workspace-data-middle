@@ -15,7 +15,7 @@ import java.math.BigDecimal;
  * @author yiqi
  * @since 2022-05-30
  */
-@TableName("ods_vlms_sptb02d1_01")
+@TableName("ods_vlms_sptb02d1")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class Sptb02d1 implements Serializable {

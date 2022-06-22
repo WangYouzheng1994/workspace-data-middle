@@ -8,9 +8,11 @@ import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.BaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
+import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -18,6 +20,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
 import java.util.Properties;
@@ -39,7 +42,7 @@ public class OracleCdcSinkMysqlSptb02App {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
         Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
@@ -78,7 +81,7 @@ public class OracleCdcSinkMysqlSptb02App {
         //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
@@ -87,8 +90,6 @@ public class OracleCdcSinkMysqlSptb02App {
             @Override
             public void processElement(String value, Context ctx, Collector<Sptb02> out) throws Exception {
                 JSONObject jsonObj = JSON.parseObject(value);
-                //获取表名
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
                 //获取cdc时间
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
                 //获取真实数据
@@ -96,17 +97,11 @@ public class OracleCdcSinkMysqlSptb02App {
                 afterObj.put("WAREHOUSE_CREATETIME", tsStr);
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
-                if ("SPTB02".equals(tableNameStr)) {
-                    boolean flag = false;
-                    //上报日期
-                    String ddjrq = afterObj.getString("DDJRQ");
-                    if (StringUtils.isNotEmpty(ddjrq)) {
-                        long sampleLong = Long.parseLong(ddjrq);
-                        if (sampleLong >= START && sampleLong <= END) {
-                            flag = true;
-                        }
-                    }
-                    if (flag) {
+                //建单日期
+                String ddjrq = afterObj.getString("DDJRQ");
+                if (StringUtils.isNotEmpty(ddjrq)) {
+                    long sampleLong = Long.parseLong(ddjrq);
+                    if (sampleLong >= START && sampleLong <= END) {
                         //获取after真实数据后，映射为实体类
                         Sptb02 baseStationData = JsonPartUtil.getAfterObj(jsonObj, Sptb02.class);
                         //log.info("反射后的实例:{}", baseStationData);
@@ -115,9 +110,28 @@ public class OracleCdcSinkMysqlSptb02App {
                         out.collect(bean);
                     }
                 }
+
             }
         }).uid("processSptb02").name("processSptb02");
 
+        //===================================sink kafka=======================================================//
+        SingleOutputStreamOperator<String> sptb02Json = processSptb02.map(new MapFunction<Sptb02, String>() {
+            @Override
+            public String map(Sptb02 obj) throws Exception {
+                return JSON.toJSONString(obj);
+            }
+        }).uid("sptb02Json").name("sptb02Json");
+
+        //获取kafka生产者
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+                props.getStr("kafka.hostname"),
+                KafkaTopicConst.ODS_VLMS_SPTB02,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02));
+
+        sptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+
+
+        //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(Sptb02.class);
         log.info("组装的插入sql:{}", sql);
