@@ -6,9 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.BaseStationData;
-import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
-import com.yqwl.datamiddle.realtime.bean.Sptb02;
+import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.beanmapper.Sptb02Mapper;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
@@ -82,10 +80,9 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mysqlSource.process(new ProcessFunction<String, DwdSptb02>() {
             @Override
             public void processElement(String value, Context context, Collector<DwdSptb02> collector) throws Exception {
-                log.info("processElement方法开始执行");
                 JSONObject jsonObject = JSON.parseObject(value);
                 //获取真实数据
-                Sptb02 sptb02 = jsonObject.getObject("after", Sptb02.class);
+                Sptb02 sptb02 = JSON.parseObject(value, Sptb02.class);
                 if (Objects.nonNull(sptb02) && StringUtils.isNotBlank(sptb02.getCJSDBH())) {
                     //处理实体类 将数据copy到dwdSptb02
                     DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
@@ -287,7 +284,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
                 }
             }
         }).uid("dataDwdProcess").name("dataDwdProcess");
-
+        dataDwdProcess.print("拓宽后:");
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
             @Override
@@ -296,7 +293,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
             }
         }).uid("dwdSptb02Json").name("dwdSptb02Json");
         //获取kafka生产者
-       FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
+        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
@@ -304,7 +301,7 @@ public class WaybillDwdAppMysqlOdsSptb02Time {
         dwdSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 
         //===================================sink mysql=======================================================//
-        //mapJson.print("拉宽数据输出：");
+        dataDwdProcess.print("拉宽数据输出：");
         String sql = MysqlUtil.getSql(DwdSptb02.class);
         dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
 
