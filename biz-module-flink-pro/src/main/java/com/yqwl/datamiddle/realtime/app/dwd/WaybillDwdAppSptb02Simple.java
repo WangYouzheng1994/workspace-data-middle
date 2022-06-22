@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwdAppMysqlOdsSptb02Simple {
+public class WaybillDwdAppSptb02Simple {
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境

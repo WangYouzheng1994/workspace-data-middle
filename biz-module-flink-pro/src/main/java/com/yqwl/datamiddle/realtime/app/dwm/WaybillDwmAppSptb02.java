@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwmApp {
+public class WaybillDwmAppSptb02 {
 
     public static void main(String[] args) throws Exception {
         //Flink 流式处理环境

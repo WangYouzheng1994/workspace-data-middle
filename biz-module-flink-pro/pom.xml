@@ -317,8 +317,8 @@
                               <!--  <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                    &lt;!&ndash; <mainClass>com.yqwl.datamiddle.realtime.app.ods.OracleCDCKafkaApp</mainClass>&ndash;&gt;
                                     &lt;!&ndash;<mainClass>com.yqwl.datamiddle.realtime.app.ods.ConsumerKafkaODSApp</mainClass>&ndash;&gt;
-                                    &lt;!&ndash;<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdApp</mainClass>&ndash;&gt;
-                                   &lt;!&ndash; <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmApp</mainClass>&ndash;&gt;
+                                    &lt;!&ndash;<mainClass>com.yqwl.datamiddle.realtime.app.dwd.WaybillDwdAppSptb02</mainClass>&ndash;&gt;
+                                   &lt;!&ndash; <mainClass>com.yqwl.datamiddle.realtime.app.dwm.WaybillDwmAppSptb02</mainClass>&ndash;&gt;
                                 </transformer>-->
                             </transformers>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
