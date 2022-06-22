@@ -221,7 +221,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                         }
                     }
                     //处理出目的站台时间
-                    if (OUT_STOCK.equals(operateType)) {
+                    if (IN_STORE.equals(operateType)) {
                         String inSql = "UPDATE dwm_vlms_sptb02 SET UNLOAD_RAILWAY_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS in ('L1', 'T')  AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VVIN='" + baseStationData.getVIN() + "' AND ( UNLOAD_RAILWAY_TIME = 0 OR UNLOAD_RAILWAY_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
@@ -269,7 +269,7 @@ public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<D
                         }
                     }
                     //2.处理出目的站台时间
-                    if (OUT_STOCK.equals(operateType)) {
+                    if (IN_STORE.equals(operateType)) {
                         String inSql = "UPDATE dwm_vlms_sptb02 SET UNLOAD_SHIP_TIME=" + baseStationData.getSAMPLE_U_T_C() + " WHERE VYSFS = 'S' AND END_PHYSICAl_CODE='"
                                 + wlckdm + "' AND VVIN='" + baseStationData.getVIN() + "' AND ( UNLOAD_SHIP_TIME = 0 OR UNLOAD_SHIP_TIME > " + baseStationData.getSAMPLE_U_T_C() + " )";
                         try {
