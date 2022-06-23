@@ -66,10 +66,11 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
             log.info("输出分流配置表中数据:{}", tableProcess.toString());
             //获取源表表名
             String sourceTable = tableProcess.getSourceTable();
+            String sourceTableLow = StringUtils.toRootLowerCase(sourceTable);
             //获取数据操作类型
             String operateType = tableProcess.getOperateType();
             //拼接字段创建主键
-            String key = sourceTable + ":" + operateType;
+            String key = sourceTableLow + ":" + operateType;
             //将数据存入结果集合
             if (tableProcessMap.containsKey(key)) {
                 CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
