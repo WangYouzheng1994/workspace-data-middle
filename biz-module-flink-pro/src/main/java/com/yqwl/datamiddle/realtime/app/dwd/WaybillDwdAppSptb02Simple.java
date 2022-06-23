@@ -238,7 +238,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vfczt = dwdSptb02.getVFCZT();
                     log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
                     if (StringUtils.isNotBlank(vfczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vfczt + "' limit 1 ";
+                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vfczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vfczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setSTART_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
@@ -254,7 +254,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vsczt = dwdSptb02.getVSCZT();
                     log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
                     if (StringUtils.isNotBlank(vsczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vsczt + "' limit 1 ";
+                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vsczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vsczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setEND_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
@@ -283,7 +283,7 @@ public class WaybillDwdAppSptb02Simple {
                 }
             }
         }).uid("dataDwdProcess").name("dataDwdProcess");
-        dataDwdProcess.print("拓宽后:");
+
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
             @Override
@@ -300,7 +300,7 @@ public class WaybillDwdAppSptb02Simple {
         dwdSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 
         //===================================sink mysql=======================================================//
-        dataDwdProcess.print("拉宽数据输出：");
+
         String sql = MysqlUtil.getSql(DwdSptb02.class);
         dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
 

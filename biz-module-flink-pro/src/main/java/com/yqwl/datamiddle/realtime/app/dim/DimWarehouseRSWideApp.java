@@ -10,9 +10,11 @@ import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
+import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import com.yqwl.datamiddle.realtime.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -94,7 +96,7 @@ public class DimWarehouseRSWideApp {
                 if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SITE_WAREHOUSE")) {
                     SiteWarehouse after = jo.getObject("after", SiteWarehouse.class);
                     String vwlckdm = after.getVWLCKDM();
-                    if (vwlckdm != null) {
+                    if (vwlckdm != null && StringUtils.equals("CONTRAST", after.getTYPE())) {
                         return true;
                     }
                     return false;
@@ -179,17 +181,10 @@ public class DimWarehouseRSWideApp {
                         out.collect(new DimWarehouseRS(right, left));
                     }
                 }).uid("rsWide").name("rsWide");
-        //7.开窗,按照时间窗口
-        rsWide.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        rsWide.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5))).apply(new AllWindowFunction<DimWarehouseRS, List<DimWarehouseRS>, TimeWindow>() {
-            @Override
-            public void apply(TimeWindow window, Iterable<DimWarehouseRS> iterable, Collector<List<DimWarehouseRS>> collector) throws Exception {
-                ArrayList<DimWarehouseRS> es = Lists.newArrayList(iterable);
-                if (es.size() > 0) {
-                    collector.collect(es);
-                }
-            }
-        }).addSink(JdbcSink.<DimWarehouseRS>getBatchSink()).uid("sink-mysql").name("sink-mysql");
+
+        //===================================sink mysql=======================================================//
+        String sql = MysqlUtil.getSql(DimWarehouseRS.class);
+        rsWide.addSink(JdbcSink.<DimWarehouseRS>getSink(sql)).uid("sink-warehouse_rs").name("sink-warehouse_rs");
 
 
         try {
