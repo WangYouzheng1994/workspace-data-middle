@@ -2,6 +2,8 @@ package com.yqwl.datamiddle.realtime.util;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.setting.dialect.Props;
+import com.yqwl.datamiddle.realtime.common.ClickhouseConfig;
+import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -57,4 +59,17 @@ public class PropertiesUtil {
         return new Props("cdc-"+ACTIVE_TYPE+".properties", CharsetUtil.CHARSET_UTF_8);
     }
 
+    /**
+     * 读取配置文件，获取Clickhouse当前连接信息
+     *
+     * @return
+     */
+    public static JdbcConnectionOptions getClickhouseJDBCConnection() {
+        return new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                .withDriverName(GetterUtil.getString(getProps().get("clickhouse.driver")))
+                .withUrl(GetterUtil.getString(getProps().get("clickhouse.url")))
+                .withUsername(GetterUtil.getString(getProps().get("clickhouse.username")))
+                .withPassword(GetterUtil.getString(getProps().get("clickhouse.password")))
+                .build();
+    }
 }

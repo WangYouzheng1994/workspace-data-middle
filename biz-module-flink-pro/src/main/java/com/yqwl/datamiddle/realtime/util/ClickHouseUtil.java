@@ -1,9 +1,7 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import com.yqwl.datamiddle.realtime.common.ClickhouseConfig;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.jdbc.JdbcStatementBuilder;
@@ -62,11 +60,7 @@ public class ClickHouseUtil {
                         .withMaxRetries(5)
                         .withBatchIntervalMs(200)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withDriverName(ClickhouseConfig.CLICKHOUSE_DRIVER)
-                        .withUrl(ClickhouseConfig.CLICKHOUSE_URL)
-                        .withUsername(ClickhouseConfig.CLICKHOUSE_USERNAME)
-                        .withPassword(ClickhouseConfig.CLICKHOUSE_PASSWORD)
-                        .build());
+                    PropertiesUtil.getClickhouseJDBCConnection()
+                );
     }
 }
