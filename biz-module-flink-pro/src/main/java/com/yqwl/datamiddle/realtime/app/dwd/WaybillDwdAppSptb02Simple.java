@@ -268,8 +268,8 @@ public class WaybillDwdAppSptb02Simple {
                     String vwlckdm1 = dwdSptb02.getVWLCKDM();
                     log.info("highwayWarehouseTypeDS:{}", vwlckdm1);
                     if (StringUtils.isNotBlank(vwlckdm1)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where VWLCKDM = '" + vwlckdm1 + "' limit 1 ";
-                        JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, siteWarehouseSql, vwlckdm1);
+                        String siteWarehouseSql = "SELECT WAREHOUSE_TYPE FROM ods_vlms_site_warehouse s JOIN ods_vlms_rfid_warehouse r ON s.WAREHOUSE_CODE=r.WAREHOUSE_CODE WHERE s.`TYPE` = 'CONTRAST' and s.VWLCKDM = '" + vwlckdm1 + "' LIMIT 1";
+                        JSONObject siteWarehouse = MysqlUtil.querySingle("ods_vlms_site_warehouse:ods_vlms_rfid_warehouse", siteWarehouseSql, vwlckdm1);
                         if (siteWarehouse != null) {
                             dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(siteWarehouse.getString("WAREHOUSE_TYPE"));
                         }
