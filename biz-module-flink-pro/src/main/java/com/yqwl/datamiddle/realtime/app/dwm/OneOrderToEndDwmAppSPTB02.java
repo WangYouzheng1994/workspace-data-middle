@@ -1,13 +1,15 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
+import com.yqwl.datamiddle.realtime.util.MysqlUtil;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -68,8 +70,8 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndUpdateProcess = mysqlSourceStream.process(new ProcessFunction<String, OotdTransition>() {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
+                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 OotdTransition ootdTransition = new OotdTransition();
-                DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
                 String cjsdbh = dwmSptb02.getCJSDBH();                                  //结算单编号
                 String vvin = dwmSptb02.getVVIN();                                      //底盘号
                 String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      //车型
@@ -211,7 +213,7 @@ public class OneOrderToEndDwmAppSPTB02 {
 
                     //====================================末端配送==============================================//
                     if ("G".equals(vysfs) && "T2".equals(highwayWarehouseType)) {
-                        //入库时间?
+
                         //配板时间
                         ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());
                         //出库时间
@@ -388,7 +390,7 @@ public class OneOrderToEndDwmAppSPTB02 {
 
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(10000)
+                        .withBatchSize(2000)
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(5)
                         .build(),
