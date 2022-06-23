@@ -88,7 +88,7 @@ public class WaybillDwmAppSptb02 {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String cjsdbh = dwmSptb02.getCJSDBH();
                         log.info("sptb02d1DS阶段获取到的查询条件值:{}", cjsdbh);
-                        if (StringUtils.isNotEmpty(cjsdbh)) {
+                        if (StringUtils.isNotBlank(cjsdbh)) {
                             return cjsdbh;
                         }
                         return null;
@@ -139,7 +139,7 @@ public class WaybillDwmAppSptb02 {
                         String baseCode = dwmSptb02.getBASE_CODE();
                         String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
                         log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
-                        if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
+                        if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
                             return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
                         }
                         return null;
@@ -195,7 +195,7 @@ public class WaybillDwmAppSptb02 {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String czjgsdm = dwmSptb02.getCZJGSDM();
                         log.info("sptc61DS阶段获取到的查询条件值:{}", czjgsdm);
-                        if (StringUtils.isNotEmpty(czjgsdm)) {
+                        if (StringUtils.isNotBlank(czjgsdm)) {
                             return czjgsdm;
                         }
                         return null;
@@ -223,7 +223,7 @@ public class WaybillDwmAppSptb02 {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String cqwh = dwmSptb02.getCQWH();
                         log.info("sptc62DS阶段获取到的查询条件值:{}", cqwh);
-                        if (StringUtils.isNotEmpty(cqwh)) {
+                        if (StringUtils.isNotBlank(cqwh)) {
                             return cqwh;
                         }
                         return null;
@@ -252,7 +252,7 @@ public class WaybillDwmAppSptb02 {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         String vwlckdm = dwmSptb02.getVWLCKDM();
                         log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
-                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                        if (StringUtils.isNotBlank(vwlckdm)) {
                             return vwlckdm;
                         }
                         return null;
@@ -285,7 +285,7 @@ public class WaybillDwmAppSptb02 {
 
                     @Override
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
-                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VCYDJC"))) {
+                        if (StringUtils.isNotBlank(dimInfoJsonObj.getString("VCYDJC"))) {
                             dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDJC"));
                         } else {
                             dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VCYDMC"));
@@ -314,7 +314,7 @@ public class WaybillDwmAppSptb02 {
 
                     @Override
                     public void join(DwmSptb02 dwmSptb02, JSONObject dimInfoJsonObj) throws Exception {
-                        if (StringUtils.isNotEmpty(dimInfoJsonObj.getString("VJXSJC"))) {
+                        if (StringUtils.isNotBlank(dimInfoJsonObj.getString("VJXSJC"))) {
                             dwmSptb02.setDEALER_NAME(dimInfoJsonObj.getString("VJXSJC"));
                         } else {
                             dwmSptb02.setTRANSPORT_NAME(dimInfoJsonObj.getString("VJXSMC"));
@@ -355,7 +355,7 @@ public class WaybillDwmAppSptb02 {
                         String hostComCode = dwmSptb02.getHOST_COM_CODE();
                         String baseCode = dwmSptb02.getBASE_CODE();
                         String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
-                        if (StringUtils.isNotEmpty(hostComCode) && StringUtils.isNotEmpty(baseCode) && StringUtils.isNotEmpty(transModeCode)) {
+                        if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
                             return Arrays.asList(dwmSptb02.getHOST_COM_CODE(), dwmSptb02.getBASE_CODE(), dwmSptb02.getTRANS_MODE_CODE());
                         }
                         return null;
@@ -429,7 +429,7 @@ public class WaybillDwmAppSptb02 {
                     public Object getKey(DwmSptb02 dwmSptb02) {
                         //获取vph
                         String vph = dwmSptb02.getVPH();
-                        if (StringUtils.isNotEmpty(vph)) {
+                        if (StringUtils.isNotBlank(vph)) {
                             return vph;
                         }
                         return null;
@@ -493,9 +493,9 @@ public class WaybillDwmAppSptb02 {
                         String czjgsdm = dwmSptb02.getCZJGSDM();
                         //获取运输方式  TRAFFIC_TYPE
                         String traffictype = dwmSptb02.getTRAFFIC_TYPE();
-                        if (StringUtils.isNotEmpty(startprovincecode) && StringUtils.isNotEmpty(startcitycode)
-                                && StringUtils.isNotEmpty(endprovincecode) && StringUtils.isNotEmpty(endcitycode)
-                                && StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype)) {
+                        if (StringUtils.isNotBlank(startprovincecode) && StringUtils.isNotBlank(startcitycode)
+                                && StringUtils.isNotBlank(endprovincecode) && StringUtils.isNotBlank(endcitycode)
+                                && StringUtils.isNotBlank(czjgsdm) && StringUtils.isNotBlank(traffictype)) {
                             return Arrays.asList(dwmSptb02.getSTART_PROVINCE_CODE(), dwmSptb02.getSTART_CITY_CODE(),
                                     dwmSptb02.getEND_PROVINCE_CODE(), dwmSptb02.getEND_CITY_CODE()
                                     , dwmSptb02.getCZJGSDM(), dwmSptb02.getTRAFFIC_TYPE());
@@ -542,7 +542,7 @@ public class WaybillDwmAppSptb02 {
                         String traffictype = dwmSptb02.getTRAFFIC_TYPE();
                         String vfczt = dwmSptb02.getVFCZT();
                         String vsczt = dwmSptb02.getVSCZT();
-                        if (StringUtils.isNotEmpty(czjgsdm) && StringUtils.isNotEmpty(traffictype) && StringUtils.isNotEmpty(vfczt) && StringUtils.isNotEmpty(vsczt)) {
+                        if (StringUtils.isNotBlank(czjgsdm) && StringUtils.isNotBlank(traffictype) && StringUtils.isNotBlank(vfczt) && StringUtils.isNotBlank(vsczt)) {
                             return Arrays.asList(dwmSptb02.getCZJGSDM(), dwmSptb02.getTRAFFIC_TYPE(), dwmSptb02.getVFCZT(), dwmSptb02.getVSCZT());
                         }
                         return null;
@@ -601,7 +601,7 @@ public class WaybillDwmAppSptb02 {
                         String startProvinceCode = dwmSptb02.getSTART_PROVINCE_CODE();
                         String startCityCode = dwmSptb02.getSTART_CITY_CODE();
                         log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
-                        if (StringUtils.isNotEmpty(startProvinceCode) && StringUtils.isNotEmpty(startCityCode)) {
+                        if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode)) {
                             return Arrays.asList(startProvinceCode, startCityCode);
                         }
                         return null;
@@ -638,7 +638,7 @@ public class WaybillDwmAppSptb02 {
                         String endProvinceCode = dwmSptb02.getEND_PROVINCE_CODE();
                         String endCityCode = dwmSptb02.getEND_CITY_CODE();
                         log.info("provincesMdac32DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", endProvinceCode, endCityCode);
-                        if (StringUtils.isNotEmpty(endProvinceCode) && StringUtils.isNotEmpty(endCityCode)) {
+                        if (StringUtils.isNotBlank(endProvinceCode) && StringUtils.isNotBlank(endCityCode)) {
                             return Arrays.asList(endProvinceCode, endCityCode);
                         }
                         return null;

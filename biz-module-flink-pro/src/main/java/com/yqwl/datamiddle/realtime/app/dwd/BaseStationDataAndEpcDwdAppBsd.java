@@ -164,9 +164,9 @@ public class BaseStationDataAndEpcDwdAppBsd {
                     String warehouse_name = "";
                     // 出入库类型
                     String PHYSICAL_CODE = "";
-                    if (StringUtils.isNotEmpty(dwdBaseStationData.getSHOP_NO())) {
+                    if (StringUtils.isNotBlank(shop_no)) {
                         String bdsSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where WAREHOUSE_CODE = '" + shop_no + "' limit 1";
-                        JSONObject bdsResult = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, bdsSql, warehouse_code);
+                        JSONObject bdsResult = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, bdsSql, shop_no);
                         if (bdsResult != null) {
                             // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
                             warehouse_type = bdsResult.getString("WAREHOUSE_TYPE");

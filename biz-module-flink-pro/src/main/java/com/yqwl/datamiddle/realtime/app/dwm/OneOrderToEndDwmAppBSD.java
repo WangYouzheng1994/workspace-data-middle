@@ -59,7 +59,7 @@ public class OneOrderToEndDwmAppBSD {
                 .build();
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
-
+        Long nowTime = System.currentTimeMillis();
         //==============================================dwd_base_station_data处理 START==========================================================================//
 
         //2.转换BASE_STATION_DATA为实体类
@@ -72,11 +72,12 @@ public class OneOrderToEndDwmAppBSD {
 
         //3.插入mysql
         mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ?  WHERE VIN = ? ",
+                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ? ,WAREHOUSE_UPDATETIME= ?  WHERE VIN = ? ",
                 (ps, epc) -> {
                     ps.setString(1, epc.getIN_WAREHOUSE_NAME());
                     ps.setString(2, epc.getIN_WAREHOUSE_CODE());
-                    ps.setString(3, epc.getVIN());
+                    ps.setLong  (3, nowTime);
+                    ps.setString(4, epc.getVIN());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(1000)
@@ -92,16 +93,17 @@ public class OneOrderToEndDwmAppBSD {
 
         //3.基地入库时间
         mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_SITE_TIME = ? " +
+                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = ? , e.WAREHOUSE_UPDATETIME= ? " +
                         "WHERE e.VIN = ? " +
                         "AND e.LEAVE_FACTORY_TIME < ? " +
                         "AND a.`WAREHOUSE_TYPE` = 'T1' " +
                         "AND (e.IN_SITE_TIME > ? or e.IN_SITE_TIME = 0)",
                 (ps, epc) -> {
-                    ps.setLong(1, epc.getSAMPLE_U_T_C());
-                    ps.setString(2, epc.getVIN());
-                    ps.setLong(3, epc.getSAMPLE_U_T_C());
-                    ps.setLong(4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (2, nowTime);
+                    ps.setString(3, epc.getVIN());
+                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(1000)
@@ -118,16 +120,17 @@ public class OneOrderToEndDwmAppBSD {
 
         //4.末端配送入库时间
         mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET IN_DISTRIBUTE_TIME = ? " +
+                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = ? , e.WAREHOUSE_UPDATETIME= ? " +
                         "WHERE e.VIN = ? " +
                         "AND e.LEAVE_FACTORY_TIME < ? " +
                         "AND a.`WAREHOUSE_TYPE` = 'T2' " +
                         "AND e.IN_SITE_TIME < ?",
                 (ps, epc) -> {
-                    ps.setLong(1, epc.getSAMPLE_U_T_C());
-                    ps.setString(2, epc.getVIN());
-                    ps.setLong(3, epc.getSAMPLE_U_T_C());
-                    ps.setLong(4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (2, nowTime);
+                    ps.setString(3, epc.getVIN());
+                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(1000)
@@ -154,12 +157,17 @@ public class OneOrderToEndDwmAppBSD {
         // TODO: @See org.jeecg.yqwl.datamiddle.job.mapper.DataMiddleOdsBaseStationDataAndEpcMapper.updateOOTDLeaveFactoryTime 需要新增where语句 By QingSong 2022年6月17日00:21:04
         //出厂日期
         outStockFilter.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET LEAVE_FACTORY_TIME=? WHERE VIN = ? AND CP9_OFFLINE_TIME < ? AND ( LEAVE_FACTORY_TIME = 0 OR LEAVE_FACTORY_TIME > ? )",
+                "UPDATE dwm_vlms_one_order_to_end d JOIN ods_vlms_base_station_data o SET d.LEAVE_FACTORY_TIME = ? ,d.WAREHOUSE_UPDATETIME = ? " +
+                        " WHERE d.VIN = ? AND d.CP9_OFFLINE_TIME < ? " +
+                        " AND ( d.LEAVE_FACTORY_TIME = 0 OR d.LEAVE_FACTORY_TIME > ? )" +
+                        " AND (o.SHOP_NO = 'DZCP901' OR o.SHOP_NO = 'DZCP9' ) " +
+                        " AND o.OPERATE_TYPE='OutStock' ",
                 (ps, epc) -> {
-                    ps.setLong(1, epc.getSAMPLE_U_T_C());
-                    ps.setString(2, epc.getVIN());
-                    ps.setLong(3, epc.getSAMPLE_U_T_C());
-                    ps.setLong(4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (2, nowTime);
+                    ps.setString(3, epc.getVIN());
+                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
+                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(1000)
@@ -171,7 +179,7 @@ public class OneOrderToEndDwmAppBSD {
                         .withDriverName(MysqlConfig.DRIVER)
                         .withUsername(MysqlConfig.USERNAME)
                         .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink3").name("baseStationDataSink3");
+                        .build())).uid("baseStationDataSink4").name("baseStationDataSink4");
 
 
         //==============================================dwd_base_station_data处理 END==========================================================================//
