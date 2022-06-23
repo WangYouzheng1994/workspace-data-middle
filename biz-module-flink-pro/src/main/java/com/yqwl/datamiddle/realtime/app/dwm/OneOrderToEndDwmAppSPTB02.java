@@ -1,8 +1,10 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
@@ -69,7 +71,7 @@ public class OneOrderToEndDwmAppSPTB02 {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
                 OotdTransition ootdTransition = new OotdTransition();
-                DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
+                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 String cjsdbh = dwmSptb02.getCJSDBH();                                  //结算单编号
                 String vvin = dwmSptb02.getVVIN();                                      //底盘号
                 String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      //车型
@@ -256,13 +258,13 @@ public class OneOrderToEndDwmAppSPTB02 {
                         "        ( ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
                         "       VEHICLE_CODE=?,VEHICLE_NAME=?, VEHICLE_RECEIVING_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
-                        "STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
-                        "SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)," +
-                        "START_PLATFORM_NAME = ?, END_PLATFORM_NAME = ?, IN_START_PLATFORM_TIME = ?, OUT_START_PLATFORM_TIME = ?, IN_END_PLATFORM_TIME = ?, UNLOAD_RAILWAY_TIME = ?, START_WATERWAY_NAME = ?, END_WATERWAY_NAME = ?, " +
-                        "IN_START_WATERWAY_TIME = ?, " +
-                        "END_START_WATERWAY_TIME = ?, IN_END_WATERWAY_TIME = ?, UNLOAD_SHIP_TIME = ? , WAREHOUSE_CREATETIME = ?, WAREHOUSE_UPDATETIME = ? , BRAND = ?, " +
-                        "DISTRIBUTE_BOARD_TIME = ?, OUT_DISTRIBUTE_TIME = ?, DISTRIBUTE_ASSIGN_TIME = ? , DISTRIBUTE_CARRIER_NAME = ?, DISTRIBUTE_VEHICLE_NO = ? , DISTRIBUTE_SHIPMENT_TIME = ?" +
-                        "DOT_SITE_TIME = ?, FINAL_SITE_TIME = ?",
+                        " STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, DEALER_NAME=?, \n" +
+                        " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or ? < SETTLEMENT_Y1, ?, SETTLEMENT_Y1)," +
+                        " START_PLATFORM_NAME = ?, END_PLATFORM_NAME = ?, IN_START_PLATFORM_TIME = ?, OUT_START_PLATFORM_TIME = ?, IN_END_PLATFORM_TIME = ?, UNLOAD_RAILWAY_TIME = ?, START_WATERWAY_NAME = ?, END_WATERWAY_NAME = ?, " +
+                        " IN_START_WATERWAY_TIME = ?, " +
+                        " END_START_WATERWAY_TIME = ?, IN_END_WATERWAY_TIME = ?, UNLOAD_SHIP_TIME = ? , WAREHOUSE_CREATETIME = ?, WAREHOUSE_UPDATETIME = ? , BRAND = ?, " +
+                        " DISTRIBUTE_BOARD_TIME = ?, OUT_DISTRIBUTE_TIME = ?, DISTRIBUTE_ASSIGN_TIME = ? , DISTRIBUTE_CARRIER_NAME = ?, DISTRIBUTE_VEHICLE_NO = ? , DISTRIBUTE_SHIPMENT_TIME = ? ," +
+                        " DOT_SITE_TIME = ?, FINAL_SITE_TIME = ?",
                 (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
