@@ -237,7 +237,7 @@ public class WaybillDwdAppSptb02Simple {
                      */
                     String vfczt = dwdSptb02.getVFCZT();
                     log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
-                    if (StringUtils.isNotEmpty(vfczt)) {
+                    if (StringUtils.isNotBlank(vfczt)) {
                         String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vfczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vfczt);
                         if (siteWarehouse != null) {
@@ -253,7 +253,7 @@ public class WaybillDwdAppSptb02Simple {
                      */
                     String vsczt = dwdSptb02.getVSCZT();
                     log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
-                    if (StringUtils.isNotEmpty(vsczt)) {
+                    if (StringUtils.isNotBlank(vsczt)) {
                         String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where VWLCKDM = '" + vsczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vsczt);
                         if (siteWarehouse != null) {
@@ -267,7 +267,7 @@ public class WaybillDwdAppSptb02Simple {
                      */
                     String vwlckdm1 = dwdSptb02.getVWLCKDM();
                     log.info("highwayWarehouseTypeDS:{}", vwlckdm1);
-                    if (StringUtils.isNotEmpty(vwlckdm1)) {
+                    if (StringUtils.isNotBlank(vwlckdm1)) {
                         String siteWarehouseSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where VWLCKDM = '" + vwlckdm1 + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, siteWarehouseSql, vwlckdm1);
                         if (siteWarehouse != null) {
