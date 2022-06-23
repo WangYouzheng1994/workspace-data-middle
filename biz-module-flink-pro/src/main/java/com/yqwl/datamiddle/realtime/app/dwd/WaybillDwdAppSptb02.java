@@ -115,7 +115,7 @@ public class WaybillDwdAppSptb02 {
                 String vysfs = sptb02.getVYSFS();
                 //System.out.println("运输方式：" + vysfs);
                 log.info("运单运输方式数据:{}", vysfs);
-                if (StringUtils.isNotEmpty(vysfs)) {
+                if (StringUtils.isNotBlank(vysfs)) {
                     //1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
                     //('J','TD','SD','G')='G'
                     if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
@@ -196,7 +196,7 @@ public class WaybillDwdAppSptb02 {
                 //sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
                 //主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
                 String czjgsdm = sptb02.getCZJGSDM();
-                if (StringUtils.isNotEmpty(czjgsdm)) {
+                if (StringUtils.isNotBlank(czjgsdm)) {
                     //大众 1
                     if ("1".equals(czjgsdm)) {
                         dwdSptb02.setHOST_COM_CODE("1");
@@ -255,7 +255,7 @@ public class WaybillDwdAppSptb02 {
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String vwlckdm = dwdSptb02.getVWLCKDM();
                         log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
-                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                        if (StringUtils.isNotBlank(vwlckdm)) {
                             return vwlckdm;
                         }
                         return null;
@@ -285,7 +285,7 @@ public class WaybillDwdAppSptb02 {
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String cdhddm = dwdSptb02.getCDHDDM();
                         log.info("mdac32DS阶段获取到的查询条件值:{}", cdhddm);
-                        if (StringUtils.isNotEmpty(cdhddm)) {
+                        if (StringUtils.isNotBlank(cdhddm)) {
                             return cdhddm;
                         }
                         return null;
@@ -317,7 +317,7 @@ public class WaybillDwdAppSptb02 {
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String vfczt = dwdSptb02.getVFCZT();
                         log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
-                        if (StringUtils.isNotEmpty(vfczt)) {
+                        if (StringUtils.isNotBlank(vfczt)) {
                             return vfczt;
                         }
                         return null;
@@ -350,7 +350,7 @@ public class WaybillDwdAppSptb02 {
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String vsczt = dwdSptb02.getVSCZT();
                         log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
-                        if (StringUtils.isNotEmpty(vsczt)) {
+                        if (StringUtils.isNotBlank(vsczt)) {
                             return vsczt;
                         }
                         return null;
@@ -379,7 +379,7 @@ public class WaybillDwdAppSptb02 {
                     public Object getKey(DwdSptb02 dwdSptb02) {
                         String vwlckdm = dwdSptb02.getVWLCKDM();
                         log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vwlckdm);
-                        if (StringUtils.isNotEmpty(vwlckdm)) {
+                        if (StringUtils.isNotBlank(vwlckdm)) {
                             return vwlckdm;
                         }
                         return null;
