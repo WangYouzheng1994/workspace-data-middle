@@ -194,17 +194,30 @@ public class WaybillDwdAppSptb02 {
                  */
                 //获取主机公司代码
                 //sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
+                //主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
                 String czjgsdm = sptb02.getCZJGSDM();
                 if (StringUtils.isNotEmpty(czjgsdm)) {
+                    //大众 1
                     if ("1".equals(czjgsdm)) {
                         dwdSptb02.setHOST_COM_CODE("1");
                     }
+                    //红旗 2
                     if ("17".equals(czjgsdm)) {
                         dwdSptb02.setHOST_COM_CODE("2");
                     }
+                    //马自达 3
                     if ("29".equals(czjgsdm)) {
                         dwdSptb02.setHOST_COM_CODE("3");
                     }
+                    //奔腾 4
+                    if ("2".equals(czjgsdm)) {
+                        dwdSptb02.setHOST_COM_CODE("4");
+                    }
+                    //解放 5
+                    if ("3".equals(czjgsdm)) {
+                        dwdSptb02.setHOST_COM_CODE("5");
+                    }
+
                 }
                 //添加新的处理逻辑(新加)
                 //10.处理 ACTUAL_OUT_TIME(实际出库时间)  取 sptb02.dckrq字段
