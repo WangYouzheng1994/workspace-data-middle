@@ -3,8 +3,6 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
@@ -74,7 +72,6 @@ public class OneOrderToEndDwmAppSPTB02 {
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
                 DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 OotdTransition ootdTransition = new OotdTransition();
-                DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
                 String cjsdbh = dwmSptb02.getCJSDBH();                                  //结算单编号
                 String vvin = dwmSptb02.getVVIN();                                      //底盘号
                 String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      //车型
