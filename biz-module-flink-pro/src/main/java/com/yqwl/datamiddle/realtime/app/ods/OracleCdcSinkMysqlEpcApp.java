@@ -54,8 +54,7 @@ public class OracleCdcSinkMysqlEpcApp {
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
         //properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
-        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
-
+        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=" + props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
         //读取oracle连接配置属性
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
