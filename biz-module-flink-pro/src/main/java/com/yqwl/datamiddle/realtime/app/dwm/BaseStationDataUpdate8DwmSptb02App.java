@@ -18,7 +18,9 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,15 @@ public class BaseStationDataUpdate8DwmSptb02App {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
 
+        log.info("初始化流处理环境完成");
+        //设置CK相关参数
+        CheckpointConfig ck = env.getCheckpointConfig();
+        ck.setCheckpointInterval(480000);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        System.setProperty("HADOOP_USER_NAME", "yunding");
+        log.info("checkpoint设置完成");
         //kafka消费源相关参数配
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
