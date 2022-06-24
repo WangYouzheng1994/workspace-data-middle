@@ -99,7 +99,7 @@ public class OracleCdcSinkMysqlSptb02d1App {
                 Sptb02d1 bean = JsonPartUtil.getBean(sptb02d1);
                 out.collect(bean);
             }
-        }).uid("processBsd").name("processBsd");
+        }).uid("processSptb02d1").name("processSptb02d1");
 
 
         //===================================sink mysql=======================================================//

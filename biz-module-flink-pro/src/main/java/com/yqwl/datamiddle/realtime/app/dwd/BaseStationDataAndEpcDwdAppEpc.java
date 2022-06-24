@@ -140,6 +140,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
+                KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC));
         mapEpcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
 

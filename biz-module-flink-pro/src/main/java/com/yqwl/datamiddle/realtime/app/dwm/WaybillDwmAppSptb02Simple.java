@@ -297,6 +297,7 @@ public class WaybillDwmAppSptb02Simple {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWM_VLMS_SPTB02,
+                KafkaTopicConst.DWM_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
 
         dwmSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");

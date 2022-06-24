@@ -60,10 +60,11 @@ public class KafkaUtil {
      * @param <T>
      * @return
      */
-    public static <T> FlinkKafkaProducer<T> getKafkaProductBySchema(String server, String topic, KafkaSerializationSchema<T> kafkaSerializationSchema) {
+    public static <T> FlinkKafkaProducer<T> getKafkaProductBySchema(String server, String topic, String transactionalId, KafkaSerializationSchema<T> kafkaSerializationSchema) {
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         props.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
+        props.setProperty(ProducerConfig.TRANSACTIONAL_ID_CONFIG, transactionalId);
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 5 * 60 * 1000 + "");
         return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE, 20);
