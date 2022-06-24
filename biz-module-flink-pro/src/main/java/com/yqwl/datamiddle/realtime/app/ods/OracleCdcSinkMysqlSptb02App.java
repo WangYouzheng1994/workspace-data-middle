@@ -96,19 +96,22 @@ public class OracleCdcSinkMysqlSptb02App {
                 afterObj.put("WAREHOUSE_CREATETIME", tsStr);
                 afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
                 jsonObj.put("after", afterObj);
+
+                //获取after真实数据后，映射为实体类
+                Sptb02 baseStationData = JsonPartUtil.getAfterObj(jsonObj, Sptb02.class);
+                //log.info("反射后的实例:{}", baseStationData);
+                //对映射后的实体类为null字段赋值默认值
+                Sptb02 bean = JsonPartUtil.getBean(baseStationData);
+                out.collect(bean);
+
                 //建单日期
-                String ddjrq = afterObj.getString("DDJRQ");
+          /*      String ddjrq = afterObj.getString("DDJRQ");
                 if (StringUtils.isNotEmpty(ddjrq)) {
                     long sampleLong = Long.parseLong(ddjrq);
                     if (sampleLong >= START && sampleLong <= END) {
-                        //获取after真实数据后，映射为实体类
-                        Sptb02 baseStationData = JsonPartUtil.getAfterObj(jsonObj, Sptb02.class);
-                        //log.info("反射后的实例:{}", baseStationData);
-                        //对映射后的实体类为null字段赋值默认值
-                        Sptb02 bean = JsonPartUtil.getBean(baseStationData);
-                        out.collect(bean);
+
                     }
-                }
+                }*/
 
             }
         }).uid("processSptb02").name("processSptb02");
@@ -127,7 +130,7 @@ public class OracleCdcSinkMysqlSptb02App {
                 KafkaTopicConst.ODS_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02));
 
-        sptb02Json.addSink(sinkKafka).uid("sinkKafkaSptb02").name("sinkKafkaSptb02");
+        sptb02Json.addSink(sinkKafka).uid("sinkKafkaSptb02").name("sinkCdcKafkaSptb02");
 
 
         //===================================sink mysql=======================================================//
