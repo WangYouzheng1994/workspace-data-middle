@@ -78,7 +78,7 @@ public class OracleCdcSinkMysqlSptb02d1App {
 
 
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStreamSptb02d1").name("oracleSourceStreamSptb02d1");
 
         SingleOutputStreamOperator<Sptb02d1> processSptb02d1 = oracleSourceStream.process(new ProcessFunction<String, Sptb02d1>() {
             @Override
@@ -99,14 +99,14 @@ public class OracleCdcSinkMysqlSptb02d1App {
                 Sptb02d1 bean = JsonPartUtil.getBean(sptb02d1);
                 out.collect(bean);
             }
-        }).uid("processBsd").name("processBsd");
+        }).uid("processSptb02d1").name("processSptb02d1");
 
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(Sptb02d1.class);
         log.info("组装的插入sql:{}", sql);
-        processSptb02d1.addSink(JdbcSink.<Sptb02d1>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        processSptb02d1.addSink(JdbcSink.<Sptb02d1>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql-sptb02d1").name("oracle-cdc-mysql-sptb02d1");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-sptb02d1");
         log.info("oracle-cdc-kafka job开始执行");

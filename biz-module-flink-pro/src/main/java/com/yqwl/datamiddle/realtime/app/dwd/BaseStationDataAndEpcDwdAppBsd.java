@@ -209,7 +209,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
-        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwdBsd").name("sinkKafkaDwdBsd");
         env.execute("dwdBsd往dwmSptb02赋值,更新Dwm");
 
     }

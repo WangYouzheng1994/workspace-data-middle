@@ -83,7 +83,7 @@ public class OracleCdcSinkMysqlEpcApp {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStreamEpc").name("oracleSourceStreamEpc");
 
         SingleOutputStreamOperator<BaseStationDataEpc> processEpc = oracleSourceStream.process(new ProcessFunction<String, BaseStationDataEpc>() {
             @Override
@@ -124,13 +124,13 @@ public class OracleCdcSinkMysqlEpcApp {
                 KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC));
 
-        epcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        epcJson.addSink(sinkKafka).uid("sinkKafkaEpc").name("sinkKafkaEpc");
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(BaseStationDataEpc.class);
         log.info("组装的插入sql:{}", sql);
-        processEpc.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        processEpc.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql-epc").name("oracle-cdc-mysql-epc");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-epc");
         log.info("oracle-cdc-kafka job开始执行");

@@ -147,7 +147,7 @@ public class ConsumerKafkaODSApp {
         );
 
         //kafkaDS.print("kafka结果数据输出:");
-        //kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
+        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 

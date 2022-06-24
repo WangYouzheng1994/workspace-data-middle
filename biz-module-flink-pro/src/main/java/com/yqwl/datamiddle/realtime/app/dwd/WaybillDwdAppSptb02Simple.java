@@ -297,12 +297,12 @@ public class WaybillDwdAppSptb02Simple {
                 KafkaTopicConst.DWD_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
 
-        dwdSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        dwdSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwdSptb02Simple").name("sinkKafkaDwdSptb02Simple");
 
         //===================================sink mysql=======================================================//
 
         String sql = MysqlUtil.getSql(DwdSptb02.class);
-        dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
+        dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("sinkMysqlDwdSptb02Simple").name("sinkMysqlDwdSptb02Simple");
 
         env.execute("sptb02-sink-mysql-dwd");
         log.info("sptb02dwd层job任务开始执行");
