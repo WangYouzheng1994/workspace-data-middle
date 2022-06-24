@@ -122,6 +122,11 @@ public class OotdTransition {
     /**
      * 经销商代码*(名称)
      */
+    private String VDWDM;
+
+    /**
+     * 经销商代码*(名称)
+     */
     private String DEALER_NAME;
 
     /**
