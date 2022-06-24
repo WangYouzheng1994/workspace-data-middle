@@ -2,6 +2,7 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
+import com.yqwl.datamiddle.realtime.app.func.SimpleBsdSinkOOTD;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
@@ -59,131 +60,20 @@ public class OneOrderToEndDwmAppBSD {
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
         //==============================================dwd_base_station_data处理 START==========================================================================//
 
-        //2.转换BASE_STATION_DATA为实体类
+        // 2.转换BASE_STATION_DATA为实体类
         SingleOutputStreamOperator<DwdBaseStationData> mapBsd = mysqlSource.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String json) throws Exception {
                 return JSON.parseObject(json, DwdBaseStationData.class);
             }
         }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
-
-        //3.插入mysql
-        mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME= ?, IN_WAREHOUSE_CODE= ? ,WAREHOUSE_UPDATETIME= ?  WHERE VIN = ? ",
-                (ps, epc) -> {
-                    Long nowTime = System.currentTimeMillis();
-                    ps.setString(1, epc.getIN_WAREHOUSE_NAME());
-                    ps.setString(2, epc.getIN_WAREHOUSE_CODE());
-                    ps.setLong  (3, nowTime);
-                    ps.setString(4, epc.getVIN());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(1000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(5)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink1").name("baseStationDataSink1");
-
-        //3.基地入库时间
-        mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = ? , e.WAREHOUSE_UPDATETIME= ? " +
-                        "WHERE e.VIN = ? " +
-                        "AND e.LEAVE_FACTORY_TIME < ? " +
-                        "AND a.`WAREHOUSE_TYPE` = 'T1' " +
-                        "AND (e.IN_SITE_TIME > ? or e.IN_SITE_TIME = 0)",
-                (ps, epc) -> {
-                    Long nowTime = System.currentTimeMillis();
-                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (2, nowTime);
-                    ps.setString(3, epc.getVIN());
-                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(1000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(5)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink2").name("baseStationDataSink2");
-        //4.末端配送入库时间
-        mapBsd.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = ? , e.WAREHOUSE_UPDATETIME= ? " +
-                        "WHERE e.VIN = ? " +
-                        "AND e.LEAVE_FACTORY_TIME < ? " +
-                        "AND a.`WAREHOUSE_TYPE` = 'T2' " +
-                        "AND e.IN_SITE_TIME < ?",
-                (ps, epc) -> {
-                    Long nowTime = System.currentTimeMillis();
-                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (2, nowTime);
-                    ps.setString(3, epc.getVIN());
-                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(1000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(5)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink3").name("baseStationDataSink3");
-        //过滤出所有出库操作记录
-        SingleOutputStreamOperator<DwdBaseStationData> outStockFilter = mapBsd.filter(new FilterFunction<DwdBaseStationData>() {
-            @Override
-            public boolean filter(DwdBaseStationData data) throws Exception {
-                String operateType = data.getOPERATE_TYPE();
-                return "OutStock".equals(operateType);
-            }
-        }).uid("outStockFilter").name("outStockFilter");
-
-        //出厂日期
-        outStockFilter.addSink(JdbcSink.sink(
-                "UPDATE dwm_vlms_one_order_to_end d JOIN ods_vlms_base_station_data o SET d.LEAVE_FACTORY_TIME = ? ,d.WAREHOUSE_UPDATETIME = ? " +
-                        " WHERE d.VIN = ? AND d.CP9_OFFLINE_TIME < ? " +
-                        " AND ( d.LEAVE_FACTORY_TIME = 0 OR d.LEAVE_FACTORY_TIME > ? )" +
-                        " AND (o.SHOP_NO = 'DZCP901' OR o.SHOP_NO = 'DZCP9' ) " +
-                        " AND o.OPERATE_TYPE='OutStock' ",
-                (ps, epc) -> {
-                    Long nowTime = System.currentTimeMillis();
-                    ps.setLong  (1, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (2, nowTime);
-                    ps.setString(3, epc.getVIN());
-                    ps.setLong  (4, epc.getSAMPLE_U_T_C());
-                    ps.setLong  (5, epc.getSAMPLE_U_T_C());
-                },
-                new JdbcExecutionOptions.Builder()
-                        .withBatchSize(1000)
-                        .withBatchIntervalMs(5000L)
-                        .withMaxRetries(5)
-                        .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataSink4").name("baseStationDataSink4");
-
-
+        // 3.更新 dwdBds->dwmOOTD 一单到底表
+        mapBsd.addSink(new SimpleBsdSinkOOTD<DwdBaseStationData>()).uid("BsdSinkOOTD").name("BsdSinkOOTD");
         //==============================================dwd_base_station_data处理 END==========================================================================//
-
         env.execute("dwdBsd更新一单到底表");
         log.info("base_station_data job任务开始执行");
 
