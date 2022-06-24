@@ -199,15 +199,16 @@ public class OneOrderToEndDwmAppSPTB02 {
                             }
                         }
 
-                        /**
-                         * 根据产品编码查获取产品名称
-                         */
-                        if (StringUtils.isNotBlank(vehicle_code)) {
-                            String mdac12Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
-                            JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
-                            if (mdac12 != null) {
-                                ootdTransition.setVEHICLE_NMAE(mdac12.getString("VCPMC"));
-                            }
+                    }
+
+                    /**
+                     * 根据产品编码查获取产品名称
+                     */
+                    if (StringUtils.isNotBlank(vehicle_code)) {
+                        String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                        JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
+                        if (mdac12 != null) {
+                            ootdTransition.setVEHICLE_NMAE(mdac12.getString("VCPMC"));
                         }
                     }
 
