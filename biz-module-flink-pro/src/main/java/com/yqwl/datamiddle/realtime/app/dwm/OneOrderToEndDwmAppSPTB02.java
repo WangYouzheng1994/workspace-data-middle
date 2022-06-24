@@ -4,6 +4,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
@@ -17,12 +18,14 @@ import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -196,16 +199,15 @@ public class OneOrderToEndDwmAppSPTB02 {
                             }
                         }
 
-                    }
-
-                    /**
-                     * 根据产品编码查获取产品名称
-                     */
-                    if (StringUtils.isNotBlank(vehicle_code)) {
-                        String mdac12Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
-                        JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
-                        if (mdac12 != null) {
-                            ootdTransition.setVEHICLE_NMAE(mdac12.getString("VCPMC"));
+                        /**
+                         * 根据产品编码查获取产品名称
+                         */
+                        if (StringUtils.isNotBlank(vehicle_code)) {
+                            String mdac12Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                            JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
+                            if (mdac12 != null) {
+                                ootdTransition.setVEHICLE_NMAE(mdac12.getString("VCPMC"));
+                            }
                         }
                     }
 
@@ -224,11 +226,13 @@ public class OneOrderToEndDwmAppSPTB02 {
                         ootdTransition.setDISTRIBUTE_VEHICLE_NO(dwmSptb02.getVJSYDM());
                         //起运时间
                         ootdTransition.setDISTRIBUTE_SHIPMENT_TIME(dwmSptb02.getSHIPMENT_TIME());
+
                     }
 
-                    //====================================公路单取打点时间 最终到货时间==============================================//
                     if ("G".equals(vysfs)) {
+                        //打点到货
                         ootdTransition.setDOT_SITE_TIME(dwmSptb02.getDOT_SITE_TIME());
+                        //最终到货时间
                         ootdTransition.setFINAL_SITE_TIME(dwmSptb02.getFINAL_SITE_TIME());
                     }
                 }
@@ -388,7 +392,7 @@ public class OneOrderToEndDwmAppSPTB02 {
 
                 },
                 new JdbcExecutionOptions.Builder()
-                        .withBatchSize(2000)
+                        .withBatchSize(200)
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(5)
                         .build(),
@@ -397,7 +401,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withDriverName(MysqlConfig.DRIVER)
                         .withUsername(MysqlConfig.USERNAME)
                         .withPassword(MysqlConfig.PASSWORD)
-                        .build()));
+                        .build())).setParallelism(1).uid("sink-dwm_vlms_one_order_to_end").name("sink-dwm_vlms_one_order_to_end");
         //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
 
