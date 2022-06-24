@@ -43,13 +43,13 @@ public class OracleCdcSinkMysqlBsdApp {
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(10, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("stream流环境初始化完成");
 
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(480000);
-        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】

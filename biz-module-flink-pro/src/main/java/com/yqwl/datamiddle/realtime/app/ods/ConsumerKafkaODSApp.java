@@ -56,7 +56,7 @@ public class ConsumerKafkaODSApp {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
 
@@ -64,7 +64,7 @@ public class ConsumerKafkaODSApp {
         //设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(480000);
-        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】

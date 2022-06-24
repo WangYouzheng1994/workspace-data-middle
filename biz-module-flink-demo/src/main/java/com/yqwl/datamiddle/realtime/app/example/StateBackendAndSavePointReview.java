@@ -31,7 +31,7 @@ public class StateBackendAndSavePointReview {
         // 2.1 开启CheckPointing
         env.enableCheckpointing(10000);
         // 2.2 设置重启策略
-        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.seconds(2)));
+        env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.seconds(2)));
         //2.3 设置Checkpoint模式（与Kafka整合，一定要设置Checkpoint模式为Exactly_Once）
         env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //2.4 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
