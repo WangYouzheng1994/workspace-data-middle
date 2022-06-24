@@ -3,23 +3,19 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
-import com.yqwl.datamiddle.realtime.util.MysqlUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -55,16 +51,19 @@ public class OneOrderToEndDwmAppSPTB02 {
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
-        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.DWM_VLMS_SPTB02)
-                .setGroupId(KafkaTopicConst.DWM_VLMS_SPTB02_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
-                .setValueOnlyDeserializer(new SimpleStringSchema())
+        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
+                .hostname(props.getStr("cdc.mysql.hostname"))
+                .port(props.getInt("cdc.mysql.port"))
+                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
+                //.tableList("data_flink.dwm_vlms_sptb02")
+                .tableList("data_middle_flink.dwm_vlms_sptb02")
+                .username(props.getStr("cdc.mysql.username"))
+                .password(props.getStr("cdc.mysql.password"))
+                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
 
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndUpdateProcess = mysqlSourceStream.process(new ProcessFunction<String, OotdTransition>() {
