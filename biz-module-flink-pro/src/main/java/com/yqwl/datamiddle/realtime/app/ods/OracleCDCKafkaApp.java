@@ -83,7 +83,6 @@ public class OracleCDCKafkaApp {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
-                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
 
         //输出到kafka

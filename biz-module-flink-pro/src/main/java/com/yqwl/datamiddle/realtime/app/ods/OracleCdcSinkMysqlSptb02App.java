@@ -125,7 +125,6 @@ public class OracleCdcSinkMysqlSptb02App {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.ODS_VLMS_SPTB02,
-                KafkaTopicConst.ODS_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02));
 
         sptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");

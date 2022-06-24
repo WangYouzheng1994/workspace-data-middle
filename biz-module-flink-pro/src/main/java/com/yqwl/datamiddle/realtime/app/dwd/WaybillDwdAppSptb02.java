@@ -406,7 +406,6 @@ public class WaybillDwdAppSptb02 {
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02_TEST,
-                KafkaTopicConst.DWD_VLMS_SPTB02_TEST,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02_TEST));
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
