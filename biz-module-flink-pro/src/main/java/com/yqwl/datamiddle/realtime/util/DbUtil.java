@@ -7,12 +7,11 @@ import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * druid数据库连接池操作工具类
@@ -162,6 +161,32 @@ public class DbUtil {
         Connection connection = null;
         Statement statement = null;
         int index = -1;
+        try {
+            connection = getDruidConnection();
+            statement = connection.createStatement();
+            index = statement.executeUpdate(updateSql);
+            log.info(">>>>>>>>>>>> 更新数据:{}", index);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            // 切记!!! 一定要释放资源
+            closeResource(connection, statement, null);
+        }
+        return index;
+    }
+
+    /**
+     * 批量更新 多条语句
+     *
+     * @param updateSql
+     * @return
+     * @throws Exception
+     */
+    public static long executeBatchUpdate(String updateSql) throws Exception {
+        Connection connection = null;
+        Statement statement = null;
+        long index = -1;
+
         try {
             connection = getDruidConnection();
             statement = connection.createStatement();

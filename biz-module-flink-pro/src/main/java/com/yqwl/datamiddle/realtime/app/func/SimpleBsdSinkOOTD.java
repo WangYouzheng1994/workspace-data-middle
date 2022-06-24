@@ -30,37 +30,54 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
         // 获取出库操作记录
         String operate_type = dbsData.getOPERATE_TYPE();
 
+        StringBuilder sb = new StringBuilder();
         //-------------------------------------处理更新Mysql----------------------------------//
         // 1.插入mysql 更新IN_WAREHOUSE_NAME，IN_WAREHOUSE_CODE 仓库代码,仓库名称  **最慢**
         if (StringUtils.isNotBlank(vin) && StringUtils.isNotBlank(in_warehouse_code)) {
-            String IN_WAREHOUSE_NAMESql = "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME = '" + in_warehouse_name + "' , IN_WAREHOUSE_CODE= '"
+            sb.append("UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME = '" + in_warehouse_name + "' , IN_WAREHOUSE_CODE= '"
+                    + in_warehouse_code + "' , WAREHOUSE_UPDATETIME = " + nowTime + " WHERE VIN = '" + vin + "' ;");
+            /*String IN_WAREHOUSE_NAMESql = "UPDATE dwm_vlms_one_order_to_end SET IN_WAREHOUSE_NAME = '" + in_warehouse_name + "' , IN_WAREHOUSE_CODE= '"
                     + in_warehouse_code + "' , WAREHOUSE_UPDATETIME = " + nowTime + " WHERE VIN = '" + vin + "' ";
-                DbUtil.executeUpdate(IN_WAREHOUSE_NAMESql);
+                DbUtil.executeUpdate(IN_WAREHOUSE_NAMESql);*/
 
         // 2.更新基地入库时间 **快**
             if (sample_u_t_c !=null){
-                String IN_SITE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = " + sample_u_t_c +
+                sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = " + sample_u_t_c +
+                                " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T1' "
+                                + "AND (e.IN_SITE_TIME > " + sample_u_t_c + " or e.IN_SITE_TIME = 0);");
+                /*String IN_SITE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = " + sample_u_t_c +
                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T1' "
                         + "AND (e.IN_SITE_TIME > " + sample_u_t_c + " or e.IN_SITE_TIME = 0) ";
-                DbUtil.executeUpdate(IN_SITE_TIMESql);
+                DbUtil.executeUpdate(IN_SITE_TIMESql);*/
 
         // 3.更新末端配送入库时间  **慢**
-                String IN_DISTRIBUTE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
+                sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
+                                " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' "
+                                + "AND e.IN_SITE_TIME < " + sample_u_t_c + ";");
+                /*String IN_DISTRIBUTE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' "
                         + "AND e.IN_SITE_TIME < " + sample_u_t_c ;
-                DbUtil.executeUpdate(IN_DISTRIBUTE_TIMESql);
+                DbUtil.executeUpdate(IN_DISTRIBUTE_TIMESql);*/
 
         // 4.过滤出所有出库操作记录  ** 快
                 if (StringUtils.equals(operate_type,"OutStock")){
         // 5.更新出厂日期   ** 快
-                    String  LEAVE_FACTORY_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
+                    sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
+                                    " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c + " AND (a.SHOP_NO = 'DZCP901' OR a.SHOP_NO = 'DZCP9' ) "
+                                    + "AND a.OPERATE_TYPE='OutStock'  AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ");");
+                    /*String  LEAVE_FACTORY_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
                                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c + " AND (a.SHOP_NO = 'DZCP901' OR a.SHOP_NO = 'DZCP9' ) "
                                         + "AND a.OPERATE_TYPE='OutStock'  AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ")";
-                DbUtil.executeUpdate(LEAVE_FACTORY_TIMESql);
-                log.info("sql: {}",LEAVE_FACTORY_TIMESql);
+                    DbUtil.executeUpdate(LEAVE_FACTORY_TIMESql);
+                    log.info("sql: {}",LEAVE_FACTORY_TIMESql);*/
                 }
             }
         }
+
+        if (sb.length() > 0) {
+            DbUtil.executeBatchUpdate(sb.toString());
+        }
+
         System.out.println("end" + System.currentTimeMillis());
     }
 }
