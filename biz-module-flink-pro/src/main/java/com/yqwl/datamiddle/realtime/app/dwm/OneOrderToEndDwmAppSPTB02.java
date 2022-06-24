@@ -49,7 +49,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
-        //kafka消费源相关参数配置
+        //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("cdc.mysql.hostname"))
@@ -64,12 +64,11 @@ public class OneOrderToEndDwmAppSPTB02 {
 
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
-
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndUpdateProcess = mysqlSourceStream.process(new ProcessFunction<String, OotdTransition>() {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
-                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
+                DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
                 OotdTransition ootdTransition = new OotdTransition();
                 String cjsdbh = dwmSptb02.getCJSDBH();                                  //结算单编号
                 String vvin = dwmSptb02.getVVIN();                                      //底盘号
