@@ -299,12 +299,12 @@ public class WaybillDwmAppSptb02Simple {
                 KafkaTopicConst.DWM_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
 
-        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwmSptb02Simple").name("sinkKafkaDwmSptb02Simple");
 
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getSql(DwmSptb02.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).uid("baseStationDataSink1").name("baseStationDataSink1");
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).uid("sinkMysqlDwmSptb02Simple").name("sinkMysqlDwmSptb02Simple");
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("sptb02-sink-mysql-dwm");

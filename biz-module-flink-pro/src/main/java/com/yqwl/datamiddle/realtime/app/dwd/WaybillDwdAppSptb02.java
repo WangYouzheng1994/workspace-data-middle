@@ -409,7 +409,7 @@ public class WaybillDwdAppSptb02 {
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02_TEST));
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
-        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka").name("dwd-sink-kafka");
+        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka-sptb02").name("dwd-sink-kafka-sptb02");
 
 
         log.info("将处理完的数据保存到mysql中");
@@ -426,7 +426,7 @@ public class WaybillDwdAppSptb02 {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-mysql").name("sink-mysql");
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-dwd-mysql-sptb02").name("sink-dwd-mysql-sptb02");
 
 
         env.execute("sptb02-sink-kafka-dwd");

@@ -141,7 +141,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC));
-        mapEpcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        mapEpcJson.addSink(sinkKafka).uid("sinkKafkaDwdEpc").name("sinkKafkaDwdEpc");
 
         //===================================sink mysql=======================================================//
         //组装sql

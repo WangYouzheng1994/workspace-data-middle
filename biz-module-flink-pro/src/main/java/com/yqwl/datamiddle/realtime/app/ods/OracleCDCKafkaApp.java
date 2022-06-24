@@ -86,7 +86,7 @@ public class OracleCDCKafkaApp {
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
 
         //输出到kafka
-        oracleSourceStream.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
+        oracleSourceStream.addSink(sinkKafka).uid("sink-Kafka-cdc_vlms_unite_oracle").name("sink-Kafka-cdc_vlms_unite_oracle");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");
