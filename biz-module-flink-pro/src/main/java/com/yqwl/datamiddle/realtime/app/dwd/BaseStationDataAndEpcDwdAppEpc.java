@@ -124,18 +124,6 @@ public class BaseStationDataAndEpcDwdAppEpc {
             }
         }).uid("epcProcess").name("epcProcess");
 
-        // 4.指定事件时间字段
-        // DwdBaseStationDataEpc指定事件时间
-      /*  SingleOutputStreamOperator<DwdBaseStationDataEpc> dwdBaseStationDataEpcWithTS = epcProcess.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<DwdBaseStationDataEpc>forBoundedOutOfOrderness(Duration.ofSeconds(5)))
-                        .withTimestampAssigner(new SerializableTimestampAssigner<DwdBaseStationDataEpc>() {
-                            @Override
-                            public long extractTimestamp(DwdBaseStationDataEpc dwdBaseStationDataEpc, long l) {
-                                return dwdBaseStationDataEpc.getWAREHOUSE_CREATETIME();
-                            }
-                        })).uid("assIgnDwdBaseStationDataEpcEventTime").name("assIgnDwdBaseStationDataEpcEventTime");
-*/
-
         // 5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapEpc = epcProcess.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station())
                 .uid("mapEpc").name("mapEpc");
@@ -150,7 +138,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
-                KafkaUtil.KAFKA_SERVER,
+                props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC));
         mapEpcJson.addSink(sinkKafka).uid("sinkKafka").name("sinkKafka");
