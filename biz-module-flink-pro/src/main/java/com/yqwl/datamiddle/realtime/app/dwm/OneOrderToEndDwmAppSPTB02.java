@@ -104,6 +104,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                 Long warehouse_createtime = dwmSptb02.getWAREHOUSE_CREATETIME();        //记录创建时间
                 Long warehouse_updatetime = dwmSptb02.getWAREHOUSE_UPDATETIME();        //记录更新时间
                 String host_com_code = dwmSptb02.getHOST_COM_CODE();                    //主机公司代码
+                String base_code = dwmSptb02.getBASE_CODE();                            //基地代码
+                String base_name = dwmSptb02.getBASE_NAME();                            //基地名称
                 ootdTransition.setWAREHOUSE_CREATETIME(warehouse_createtime);           //记录创建时间
                 ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           //记录更新时间
 
@@ -112,6 +114,12 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ootdTransition.setCJSDBH(cjsdbh);
                     if (StringUtils.isNotBlank(vehicle_code)) {
                         ootdTransition.setVEHICLE_CODE(vehicle_code);
+                    }
+                    if (StringUtils.isNotBlank(base_code)){
+                        ootdTransition.setBASE_CODE(base_code);
+                    }
+                    if (StringUtils.isNotBlank(base_name)){
+                        ootdTransition.setBASE_NAME(base_name);
                     }
                     if (StringUtils.isNotBlank(vvin)) {
                         ootdTransition.setVVIN(vvin);
@@ -260,9 +268,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         "IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
                         "IN_END_WATERWAY_TIME, UNLOAD_SHIP_TIME, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME, BRAND, " +
                         "DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
-                        "DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME )\n" +
+                        "DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME )\n" +
                         "VALUES\n" +
-                        "        ( ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? ,?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
                         "       VEHICLE_CODE=?,VEHICLE_NAME=?, VEHICLE_RECEIVING_TIME=?, TASK_NO=?, PLAN_RELEASE_TIME=?, \n " +
                         " STOWAGE_NOTE_NO=?, ASSIGN_TIME=?, CARRIER_NAME=?, ACTUAL_OUT_TIME=?, SHIPMENT_TIME=? ,TRANSPORT_VEHICLE_NO=?, START_CITY_NAME=?, END_CITY_NAME=?, VDWDM=?, DEALER_NAME=?, \n" +
@@ -271,7 +279,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_START_WATERWAY_TIME = ?, " +
                         " END_START_WATERWAY_TIME = ?, IN_END_WATERWAY_TIME = ?, UNLOAD_SHIP_TIME = ? , WAREHOUSE_CREATETIME = ?, WAREHOUSE_UPDATETIME = ? , BRAND = ?, " +
                         " DISTRIBUTE_BOARD_TIME = ?, OUT_DISTRIBUTE_TIME = ?, DISTRIBUTE_ASSIGN_TIME = ? , DISTRIBUTE_CARRIER_NAME = ?, DISTRIBUTE_VEHICLE_NO = ? , DISTRIBUTE_SHIPMENT_TIME = ? ," +
-                        " DOT_SITE_TIME = ?, FINAL_SITE_TIME = ?",
+                        " DOT_SITE_TIME = ?, FINAL_SITE_TIME = ? , BASE_CODE = ? ,BASE_NAME= ? ",
                 (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
@@ -290,6 +298,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vdwdm = ootd.getVDWDM();                                      //经销商代码(名称)
                     String dealer_name = ootd.getDEALER_NAME();                          //经销商代码(名称)
                     String cjsdbh = ootd.getCJSDBH();                                    //结算单编号
+                    String base_code = ootd.getBASE_CODE();                              //基地代码
+                    String base_name = ootd.getBASE_NAME();                              //基地名称
 
                     //新添加铁水出入站台/港口的十二个字段
                     String start_platform_name = ootd.getSTART_PLATFORM_NAME();          //铁路开始站台
@@ -309,14 +319,14 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(1, vvin);                        //底盘号
                     ps.setString(2, vehicle_code);               //车型
                     ps.setString(3, vehicle_name);               //车型名称
-                    ps.setLong(4, ddjrq);                      //整车物流接收STD日
+                    ps.setLong  (4, ddjrq);                      //整车物流接收STD日
                     ps.setString(5, cjhdh);                      //任务单号
-                    ps.setLong(6, dpzrq);                      //配板日期
+                    ps.setLong  (6, dpzrq);                      //配板日期
                     ps.setString(7, cpzdbh);                     //配载单编号
-                    ps.setLong(8, assign_time);                //指派运输商日期
+                    ps.setLong  (8, assign_time);                //指派运输商日期
                     ps.setString(9, assign_name);                //指派承运商名称
-                    ps.setLong(10, actual_out_time);            //出库日期
-                    ps.setLong(11, shipment_time);              //起运日期 公路/铁路
+                    ps.setLong  (10, actual_out_time);            //出库日期
+                    ps.setLong  (11, shipment_time);              //起运日期 公路/铁路
                     ps.setString(12, vjsydm);                     //运输车号
                     ps.setString(13, start_city_name);            //始发城市
                     ps.setString(14, end_city_name);              //目的城市
@@ -328,75 +338,81 @@ public class OneOrderToEndDwmAppSPTB02 {
                     //新添加铁水出入站台/港口的十二个字段
                     ps.setString(18, start_platform_name);        //铁路开始站台
                     ps.setString(19, end_platform_name);          //铁路目的站台
-                    ps.setLong(20, in_start_platform_time);       //铁路入开始站台时间
-                    ps.setLong(21, out_start_platform_time);      //铁路出开始站台时间
-                    ps.setLong(22, in_end_platform_time);         //铁路入目的站台时间
-                    ps.setLong(23, unload_railway_time);          //铁路卸车时间
+                    ps.setLong  (20, in_start_platform_time);       //铁路入开始站台时间
+                    ps.setLong  (21, out_start_platform_time);      //铁路出开始站台时间
+                    ps.setLong  (22, in_end_platform_time);         //铁路入目的站台时间
+                    ps.setLong  (23, unload_railway_time);          //铁路卸车时间
                     ps.setString(24, start_waterway_name);        //水路开始港口名称
                     ps.setString(25, end_waterway_name);          //水路目的港口名称
-                    ps.setLong(26, in_start_waterway_time);       //水路入开始港口时间
-                    ps.setLong(27, end_start_waterway_time);      //水路出开始港口时间
-                    ps.setLong(28, in_end_waterway_time);         //水路入目的港口时间
-                    ps.setLong(29, unload_ship_time);             //水路卸船时间
-                    ps.setLong(30, ootd.getWAREHOUSE_CREATETIME());//数据创建时间
-                    ps.setLong(31, ootd.getWAREHOUSE_UPDATETIME());//数据更新时间
+                    ps.setLong  (26, in_start_waterway_time);       //水路入开始港口时间
+                    ps.setLong  (27, end_start_waterway_time);      //水路出开始港口时间
+                    ps.setLong  (28, in_end_waterway_time);         //水路入目的港口时间
+                    ps.setLong  (29, unload_ship_time);             //水路卸船时间
+                    ps.setLong  (30, ootd.getWAREHOUSE_CREATETIME());//数据创建时间
+                    ps.setLong  (31, ootd.getWAREHOUSE_UPDATETIME());//数据更新时间
                     ps.setString(32, ootd.getBRAND());             //主机公司代码
 
                     //========================末端配送===============================//
-                    ps.setLong(33, ootd.getDISTRIBUTE_BOARD_TIME());
-                    ps.setLong(34, ootd.getOUT_DISTRIBUTE_TIME());
-                    ps.setLong(35, ootd.getDISTRIBUTE_ASSIGN_TIME());
+                    ps.setLong  (33, ootd.getDISTRIBUTE_BOARD_TIME());
+                    ps.setLong  (34, ootd.getOUT_DISTRIBUTE_TIME());
+                    ps.setLong  (35, ootd.getDISTRIBUTE_ASSIGN_TIME());
                     ps.setString(36, ootd.getDISTRIBUTE_CARRIER_NAME());
                     ps.setString(37, ootd.getDISTRIBUTE_VEHICLE_NO());
-                    ps.setLong(38, ootd.getDISTRIBUTE_SHIPMENT_TIME());
-                    ps.setLong(39, ootd.getDOT_SITE_TIME());
-                    ps.setLong(40, ootd.getFINAL_SITE_TIME());
+                    ps.setLong  (38, ootd.getDISTRIBUTE_SHIPMENT_TIME());
+                    ps.setLong  (39, ootd.getDOT_SITE_TIME());
+                    ps.setLong  (40, ootd.getFINAL_SITE_TIME());
+                    //-----------------------尾部新加的Base_code,base_name-------------//
+                    ps.setString(41, base_code);
+                    ps.setString(42, base_name);
 
 
                     //on duplicate key
-                    ps.setString(41, vehicle_code);               //车型
-                    ps.setString(42, vehicle_name);               //车型名称
-                    ps.setLong(42, ootd.getDDJRQ());              //整车物流接收STD日
-                    ps.setString(43, cjhdh);                      //任务单号
-                    ps.setLong(45, dpzrq);                        //配板日期
-                    ps.setString(46, cpzdbh);                     //配载单编号
-                    ps.setLong(47, assign_time);                  //指派运输商日期
-                    ps.setString(48, assign_name);                //指派承运商名称
-                    ps.setLong(48, actual_out_time);              //出库日期
-                    ps.setLong(49, shipment_time);                //起运日期 公路/铁路
-                    ps.setString(50, vjsydm);                     //运输车号
-                    ps.setString(51, start_city_name);            //始发城市
-                    ps.setString(52, end_city_name);              //目的城市
-                    ps.setString(53, vdwdm);                //经销商代码(名称)
-                    ps.setString(54, dealer_name);                //经销商代码(名称)
-                    ps.setString(55, cjsdbh);                     //结算单编号
-                    ps.setString(56, cjsdbh);                     //结算单编号
+                    ps.setString(43, vehicle_code);               //车型
+                    ps.setString(44, vehicle_name);               //车型名称
+                    ps.setLong  (45, ootd.getDDJRQ());              //整车物流接收STD日
+                    ps.setString(46, cjhdh);                      //任务单号
+                    ps.setLong  (47, dpzrq);                        //配板日期
+                    ps.setString(48, cpzdbh);                     //配载单编号
+                    ps.setLong  (49, assign_time);                  //指派运输商日期
+                    ps.setString(50, assign_name);                //指派承运商名称
+                    ps.setLong  (51, actual_out_time);              //出库日期
+                    ps.setLong  (52, shipment_time);                //起运日期 公路/铁路
+                    ps.setString(53, vjsydm);                     //运输车号
+                    ps.setString(54, start_city_name);            //始发城市
+                    ps.setString(55, end_city_name);              //目的城市
+                    ps.setString(56, vdwdm);                //经销商代码(名称)
+                    ps.setString(57, dealer_name);                //经销商代码(名称)
+                    ps.setString(58, cjsdbh);                     //结算单编号
+                    ps.setString(59, cjsdbh);                     //结算单编号
 
                     //新添加铁水出入站台/港口的十二个字段
-                    ps.setString(57, start_platform_name);        //铁路开始站台
-                    ps.setString(58, end_platform_name);          //铁路目的站台
-                    ps.setLong(59, in_start_platform_time);       //铁路入开始站台时间
-                    ps.setLong(60, out_start_platform_time);      //铁路出开始站台时间
-                    ps.setLong(61, in_end_platform_time);         //铁路入目的站台时间
-                    ps.setLong(62, unload_railway_time);          //铁路卸车时间
-                    ps.setString(63, start_waterway_name);        //水路开始港口名称
-                    ps.setString(64, end_waterway_name);          //水路目的港口名称
-                    ps.setLong(65, in_start_waterway_time);       //水路入开始港口时间
-                    ps.setLong(66, end_start_waterway_time);      //水路出开始港口时间
-                    ps.setLong(67, in_end_waterway_time);         //水路入目的港口时间
-                    ps.setLong(68, unload_ship_time);             //水路卸船时间
-                    ps.setLong(69, ootd.getWAREHOUSE_CREATETIME());//创建时间
-                    ps.setLong(70, ootd.getWAREHOUSE_UPDATETIME());//更新时间
-                    ps.setString(71, ootd.getBRAND());             //主机公司代码
+                    ps.setString(60, start_platform_name);        //铁路开始站台
+                    ps.setString(61, end_platform_name);          //铁路目的站台
+                    ps.setLong  (62, in_start_platform_time);       //铁路入开始站台时间
+                    ps.setLong  (63, out_start_platform_time);      //铁路出开始站台时间
+                    ps.setLong  (64, in_end_platform_time);         //铁路入目的站台时间
+                    ps.setLong  (65, unload_railway_time);          //铁路卸车时间
+                    ps.setString(66, start_waterway_name);        //水路开始港口名称
+                    ps.setString(67, end_waterway_name);          //水路目的港口名称
+                    ps.setLong  (68, in_start_waterway_time);       //水路入开始港口时间
+                    ps.setLong  (69, end_start_waterway_time);      //水路出开始港口时间
+                    ps.setLong  (70, in_end_waterway_time);         //水路入目的港口时间
+                    ps.setLong  (71, unload_ship_time);             //水路卸船时间
+                    ps.setLong  (72, ootd.getWAREHOUSE_CREATETIME());//创建时间
+                    ps.setLong  (73, ootd.getWAREHOUSE_UPDATETIME());//更新时间
+                    ps.setString(74, ootd.getBRAND());             //主机公司代码
 
-                    ps.setLong(72, ootd.getDISTRIBUTE_BOARD_TIME());
-                    ps.setLong(73, ootd.getOUT_DISTRIBUTE_TIME());
-                    ps.setLong(74, ootd.getDISTRIBUTE_ASSIGN_TIME());
-                    ps.setString(75, ootd.getDISTRIBUTE_CARRIER_NAME());
-                    ps.setString(76, ootd.getDISTRIBUTE_VEHICLE_NO());
-                    ps.setLong(77, ootd.getDISTRIBUTE_SHIPMENT_TIME());
-                    ps.setLong(78, ootd.getDOT_SITE_TIME());
-                    ps.setLong(79, ootd.getFINAL_SITE_TIME());
+                    ps.setLong  (75, ootd.getDISTRIBUTE_BOARD_TIME());
+                    ps.setLong  (76, ootd.getOUT_DISTRIBUTE_TIME());
+                    ps.setLong  (77, ootd.getDISTRIBUTE_ASSIGN_TIME());
+                    ps.setString(78, ootd.getDISTRIBUTE_CARRIER_NAME());
+                    ps.setString(79, ootd.getDISTRIBUTE_VEHICLE_NO());
+                    ps.setLong  (80, ootd.getDISTRIBUTE_SHIPMENT_TIME());
+                    ps.setLong  (81, ootd.getDOT_SITE_TIME());
+                    ps.setLong  (82, ootd.getFINAL_SITE_TIME());
+                    //-----------------------尾部新加的Base_code,base_name-------------//
+                    ps.setString(83, base_code);
+                    ps.setString(84, base_name);
 
                 },
                 new JdbcExecutionOptions.Builder()

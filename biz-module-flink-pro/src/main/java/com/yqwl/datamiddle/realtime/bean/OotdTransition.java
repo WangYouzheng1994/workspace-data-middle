@@ -55,6 +55,17 @@ public class OotdTransition {
     private String BDS_BASE_NAME;
 
     /**
+     * dwm新增-发车基地名称
+     */
+
+    private String BASE_NAME;
+
+    /**
+     * 基地代码
+     */
+    private String BASE_CODE;
+
+    /**
      * 整车物流接受STD日期
      */
     private Long DDJRQ;
