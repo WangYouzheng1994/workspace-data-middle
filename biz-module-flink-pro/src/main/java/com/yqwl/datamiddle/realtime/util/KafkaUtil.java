@@ -64,6 +64,8 @@ public class KafkaUtil {
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, server);
         props.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
+        props.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "1");
+        props.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 12 * 60 * 1000 + "");
         return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE, 20);
