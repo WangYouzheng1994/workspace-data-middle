@@ -59,7 +59,7 @@ public class DimProvinceWideApp {
 
       /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
-        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint/kafka20");
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/

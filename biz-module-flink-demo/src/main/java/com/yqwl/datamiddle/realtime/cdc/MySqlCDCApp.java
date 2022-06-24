@@ -45,7 +45,7 @@ public class MySqlCDCApp {
         // enable checkpoint
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
-        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
         ck.setCheckpointTimeout(60000);

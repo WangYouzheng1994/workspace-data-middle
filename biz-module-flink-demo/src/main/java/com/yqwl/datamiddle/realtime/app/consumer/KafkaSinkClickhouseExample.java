@@ -45,7 +45,7 @@ public class KafkaSinkClickhouseExample {
         //触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
         ck.setCheckpointInterval(10000);
         //采用精确一次模式
-        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //检查点保存路径
         //ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】

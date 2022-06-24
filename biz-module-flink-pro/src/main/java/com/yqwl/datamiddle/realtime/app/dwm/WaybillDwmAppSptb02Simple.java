@@ -61,8 +61,8 @@ public class WaybillDwmAppSptb02Simple {
         log.info("初始化流处理环境完成");
         //设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
-        ck.setCheckpointInterval(480000);
-        ck.setCheckpointingMode(CheckpointingMode.AT_LEAST_ONCE);
+        ck.setCheckpointInterval(300000);
+        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //System.setProperty("HADOOP_USER_NAME", "yunding");

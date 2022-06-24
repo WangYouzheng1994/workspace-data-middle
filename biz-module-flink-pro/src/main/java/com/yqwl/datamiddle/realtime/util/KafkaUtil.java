@@ -68,7 +68,7 @@ public class KafkaUtil {
         props.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 12 * 60 * 1000 + "");
-        return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE, 20);
+        return new FlinkKafkaProducer<T>(topic, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.AT_LEAST_ONCE, 20);
     }
 
     /**
@@ -84,7 +84,7 @@ public class KafkaUtil {
         props.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
         //设置生产数据的超时时间
         props.setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 12 * 60 * 1000 + "");
-        return new FlinkKafkaProducer<T>(DEFAULT_TOPIC, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.EXACTLY_ONCE, 20);
+        return new FlinkKafkaProducer<T>(DEFAULT_TOPIC, kafkaSerializationSchema, props, FlinkKafkaProducer.Semantic.AT_LEAST_ONCE, 20);
     }
 
     /**
