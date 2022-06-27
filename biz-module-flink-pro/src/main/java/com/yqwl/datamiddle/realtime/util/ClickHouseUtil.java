@@ -58,7 +58,7 @@ public class ClickHouseUtil {
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(2000)
                         .withMaxRetries(5)
-                        .withBatchIntervalMs(200)
+                        .withBatchIntervalMs(5000)
                         .build(),
                     PropertiesUtil.getClickhouseJDBCConnection()
                 );
