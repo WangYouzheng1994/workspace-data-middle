@@ -76,7 +76,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
                 Long ddjrq1 = dwmSptb02.getDDJRQ();
                 if (Objects.nonNull(ddjrq1) && ddjrq1 > 0) {
-
+                    if (ddjrq1 >= START && ddjrq1 <= END) {
                         OotdTransition ootdTransition = new OotdTransition();
                         String cjsdbh = dwmSptb02.getCJSDBH();                                  //结算单编号
                         String vvin = dwmSptb02.getVVIN();                                      //底盘号
@@ -255,7 +255,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         //对象null值进行默认值赋值
                         OotdTransition bean = JsonPartUtil.getBean(ootdTransition);
                         out.collect(bean);
-
+                    }
                 }
             }
         }).uid("oneOrderToEndUpdateProcess").name("oneOrderToEndUpdateProcess");
