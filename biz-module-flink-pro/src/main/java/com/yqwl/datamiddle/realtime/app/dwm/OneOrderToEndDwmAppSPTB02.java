@@ -106,7 +106,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 String base_code = dwmSptb02.getBASE_CODE();                            //基地代码
                 String base_name = dwmSptb02.getBASE_NAME();                            //基地名称
                 ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           //记录更新时间
-
+                ootdTransition.setVVIN(vvin);                                           //vin码 先赋值
 
                 if (StringUtils.isNotBlank(cjsdbh) && "G".equals(vysfs) && "T1".equals(highwayWarehouseType)) {
                     ootdTransition.setCJSDBH(cjsdbh);
@@ -118,9 +118,6 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
                     if (StringUtils.isNotBlank(base_name)) {
                         ootdTransition.setBASE_NAME(base_name);
-                    }
-                    if (StringUtils.isNotBlank(vvin)) {
-                        ootdTransition.setVVIN(vvin);
                     }
                     if (ddjrq != null) {
                         ootdTransition.setDDJRQ(ddjrq);
