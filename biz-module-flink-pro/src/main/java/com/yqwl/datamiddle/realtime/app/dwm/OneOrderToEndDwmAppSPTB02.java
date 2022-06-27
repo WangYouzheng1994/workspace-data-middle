@@ -204,7 +204,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                             ootdTransition.setIN_END_WATERWAY_TIME(in_end_waterway_time);        //水路的入目的港口时间
                         }
                         if (unload_ship_time != null) {
-                            ootdTransition.setUNLOAD_RAILWAY_TIME(unload_ship_time);             //水路的卸船时间
+                            ootdTransition.setUNLOAD_SHIP_TIME(unload_ship_time);             //水路的卸船时间
                         }
                     }
 
