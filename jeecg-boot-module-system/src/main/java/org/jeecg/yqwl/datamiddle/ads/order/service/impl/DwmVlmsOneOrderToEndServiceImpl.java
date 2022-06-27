@@ -72,8 +72,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             this.formatTime(params);
 
             //查询配载单编号
-            String stowageNoteNo = params.getStowageNoteNo();
-/*            //计算同板数量
+/*            String stowageNoteNo = params.getStowageNoteNo();
+            //计算同板数量
             if (StringUtils.isNotBlank(stowageNoteNo)) {
 //                if (samePlateNumMap.containsKey(stowageNoteNo)) {
 //                    params.setSamePlateNum(samePlateNumMap.get(stowageNoteNo));
@@ -98,12 +98,38 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                         (item) -> {
                             List<String> trafficLists = new ArrayList();
                             item.getValue().stream().forEach(it -> trafficLists.add(it.getTrafficType()));
-                            oneOrderToEndList.get(listMap.get(item.getKey())).setTrafficType(StringUtils.join(trafficLists, ","));
+                            oneOrderToEndList.get(listMap.get(item.getKey())).setTrafficType(formatTrafficTypeToChinese(trafficLists));
                         }
                 );
             }
         }
         return oneOrderToEndList;
+    }
+
+    /**
+     * 英文运输方式
+     *
+     * @param engTrafficLists
+     * @return
+     */
+    private String formatTrafficTypeToChinese(List<String> engTrafficLists) {
+        if (CollectionUtils.isNotEmpty(engTrafficLists)) {
+            String eng = null;
+            for (int i = 0; i < engTrafficLists.size(); i++) {
+                eng = engTrafficLists.get(i);
+                if (StringUtils.isNotBlank(eng)) {
+                    switch (eng) {
+                        case "G" : engTrafficLists.set(i, "公");break;
+                        case "T" : engTrafficLists.set(i, "铁");break;
+                        case "S" : engTrafficLists.set(i, "水");break;
+                        default: engTrafficLists.set(i, "未知");break;
+                    }
+                }
+            }
+            return StringUtils.join(engTrafficLists, "，");
+        } else {
+            return "";
+        }
     }
 
     /**

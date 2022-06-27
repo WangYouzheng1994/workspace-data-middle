@@ -76,7 +76,7 @@
             dwm_vlms_one_order_to_end TOEND
         left join A on TOEND.STOWAGE_NOTE_NO = A.STOWAGE_NOTE_NO
         <include refid="where_count_one_to_end" />
-        order by TOEND.CP9_OFFLINE_TIME desc
+        order by TOEND.VEHICLE_RECEIVING_TIME desc
 
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
