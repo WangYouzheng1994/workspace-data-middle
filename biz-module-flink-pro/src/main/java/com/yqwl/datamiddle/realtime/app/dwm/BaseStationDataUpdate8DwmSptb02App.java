@@ -65,7 +65,7 @@ public class BaseStationDataUpdate8DwmSptb02App {
         baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");
 
 
-        log.info("消费dwd_vlms_base_station_data更新dwm_vlms_sptb02");
-        env.execute("消费dwd_vlms_base_station_data更新dwm_vlms_sptb02");
+        log.info("消费dwdBsd更新dwm_vlms_sptb02,8个时间节点");
+        env.execute("消费dwdBsd更新dwm_vlms_sptb02,8个时间节点");
     }
 }
