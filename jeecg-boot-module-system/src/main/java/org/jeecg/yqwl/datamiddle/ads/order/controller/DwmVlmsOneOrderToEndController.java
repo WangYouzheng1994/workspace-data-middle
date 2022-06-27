@@ -145,7 +145,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
     @ApiOperation(value = "导出", notes = "导出")
     @PostMapping(value = "/exportXls")
     public void exportXls(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
-//	  System.out.println(System.currentTimeMillis());
         // 创建工作簿
         SXSSFWorkbook wb = new SXSSFWorkbook();
         // 在工作簿中创建sheet页
@@ -153,7 +152,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         // 创建行,从0开始
         SXSSFRow row = sheet.createRow(0);
         // 获取表头(前端页面一共有44个字段,entity一共是57个字段)
-//	  Field[] fileds = DwmVlmsOneOrderToEnd.class.getDeclaredFields();
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "CP9下线接车日期", "出厂日期", "入库日期", "入库仓库", "任务单号",
                 "整车物流接收STD日期", "配板日期", "配板单号", "运输方式", "指派日期", "指派承运商名称", "出库日期", "起运日期-公路/铁路",
                 "运输车号", "同板数量", "轿运车车位数", "始发城市", "目的城市", "经销商代码", "始发港名称", "到达始发港口时间/入港时间",
@@ -194,8 +192,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         int rowNum = 1;
 
         Integer maxSize = 150000;
-        Integer currentSize = 0;
 
+        SXSSFRow row1 = null;
         do {
             queryCriteria.setPageNo(pageNo);
 
@@ -203,7 +201,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
             for (DwmVlmsOneOrderToEnd item : pageList) {
                 // 时间字段转换成年月日时分秒类型
-                SXSSFRow row1 = sheet.createRow(rowNum);
+                row1 = sheet.createRow(rowNum);
                 // vin
                 row1.createCell(0).setCellValue(item.getVin());
                 // brand
@@ -345,8 +343,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             } else {
                 pageNo++;
             }
-            currentSize++;
-            if (currentSize >= maxSize) {
+
+            if (rowNum >= maxSize) {
                 intervalFlag = false;
             }
         } while (intervalFlag);
