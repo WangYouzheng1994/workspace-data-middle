@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
-    <select id="getSptbTrafficTypeByVin" resultType="String">
-        select TRAFFIC_TYPE from dwm_vlms_sptb02 where VVIN = #{vvin} order by CJSDBH
+    <resultMap id="sptb02Result" type="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
+        <result column="TRAFFIC_TYPE" property="trafficType" />
+    </resultMap>
+    <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02" parameterType="java.util.List" >
+        select TRAFFIC_TYPE, VVIN, CJSDBH
+        from
+             dwm_vlms_sptb02
+        <where>
+            VVIN in
+            <foreach item="vin" collection="vins" open="(" separator="," close=")">
+                #{vin}
+            </foreach>
+        </where>
+        order by
+            CJSDBH
     </select>
 
     <!--clickhouse插入数据    -->

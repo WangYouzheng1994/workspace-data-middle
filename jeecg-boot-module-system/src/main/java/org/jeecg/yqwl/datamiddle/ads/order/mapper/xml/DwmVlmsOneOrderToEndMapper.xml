@@ -3,6 +3,8 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
     <sql id="where_count_one_to_end">
         <where>
+            BRAND = '1'
+
             <choose>
                 <when test="params.vinList != null or params.selections != null ">
                     and VIN IN
@@ -49,6 +51,7 @@
             <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
+
         </where>
     </sql>
 

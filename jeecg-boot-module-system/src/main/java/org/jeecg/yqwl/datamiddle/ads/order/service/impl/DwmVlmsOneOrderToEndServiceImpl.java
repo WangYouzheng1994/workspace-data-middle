@@ -2,8 +2,10 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
@@ -14,9 +16,12 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
 @DS("slave")
@@ -37,6 +42,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     /**
      * 按条件进行分页查询
+     *
      * @param queryCriteria
      * @return
      */
@@ -48,12 +54,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
-        //遍历list,并查询出同板数量赋值
-        Map<String, Integer> samePlateNumMap = new HashMap<>();
+        //遍历list VIN码:list下标
+        Map<String, Integer> listMap = new HashMap<>();
 
         DwmVlmsOneOrderToEnd params = null;
-        for ( int i = 0; i < oneOrderToEndList.size(); i ++ ) {
-           params = oneOrderToEndList.get(i);
+        for (int i = 0; i < oneOrderToEndList.size(); i++) {
+            params = oneOrderToEndList.get(i);
+            listMap.put(params.getVin(), i);
             // 添加逻辑  如果是时间字段  需要在得到的值进行-8小时处理
             // cp9OfflineTime,leaveFactoryTime,inSiteTime,inWarehouseName,taskNo,vehicleReceivingTime,   4
             // stowageNoteTime,stowageNoteNo,trafficType,assignTime,carrierName,actualOutTime,shipmentTime,transportVehicleNo,samePlateNum,   4
@@ -66,7 +73,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
             //查询配载单编号
             String stowageNoteNo = params.getStowageNoteNo();
-            //计算同板数量
+/*            //计算同板数量
             if (StringUtils.isNotBlank(stowageNoteNo)) {
 //                if (samePlateNumMap.containsKey(stowageNoteNo)) {
 //                    params.setSamePlateNum(samePlateNumMap.get(stowageNoteNo));
@@ -77,11 +84,23 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //                        params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
 //                    }
 //                }
-            }
+            }*/
+        }
 
-            if (StringUtils.isNotBlank(params.getVin())) {
-                List<String> sptbTrafficTypeByVin = this.dwmVlmsSptb02Mapper.getSptbTrafficTypeByVin(params.getVin());
-                params.setTrafficType(StringUtils.join(sptbTrafficTypeByVin, ","));
+        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
+            // 运输方式拼接显示处理。
+            ArrayList<String> vinList = oneOrderToEndList.stream().collect(ArrayList::new, (list, item) -> list.add(item.getVin()), ArrayList::addAll);
+            if (CollectionUtils.isNotEmpty(vinList)) {
+                List<DwmVlmsSptb02> sptbTrafficTypeByVin = this.dwmVlmsSptb02Mapper.getSptbTrafficTypeByVin(vinList);
+                // group concat
+                // sptbTrafficTypeByVin.stream().collect(groupingBy())
+                sptbTrafficTypeByVin.stream().collect(groupingBy(DwmVlmsSptb02::getVvin)).entrySet().stream().forEach(
+                        (item) -> {
+                            List<String> trafficLists = new ArrayList();
+                            item.getValue().stream().forEach(it -> trafficLists.add(it.getTrafficType()));
+                            oneOrderToEndList.get(listMap.get(item.getKey())).setTrafficType(StringUtils.join(trafficLists, ","));
+                        }
+                );
             }
         }
         return oneOrderToEndList;
@@ -93,28 +112,28 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @param params rows of db
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
-        if ( params.getCp9OfflineTime() != 0 ) {
+        if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
             params.setCp9OfflineTime(cp9OfflineTime);
         }
 
         //leaveFactoryTime
-        if ( params.getLeaveFactoryTime() != 0) {
+        if (params.getLeaveFactoryTime() != 0) {
             Long leaveFactoryTime = params.getLeaveFactoryTime() - 28800000L;
             params.setLeaveFactoryTime(leaveFactoryTime);
         }
         //inSiteTime
-        if ( params.getInSiteTime() != 0) {
+        if (params.getInSiteTime() != 0) {
             Long inSiteTime = params.getInSiteTime() - 28800000L;
             params.setInSiteTime(inSiteTime);
         }
         //vehicleReceivingTime
-        if ( params.getVehicleReceivingTime() != 0) {
+        if (params.getVehicleReceivingTime() != 0) {
             Long vehicleReceivingTime = params.getVehicleReceivingTime() - 28800000L;
             params.setVehicleReceivingTime(vehicleReceivingTime);
         }
         //stowageNoteTime
-        if ( params.getStowageNoteTime() != 0) {
+        if (params.getStowageNoteTime() != 0) {
             Long stowageNoteTime = params.getStowageNoteTime() - 28800000L;
             params.setStowageNoteTime(stowageNoteTime);
         }
@@ -124,7 +143,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setAssignTime(assignTime);
         }
         //actualOutTime
-        if ( params.getActualOutTime() != 0) {
+        if (params.getActualOutTime() != 0) {
             Long actualOutTime = params.getActualOutTime() - 28800000L;
             params.setActualOutTime(actualOutTime);
         }
@@ -134,72 +153,72 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setShipmentTime(shipmentTime);
         }
         //inStartWaterwayTime,
-        if ( params.getInStartWaterwayTime() != 0 ) {
+        if (params.getInStartWaterwayTime() != 0) {
             Long inStartWaterwayTime = params.getInStartWaterwayTime() - 28800000L;
             params.setInStartWaterwayTime(inStartWaterwayTime);
         }
         // endStartWaterwayTime
-        if ( params.getEndStartWaterwayTime() != 0) {
+        if (params.getEndStartWaterwayTime() != 0) {
             Long endStartWaterwayTime = params.getEndStartWaterwayTime() - 28800000L;
             params.setEndStartWaterwayTime(endStartWaterwayTime);
         }
         //inEndWaterwayTime
-        if ( params.getInEndWaterwayTime() != 0) {
+        if (params.getInEndWaterwayTime() != 0) {
             Long inEndWaterwayTime = params.getInEndWaterwayTime() - 28800000L;
             params.setInEndWaterwayTime(inEndWaterwayTime);
         }
         // inStartPlatformTime
-        if ( params.getInStartPlatformTime() != 0 ) {
+        if (params.getInStartPlatformTime() != 0) {
             Long inStartPlatformTime = params.getInStartPlatformTime() - 28800000L;
             params.setInStartPlatformTime(inStartPlatformTime);
         }
         // outStartPlatformTime
-        if ( params.getOutStartPlatformTime() != 0) {
+        if (params.getOutStartPlatformTime() != 0) {
             Long outStartPlatformTime = params.getOutStartPlatformTime() - 28800000L;
             params.setOutStartPlatformTime(outStartPlatformTime);
         }
         // inEndPlatformTime,
-        if ( params.getInEndPlatformTime() != 0) {
+        if (params.getInEndPlatformTime() != 0) {
             Long inEndPlatformTime = params.getInEndPlatformTime() - 28800000L;
             params.setInEndPlatformTime(inEndPlatformTime);
         }
         // unloadShipTime,
-        if ( params.getUnloadShipTime() != 0) {
+        if (params.getUnloadShipTime() != 0) {
             Long unloadShipTime = params.getUnloadShipTime() - 28800000L;
             params.setUnloadShipTime(unloadShipTime);
         }
         // unloadRailwayTime,
-        if ( params.getUnloadRailwayTime() != 0) {
+        if (params.getUnloadRailwayTime() != 0) {
             Long unloadRailwayTime = params.getUnloadRailwayTime() - 28800000L;
             params.setUnloadRailwayTime(unloadRailwayTime);
         }
         // inDistributeTime,
-        if ( params.getInDistributeTime() != 0 ) {
+        if (params.getInDistributeTime() != 0) {
             Long inDistributeTime = params.getInDistributeTime() - 28800000L;
             params.setInDistributeTime(inDistributeTime);
         }
         // distributeAssignTime
-        if ( params.getDistributeAssignTime() != 0 ) {
+        if (params.getDistributeAssignTime() != 0) {
             Long distributeAssignTime = params.getDistributeAssignTime() - 28800000L;
             params.setDistributeAssignTime(distributeAssignTime);
         }
         //outDistributeTime
-        if ( params.getOutDistributeTime() != 0 ) {
+        if (params.getOutDistributeTime() != 0) {
             Long outDistributeTime = params.getOutDistributeTime() - 28800000L;
             params.setOutDistributeTime(outDistributeTime);
         }
         // distributeShipmentTime,
-        if ( params.getDistributeShipmentTime() != 0) {
+        if (params.getDistributeShipmentTime() != 0) {
             Long distributeShipmentTime = params.getDistributeShipmentTime() - 28800000L;
             params.setDistributeShipmentTime(distributeShipmentTime);
         }
         // dotSiteTime,
-        if ( params.getDotSiteTime() != 0) {
+        if (params.getDotSiteTime() != 0) {
             Long dotSiteTime = params.getDotSiteTime() - 28800000L;
             params.setDotSiteTime(dotSiteTime);
         }
         // finalSiteTime
-        if ( params.getFinalSiteTime() != 0) {
+        if (params.getFinalSiteTime() != 0) {
             Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
             params.setFinalSiteTime(finalSiteTime);
         }

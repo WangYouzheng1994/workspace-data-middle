@@ -123,8 +123,8 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     /**
      * 根据vin码获取 trafficType
      *
-     * @param vvin
+     * @param vins
      * @return
      */
-    List<String> getSptbTrafficTypeByVin(String vvin);
+    List<DwmVlmsSptb02> getSptbTrafficTypeByVin(List<String> vins);
 }
