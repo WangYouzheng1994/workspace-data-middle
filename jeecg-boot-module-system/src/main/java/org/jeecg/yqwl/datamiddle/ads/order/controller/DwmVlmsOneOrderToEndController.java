@@ -193,7 +193,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         // 设置新增数据行,从第一行开始
         int rowNum = 1;
 
-        Integer maxSize = 200000;
+        Integer maxSize = 150000;
         Integer currentSize = 0;
 
         do {
@@ -207,7 +207,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // vin
                 row1.createCell(0).setCellValue(item.getVin());
                 // brand
-                row1.createCell(1).setCellValue(item.getBrand());
+                row1.createCell(1).setCellValue(formatBrandToChinese(item.getBrand()));
                 // baseName
                 row1.createCell(2).setCellValue(item.getBaseName());
                 // vehicleName
@@ -410,6 +410,29 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         return Result.OK(page);
     }
 
+    /**
+     * 格式化品牌
+     * t === '1' ? '大众' : t === '2' ? '红旗' : t === '3' ? '马自达' : t
+     *
+     * @param brandEng
+     */
+    private String formatBrandToChinese(String brandEng) {
+        String value = "";
+
+        switch(brandEng) {
+            case "1" : value = "大众"; break;
+            case "2" : value = "红旗"; break;
+            case "3" : value = "马自达"; break;
+        }
+
+        return value;
+    }
+
+    /**
+     * 日期转换 统一减掉8小时，目前etl没处理好。
+     *
+     * @param queryCriteria
+     */
     private void formatQueryTime(GetQueryCriteria queryCriteria) {
         if (queryCriteria.getLeaveFactoryTimeStart() != null) {
             queryCriteria.setLeaveFactoryTimeStart(queryCriteria.getLeaveFactoryTimeStart() + 28800000);
