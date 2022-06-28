@@ -87,7 +87,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             }*/
         }
 
-        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
+       /* if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
             // 运输方式拼接显示处理。
             ArrayList<String> vinList = oneOrderToEndList.stream().collect(ArrayList::new, (list, item) -> list.add(item.getVin()), ArrayList::addAll);
             if (CollectionUtils.isNotEmpty(vinList)) {
@@ -102,7 +102,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                         }
                 );
             }
-        }
+        }*/
         return oneOrderToEndList;
     }
 
