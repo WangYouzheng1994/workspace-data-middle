@@ -58,7 +58,7 @@ public class WaybillDwmAppOOTD {
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .build();
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppOOTDMysqlSource").uid("WaybillDwmAppOOTDMysqlSource").name("WaybillDwmAppOOTDMysqlSource");
 
 
         //3.转实体类 BASE_STATION_DATA_EPC
@@ -68,7 +68,7 @@ public class WaybillDwmAppOOTD {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 return jsonObject.getObject("after", DwmOneOrderToEnd.class);
             }
-        }).uid("transitionDwmOneOrderToEnd").name("transitionDwmOneOrderToEnd");
+        }).uid("WaybillDwmAppOOTDTnsitionDwmOneOrderToEnd").name("WaybillDwmAppOOTDTnsitionDwmOneOrderToEnd");
         //====================================sink clickhouse===============================================//
 //        组装sql
         StringBuffer sql = new StringBuffer();
