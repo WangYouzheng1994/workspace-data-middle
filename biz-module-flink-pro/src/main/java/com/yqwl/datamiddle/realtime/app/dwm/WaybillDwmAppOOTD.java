@@ -79,7 +79,7 @@ public class WaybillDwmAppOOTD {
 
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-DwmOneOrderToEnd");
+        env.execute("dwmOneOrderToEnd-clickhouse");
         log.info("DwmOneOrderToEnd层job任务开始执行");
     }
 }
