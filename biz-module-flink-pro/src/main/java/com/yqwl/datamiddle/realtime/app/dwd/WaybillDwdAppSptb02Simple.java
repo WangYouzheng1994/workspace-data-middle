@@ -207,7 +207,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vwlckdm = dwdSptb02.getVWLCKDM();
                     log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
                     if (StringUtils.isNotBlank(vwlckdm)) {
-                        String sptc34Sql = "select * from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vwlckdm + "' limit 1 ";
+                        String sptc34Sql = "select VSQDM, VSXDM from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vwlckdm + "' limit 1 ";
                         JSONObject odsVlmsSptc34 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34Sql, vwlckdm);
                         if (odsVlmsSptc34 != null) {
                             dwdSptb02.setSTART_PROVINCE_CODE(odsVlmsSptc34.getString("VSQDM"));
@@ -222,7 +222,7 @@ public class WaybillDwdAppSptb02Simple {
                     String cdhddm = dwdSptb02.getCDHDDM();
                     log.info("mdac32DS阶段获取到的查询条件值:{}", cdhddm);
                     if (StringUtils.isNotBlank(cdhddm)) {
-                        String sptc34Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC32 + " where CDHDDM = '" + cdhddm + "' limit 1 ";
+                        String sptc34Sql = "select CSQDM, CSXDM from " + KafkaTopicConst.ODS_VLMS_MDAC32 + " where CDHDDM = '" + cdhddm + "' limit 1 ";
                         JSONObject mdac32 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC32, sptc34Sql, cdhddm);
                         if (mdac32 != null) {
                             dwdSptb02.setEND_PROVINCE_CODE(mdac32.getString("CSQDM"));
@@ -238,7 +238,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vfczt = dwdSptb02.getVFCZT();
                     log.info("vfcztSiteWarehouseDS阶段获取到的查询条件值:{}", vfczt);
                     if (StringUtils.isNotBlank(vfczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vfczt + "' limit 1 ";
+                        String siteWarehouseSql = "select WAREHOUSE_CODE, WAREHOUSE_NAME from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vfczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vfczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setSTART_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
@@ -254,7 +254,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vsczt = dwdSptb02.getVSCZT();
                     log.info("vscztSiteWarehouseDS阶段获取到的查询条件值:{}", vsczt);
                     if (StringUtils.isNotBlank(vsczt)) {
-                        String siteWarehouseSql = "select * from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vsczt + "' limit 1 ";
+                        String siteWarehouseSql = "select WAREHOUSE_CODE, WAREHOUSE_NAME from " + KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE + " where `TYPE` = 'CONTRAST' and VWLCKDM = '" + vsczt + "' limit 1 ";
                         JSONObject siteWarehouse = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SITE_WAREHOUSE, siteWarehouseSql, vsczt);
                         if (siteWarehouse != null) {
                             dwdSptb02.setEND_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
@@ -268,7 +268,7 @@ public class WaybillDwdAppSptb02Simple {
                     String vwlckdm1 = dwdSptb02.getVWLCKDM();
                     log.info("highwayWarehouseTypeDS:{}", vwlckdm1);
                     if (StringUtils.isNotBlank(vwlckdm1)) {
-                        String siteWarehouseSql = "SELECT WAREHOUSE_TYPE FROM ods_vlms_site_warehouse s JOIN ods_vlms_rfid_warehouse r ON s.WAREHOUSE_CODE=r.WAREHOUSE_CODE WHERE s.`TYPE` = 'CONTRAST' and s.VWLCKDM = '" + vwlckdm1 + "' LIMIT 1";
+                        String siteWarehouseSql = "SELECT r.WAREHOUSE_TYPE FROM ods_vlms_site_warehouse s JOIN ods_vlms_rfid_warehouse r ON s.WAREHOUSE_CODE=r.WAREHOUSE_CODE WHERE s.`TYPE` = 'CONTRAST' and s.VWLCKDM = '" + vwlckdm1 + "' LIMIT 1";
                         JSONObject siteWarehouse = MysqlUtil.querySingle("ods_vlms_site_warehouse:ods_vlms_rfid_warehouse", siteWarehouseSql, vwlckdm1);
                         if (siteWarehouse != null) {
                             dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(siteWarehouse.getString("WAREHOUSE_TYPE"));
@@ -291,6 +291,8 @@ public class WaybillDwdAppSptb02Simple {
                 return JSON.toJSONString(obj);
             }
         }).uid("dwdSptb02Json").name("dwdSptb02Json");
+
+        dwdSptb02Json.print();
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
