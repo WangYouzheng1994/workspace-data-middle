@@ -23,6 +23,7 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,17 +55,23 @@ public class OneOrderToEndDwmAppSPTB02 {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
+        Properties properties = new Properties();
+        properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
+        properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
+        properties.setProperty("debezium.include.schema.changes","false");
         //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                //.tableList("data_flink.dwm_vlms_sptb02")
-                .tableList("data_middle_flink.dwm_vlms_sptb02")
+                .tableList("data_flink.dwm_vlms_sptb02")
+                //.tableList("data_middle_flink.dwm_vlms_sptb02")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+                .debeziumProperties(properties)
+                .distributionFactorUpper(10.0d)
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
