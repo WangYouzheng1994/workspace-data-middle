@@ -154,15 +154,15 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
-        slave_1:
-          url: jdbc:clickhouse://10.123.175.196:8123/default
-          username: sjztrd
-          password: eMmbfXhpyeXBr2Vm
-          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
-          initialSize: 10
-          maxActive: 100
-          minIdle: 10
-          maxWait: 6000
+#        slave_1:
+#          url: jdbc:clickhouse://10.123.175.196:8123/default
+#          username: sjztrd
+#          password: eMmbfXhpyeXBr2Vm
+#          driver-class-name: ru.yandex.clickhouse.ClickHouseDriver
+#          initialSize: 10
+#          maxActive: 100
+#          minIdle: 10
+#          maxWait: 6000
         slave_2:
           url: jdbc:clickhouse://10.123.175.197:8123/default
           username: sjztrd
