@@ -96,7 +96,7 @@ public class WaybillDwmAppSptb02Simple {
                     String cjsdbh = dwmSptb02.getCJSDBH();
                     log.info("sptb02d1DS阶段获取到的查询条件值:{}", cjsdbh);
                     if (StringUtils.isNotBlank(cjsdbh)) {
-                        String sptb02d1Sql = "select * from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbh + "' limit 1 ";
+                        String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbh + "' limit 1 ";
                         JSONObject sptb02d1 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, sptb02d1Sql, cjsdbh);
                         if (sptb02d1 != null) {
                             dwmSptb02.setVVIN(sptb02d1.getString("VVIN"));
@@ -121,7 +121,7 @@ public class WaybillDwmAppSptb02Simple {
                     String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
                     log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
                     if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
-                        String specConfigSql = "select * from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
+                        String specConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
                         JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, specConfigSql, hostComCode, baseCode, transModeCode);
                         if (specConfig != null) {
                             //定义要增加的时间戳
@@ -161,7 +161,7 @@ public class WaybillDwmAppSptb02Simple {
                     String czjgsdm = dwmSptb02.getCZJGSDM();
                     log.info("sptc61DS阶段获取到的查询条件值:{}", czjgsdm);
                     if (StringUtils.isNotBlank(czjgsdm)) {
-                        String sptc61Sql = "select * from " + KafkaTopicConst.ODS_VLMS_SPTC61 + " where CID = '" + czjgsdm + "' limit 1 ";
+                        String sptc61Sql = "select CJC from " + KafkaTopicConst.ODS_VLMS_SPTC61 + " where CID = '" + czjgsdm + "' limit 1 ";
                         JSONObject sptc61 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC61, sptc61Sql, czjgsdm);
                         if (sptc61 != null) {
                             dwmSptb02.setCUSTOMER_NAME(sptc61.getString("CJC"));
@@ -175,7 +175,7 @@ public class WaybillDwmAppSptb02Simple {
                     String cqwh = dwmSptb02.getCQWH();
                     log.info("sptc61DS阶段获取到的查询条件值:{}", cqwh);
                     if (StringUtils.isNotBlank(cqwh)) {
-                        String sptc62Sql = "select * from " + KafkaTopicConst.ODS_VLMS_SPTC62 + " where CID = '" + cqwh + "' limit 1 ";
+                        String sptc62Sql = "select CNAME from " + KafkaTopicConst.ODS_VLMS_SPTC62 + " where CID = '" + cqwh + "' limit 1 ";
                         JSONObject sptc62 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC62, sptc62Sql, cqwh);
                         if (sptc62 != null) {
                             dwmSptb02.setBASE_NAME(sptc62.getString("CNAME"));
@@ -190,7 +190,7 @@ public class WaybillDwmAppSptb02Simple {
                     String vwlckdm = dwmSptb02.getVWLCKDM();
                     log.info("sptc34DS阶段获取到的查询条件值:{}", vwlckdm);
                     if (StringUtils.isNotBlank(vwlckdm)) {
-                        String sptc34Sql = "select * from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vwlckdm + "' limit 1 ";
+                        String sptc34Sql = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vwlckdm + "' limit 1 ";
                         JSONObject sptc34 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34Sql, vwlckdm);
                         if (sptc34 != null) {
                             dwmSptb02.setSHIPMENT_WAREHOUSE_NAME(sptc34.getString("VWLCKMC"));
@@ -205,7 +205,7 @@ public class WaybillDwmAppSptb02Simple {
                     String cyssdm = dwmSptb02.getCYSSDM();
                     log.info("mdac52DS阶段获取到的查询条件值:{}", cyssdm);
                     if (StringUtils.isNotBlank(cyssdm)) {
-                        String mdac52Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC52 + " where CCYDDM = '" + cyssdm + "' limit 1 ";
+                        String mdac52Sql = "select VCYDJC, VCYDMC from " + KafkaTopicConst.ODS_VLMS_MDAC52 + " where CCYDDM = '" + cyssdm + "' limit 1 ";
                         JSONObject mdac52 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC52, mdac52Sql, cyssdm);
                         if (mdac52 != null) {
                             if (StringUtils.isNotBlank(mdac52.getString("VCYDJC"))) {
@@ -223,7 +223,7 @@ public class WaybillDwmAppSptb02Simple {
                      */
                     String vdwdm = dwmSptb02.getVDWDM();
                     if (StringUtils.isNotBlank(vdwdm)) {
-                        String mdac22Sql = "select * from " + KafkaTopicConst.ODS_VLMS_MDAC22 + " where CJXSDM = '" + vdwdm + "' limit 1 ";
+                        String mdac22Sql = "select VJXSJC, VJXSMC from " + KafkaTopicConst.ODS_VLMS_MDAC22 + " where CJXSDM = '" + vdwdm + "' limit 1 ";
                         JSONObject mdac22 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC22, mdac22Sql, vdwdm);
                         if (mdac22 != null) {
                             if (StringUtils.isNotBlank(mdac22.getString("VJXSJC"))) {
@@ -246,7 +246,7 @@ public class WaybillDwmAppSptb02Simple {
                     String startCityCode = dwmSptb02.getSTART_CITY_CODE();
                     log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
                     if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode)) {
-                        String provinceSql = "select * from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + startProvinceCode + "' and csxdm = '" + startCityCode + "' limit 1 ";
+                        String provinceSql = "select vsqmc, vsxmc from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + startProvinceCode + "' and csxdm = '" + startCityCode + "' limit 1 ";
                         JSONObject province = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_PROVINCES, provinceSql, startProvinceCode, startCityCode);
                         if (province != null) {
                             //省区名称：山东省
@@ -268,7 +268,7 @@ public class WaybillDwmAppSptb02Simple {
                     String endCityCode = dwmSptb02.getEND_CITY_CODE();
                     log.info("provincesMdac32DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", endProvinceCode, endCityCode);
                     if (StringUtils.isNotBlank(endProvinceCode) && StringUtils.isNotBlank(endCityCode)) {
-                        String provinceSql = "select * from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + endProvinceCode + "' and csxdm = '" + endCityCode + "' limit 1 ";
+                        String provinceSql = "select vsqmc, vsxmc from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + endProvinceCode + "' and csxdm = '" + endCityCode + "' limit 1 ";
                         JSONObject province = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_PROVINCES, provinceSql, endProvinceCode, endCityCode);
                         if (province != null) {
                             //例如 省区名称：山东省
@@ -293,6 +293,7 @@ public class WaybillDwmAppSptb02Simple {
                 return JSON.toJSONString(obj);
             }
         }).uid("dwmSptb02Json").name("dwmSptb02Json");
+        dwmSptb02Json.print();
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),

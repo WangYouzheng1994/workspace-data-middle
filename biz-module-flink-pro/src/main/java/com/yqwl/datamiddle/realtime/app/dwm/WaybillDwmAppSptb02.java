@@ -325,7 +325,7 @@ public class WaybillDwmAppSptb02 {
 
 
 
-
+        //===========================
         //分配及时率  出库及时率  起运及时率 到货及时率
         /**
          * 处理理论出库时间 THEORY_OUT_TIME
@@ -580,7 +580,7 @@ public class WaybillDwmAppSptb02 {
                     }
                 },
                 60, TimeUnit.SECONDS).uid("spti32RailSeaDS").name("spti32RailSeaDS");
-
+        //===========================
         /**
          * 处理 起货地 物理仓库代码  省区 县区名称
          * 关联合并后的维表 dim_vlms_provinces
