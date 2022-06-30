@@ -410,7 +410,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
     /**
      * 格式化品牌
-     * t === '1' ? '大众' : t === '2' ? '红旗' : t === '3' ? '马自达' : t
+     * t === '1' ? '大众' : t === '2' ? '红旗' : t === '3' ? '马自达' : t === '4' ? '奔腾' : t === '5' ? '解放'
      *
      * @param brandEng
      */
@@ -421,6 +421,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             case "1" : value = "大众"; break;
             case "2" : value = "红旗"; break;
             case "3" : value = "马自达"; break;
+            case "4" : value = "奔腾"; break;
+            case "5" : value = "解放"; break;
         }
 
         return value;
