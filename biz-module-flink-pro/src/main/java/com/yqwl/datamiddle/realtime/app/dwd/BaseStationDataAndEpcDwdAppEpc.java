@@ -71,8 +71,8 @@ public class BaseStationDataAndEpcDwdAppEpc {
         // kafka消费源相关参数配置
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701)
+                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();

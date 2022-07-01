@@ -71,6 +71,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_BASE_STATION_DATA_LATEST_0701 = "ods_vlms_base_station_data_latest_0701";
     public static final String ODS_VLMS_BASE_STATION_DATA_EPC = "ods_vlms_base_station_data_epc";
     public static final String ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701 = "ods_vlms_base_station_data_latest_0701";
+    public static final String ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701_GROUP = "ods_vlms_base_station_data_latest_0701_group";
     public static final String ODS_VLMS_SPTI32_DZ = "ods_vlms_spti32_dz";
     public static final String ODS_VLMS_RFID_WAREHOUSE = "ods_vlms_rfid_warehouse";
 
