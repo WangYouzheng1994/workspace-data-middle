@@ -212,7 +212,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
         dwmSptb02Json.addSink(sinkKafka).uid("BaseStationDataAndEpcDwdAppBsdinkKafkaDwdBsd").name("BaseStationDataAndEpcDwdAppBsdsinkKafkaDwdBsd");
-        env.execute("dwdBsd往dwmSptb02赋值,更新Dwm");
+        env.execute("拉宽bsd表进入dwdBsd");
 
     }
 
