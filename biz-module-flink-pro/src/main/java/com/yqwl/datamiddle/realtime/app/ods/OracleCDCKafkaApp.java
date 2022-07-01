@@ -77,7 +77,7 @@ public class OracleCDCKafkaApp {
 
 
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCDCKafkaApporacleSourceStream").name("OracleCDCKafkaApporacleSourceStream");
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -86,7 +86,7 @@ public class OracleCDCKafkaApp {
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
 
         //输出到kafka
-        oracleSourceStream.addSink(sinkKafka).uid("sink-Kafka-cdc_vlms_unite_oracle").name("sink-Kafka-cdc_vlms_unite_oracle");
+        oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");
