@@ -2,6 +2,7 @@ package com.yqwl.datamiddle.realtime.common;
 
 /**
  * kafka topic 常量定义
+ * 带有_LATEST_0701为事实表增量数据的抽取 by xiaofeng 2022.07.01
  */
 public class KafkaTopicConst {
 
@@ -9,6 +10,7 @@ public class KafkaTopicConst {
     //groupid
     public static final String ODS_VLMS_SPTC34_GROUP = "ods_vlms_sptc34_group";
     public static final String ODS_VLMS_SPTB02_GROUP = "ods_vlms_sptb02_group";
+    public static final String ODS_VLMS_SPTB02_LATEST_0701_GROUP = "ods_vlms_sptb02_latest_0701_group";
     public static final String DWD_VLMS_SPTB02_GROUP = "dwd_vlms_sptb02_group";
     public static final String DWD_VLMS_SPTB02_GROUP_1 = "dwd_vlms_sptb02_group_1";
     public static final String ODS_VLMS_SYSC07_GROUP = "ods_vlms_sysc07_group";
@@ -18,6 +20,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_BASE_STATION_DATA_EPC_GROUP = "ods_vlms_base_station_data_epc_group";
     public static final String DWM_VLMS_SPTB02_GROUP = "dwm_vlms_sptb02_group";
     public static final String ODS_VLMS_BASE_STATION_DATA_GROUP = "ods_vlms_base_station_data_group";
+    public static final String ODS_VLMS_BASE_STATION_DATA_LATEST_0701_GROUP = "ods_vlms_base_station_data_latest_0701_group";
 
 
     public static final String ORACLE_TOPIC_GROUP = "oracle_source_group";
@@ -28,6 +31,7 @@ public class KafkaTopicConst {
     public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
     //source 表sysc07 cdc kafka topic name
     public static final String ODS_VLMS_SPTB02 = "ods_vlms_sptb02";
+    public static final String ODS_VLMS_SPTB02_LATEST_0701 = "ods_vlms_sptb02_latest_0701";
     public static final String ODS_VLMS_SPTB02_02 = "ods_vlms_sptb02_02";
     public static final String ODS_VLMS_SPTC61 = "ods_vlms_sptc61";
     public static final String ODS_VLMS_SYSC09D = "ods_vlms_sysc09d";
@@ -64,7 +68,9 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SPTB02_STD_IMPORT = "ods_vlms_sptb02_std_import";
     public static final String ODS_VLMS_SPTB013 = "ods_vlms_sptb013";
     public static final String ODS_VLMS_BASE_STATION_DATA = "ods_vlms_base_station_data";
+    public static final String ODS_VLMS_BASE_STATION_DATA_LATEST_0701 = "ods_vlms_base_station_data_latest_0701";
     public static final String ODS_VLMS_BASE_STATION_DATA_EPC = "ods_vlms_base_station_data_epc";
+    public static final String ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701 = "ods_vlms_base_station_data_latest_0701";
     public static final String ODS_VLMS_SPTI32_DZ = "ods_vlms_spti32_dz";
     public static final String ODS_VLMS_RFID_WAREHOUSE = "ods_vlms_rfid_warehouse";
 
@@ -83,13 +89,13 @@ public class KafkaTopicConst {
 
     //dwd topic
     public static final String DWD_VLMS_SPTB02 = "dwd_vlms_sptb02";
-    public static final String DWD_VLMS_SPTB02_TEST = "dwd_vlms_sptb02_test";
     public static final String DWD_VLMS_BASE_STATION_DATA = "dwd_vlms_base_station_data";
     public static final String DWD_VLMS_BASE_STATION_DATA_EPC = "dwd_vlms_base_station_data_epc";
 
 
     //dwm topic
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
+    public static final String DWM_VLMS_SPTB02Test = "dwm_vlms_sptb02Test";
     public static final String DWM_VLMS_SPTB02_TEST1 = "dwm_vlms_sptb02_test1";
 
     public static final String DWM_VLMS_ONE_ORDER_TO_END ="dwm_vlms_one_order_to_end";
