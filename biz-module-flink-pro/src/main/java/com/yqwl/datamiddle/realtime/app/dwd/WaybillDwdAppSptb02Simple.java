@@ -67,14 +67,14 @@ public class WaybillDwdAppSptb02Simple {
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_SPTB02_GROUP)
+                .setTopics(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwdAppSptb02SimpleMysqlSource").uid("WaybillDwdAppSptb02SimpleMysqlSourceStream").name("WaybillDwdAppSptb02SimpleMysqlSourceStream");
 
         //对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mysqlSource.process(new ProcessFunction<String, DwdSptb02>() {
@@ -87,7 +87,6 @@ public class WaybillDwdAppSptb02Simple {
                     DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
                     //获取原数据的运输方式
                     String vysfs = sptb02.getVYSFS();
-                    //System.out.println("运输方式：" + vysfs);
                     log.info("运单运输方式数据:{}", vysfs);
                     if (StringUtils.isNotEmpty(vysfs)) {
                         //1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
@@ -282,7 +281,7 @@ public class WaybillDwdAppSptb02Simple {
                     dwdSptb02 = null;
                 }
             }
-        }).uid("dataDwdProcess").name("dataDwdProcess");
+        }).setParallelism(4).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
@@ -290,21 +289,20 @@ public class WaybillDwdAppSptb02Simple {
             public String map(DwdSptb02 obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("dwdSptb02Json").name("dwdSptb02Json");
+        }).uid("WaybillDwdAppSptb02SimpleDwdSptb02Json").name("WaybillDwdAppSptb02SimpleDwdSptb02Json");
 
-        dwdSptb02Json.print();
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
 
-        dwdSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwdSptb02Simple").name("sinkKafkaDwdSptb02Simple");
+        dwdSptb02Json.addSink(sinkKafka).setParallelism(1).uid("WaybillDwdAppSptb02SimpleSinkKafkaDwdSptb02Simple").name("WaybillDwdAppSptb02SimpleSinkKafkaDwdSptb02Simple");
 
         //===================================sink mysql=======================================================//
 
         String sql = MysqlUtil.getSql(DwdSptb02.class);
-        dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).uid("sinkMysqlDwdSptb02Simple").name("sinkMysqlDwdSptb02Simple");
+        dataDwdProcess.addSink(JdbcSink.<DwdSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwdAppSptb02SimpleSinkMysqlDwdSptb02Simple").name("WaybillDwdAppSptb02SimpleSinkMysqlDwdSptb02Simple");
 
         env.execute("sptb02-sink-mysql-dwd");
         log.info("sptb02dwd层job任务开始执行");

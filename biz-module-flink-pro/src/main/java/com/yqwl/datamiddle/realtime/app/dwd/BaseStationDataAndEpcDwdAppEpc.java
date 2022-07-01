@@ -69,14 +69,14 @@ public class BaseStationDataAndEpcDwdAppEpc {
         // kafka消费源相关参数配置
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
+                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_GROUP)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
         // 将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MySQL-Source").uid("oracleSourceStream").name("oracleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "BaseStationDataAndEpcDwdAppEpcMySQL-Source").uid("BaseStationDataAndEpcDwdAppEpcOracleSourceStream").name("BaseStationDataAndEpcDwdAppEpcOracleSourceStream");
         SingleOutputStreamOperator<DwdBaseStationDataEpc> epcProcess = oracleSourceStream.process(new ProcessFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public void processElement(String value, Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
@@ -122,11 +122,11 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 }
 
             }
-        }).uid("epcProcess").name("epcProcess");
+        }).uid("BaseStationDataAndEpcDwdAppEpcepcProcess").name("BaseStationDataAndEpcDwdAppEpcepcProcess");
 
         // 5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapEpc = epcProcess.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station())
-                .uid("mapEpc").name("mapEpc");
+                .uid("BaseStationDataAndEpcDwdAppEpcmapEpc").name("BaseStationDataAndEpcDwdAppEpcmapEpc");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> mapEpcJson = mapEpc.map(new MapFunction<DwdBaseStationDataEpc, String>() {
@@ -134,19 +134,19 @@ public class BaseStationDataAndEpcDwdAppEpc {
             public String map(DwdBaseStationDataEpc value) throws Exception {
                 return JSON.toJSONString(value);
             }
-        }).uid("mapEpcJson").name("mapEpcJson");
+        }).uid("BaseStationDataAndEpcDwdAppEpcmapEpcJson").name("BaseStationDataAndEpcDwdAppEpcmapEpcJson");
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC));
-        mapEpcJson.addSink(sinkKafka).uid("sinkKafkaDwdEpc").name("sinkKafkaDwdEpc");
+        mapEpcJson.addSink(sinkKafka).uid("BaseStationDataAndEpcDwdAppEpcsinkKafkaDwdEpc").name("BaseStationDataAndEpcDwdAppEpcsinkKafkaDwdEpc");
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(DwdBaseStationDataEpc.class);
-        mapEpc.addSink(JdbcSink.<DwdBaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql").name("oracle-cdc-mysql");
+        mapEpc.addSink(JdbcSink.<DwdBaseStationDataEpc>getSink(sql)).setParallelism(1).uid("BaseStationDataAndEpcDwdAppEpcOracle-cdc-mysql").name("BaseStationDataAndEpcDwdAppEpcOracle-cdc-mysql");
         env.execute("拉宽bsdEpc表进入dwdBsdEpc");
     }
 

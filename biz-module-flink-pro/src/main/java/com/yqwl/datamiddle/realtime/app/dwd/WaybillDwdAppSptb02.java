@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
+@Deprecated
 public class WaybillDwdAppSptb02 {
 
     public static void main(String[] args) throws Exception {
@@ -79,7 +80,7 @@ public class WaybillDwdAppSptb02 {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer").uid("jsonDataStr").name("jsonDataStr");
+        SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "WaybillDwdAppSptb02kafka-consumer").uid("WaybillDwdAppSptb02jsonDataStr").name("WaybillDwdAppSptb02jsonDataStr");
 
         //从Kafka主题中获取消费端
         log.info("从kafka的主题:" + KafkaTopicConst.ODS_VLMS_SPTB02 + "中获取的要处理的数据");
@@ -97,7 +98,7 @@ public class WaybillDwdAppSptb02 {
                 log.info("从kafka里转换成实体类对象后数据:{}", sptb02);
                 return sptb02;
             }
-        }).uid("objStream").name("objStream");
+        }).uid("WaybillDwdAppSptb02objStream").name("WaybillDwdAppSptb02objStream");
         //对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = objStream.process(new ProcessFunction<Sptb02, DwdSptb02>() {
             @Override
@@ -236,7 +237,7 @@ public class WaybillDwdAppSptb02 {
                 log.info("处理完的数据填充后的值:" + dwdSptb02.toString());
                 collector.collect(dwdSptb02);
             }
-        }).uid("dataDwdProcess").name("dataDwdProcess");
+        }).uid("WaybillDwdAppSptb02dataDwdProcess").name("WaybillDwdAppSptb02dataDwdProcess");
 
 
         /**
@@ -267,7 +268,7 @@ public class WaybillDwdAppSptb02 {
                         dwdSptb02.setSTART_CITY_CODE(dimInfoJsonObj.getString("VSXDM"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("sptc34DS").name("sptc34DS");
+                60, TimeUnit.SECONDS).uid("WaybillDwdAppSptb02sptc34DS").name("WaybillDwdAppSptb02sptc34DS");
 
         /**
          *  处理 经销商到货地 省区代码 市县代码
@@ -297,7 +298,7 @@ public class WaybillDwdAppSptb02 {
                         dwdSptb02.setEND_CITY_CODE(dimInfoJsonObj.getString("CSXDM"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("mdac32DS").name("mdac32DS");
+                60, TimeUnit.SECONDS).uid("WaybillDwdAppSptb02mdac32DS").name("WaybillDwdAppSptb02mdac32DS");
 
         /**
          *  处理 发车站台 对应的仓库代码 仓库名称
@@ -329,7 +330,7 @@ public class WaybillDwdAppSptb02 {
                         dwdSptb02.setSTART_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("vfcztSiteWarehouseDS").name("vfcztSiteWarehouseDS");
+                60, TimeUnit.SECONDS).uid("WaybillDwdAppSptb02vfcztSiteWarehouseDS").name("WaybillDwdAppSptb02vfcztSiteWarehouseDS");
 
 
         /**
@@ -362,7 +363,7 @@ public class WaybillDwdAppSptb02 {
                         dwdSptb02.setEND_WAREHOUSE_NAME(dimInfoJsonObj.getString("WAREHOUSE_NAME"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("vscztSiteWarehouseDS").name("vscztSiteWarehouseDS");
+                60, TimeUnit.SECONDS).uid("WaybillDwdAppSptb02VscztSiteWarehouseDS").name("WaybillDwdAppSptb02VscztSiteWarehouseDS");
 
         /**
          *  处理 公路单的对应的物理仓库代码对应的类型
@@ -390,7 +391,7 @@ public class WaybillDwdAppSptb02 {
                         dwdSptb02.setHIGHWAY_WAREHOUSE_TYPE(dimInfoJsonObj.getString("WAREHOUSE_TYPE"));
                     }
                 },
-                60, TimeUnit.SECONDS).uid("highwayWarehouseTypeDS").name("highwayWarehouseTypeDS");
+                60, TimeUnit.SECONDS).uid("WaybillDwdAppSptb02HighwayWarehouseTypeDS").name("WaybillDwdAppSptb02HighwayWarehouseTypeDS");
 
         //将实体类映射成json
         SingleOutputStreamOperator<String> mapJson = highwayWarehouseTypeDS.map(new MapFunction<DwdSptb02, String>() {
@@ -399,17 +400,17 @@ public class WaybillDwdAppSptb02 {
                 DwdSptb02 bean = JsonPartUtil.getBean(obj);
                 return JSON.toJSONString(bean);
             }
-        }).uid("mapJson").name("mapJson");
+        }).uid("WaybillDwdAppSptb02MapJson").name("WaybillDwdAppSptb02MapJson");
 
         //组装kafka生产端
         dataDwdProcess.print("数据拉宽后结果输出:");
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.DWD_VLMS_SPTB02_TEST,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02_TEST));
+                KafkaTopicConst.DWD_VLMS_SPTB02,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_SPTB02));
         //将处理完的数据保存到kafka
         log.info("将处理完的数据保存到kafka中");
-        mapJson.addSink(sinkKafka).setParallelism(1).uid("dwd-sink-kafka-sptb02").name("dwd-sink-kafka-sptb02");
+        mapJson.addSink(sinkKafka).setParallelism(1).uid("WaybillDwdAppSptb02Dwd-sink-kafka-sptb02").name("WaybillDwdAppSptb02Dwd-sink-kafka-sptb02");
 
 
         log.info("将处理完的数据保存到mysql中");
@@ -426,7 +427,7 @@ public class WaybillDwdAppSptb02 {
                     collector.collect(list);
                 }
             }
-        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("sink-dwd-mysql-sptb02").name("sink-dwd-mysql-sptb02");
+        }).addSink(JdbcSink.<DwdSptb02>getBatchSink()).setParallelism(1).uid("WaybillDwdAppSptb02Sink-dwd-mysql-sptb02").name("WaybillDwdAppSptb02Sink-dwd-mysql-sptb02");
 
 
         env.execute("sptb02-sink-kafka-dwd");

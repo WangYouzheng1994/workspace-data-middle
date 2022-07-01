@@ -111,14 +111,14 @@ public class BaseStationDataAndEpcDwdAppBsd {
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_GROUP)
+                .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
         // 将kafka中源数据转化成DataStream
-        SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource,WatermarkStrategy.noWatermarks(),"ods_bsd-kafka").uid("oracleSourceStream").name("oracleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource,WatermarkStrategy.noWatermarks(),"BaseStationDataAndEpcDwdAppBsdods_bsd-kafka").uid("BaseStationDataAndEpcDwdAppBsdoracleSourceStream").name("BaseStationDataAndEpcDwdAppBsdoracleSourceStream");
         // oracleSourceStream.print("source 输出：");
         //过滤 大于 2021-06-01 00:00:00的数据
        /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
@@ -144,7 +144,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
                          }}
                 return true;
             }
-        }).uid("dataAndEpcFilter").name("dataAndEpcFilter");
+        }).uid("BaseStationDataAndEpcDwdAppBsddataAndEpcFilter").name("BaseStationDataAndEpcDwdAppBsddataAndEpcFilter");
        */
 
 
@@ -193,23 +193,23 @@ public class BaseStationDataAndEpcDwdAppBsd {
                     out.collect(dwdBaseStationData);
                 }
             }
-        }).uid("dwmBsdProcess").name("dwmBsdProcess");
+        }).uid("BaseStationDataAndEpcDwdAppBsddwmBsdProcess").name("BaseStationDataAndEpcDwdAppBsddwmBsdProcess");
         //--------------------------------存入DwdBaseStationData mysql------------------------------------//
         String bsdSql = MysqlUtil.getSql(DwdBaseStationData.class);
-        dwmProcess.addSink(JdbcSink.<DwdBaseStationData>getSink(bsdSql)).uid("sink-mysqDsb").name("sink-mysqldsb");
+        dwmProcess.addSink(JdbcSink.<DwdBaseStationData>getSink(bsdSql)).uid("BaseStationDataAndEpcDwdAppBsdsink-mysqDsb").name("BaseStationDataAndEpcDwdAppBsdsink-mysqldsb");
         //-------------------------------存入kafkaDwdBaseStationDataTopic--------------------------------//
         SingleOutputStreamOperator<String> dwmSptb02Json = dwmProcess.map(new MapFunction<DwdBaseStationData, String>() {
             @Override
             public String map(DwdBaseStationData obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("dwmBsdJson").name("dwmBsdJson");
+        }).uid("BaseStationDataAndEpcDwdAppBsddwmBsdJson").name("BaseStationDataAndEpcDwdAppBsddwmBsdJson");
         // 获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
-        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwdBsd").name("sinkKafkaDwdBsd");
+        dwmSptb02Json.addSink(sinkKafka).uid("BaseStationDataAndEpcDwdAppBsdinkKafkaDwdBsd").name("BaseStationDataAndEpcDwdAppBsdsinkKafkaDwdBsd");
         env.execute("dwdBsd往dwmSptb02赋值,更新Dwm");
 
     }
