@@ -88,7 +88,7 @@ public class ConsumerKafkaODSApp {
                 .build();
         //将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
-                .uid("jsonDataStr").name("jsonDataStr");
+                .uid("ConsumerKafkaODSAppJsonDataStr").name("ConsumerKafkaODSAppJsonDataStr");
 
 
         //====================================flink各自算子处理逻辑===============================================//
@@ -107,7 +107,7 @@ public class ConsumerKafkaODSApp {
                 jsonObj.put("after", afterObj);
                 return jsonObj;
             }
-        }).uid("jsonStream").name("jsonStream");
+        }).uid("ConsumerKafkaODSAppJsonStream").name("ConsumerKafkaODSAppJsonStream");
         //jsonStream.print("json转化map输出:");
         //动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
         //定义输出到mysql的侧输出流标签
@@ -117,7 +117,7 @@ public class ConsumerKafkaODSApp {
         //事实流写回到Kafka的数据
         SingleOutputStreamOperator<JSONObject> kafkaDS = jsonStream.process(new TableProcessDivideFunctionList(mysqlTag))
                 .setParallelism(2)
-                .uid("kafka-divide-data").name("kafka-divide-data");
+                .uid("ConsumerKafkaODSAppKafka-divide-data").name("ConsumerKafkaODSAppKafka-divide-data");
         log.info("事实主流数据处理完成");
 
         //获取一个kafka生产者将事实数据写回到kafka的dwd层
@@ -147,7 +147,7 @@ public class ConsumerKafkaODSApp {
         );
 
         //kafkaDS.print("kafka结果数据输出:");
-        kafkaDS.addSink(kafkaSink).uid("ods-sink-kafka").name("ods-sink-kafka");
+        kafkaDS.addSink(kafkaSink).uid("ConsumerKafkaODSAppOds-sink-kafka").name("ConsumerKafkaODSAppOds-sink-kafka");
         //获取侧输出流 通过mysqlTag得到需要写到mysql的数据
         DataStream<JSONObject> insertMysqlDS = kafkaDS.getSideOutput(mysqlTag);
 
@@ -179,13 +179,13 @@ public class ConsumerKafkaODSApp {
                     collector.collect(map);
                 }
             }
-        }).uid("mysqlProcess").name("mysqlProcess");
+        }).uid("ConsumerKafkaODSAppMysqlProcess").name("ConsumerKafkaODSAppMysqlProcess");
 
 
         //=====================================插入mysql-sink===============================================//
         //mysqlProcess.print("mysql结果数据输出:");
         //将维度数据保存到mysql对应的维度表中
-        mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("dim-sink-batch-mysql").name("dim-sink-batch-mysql");
+        mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("ConsumerKafkaODSAppDim-sink-batch-mysql").name("ConsumerKafkaODSAppDim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");
 
         log.info("流处理程序开始执行");

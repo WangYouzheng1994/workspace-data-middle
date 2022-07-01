@@ -83,7 +83,7 @@ public class OracleCdcSinkMysqlEpcApp {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStreamEpc").name("oracleSourceStreamEpc");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCdcSinkMysqlEpcAppOracleSourceStreamEpc").name("OracleCdcSinkMysqlEpcAppOracleSourceStreamEpc");
 
         SingleOutputStreamOperator<BaseStationDataEpc> processEpc = oracleSourceStream.process(new ProcessFunction<String, BaseStationDataEpc>() {
             @Override
@@ -108,7 +108,7 @@ public class OracleCdcSinkMysqlEpcApp {
                     out.collect(bean);
                 }
             }
-        }).uid("processEpc").name("processEpc");
+        }).uid("OracleCdcSinkMysqlEpcAppProcessEpc").name("OracleCdcSinkMysqlEpcAppProcessEpc");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> epcJson = processEpc.map(new MapFunction<BaseStationDataEpc, String>() {
@@ -116,7 +116,7 @@ public class OracleCdcSinkMysqlEpcApp {
             public String map(BaseStationDataEpc obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("epcJson").name("epcJson");
+        }).uid("OracleCdcSinkMysqlEpcAppEpcJson").name("OracleCdcSinkMysqlEpcAppEpcJson");
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -124,13 +124,13 @@ public class OracleCdcSinkMysqlEpcApp {
                 KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC));
 
-        epcJson.addSink(sinkKafka).uid("sinkKafkaEpc").name("sinkKafkaEpc");
+        epcJson.addSink(sinkKafka).uid("OracleCdcSinkMysqlEpcAppSinkKafkaEpc").name("OracleCdcSinkMysqlEpcAppSinkKafkaEpc");
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(BaseStationDataEpc.class);
         log.info("组装的插入sql:{}", sql);
-        processEpc.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql-epc").name("oracle-cdc-mysql-epc");
+        processEpc.addSink(JdbcSink.<BaseStationDataEpc>getSink(sql)).setParallelism(1).uid("OracleCdcSinkMysqlEpcAppOracle-cdc-mysql-epc").name("OracleCdcSinkMysqlEpcAppOracle-cdc-mysql-epc");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-epc");
         log.info("oracle-cdc-kafka job开始执行");

@@ -75,7 +75,7 @@ public class OracleCdcSinkMysqlSptb02App {
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
-        //ck.setCheckpointTimeout(60000);
+        ck.setCheckpointTimeout(15 * 60 * 1000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
@@ -83,7 +83,7 @@ public class OracleCdcSinkMysqlSptb02App {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStreamSptb02").name("oracleSourceStreamSptb02");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCdcSinkMysqlSptb02AppSourceStreamSptb02").name("OracleCdcSinkMysqlSptb02AppSourceStreamSptb02");
 
         SingleOutputStreamOperator<Sptb02> processSptb02 = oracleSourceStream.process(new ProcessFunction<String, Sptb02>() {
             @Override
@@ -114,7 +114,7 @@ public class OracleCdcSinkMysqlSptb02App {
                 }*/
 
             }
-        }).uid("processSptb02").name("processSptb02");
+        }).uid("OracleCdcSinkMysqlSptb02AppProcessSptb02").name("OracleCdcSinkMysqlSptb02AppProcessSptb02");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> sptb02Json = processSptb02.map(new MapFunction<Sptb02, String>() {
@@ -122,7 +122,7 @@ public class OracleCdcSinkMysqlSptb02App {
             public String map(Sptb02 obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("sptb02Json").name("sptb02Json");
+        }).uid("OracleCdcSinkMysqlSptb02AppSptb02Json").name("OracleCdcSinkMysqlSptb02AppSptb02Json");
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -130,14 +130,14 @@ public class OracleCdcSinkMysqlSptb02App {
                 KafkaTopicConst.ODS_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_SPTB02));
 
-        sptb02Json.addSink(sinkKafka).uid("sinkKafkaSptb02").name("sinkCdcKafkaSptb02");
+        sptb02Json.addSink(sinkKafka).uid("OracleCdcSinkMysqlSptb02AppSinkKafkaSptb02").name("OracleCdcSinkMysqlSptb02AppSinkCdcKafkaSptb02");
 
 
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(Sptb02.class);
         log.info("组装的插入sql:{}", sql);
-        processSptb02.addSink(JdbcSink.<Sptb02>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql-sptb02").name("oracle-cdc-mysql-sptb02");
+        processSptb02.addSink(JdbcSink.<Sptb02>getSink(sql)).setParallelism(1).uid("OracleCdcSinkMysqlSptb02AppOracle-cdc-mysql-sptb02").name("OracleCdcSinkMysqlSptb02AppOracle-cdc-mysql-sptb02");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-sptb02");
         log.info("oracle-cdc-kafka job开始执行");

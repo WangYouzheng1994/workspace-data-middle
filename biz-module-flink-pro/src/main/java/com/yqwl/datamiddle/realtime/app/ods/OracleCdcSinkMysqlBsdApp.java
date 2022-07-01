@@ -87,7 +87,7 @@ public class OracleCdcSinkMysqlBsdApp {
 
 
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStreamBsd").name("oracleSourceStreamBsd");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCdcSinkMysqlBsdAppOracleSourceStreamBsd").name("OracleCdcSinkMysqlBsdAppOracleSourceStreamBsd");
 
         SingleOutputStreamOperator<BaseStationData> processBsd = oracleSourceStream.process(new ProcessFunction<String, BaseStationData>() {
             @Override
@@ -117,7 +117,7 @@ public class OracleCdcSinkMysqlBsdApp {
                 }
 
             }
-        }).uid("processBsd").name("processBsd");
+        }).uid("OracleCdcSinkMysqlBsdAppProcessBsd").name("OracleCdcSinkMysqlBsdAppProcessBsd");
 
 
         //===================================sink kafka=======================================================//
@@ -126,19 +126,19 @@ public class OracleCdcSinkMysqlBsdApp {
             public String map(BaseStationData obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("bsdJson").name("bsdJson");
+        }).uid("OracleCdcSinkMysqlBsdAppBsdJson").name("OracleCdcSinkMysqlBsdAppBsdJson");
         //获取kafka生产者
        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA));
 
-        bsdJson.addSink(sinkKafka).uid("sinkKafkaBsd").name("sinkKafkaBsd");
+        bsdJson.addSink(sinkKafka).uid("OracleCdcSinkMysqlBsdAppSinkKafkaBsd").name("OracleCdcSinkMysqlBsdAppSinkKafkaBsd");
         //===================================sink mysql=======================================================//
         //组装sql
         String sql = MysqlUtil.getSql(BaseStationData.class);
         log.info("组装的插入sql:{}", sql);
-        processBsd.addSink(JdbcSink.<BaseStationData>getSink(sql)).setParallelism(1).uid("oracle-cdc-mysql-bsd").name("oracle-cdc-mysql-bsd");
+        processBsd.addSink(JdbcSink.<BaseStationData>getSink(sql)).setParallelism(1).uid("OracleCdcSinkMysqlBsdAppOracle-cdc-mysql-bsd").name("OracleCdcSinkMysqlBsdAppOracle-cdc-mysql-bsd");
         log.info("add sink mysql设置完成");
         env.execute("oracle-cdc-mysql-bsd");
         log.info("oracle-cdc-kafka job开始执行");
