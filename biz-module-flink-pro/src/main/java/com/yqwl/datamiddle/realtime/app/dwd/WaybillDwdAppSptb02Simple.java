@@ -81,7 +81,9 @@ public class WaybillDwdAppSptb02Simple {
             @Override
             public void processElement(String value, Context context, Collector<DwdSptb02> collector) throws Exception {
                 //获取真实数据
-                Sptb02 sptb02 = JSON.parseObject(value, Sptb02.class);
+                JSONObject jsonObject = JSON.parseObject(value);
+                String after = jsonObject.getString("after");
+                Sptb02 sptb02 = JSON.parseObject(after, Sptb02.class);
                 if (Objects.nonNull(sptb02) && StringUtils.isNotBlank(sptb02.getCJSDBH())) {
                     //处理实体类 将数据copy到dwdSptb02
                     DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);

@@ -2,7 +2,9 @@ package com.yqwl.datamiddle.realtime.app.dwd;
 
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
@@ -80,7 +82,9 @@ public class BaseStationDataAndEpcDwdAppEpc {
         SingleOutputStreamOperator<DwdBaseStationDataEpc> epcProcess = oracleSourceStream.process(new ProcessFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public void processElement(String value, Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
-                DwdBaseStationDataEpc dataBsdEpc = JSON.parseObject(value, DwdBaseStationDataEpc.class);
+                JSONObject jsonObject = JSON.parseObject(value);
+                String after = jsonObject.getString("after");
+                DwdBaseStationDataEpc dataBsdEpc = JSON.parseObject(after, DwdBaseStationDataEpc.class);
                 //车架号和操作时间不能为空
                 if (StringUtils.isNotBlank(dataBsdEpc.getVIN()) && dataBsdEpc.getOPERATETIME() > 0) {
                     /**

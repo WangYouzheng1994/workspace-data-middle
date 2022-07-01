@@ -154,7 +154,9 @@ public class BaseStationDataAndEpcDwdAppBsd {
             public void processElement(String value, Context ctx, Collector<DwdBaseStationData> out) throws Exception {
                 log.info("process方法开始执行");
                 // 1 .转实体类
-                DwdBaseStationData dwdBaseStationData = JSON.parseObject(value, DwdBaseStationData.class);
+                JSONObject jsonObject = JSON.parseObject(value);
+                String after = jsonObject.getString("after");
+                DwdBaseStationData dwdBaseStationData = JSON.parseObject(after, DwdBaseStationData.class);
                 String vin = dwdBaseStationData.getVIN();
                 if (StringUtils.isNotBlank(vin)) {
                     // 2 .处理字段 base_station_data 和rfid_warehouse关联添加入库仓库的字段
