@@ -46,7 +46,7 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
 
         // 2.更新基地入库时间 **快**
             if (sample_u_t_c !=null){
-                sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = " + sample_u_t_c +
+                sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on e.IN_WAREHOUSE_CODE = a.WAREHOUSE_CODE SET e.IN_SITE_TIME = " + sample_u_t_c +
                                 " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T1' "
                                 + "AND (e.IN_SITE_TIME > " + sample_u_t_c + " or e.IN_SITE_TIME = 0);");
                 /*String IN_SITE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_SITE_TIME = " + sample_u_t_c +
@@ -65,11 +65,11 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
                 DbUtil.executeUpdate(IN_DISTRIBUTE_TIMESql);*/
 
         // 4.过滤出所有出库操作记录  ** 快
-                if (StringUtils.equals(operate_type,"OutStock")){
+                if (StringUtils.equals(operate_type,"OutStock") && (StringUtils.equals(shop_no,"DZCP901") || StringUtils.equals(shop_no, "DZCP9")) ){
         // 5.更新出厂日期   ** 快
-                    sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
-                                    " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c + " AND (a.SHOP_NO = 'DZCP901' OR a.SHOP_NO = 'DZCP9' ) "
-                                    + "AND a.OPERATE_TYPE='OutStock'  AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ");");
+                    sb.append("UPDATE dwm_vlms_one_order_to_end e  SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
+                                    " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c +
+                                     " AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ");");
                     /*String  LEAVE_FACTORY_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
                                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c + " AND (a.SHOP_NO = 'DZCP901' OR a.SHOP_NO = 'DZCP9' ) "
                                         + "AND a.OPERATE_TYPE='OutStock'  AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ")";
