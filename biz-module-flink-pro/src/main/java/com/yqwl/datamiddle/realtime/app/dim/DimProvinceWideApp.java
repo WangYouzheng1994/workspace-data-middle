@@ -94,9 +94,9 @@ public class DimProvinceWideApp {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        SingleOutputStreamOperator<String> sysc07Source = env.fromSource(sysc07, WatermarkStrategy.noWatermarks(), "sysc07-kafka").uid("sysc07Source").name("sysc07Source");
-        SingleOutputStreamOperator<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka").uid("sysc08Source").name("sysc08Source");
-        SingleOutputStreamOperator<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka").uid("mdac01Source").name("mdac01Source");
+        SingleOutputStreamOperator<String> sysc07Source = env.fromSource(sysc07, WatermarkStrategy.noWatermarks(), "sysc07-kafka").uid("DimProvinceWideAppsysc07Source").name("DimProvinceWideAppsysc07Source");
+        SingleOutputStreamOperator<String> sysc08Source = env.fromSource(sysc08, WatermarkStrategy.noWatermarks(), "sysc08-kafka").uid("DimProvinceWideAppsysc08Source").name("DimProvinceWideAppsysc08Source");
+        SingleOutputStreamOperator<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka").uid("DimProvinceWideAppmdac01Source").name("DimProvinceWideAppmdac01Source");
 
 
         LOGGER.info("1.kafka数据源收入");
@@ -117,7 +117,7 @@ public class DimProvinceWideApp {
                 }
                 return false;
             }
-        }).uid("filterSysc07").name("filterSysc07");
+        }).uid("DimProvinceWideAppfilterSysc07").name("DimProvinceWideAppfilterSysc07");
         // 过滤出sysc08的表
         SingleOutputStreamOperator<String> filterSysc08 = sysc08Source.filter(new RichFilterFunction<String>() {
             @Override
@@ -128,7 +128,7 @@ public class DimProvinceWideApp {
                 }
                 return false;
             }
-        }).uid("filterSysc08").name("filterSysc08");
+        }).uid("DimProvinceWideAppfilterSysc08").name("DimProvinceWideAppfilterSysc08");
 
         // 过滤出mdac01的表
         SingleOutputStreamOperator<String> filterMdac01 = mdac01Source.filter(new RichFilterFunction<String>() {
@@ -140,7 +140,7 @@ public class DimProvinceWideApp {
                 }
                 return false;
             }
-        }).uid("filterMdac01").name("filterMdac01");
+        }).uid("DimProvinceWideAppfilterMdac01").name("DimProvinceWideAppfilterMdac01");
 
         LOGGER.info("2.过滤后的数据");
 
@@ -155,7 +155,7 @@ public class DimProvinceWideApp {
                 sysc07.setTs(ts);
                 return sysc07;
             }
-        }).uid("mapSysc07").name("mapSysc07");
+        }).uid("DimProvinceWideAppmapSysc07").name("DimProvinceWideAppmapSysc07");
 
         //  转换  Sysc08的表
         SingleOutputStreamOperator<Sysc08> mapSysc08 = filterSysc08.map(new MapFunction<String, Sysc08>() {
@@ -167,7 +167,7 @@ public class DimProvinceWideApp {
                 sysc08.setTs(ts);
                 return sysc08;
             }
-        }).uid("mapSysc08").name("mapSysc08");
+        }).uid("DimProvinceWideAppmapSysc08").name("DimProvinceWideAppmapSysc08");
 
         //  转换  Mdac01的表
         SingleOutputStreamOperator<Mdac01> mapMdac01 = filterMdac01.map(new MapFunction<String, Mdac01>() {
@@ -179,7 +179,7 @@ public class DimProvinceWideApp {
                 mdac01.setTs(ts);
                 return mdac01;
             }
-        }).uid("mapMdac01").name("mapMdac01");
+        }).uid("DimProvinceWideAppmapMdac01").name("DimProvinceWideAppmapMdac01");
 
         /*4.指定事件时间字段 */
         //  sysc07指定事件时间
@@ -191,7 +191,7 @@ public class DimProvinceWideApp {
                                 return sysc07.getTs();
                             }
                         })
-        ).uid("Sysc07WithTsDS").name("Sysc07WithTsDS");
+        ).uid("DimProvinceWideAppSysc07WithTsDS").name("DimProvinceWideAppSysc07WithTsDS");
 
         //  sysc08指定事件时间
         SingleOutputStreamOperator<Sysc08> sysc08WithTs = mapSysc08.assignTimestampsAndWatermarks(
@@ -202,7 +202,7 @@ public class DimProvinceWideApp {
                                 return sysc08.getTs();
                             }
                         })
-        ).uid("Sysc08WithTsDS").name("Sysc08WithTsDS");
+        ).uid("DimProvinceWideAppSysc08WithTsDS").name("DimProvinceWideAppSysc08WithTsDS");
 
         //  mdac01指定事件时间
         SingleOutputStreamOperator<Mdac01> mdac01WithTs = mapMdac01.assignTimestampsAndWatermarks(
@@ -213,7 +213,7 @@ public class DimProvinceWideApp {
                                 return mdac01.getTs();
                             }
                         })
-        ).uid("Mdac01WithTsDS").name("Mdac01WithTsDS");
+        ).uid("DimProvinceWideAppMdac01WithTsDS").name("DimProvinceWideAppMdac01WithTsDS");
 
         /* 5. 分组指定关联key */
         //  sysc07,08,09按照省区代码(CSQDM)分组
@@ -234,7 +234,7 @@ public class DimProvinceWideApp {
                                 out.collect(new ProvincesWide(right, left));
                             }
                         }
-                ).uid("mergeSysc0708").name("mergeSysc0708");
+                ).uid("DimProvinceWideAppmergeSysc0708").name("DimProvinceWideAppmergeSysc0708");
         KeyedStream<ProvincesWide, String> provincesWide0708KeyedStream = wide0708.keyBy(ProvincesWide::getCdqdm);
 
 
@@ -247,7 +247,7 @@ public class DimProvinceWideApp {
                     public void processElement(ProvincesWide left, Mdac01 right, Context ctx, Collector<ProvincesWide> out) {
                         out.collect(new ProvincesWide(left, right));
                     }
-                }).uid("mergeWide07mdac01").name("mergeWide07mdac01");
+                }).uid("DimProvinceWideAppmergeWide07mdac01").name("DimProvinceWideAppmergeWide07mdac01");
 
         SingleOutputStreamOperator<ProvincesWide> provincesWideWithSysc09 = AsyncDataStream.unorderedWait(
                 provincesWide,
@@ -274,7 +274,7 @@ public class DimProvinceWideApp {
                             wide.setVdsmc(dimInfoJsonObj.getString("VDSMC"));
                         }
                     }
-                }, 60, TimeUnit.SECONDS).uid("provincesWideWithSysc09").name("provincesWideWithSysc09");
+                }, 60, TimeUnit.SECONDS).uid("DimProvinceWideAppprovincesWideWithSysc09").name("DimProvinceWideAppprovincesWideWithSysc09");
 
         /* 7.开窗,按照时间窗口 */
         provincesWideWithSysc09.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
@@ -286,7 +286,7 @@ public class DimProvinceWideApp {
                     collector.collect(es);
                 }
             }
-        }).addSink(JdbcSink.<ProvincesWide>getBatchSink()).uid("sink-mysql").name("sink-mysql");
+        }).addSink(JdbcSink.<ProvincesWide>getBatchSink()).uid("DimProvinceWideAppsink-mysql").name("DimProvinceWideAppsink-mysql");
 
         try {
             env.execute("KafkaSinkMysql");
