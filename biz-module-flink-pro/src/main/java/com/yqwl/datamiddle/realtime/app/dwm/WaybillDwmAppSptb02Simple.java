@@ -79,7 +79,7 @@ public class WaybillDwmAppSptb02Simple {
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppSptb02SimpleMysqlSource").uid("WaybillDwmAppSptb02SimpleMysqlSourceStream").name("WaybillDwmAppSptb02SimpleMysqlSourceStream");
 
         SingleOutputStreamOperator<DwmSptb02> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02>() {
             @Override
@@ -283,7 +283,7 @@ public class WaybillDwmAppSptb02Simple {
                     out.collect(bean);
                 }
             }
-        }).uid("dwmSptb02Process").name("dwmSptb02Process");
+        }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
 
         //===================================sink kafka=======================================================//
@@ -292,7 +292,7 @@ public class WaybillDwmAppSptb02Simple {
             public String map(DwmSptb02 obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("dwmSptb02Json").name("dwmSptb02Json");
+        }).uid("WaybillDwmAppSptb02SimpleDwmSptb02Json").name("WaybillDwmAppSptb02SimpleDwmSptb02Json");
         dwmSptb02Json.print();
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -300,15 +300,15 @@ public class WaybillDwmAppSptb02Simple {
                 KafkaTopicConst.DWM_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
 
-        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwmSptb02Simple").name("sinkKafkaDwmSptb02Simple");
+        dwmSptb02Json.addSink(sinkKafka).setParallelism(1).uid("WaybillDwmAppSptb02SimpleSinkKafkaDwmSptb02Simple").name("WaybillDwmAppSptb02SimpleSinkKafkaDwmSptb02Simple");
 
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getSql(DwmSptb02.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).uid("sinkMysqlDwmSptb02Simple").name("sinkMysqlDwmSptb02Simple");
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02SimpleSinkMysqlDwmSptb02Simple").name("WaybillDwmAppSptb02SimpleSinkMysqlDwmSptb02Simple");
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-mysql-dwm");
+        env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");
         log.info("sptb02dwd层job任务开始执行");
     }
 }
