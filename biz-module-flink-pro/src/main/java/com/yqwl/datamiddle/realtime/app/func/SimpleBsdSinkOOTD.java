@@ -16,9 +16,7 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
     @Override
     public void invoke(DwdBaseStationData dbsData, Context context) throws Exception {
-        System.out.println("start" + System.currentTimeMillis());
 
-        //todo :获取rs的warehouseCode与shopNum相等,vin=vin
         // 获取Vin码
         String vin = dbsData.getVIN();
         // 获取仓库代码
@@ -59,7 +57,6 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
                     sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on a.WAREHOUSE_CODE = e.IN_WAREHOUSE_CODE  JOIN dwm_vlms_sptb02 s on e.VIN = s.VVIN SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
                             " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' AND s.VYSFS = 'G' "
                             + "AND e.IN_SITE_TIME < " + sample_u_t_c + ";");
-                    log.info("{}", sb);
                 /*String IN_DISTRIBUTE_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' "
                         + "AND e.IN_SITE_TIME < " + sample_u_t_c ;
@@ -84,6 +81,5 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
             DbUtil.executeBatchUpdate(sb.toString());
         }
 
-        System.out.println("end" + System.currentTimeMillis());
     }
 }
