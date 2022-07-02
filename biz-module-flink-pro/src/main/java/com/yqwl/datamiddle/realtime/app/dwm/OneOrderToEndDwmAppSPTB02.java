@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
@@ -12,9 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -41,6 +46,10 @@ public class OneOrderToEndDwmAppSPTB02 {
     private static final long END = 1672502399000L;
 
     public static void main(String[] args) throws Exception {
+        //Configuration configuration1 = new Configuration();
+        //flink parallelism=16 savepoint state
+        // configuration1.setString("execution.savepoint.path",
+        // "hdfs://hadoop195:8020/flink/checkpoint/be4ef18e17df472b9c62fee199e8fb21/4641d34ccce58cab8466c991a62ed103/chk-66");
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
@@ -55,10 +64,13 @@ public class OneOrderToEndDwmAppSPTB02 {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
+
         Properties properties = new Properties();
+        // 遇到错误跳过
         properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
         properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
-        properties.setProperty("debezium.include.schema.changes","false");
+
+
         //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
@@ -71,16 +83,24 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .distributionFactorUpper(10.0d)
+                .distributionFactorUpper(10.0d)   //针对cdc的错误算法的更改
                 .build();
 
+/*        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
+                .setBootstrapServers(props.getStr("kafka.hostname"))
+                .setTopics(KafkaTopicConst.DWM_VLMS_SPTB02)
+                .setGroupId(KafkaTopicConst.DWM_VLMS_SPTB02_GROUP)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();*/
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppSPTB02MysqlSource").uid("OneOrderToEndDwmAppSPTB02MysqlSourceStream").name("OneOrderToEndDwmAppSPTB02MysqlSourceStream");
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndUpdateProcess = mysqlSourceStream.process(new ProcessFunction<String, OotdTransition>() {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
+                //DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 Long ddjrq1 = dwmSptb02.getDDJRQ();
                 if (Objects.nonNull(ddjrq1) && ddjrq1 > 0) {
                     if (ddjrq1 >= START && ddjrq1 <= END) {
@@ -265,7 +285,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
                 }
             }
-        }).uid("oneOrderToEndUpdateProcess").name("oneOrderToEndUpdateProcess");
+        }).uid("OneOrderToEndDwmAppSPTB02UpdateProcess").name("OneOrderToEndDwmAppSPTB02UpdateProcess");
 
 
         //5.sptb02与一单到底对应的字段插入mysql
@@ -434,7 +454,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withDriverName(MysqlConfig.DRIVER)
                         .withUsername(MysqlConfig.USERNAME)
                         .withPassword(MysqlConfig.PASSWORD)
-                        .build())).setParallelism(1).uid("sink-dwm_vlms_one_order_to_end").name("sink-dwm_vlms_one_order_to_end");
+                        .build())).setParallelism(1).uid("OneOrderToEndDwmAppSPTB02SinkMysql-dwm_vlms_one_order_to_end").name("OneOrderToEndDwmAppSPTB02SinkMysql-dwm_vlms_one_order_to_end");
         //==============================================dwm_vlms_sptb02处理END=============================================================================//
 
 
