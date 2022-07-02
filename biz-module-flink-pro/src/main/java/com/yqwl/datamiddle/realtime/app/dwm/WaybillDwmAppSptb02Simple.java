@@ -307,7 +307,7 @@ public class WaybillDwmAppSptb02Simple {
         String sql = MysqlUtil.getSql(DwmSptb02.class);
         dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02SimpleSinkMysqlDwmSptb02Simple").name("WaybillDwmAppSptb02SimpleSinkMysqlDwmSptb02Simple");
 
-        log.info("将处理完的数据保存到clickhouse中1");
+        log.info("将处理完的数据保存到clickhouse中");
         env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");
         log.info("sptb02dwd层job任务开始执行");
     }
