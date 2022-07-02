@@ -65,19 +65,18 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
                         + "AND e.IN_SITE_TIME < " + sample_u_t_c ;
                 DbUtil.executeUpdate(IN_DISTRIBUTE_TIMESql);*/
                 }
-
-                // 4.过滤出所有出库操作记录  ** 快
-                if (StringUtils.equals(operate_type, "OutStock") && (StringUtils.equals(shop_no, "DZCP901") || StringUtils.equals(shop_no, "DZCP9"))) {
-                    // 5.更新出厂日期   ** 快
-                    sb.append("UPDATE dwm_vlms_one_order_to_end e  SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
-                            " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c +
-                            " AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ");");
+                }
+            // 4.过滤出所有出库操作记录  ** 快
+            if (StringUtils.equals(operate_type, "OutStock") && (StringUtils.equals(shop_no, "DZCP901") || StringUtils.equals(shop_no, "DZCP9"))) {
+                // 5.更新出厂日期   ** 快
+                sb.append("UPDATE dwm_vlms_one_order_to_end e  SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
+                        " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c +
+                        " AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ");");
                     /*String  LEAVE_FACTORY_TIMESql = "UPDATE dwm_vlms_one_order_to_end e JOIN ods_vlms_base_station_data a SET e.LEAVE_FACTORY_TIME = " + sample_u_t_c +
                                         " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.CP9_OFFLINE_TIME < " + sample_u_t_c + " AND (a.SHOP_NO = 'DZCP901' OR a.SHOP_NO = 'DZCP9' ) "
                                         + "AND a.OPERATE_TYPE='OutStock'  AND ( e.LEAVE_FACTORY_TIME = 0 OR e.LEAVE_FACTORY_TIME > " + sample_u_t_c + ")";
                     DbUtil.executeUpdate(LEAVE_FACTORY_TIMESql);
                     log.info("sql: {}",LEAVE_FACTORY_TIMESql);*/
-                }
             }
         }
 
