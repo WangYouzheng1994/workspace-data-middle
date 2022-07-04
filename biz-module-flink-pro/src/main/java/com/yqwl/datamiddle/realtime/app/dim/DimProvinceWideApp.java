@@ -80,7 +80,7 @@ public class DimProvinceWideApp {
         KafkaSource<String> sysc08 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_SYSC08)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC07_GROUP)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC08_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -89,7 +89,7 @@ public class DimProvinceWideApp {
         KafkaSource<String> mdac01 = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_MDAC01)
-                .setGroupId(KafkaTopicConst.ODS_VLMS_SYSC07_GROUP)
+                .setGroupId(KafkaTopicConst.ODS_VLMS_MDAC01_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
