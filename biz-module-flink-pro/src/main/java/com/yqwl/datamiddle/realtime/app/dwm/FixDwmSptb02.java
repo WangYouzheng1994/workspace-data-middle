@@ -23,7 +23,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description:
+ * @Description: 修数的任务
  *     // 有乱码的字段 :
  *     // TRANSPORT_VEHICLE_NO  运输车号
  *     // START_CITY_NAME       始发城市
