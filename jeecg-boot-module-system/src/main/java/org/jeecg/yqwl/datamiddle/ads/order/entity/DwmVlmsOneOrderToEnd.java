@@ -67,8 +67,10 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "入库代码")
 	private String inWarehouseCode;*/
 	/**计划下达时间 取sptb02.dpzrq*/
-	@Excel(name = "计划下达时间", width = 15)
-    @ApiModelProperty(value = "计划下达时间 取sptb02.dpzrq")
+	// @Excel(name = "计划下达时间", width = 15)
+    //
+	@Excel(name = "配板时间", width = 15)
+	@ApiModelProperty(value = "配板时间 取sptb02.dpzrq")
 	private Long planReleaseTime;
 	/**任务单号 取sptb02.cjhdh*/
 	@Excel(name = "任务单号", width = 15)

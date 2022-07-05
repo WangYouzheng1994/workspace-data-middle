@@ -232,7 +232,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // stowageNoteTime
                 if (item.getStowageNoteTime() != 0) {
-                    row1.createCell(10).setCellValue(sdf.format(item.getStowageNoteTime()));
+                    row1.createCell(10).setCellValue(sdf.format(item.getPlanReleaseTime()));
                 }
                 // stowageNoteNo
                 row1.createCell(11).setCellValue(item.getStowageNoteNo());
