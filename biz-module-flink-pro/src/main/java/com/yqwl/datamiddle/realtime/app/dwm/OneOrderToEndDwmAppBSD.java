@@ -60,7 +60,7 @@ public class OneOrderToEndDwmAppBSD {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         // 1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppBSDMysqlSource").uid("OneOrderToEndDwmAppBSDMysqlSourceStream").name("OneOrderToEndDwmAppBSDMysqlSourceStream");
         //==============================================dwd_base_station_data处理 START==========================================================================//
 
         // 2.转换BASE_STATION_DATA为实体类
@@ -69,9 +69,9 @@ public class OneOrderToEndDwmAppBSD {
             public DwdBaseStationData map(String json) throws Exception {
                 return JSON.parseObject(json, DwdBaseStationData.class);
             }
-        }).uid("transitionBASE_STATION_DATA").name("transitionBASE_STATION_DATA");
+        }).uid("OneOrderToEndDwmAppBSDTransitionBASE_STATION_DATA").name("OneOrderToEndDwmAppBSDTransitionBASE_STATION_DATA");
         // 3.更新 dwdBds->dwmOOTD 一单到底表
-        mapBsd.addSink(new SimpleBsdSinkOOTD<DwdBaseStationData>()).uid("BsdSinkOOTD").name("BsdSinkOOTD");
+        mapBsd.addSink(new SimpleBsdSinkOOTD<DwdBaseStationData>()).uid("OneOrderToEndDwmAppBSDBsdSinkOOTD").name("OneOrderToEndDwmAppBSDBsdSinkOOTD");
         //==============================================dwd_base_station_data处理 END==========================================================================//
         env.execute("dwdBsd更新一单到底表");
         log.info("base_station_data job任务开始执行");

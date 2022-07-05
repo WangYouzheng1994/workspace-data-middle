@@ -36,13 +36,11 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
             // 查询开始站台的运单记录
             // 当前查询到记录值为空，从来没有被更新过
             if (IN_STORE.equals(operateType)) {
-                log.info("vvin码：" + data.getVIN());
                 String inSql = "UPDATE dwm_vlms_sptb02 SET IN_START_PLATFORM_TIME=" + data.getSAMPLE_U_T_C() + " WHERE VYSFS IN ('L1', 'T') AND START_PHYSICAL_CODE='"
                         + wlckdm + "' AND VVIN='" + vin + "' AND ( IN_START_PLATFORM_TIME = 0 OR IN_START_PLATFORM_TIME > " + data.getSAMPLE_U_T_C() + " )";
-                log.info("执行sql：" + inSql);
-                int i = DbUtil.executeUpdate(inSql);
-                log.info("执行结果：" + i);
+                DbUtil.executeUpdate(inSql);
             }
+
             // 1.2 处理开始站台的出站台时间
             if (OUT_STOCK.equals(operateType)) {
                 String inSql = "UPDATE dwm_vlms_sptb02 SET OUT_START_PLATFORM_TIME=" + data.getSAMPLE_U_T_C() + " WHERE VYSFS IN ('L1', 'T') AND START_PHYSICAL_CODE='"
@@ -96,7 +94,6 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                 //执行sql前的条件
                 String dwmSptb02Sql = "UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + physical_code + "' AND VVIN ='" + vin + "'";
                 try {
-                    log.info("展示执行的sql:{}", dwmSptb02Sql);
                     DbUtil.executeUpdate(dwmSptb02Sql);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);

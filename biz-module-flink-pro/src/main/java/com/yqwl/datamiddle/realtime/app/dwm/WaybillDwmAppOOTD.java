@@ -19,6 +19,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +46,11 @@ public class WaybillDwmAppOOTD {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
+        Properties properties = new Properties();
+        // 以下为了遇到报错跳过错误而加
+        properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
+        properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
+
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         //读取mysql binlog
@@ -56,6 +62,8 @@ public class WaybillDwmAppOOTD {
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+                .debeziumProperties(properties)
+                .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .build();
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppOOTDMysqlSource").uid("WaybillDwmAppOOTDMysqlSource").name("WaybillDwmAppOOTDMysqlSource");
@@ -73,13 +81,10 @@ public class WaybillDwmAppOOTD {
 //        组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_ONE_ORDER_TO_END).append(" values ").append(StrUtil.getValueSql(DwmOneOrderToEnd.class));
-        log.info("组装clickhouse插入sql:{}", sql);
-        mapBsdEpc.addSink(ClickHouseUtil.<DwmOneOrderToEnd>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        mapBsdEpc.print("拉宽后数据输出：");
-
+        mapBsdEpc.addSink(ClickHouseUtil.<DwmOneOrderToEnd>getSink(sql.toString())).setParallelism(1).uid("WaybillDwmAppOOTD_Sink-clickhouse").name("WaybillDwmAppOOTD_Sink-clickhouse");
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("dwmOneOrderToEnd-clickhouse");
+        env.execute("Mysql_DwmOneOrderToEnd->Clickhouse_DwmOneOrderToEnd");
         log.info("DwmOneOrderToEnd层job任务开始执行");
     }
 }

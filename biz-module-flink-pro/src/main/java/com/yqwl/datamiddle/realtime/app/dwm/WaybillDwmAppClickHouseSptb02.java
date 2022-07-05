@@ -19,6 +19,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,6 +30,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppClickHouseSptb02 {
+    //2019-12-31 00:00:00
+    private static final long START = 1577721600000L;
+    //2022-12-31 23:59:59
+    private static final long END = 1672502399000L;
+
 
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
@@ -45,6 +51,11 @@ public class WaybillDwmAppClickHouseSptb02 {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
+        Properties properties = new Properties();
+        // 以下为了遇到报错跳过错误而加
+        properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
+        properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
+
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         //读取mysql binlog
@@ -52,13 +63,15 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList("data_middle_flink.dwm_vlms_sptb02")
+                .tableList("data_flink.dwm_vlms_sptb02")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+                .debeziumProperties(properties)
+                .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .build();
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppClickHouseSptb02MysqlSource").uid("WaybillDwmAppClickHouseSptb02").name("WaybillDwmAppClickHouseSptb02");
 
 
         //3.转实体类 BASE_STATION_DATA_EPC
@@ -68,18 +81,16 @@ public class WaybillDwmAppClickHouseSptb02 {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
                 return jsonObject.getObject("after", DwmSptb02.class);
             }
-        }).uid("transitionDwmOneOrderToEnd").name("transitionDwmOneOrderToEnd");
+        }).uid("WaybillDwmAppClickHouseSptb02TransitionDwmOneOrderToEnd").name("WaybillDwmAppClickHouseSptb02TransitionDwmOneOrderToEnd");
         //====================================sink clickhouse===============================================//
         //        组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_SPTB02).append(" values ").append(StrUtil.getValueSql(DwmSptb02.class));
         log.info("组装clickhouse插入sql:{}", sql);
-        mapBsdEpc.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("sink-clickhouse").name("sink-clickhouse");
-        mapBsdEpc.print("拉宽后数据输出：");
-
+        mapBsdEpc.addSink(ClickHouseUtil.<DwmSptb02>getSink(sql.toString())).setParallelism(1).uid("WaybillDwmAppClickHouseSptb02Sink-clickhouse").name("WaybillDwmAppClickHouseSptb02Sink-clickhouse");
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-DwmOneOrderToEnd");
+        env.execute("Mysql_DwmSptb02->Clickhosue_DwmSptb02");
         log.info("DwmOneOrderToEnd层job任务开始执行");
     }
 }

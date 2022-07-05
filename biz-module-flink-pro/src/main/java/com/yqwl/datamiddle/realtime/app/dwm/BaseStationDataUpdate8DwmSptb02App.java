@@ -53,17 +53,16 @@ public class BaseStationDataUpdate8DwmSptb02App {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        SingleOutputStreamOperator<String> mysqlStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MySQL-Source").uid("mysqlSource").name("mysqlSource");
+        SingleOutputStreamOperator<String> mysqlStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "BaseStationDataUpdate8DwmSptb02AppMySQL-Source").uid("BaseStationDataUpdate8DwmSptb02AppmysqlSource").name("BaseStationDataUpdate8DwmSptb02AppMysqlSource");
         //将json转成obj
         SingleOutputStreamOperator<DwdBaseStationData> baseStationDataMap = mysqlStream.map(new MapFunction<String, DwdBaseStationData>() {
             @Override
             public DwdBaseStationData map(String json) throws Exception {
                 return JSON.parseObject(json, DwdBaseStationData.class);
             }
-        }).uid("baseStationDataMap").name("baseStationDataMap");
+        }).uid("BaseStationDataUpdate8DwmSptb02AppBaseStationDataMap").name("BaseStationDataUpdate8DwmSptb02AppBaseStationDataMap");
 
-        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("aseStationDataSink").name("aseStationDataSink");
-
+        baseStationDataMap.addSink(new SimpleBaseStationDataSink<DwdBaseStationData>()).uid("BaseStationDataUpdate8DwmSptb02AppAseStationDataSink").name("BaseStationDataUpdate8DwmSptb02AppAseStationDataSink");
 
         log.info("消费dwdBsd更新dwm_vlms_sptb02,8个时间节点");
         env.execute("消费dwdBsd更新dwm_vlms_sptb02,8个时间节点");

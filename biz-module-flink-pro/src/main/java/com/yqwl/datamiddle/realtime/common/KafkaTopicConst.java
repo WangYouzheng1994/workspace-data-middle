@@ -14,6 +14,8 @@ public class KafkaTopicConst {
     public static final String DWD_VLMS_SPTB02_GROUP = "dwd_vlms_sptb02_group";
     public static final String DWD_VLMS_SPTB02_GROUP_1 = "dwd_vlms_sptb02_group_1";
     public static final String ODS_VLMS_SYSC07_GROUP = "ods_vlms_sysc07_group";
+    public static final String ODS_VLMS_SYSC08_GROUP = "ods_vlms_sysc08_group";
+    public static final String ODS_VLMS_MDAC01_GROUP = "ods_vlms_mdac01_group";
     public static final String DWD_VLMS_BASE_STATION_DATA_GROUP_1 = "dwd_vlms_base_station_data_group_1";
     public static final String DWD_VLMS_BASE_STATION_DATA_GROUP_2 = "dwd_vlms_base_station_data_group_2";
     public static final String DWD_VLMS_BASE_STATION_DATA_EPC_GROUP = "dwd_vlms_base_station_data_epc_group";

@@ -57,7 +57,7 @@ public class OneOrderToEndDwmAppEPC {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppEPCMysqlSource").uid("OneOrderToEndDwmAppEPCMysqlSourceStream").name("OneOrderToEndDwmAppEPCMysqlSourceStream");
 
         //==============================================dwd_base_station_data_epc处理 START====================================================================//
 
@@ -67,7 +67,7 @@ public class OneOrderToEndDwmAppEPC {
             public DwdBaseStationDataEpc map(String json) throws Exception {
                 return JSON.parseObject(json, DwdBaseStationDataEpc.class);
             }
-        }).uid("transitionBASE_STATION_DATA_EPCMap").name("transitionBASE_STATION_DATA_EPCMap");
+        }).uid("OneOrderToEndDwmAppEPCTransitionBASE_STATION_DATA_EPCMap").name("OneOrderToEndDwmAppEPCTransitionBASE_STATION_DATA_EPCMap");
         //4.插入mysql
         mapBsdEpc.addSink(JdbcSink.sink(
 
@@ -101,7 +101,7 @@ public class OneOrderToEndDwmAppEPC {
                         .withDriverName(MysqlConfig.DRIVER)
                         .withUsername(MysqlConfig.USERNAME)
                         .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("baseStationDataEpcSink").name("baseStationDataEpcSink");
+                        .build())).uid("OneOrderToEndDwmAppEPCBaseStationDataEpcSink").name("OneOrderToEndDwmAppEPCBaseStationDataEpcSink");
         //==============================================dwd_base_station_data_epc处理 END====================================================================//
 
         env.execute("bsdEpc更新一单到底表");

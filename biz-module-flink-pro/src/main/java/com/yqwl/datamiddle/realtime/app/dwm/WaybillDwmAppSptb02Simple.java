@@ -65,7 +65,7 @@ public class WaybillDwmAppSptb02Simple {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
         //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
@@ -79,7 +79,7 @@ public class WaybillDwmAppSptb02Simple {
                 .build();
 
         //1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "MysqlSource").uid("MysqlSourceStream").name("MysqlSourceStream");
+        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppSptb02SimpleMysqlSource").uid("WaybillDwmAppSptb02SimpleMysqlSourceStream").name("WaybillDwmAppSptb02SimpleMysqlSourceStream");
 
         SingleOutputStreamOperator<DwmSptb02> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02>() {
             @Override
@@ -283,7 +283,7 @@ public class WaybillDwmAppSptb02Simple {
                     out.collect(bean);
                 }
             }
-        }).uid("dwmSptb02Process").name("dwmSptb02Process");
+        }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
 
         //===================================sink kafka=======================================================//
@@ -292,23 +292,23 @@ public class WaybillDwmAppSptb02Simple {
             public String map(DwmSptb02 obj) throws Exception {
                 return JSON.toJSONString(obj);
             }
-        }).uid("dwmSptb02Json").name("dwmSptb02Json");
-        dwmSptb02Json.print();
+        }).uid("WaybillDwmAppSptb02SimpleDwmSptb02Json").name("WaybillDwmAppSptb02SimpleDwmSptb02Json");
+
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWM_VLMS_SPTB02,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
 
-        dwmSptb02Json.addSink(sinkKafka).uid("sinkKafkaDwmSptb02Simple").name("sinkKafkaDwmSptb02Simple");
+        dwmSptb02Json.addSink(sinkKafka).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkKafka").name("WaybillDwmAppSptb02Simple_SinkKafka");
 
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getSql(DwmSptb02.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).uid("sinkMysqlDwmSptb02Simple").name("sinkMysqlDwmSptb02Simple");
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
 
         log.info("将处理完的数据保存到clickhouse中");
-        env.execute("sptb02-sink-mysql-dwm");
+        env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");
         log.info("sptb02dwd层job任务开始执行");
     }
 }
