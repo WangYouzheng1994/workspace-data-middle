@@ -31,8 +31,10 @@ public class SimpleFixDwmSptb02DataSink<T> extends RichSinkFunction<FixDwmsptb02
         // 到货地县区名称
         String end_city_name = data.getEND_CITY_NAME();
         if (StringUtils.isNotBlank(cjsdbh) ) {
-            String inSql = "UPDATE dwm_vlms_one_order_to_end SET TRANSPORT_VEHICLE_NO= '" + vjsydm + "' ";
-            DbUtil.executeUpdate(inSql);
+            if (StringUtils.isNotBlank(vjsydm)){
+                String inSql = "UPDATE dwm_vlms_one_order_to_end SET TRANSPORT_VEHICLE_NO= '" + vjsydm + "' ";
+                DbUtil.executeUpdate(inSql);
+            }
         }
         //==============================================处理车牌号+起运地县区名称=============================================================//
         if ( StringUtils.isNotBlank(start_city_name) ) {
