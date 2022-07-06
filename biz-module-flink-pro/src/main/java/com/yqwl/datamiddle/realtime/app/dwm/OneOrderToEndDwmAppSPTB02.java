@@ -135,6 +135,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String base_name = dwmSptb02.getBASE_NAME();                            //基地名称
                         ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           //记录更新时间
                         ootdTransition.setVVIN(vvin);                                           //vin码 先赋值
+                        String vyscdm = dwmSptb02.getVYSCDM();                                                  // 运输车代码 关联 mdac33.vyscdm
 
                         if (StringUtils.isNotBlank(cjsdbh)) {
                             ootdTransition.setCJSDBH(cjsdbh);
@@ -201,6 +202,14 @@ public class OneOrderToEndDwmAppSPTB02 {
                             }
                             if (StringUtils.isNotBlank(host_com_code)) {
                                 ootdTransition.setBRAND(host_com_code);
+                            }
+                            // 轿运车乘位数 : mdac33.NCYDE 承运定额  使用sptb02.vyscdm关联 mdac33.vyscdm
+                            if (StringUtils.isNotBlank(vyscdm)) {
+                                String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
+                                JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
+                                if (mdac33 != null) {
+                                    ootdTransition.setJYCCWS(mdac33.getInteger("NCYDE"));
+                                }
                             }
                         }
 
