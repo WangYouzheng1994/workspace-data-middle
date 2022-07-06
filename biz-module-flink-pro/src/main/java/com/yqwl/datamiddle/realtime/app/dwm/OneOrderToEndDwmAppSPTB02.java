@@ -1,7 +1,6 @@
 package com.yqwl.datamiddle.realtime.app.dwm;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
@@ -13,13 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
@@ -120,8 +115,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String start_city_name = dwmSptb02.getSTART_CITY_NAME();                //始发城市
                         String end_city_name = dwmSptb02.getEND_CITY_NAME();                    //目的城市
                         String vdwdm = dwmSptb02.getVDWDM();                                    //经销商代码
-                        String dealer_name = dwmSptb02.getDEALER_NAME();                              //经销商代码
-                        String vysfs = dwmSptb02.getVYSFS();                                    //运输方式
+                        String dealer_name = dwmSptb02.getDEALER_NAME();                        //经销商代码
+                        //String vysfs = dwmSptb02.getVYSFS();                                    //原始的运输方式
+                        String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      //dwm的合出来的运输方式
                         String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      //开始站台/港口仓库名称
                         String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          //到达站台/港口仓库名称
                         Long in_start_platform_time = dwmSptb02.getIN_START_PLATFORM_TIME();    //铁路的入开始站台时间
@@ -140,11 +136,24 @@ public class OneOrderToEndDwmAppSPTB02 {
                         ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           //记录更新时间
                         ootdTransition.setVVIN(vvin);                                           //vin码 先赋值
 
-                        if (StringUtils.isNotBlank(cjsdbh) && "G".equals(vysfs) && "T1".equals(highwayWarehouseType)) {
+                        if (StringUtils.isNotBlank(cjsdbh)) {
                             ootdTransition.setCJSDBH(cjsdbh);
+                        }
+
+                        // 第一个运单的落值情况
+                        if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S")) {
                             if (StringUtils.isNotBlank(vehicle_code)) {
                                 ootdTransition.setVEHICLE_CODE(vehicle_code);
+                                /**
+                                 * 根据产品编码查获取产品名称
+                                 */
+                                String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                                JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
+                                if (mdac12 != null) {
+                                    ootdTransition.setVEHICLE_NAME(mdac12.getString("VCPMC"));
+                                }
                             }
+
                             if (StringUtils.isNotBlank(base_code)) {
                                 ootdTransition.setBASE_CODE(base_code);
                             }
@@ -193,12 +202,12 @@ public class OneOrderToEndDwmAppSPTB02 {
                             if (StringUtils.isNotBlank(host_com_code)) {
                                 ootdTransition.setBRAND(host_com_code);
                             }
-
                         }
+
                         //=====================================铁水运单处理=====================================================//
-                        if (StringUtils.isNotBlank(vysfs) && StringUtils.isNotBlank(cjsdbh)) {
+                        if (StringUtils.isNotBlank(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
                             //铁路运输方式
-                            if ("T".equals(vysfs) || "L1".equals(vysfs)) {
+                            if ("T".equals(traffic_type) || "L1".equals(traffic_type)) {
                                 if (StringUtils.isNotBlank(start_warehouse_name)) {
                                     ootdTransition.setSTART_PLATFORM_NAME(start_city_name);              //开始站台仓库名称
                                 }
@@ -219,7 +228,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                                 }
                             }
                             //水路运输方式
-                            if ("S".equals(vysfs) && StringUtils.isNotBlank(cjsdbh)) {
+                            if ("S".equals(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
                                 if (StringUtils.isNotBlank(start_warehouse_name)) {
                                     ootdTransition.setSTART_WATERWAY_NAME(start_city_name);              //开始站台仓库名称
                                 }
@@ -241,19 +250,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                             }
                         }
 
-                        /**
-                         * 根据产品编码查获取产品名称
-                         */
-                        if (StringUtils.isNotBlank(vehicle_code)) {
-                            String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
-                            JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
-                            if (mdac12 != null) {
-                                ootdTransition.setVEHICLE_NMAE(mdac12.getString("VCPMC"));
-                            }
-                        }
-
                         //====================================末端配送==============================================//
-                        if ("G".equals(vysfs) && "T2".equals(highwayWarehouseType) && StringUtils.isNotBlank(cjsdbh)) {
+                        if ("G".equals(traffic_type) && "T2".equals(highwayWarehouseType) && StringUtils.isNotBlank(cjsdbh)) {
 
                             //配板时间
                             ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());
@@ -267,16 +265,17 @@ public class OneOrderToEndDwmAppSPTB02 {
                             ootdTransition.setDISTRIBUTE_VEHICLE_NO(dwmSptb02.getVJSYDM());
                             //起运时间
                             ootdTransition.setDISTRIBUTE_SHIPMENT_TIME(dwmSptb02.getSHIPMENT_TIME());
-
                         }
 
-                        if ("G".equals(vysfs)) {
+                        if (dwmSptb02.getDOT_SITE_TIME() != null) {
                             //打点到货
                             ootdTransition.setDOT_SITE_TIME(dwmSptb02.getDOT_SITE_TIME());
+                        }
+
+                        if (dwmSptb02.getFINAL_SITE_TIME() != null) {
                             //最终到货时间
                             ootdTransition.setFINAL_SITE_TIME(dwmSptb02.getFINAL_SITE_TIME());
                         }
-
 
                         //对象null值进行默认值赋值
                         OotdTransition bean = JsonPartUtil.getBean(ootdTransition);
@@ -313,7 +312,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
-                    String vehicle_name = ootd.getVEHICLE_NMAE();                        //车型名称
+                    String vehicle_name = ootd.getVEHICLE_NAME();                        //车型名称
                     Long ddjrq = ootd.getDDJRQ();                                        //整车物流接收STD日
                     String cjhdh = ootd.getCJHDH();                                      //任务单号
                     Long dpzrq = ootd.getDPZRQ();                                        //配板日期

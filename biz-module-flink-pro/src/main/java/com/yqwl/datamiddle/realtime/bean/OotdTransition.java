@@ -1,7 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
-import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -27,7 +26,7 @@ public class OotdTransition {
     /**
      * 车型名称
      */
-    private String VEHICLE_NMAE;
+    private String VEHICLE_NAME;
 
     /**
      * 底盘号
