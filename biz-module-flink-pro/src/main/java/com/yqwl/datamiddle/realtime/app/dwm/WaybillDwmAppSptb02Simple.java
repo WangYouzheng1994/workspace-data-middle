@@ -229,7 +229,7 @@ public class WaybillDwmAppSptb02Simple {
                             if (StringUtils.isNotBlank(mdac22.getString("VJXSJC"))) {
                                 dwmSptb02.setDEALER_NAME(mdac22.getString("VJXSJC"));
                             } else {
-                                dwmSptb02.setTRANSPORT_NAME(mdac22.getString("VJXSMC"));
+                                dwmSptb02.setDEALER_NAME(mdac22.getString("VJXSMC"));
                             }
                         }
                     }
