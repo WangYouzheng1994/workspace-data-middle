@@ -113,8 +113,8 @@ public class WaybillDwdAppSptb02Simple {
                         if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
                             dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                         }
-                        if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
-                            dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
+                        if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDSJCFSJ())) {
+                            dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
                         }
                     }
                     //3.处理 计划下达时间
