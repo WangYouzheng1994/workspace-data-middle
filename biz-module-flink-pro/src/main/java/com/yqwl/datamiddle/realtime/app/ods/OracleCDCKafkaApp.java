@@ -36,15 +36,15 @@ public class OracleCDCKafkaApp {
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
-        CheckpointConfig ck = env.getCheckpointConfig();
+        /*CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
-        ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        // ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
-        //ck.setCheckpointTimeout(60000);
+        ck.setCheckpointTimeout(60000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
-        //ck.setMinPauseBetweenCheckpoints(500);
+        ck.setMinPauseBetweenCheckpoints(5000);*/
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
         System.setProperty("HADOOP_USER_NAME", "yunding");
@@ -58,9 +58,14 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+        properties.put("event.processing.failure.handling.mode", "warn");
         //properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
-        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=" + props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
+        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
+                props.getStr("cdc.oracle.hostname") + ")(PORT=" +
+                props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" +
+                props.getStr("cdc.oracle.database") + ")))");
+
         //读取oracle连接配置属性
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
