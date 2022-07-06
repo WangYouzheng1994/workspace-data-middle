@@ -32,7 +32,8 @@ public class SimpleFixDwmSptb02DataSink<T> extends RichSinkFunction<FixDwmsptb02
         String end_city_name = data.getEND_CITY_NAME();
         if (StringUtils.isNotBlank(cjsdbh) ) {
             if (StringUtils.isNotBlank(vjsydm)){
-                String inSql = "UPDATE dwm_vlms_one_order_to_end SET TRANSPORT_VEHICLE_NO= '" + vjsydm + "' ";
+                String inSql = "UPDATE dwm_vlms_one_order_to_end SET TRANSPORT_VEHICLE_NO= '" + vjsydm + "'  WHERE SETTLEMENT_Y1 ='"
+                        + cjsdbh + "' ";
                 DbUtil.executeUpdate(inSql);
             }
         }

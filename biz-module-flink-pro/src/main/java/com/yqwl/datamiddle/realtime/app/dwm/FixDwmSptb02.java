@@ -83,7 +83,7 @@ public class FixDwmSptb02 {
 
                 Sptb02 sptb02 = JsonPartUtil.getAfterObj(value, Sptb02.class);
                 Long ddjrq = sptb02.getDDJRQ();
-                if (Objects.nonNull(ddjrq) && ddjrq > 0) {
+                //if (Objects.nonNull(ddjrq) && ddjrq > 0) {
                     // 筛选6月1号以后的数据
                     if (ddjrq >= START && ddjrq <= END) {
                         FixDwmsptb02Bean fixDwmsptb02 = new FixDwmsptb02Bean();
@@ -97,6 +97,7 @@ public class FixDwmSptb02 {
                         fixDwmsptb02.setCJSDBH(cjsdbh);
 
                         if (StringUtils.isNotBlank(cjsdbh)){
+
                             String sptb02Sql = "select START_PROVINCE_CODE, START_CITY_CODE, END_PROVINCE_CODE, END_CITY_CODE from " + KafkaTopicConst.DWD_VLMS_SPTB02 + " where CJSDBH = '" + cjsdbh + "' limit 1 ";
                             JSONObject sptb02Json = MysqlUtil.querySingle(KafkaTopicConst.DWD_VLMS_SPTB02, sptb02Sql, cjsdbh);
                             if (sptb02Json != null) {
@@ -135,7 +136,7 @@ public class FixDwmSptb02 {
                                     fixDwmsptb02.setEND_CITY_CODE(end_city_code);
                                 }
                             }
-                        }
+                        //}
                         out.collect(fixDwmsptb02);
                     }
                 }
