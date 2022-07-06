@@ -249,6 +249,11 @@ public class OotdTransition {
     private String DISTRIBUTE_VEHICLE_NO;
 
     /**
+     * 末端分拨中心 轿车数量
+     */
+    private Integer DISTRIBUTE_VEHICLE_NUM;
+
+    /**
      * 末端分拨中心 起运时间
      */
 
@@ -265,7 +270,4 @@ public class OotdTransition {
      */
 
     private Long FINAL_SITE_TIME;
-
-
-
 }
