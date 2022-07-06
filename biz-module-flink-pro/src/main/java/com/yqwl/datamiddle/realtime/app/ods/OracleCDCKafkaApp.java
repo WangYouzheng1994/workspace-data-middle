@@ -76,7 +76,7 @@ public class OracleCDCKafkaApp {
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .debeziumProperties(properties)
                 .build();
 
