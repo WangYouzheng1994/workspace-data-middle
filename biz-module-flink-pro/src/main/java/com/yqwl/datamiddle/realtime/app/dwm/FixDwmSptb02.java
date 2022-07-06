@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2022/7/5 11:56
  * @Version: V1.0
  */
+@Deprecated
 @Slf4j
 public class FixDwmSptb02 {
     //2021-06-01 00:00:00

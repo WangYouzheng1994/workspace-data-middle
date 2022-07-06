@@ -16,6 +16,7 @@ import java.util.Objects;
  * @Date: 2022/06/08
  * @Version: V1.0
  */
+@Deprecated
 @Slf4j
 public class BaseStationDataSink<T> extends RichSinkFunction<DwdBaseStationData> {
     //入库标识

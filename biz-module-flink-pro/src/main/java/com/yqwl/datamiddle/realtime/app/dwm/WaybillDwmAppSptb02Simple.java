@@ -277,6 +277,7 @@ public class WaybillDwmAppSptb02Simple {
                             dwmSptb02.setEND_CITY_NAME(province.getString("vsxmc"));
                         }
                     }
+                    dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
                     //实体类中null值进行默认值赋值
                     DwmSptb02 bean = JsonPartUtil.getBean(dwmSptb02);

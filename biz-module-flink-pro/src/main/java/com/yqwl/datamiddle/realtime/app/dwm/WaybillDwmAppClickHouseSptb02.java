@@ -79,7 +79,12 @@ public class WaybillDwmAppClickHouseSptb02 {
             @Override
             public DwmSptb02 map(String kafkaBsdEpcValue) throws Exception {
                 JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
-                return jsonObject.getObject("after", DwmSptb02.class);
+                DwmSptb02 after = jsonObject.getObject("after", DwmSptb02.class);
+                // 设置更新时间，兜底合并clickhouse
+                if (after.getWAREHOUSE_UPDATETIME() == null || after.getWAREHOUSE_UPDATETIME() == 0L) {
+                    after.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
+                }
+                return after;
             }
         }).uid("WaybillDwmAppClickHouseSptb02TransitionDwmOneOrderToEnd").name("WaybillDwmAppClickHouseSptb02TransitionDwmOneOrderToEnd");
         //====================================sink clickhouse===============================================//
