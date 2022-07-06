@@ -36,7 +36,7 @@ public class OracleCDCKafkaApp {
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
-        /*CheckpointConfig ck = env.getCheckpointConfig();
+        CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         // ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
@@ -44,7 +44,7 @@ public class OracleCDCKafkaApp {
         //检查点必须在一分钟内完成，或者被丢弃【CheckPoint的超时时间】
         ck.setCheckpointTimeout(60000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
-        ck.setMinPauseBetweenCheckpoints(5000);*/
+        ck.setMinPauseBetweenCheckpoints(5000);
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
         System.setProperty("HADOOP_USER_NAME", "yunding");
