@@ -115,8 +115,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String start_city_name = dwmSptb02.getSTART_CITY_NAME();                //始发城市
                         String end_city_name = dwmSptb02.getEND_CITY_NAME();                    //目的城市
                         String vdwdm = dwmSptb02.getVDWDM();                                    //经销商代码
-                        String dealer_name = dwmSptb02.getDEALER_NAME();                        //经销商代码
-                        //String vysfs = dwmSptb02.getVYSFS();                                    //原始的运输方式
+                        String dealer_name = dwmSptb02.getDEALER_NAME();                        //经销商名称
+                        //String vysfs = dwmSptb02.getVYSFS();                                  //原始的运输方式
                         String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      //dwm的合出来的运输方式
                         String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      //开始站台/港口仓库名称
                         String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          //到达站台/港口仓库名称
@@ -194,9 +194,11 @@ public class OneOrderToEndDwmAppSPTB02 {
                             if (StringUtils.isNotBlank(end_city_name)) {
                                 ootdTransition.setEND_CITY_NAME(end_city_name);
                             }
+                            // 经销商代码
                             if (StringUtils.isNotBlank(vdwdm)) {
                                 ootdTransition.setVDWDM(vdwdm);
                             }
+                            // 经销商名称: DWD层sptb02.vdwdm  取自 mdac22.CJXSDM 优先去经销商简称 jxsjc 如果为空,取 jxsmc
                             if (StringUtils.isNotBlank(dealer_name)) {
                                 ootdTransition.setDEALER_NAME(dealer_name);
                             }
@@ -333,8 +335,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vjsydm = ootd.getVJSYDM();                                    //运输车号
                     String start_city_name = ootd.getSTART_CITY_NAME();                  //始发城市
                     String end_city_name = ootd.getEND_CITY_NAME();                      //目的城市
-                    String vdwdm = ootd.getVDWDM();                                      //经销商代码(名称)
-                    String dealer_name = ootd.getDEALER_NAME();                          //经销商代码(名称)
+                    String vdwdm = ootd.getVDWDM();                                      //经销商代码
+                    String dealer_name = ootd.getDEALER_NAME();                          //经销商名称(简称 || 名称)
                     String cjsdbh = ootd.getCJSDBH();                                    //结算单编号
                     String base_code = ootd.getBASE_CODE();                              //基地代码
                     String base_name = ootd.getBASE_NAME();                              //基地名称
