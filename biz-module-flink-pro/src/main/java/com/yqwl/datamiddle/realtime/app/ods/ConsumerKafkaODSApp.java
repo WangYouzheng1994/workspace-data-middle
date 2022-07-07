@@ -39,6 +39,7 @@ import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import javax.annotation.Nullable;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -83,6 +84,7 @@ public class ConsumerKafkaODSApp {
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
+                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
@@ -141,7 +143,7 @@ public class ConsumerKafkaODSApp {
                         jsonObj.remove("sink_table");
                         jsonObj.remove("sink_pk");
                         // 从数据中获取到要输出的主题名称  以及转换成字节
-                        return new ProducerRecord<>(sinkTopic, jsonObj.toString().getBytes());
+                        return new ProducerRecord<>(sinkTopic, jsonObj.toString().getBytes(Charset.forName("UTF-8")));
                     }
                 }
         );
