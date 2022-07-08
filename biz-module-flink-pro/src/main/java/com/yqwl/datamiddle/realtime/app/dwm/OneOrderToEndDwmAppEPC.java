@@ -38,13 +38,19 @@ public class OneOrderToEndDwmAppEPC {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+
+        //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
+
+        // 设置checkpoint点二级目录位置
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oote_dwm_epc"));
+        // 设置savepoint点二级目录位置
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oote_dwm_epc"));
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置

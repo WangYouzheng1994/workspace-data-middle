@@ -3,51 +3,28 @@ package com.yqwl.datamiddle.realtime.app.dwd;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.google.common.collect.Lists;
-import com.ververica.cdc.connectors.oracle.OracleSource;
-import com.ververica.cdc.connectors.oracle.table.StartupOptions;
-import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
-import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.KafkaUtil;
+import com.yqwl.datamiddle.realtime.util.MysqlUtil;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichFilterFunction;
-import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.common.state.MapState;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.AsyncDataStream;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.streaming.api.functions.source.SourceFunction;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
-import java.sql.Timestamp;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,13 +50,19 @@ public class BaseStationDataAndEpcDwdAppBsd {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+
+        //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
+        // 设置checkpoint点二级目录位置
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("base_station_data_epc_dwd_app_bsd"));
+        // 设置savepoint点二级目录位置
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("base_station_data_epc_dwd_app_bsd"));
+
         log.info("checkpoint设置完成");
 
         //读取oracle连接配置属性
@@ -196,9 +179,11 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 }
             }
         }).uid("BaseStationDataAndEpcDwdAppBsddwmBsdProcess").name("BaseStationDataAndEpcDwdAppBsddwmBsdProcess");
+
         //--------------------------------存入DwdBaseStationData mysql------------------------------------//
         String bsdSql = MysqlUtil.getSql(DwdBaseStationData.class);
         dwmProcess.addSink(JdbcSink.<DwdBaseStationData>getSink(bsdSql)).uid("BaseStationDataAndEpcDwdAppBsdsink-mysqDsb").name("BaseStationDataAndEpcDwdAppBsdsink-mysqldsb");
+
         //-------------------------------存入kafkaDwdBaseStationDataTopic--------------------------------//
         SingleOutputStreamOperator<String> dwmSptb02Json = dwmProcess.map(new MapFunction<DwdBaseStationData, String>() {
             @Override
@@ -206,6 +191,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 return JSON.toJSONString(obj);
             }
         }).uid("BaseStationDataAndEpcDwdAppBsddwmBsdJson").name("BaseStationDataAndEpcDwdAppBsddwmBsdJson");
+
         // 获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
@@ -213,8 +199,5 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA));
         dwmSptb02Json.addSink(sinkKafka).uid("BaseStationDataAndEpcDwdAppBsdinkKafkaDwdBsd").name("BaseStationDataAndEpcDwdAppBsdsinkKafkaDwdBsd");
         env.execute("拉宽bsd表进入dwdBsd");
-
     }
-
-
 }

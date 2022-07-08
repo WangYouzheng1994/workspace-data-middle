@@ -3,39 +3,32 @@ package com.yqwl.datamiddle.realtime.app.dwd;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.ververica.cdc.connectors.mysql.source.MySqlSource;
-import com.yqwl.datamiddle.realtime.app.func.DimAsyncFunction;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.*;
+import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
+import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.beanmapper.Sptb02Mapper;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
-import com.yqwl.datamiddle.realtime.util.*;
+import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
+import com.yqwl.datamiddle.realtime.util.KafkaUtil;
+import com.yqwl.datamiddle.realtime.util.MysqlUtil;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
-import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,17 +44,23 @@ public class WaybillDwdAppSptb02Simple {
         //Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
+        // 设置并行度为1
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+
+        //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         //System.setProperty("HADOOP_USER_NAME", "yunding");
-        log.info("checkpoint设置完成");
+        // 设置checkpoint点二级目录位置
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwd_sptb02_simple"));
+        // 设置savepoint点二级目录位置
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwd_sptb02_simple"));
 
+        log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();

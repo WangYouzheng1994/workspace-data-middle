@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
 import com.yqwl.datamiddle.realtime.app.func.DimBatchSink;
-import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunction;
 import com.yqwl.datamiddle.realtime.app.func.TableProcessDivideFunctionList;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
@@ -15,7 +14,6 @@ import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SerializationSchema;
@@ -24,7 +22,6 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -58,6 +55,7 @@ public class ConsumerKafkaODSApp {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
+        // 设置并行度为1
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
 
@@ -74,8 +72,11 @@ public class ConsumerKafkaODSApp {
         //ck.setMinPauseBetweenCheckpoints(500);
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
+        // 设置checkpoint点二级目录位置
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("consumer_kafka_ods_app"));
+        // 设置savepoint点二级目录位置
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("consumer_kafka_ods_app"));
         System.setProperty("HADOOP_USER_NAME", "yunding");
-        //System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
         //====================================kafka 消费端配置===============================================//
