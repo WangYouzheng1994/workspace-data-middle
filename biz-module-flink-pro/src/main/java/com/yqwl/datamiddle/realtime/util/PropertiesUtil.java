@@ -40,6 +40,13 @@ public class PropertiesUtil {
     private static final String FILENAME_DEV = "cdc-dev.properties";
     private static final String FILENAME_PROD = "cdc-prod.properties";
 
+    /**
+     * 指定读取的properties版本, dev或prod
+     *
+     * @param active
+     * @return
+     */
+    @Deprecated
     public static Props getProps(String active) {
         if (ACTIVE_DEV.equals(active)) {
             return new Props(FILENAME_DEV);
@@ -57,6 +64,26 @@ public class PropertiesUtil {
      */
     public static Props getProps() {
         return new Props("cdc-"+ACTIVE_TYPE+".properties", CharsetUtil.CHARSET_UTF_8);
+    }
+
+    /**
+     * 获取当前环境版本下的 checkPoint
+     *
+     * @param checkpointSubDir 在公共目录下面的二级目录
+     * @return
+     */
+    public static String getCheckpointStr(String checkpointSubDir) {
+        return PropertiesUtil.getProps().getStr("checkpoint.hdfs.url") + checkpointSubDir;
+    }
+
+    /**
+     * 获取当前环境版本下的 checkPoint
+     *
+     * @param savePointSubDir 在公共目录下面的二级目录
+     * @return
+     */
+    public static String getSavePointStr(String savePointSubDir) {
+        return PropertiesUtil.getProps().getStr("savepoint.hdfs.url") + savePointSubDir;
     }
 
     /**

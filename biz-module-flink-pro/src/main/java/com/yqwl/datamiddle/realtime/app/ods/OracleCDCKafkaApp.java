@@ -36,6 +36,9 @@ public class OracleCDCKafkaApp {
         //flink程序重启，每次之间间隔10s
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
+
+        Props props = PropertiesUtil.getProps();
+
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         // ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
@@ -45,13 +48,18 @@ public class OracleCDCKafkaApp {
         ck.setCheckpointTimeout(60000);
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         ck.setMinPauseBetweenCheckpoints(5000);
+        // 设置checkpoint点位置
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
         System.setProperty("HADOOP_USER_NAME", "yunding");
         //System.setProperty("HADOOP_USER_NAME", "root");
 
+        // 设置savepoint点位置
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
+
         log.info("stream流环境初始化完成");
-        Props props = PropertiesUtil.getProps();
+
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
