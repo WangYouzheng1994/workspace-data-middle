@@ -50,7 +50,7 @@ public class OneOrderToEndDwmAppEPC {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oote_dwm_epc"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oote_dwm_epc"));
+        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oote_dwm_epc"));
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置

@@ -58,7 +58,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("base_station_data_epc_dwd_app_epc"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("base_station_data_epc_dwd_app_epc"));
+        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("base_station_data_epc_dwd_app_epc"));
         log.info("checkpoint设置完成");
 
         Props props = PropertiesUtil.getProps();
