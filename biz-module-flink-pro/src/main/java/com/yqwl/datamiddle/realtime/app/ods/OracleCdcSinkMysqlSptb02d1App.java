@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2022/05/06
  * @Version: V1.0
  */
+@Deprecated
 @Slf4j
 public class OracleCdcSinkMysqlSptb02d1App {
 
