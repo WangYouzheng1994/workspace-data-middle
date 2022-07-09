@@ -33,7 +33,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 /**
- * @Description: 一单到底
+ * @Description: 大众一单到底全节点查询
  * @Author: jeecg-boot
  * @Date: 2022-06-06
  * @Version: V1.0

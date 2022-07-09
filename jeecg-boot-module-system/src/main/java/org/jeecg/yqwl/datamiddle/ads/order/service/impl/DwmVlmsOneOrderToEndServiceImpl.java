@@ -133,11 +133,66 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     }
 
     /**
-     * 时间数据 从数据库里面查出来以后减掉八小时
+     * 格式化16位微秒时间戳为13位毫秒时间戳
+     *
+     * @param params
+     */
+    private void formatMicros2Millis(DwmVlmsOneOrderToEnd params) {
+        // 出厂日期
+        if (params.getLeaveFactoryTime() != null) {
+            params.setLeaveFactoryTime(params.getLeaveFactoryTime() / 1000);
+        }
+        // 入库日期
+        if (params.getInSiteTime() != null) {
+            params.setInSiteTime(params.getInSiteTime() / 1000);
+        }
+        // 入开始站台时间
+        if (params.getInStartPlatformTime() != null) {
+            params.setInStartPlatformTime(params.getInStartPlatformTime() / 1000);
+        }
+        // 出开始站台时间
+        if (params.getOutStartPlatformTime() != null) {
+            params.setOutStartPlatformTime(params.getOutStartPlatformTime() / 1000);
+        }
+        // 入目标站台时间
+        if (params.getInEndPlatformTime() != null) {
+            params.setInEndPlatformTime(params.getInEndPlatformTime() / 1000);
+        }
+        // 铁路卸车时间
+        if (params.getUnloadRailwayTime() != null) {
+            params.setUnloadRailwayTime(params.getUnloadRailwayTime() / 1000);
+        }
+        // 入开始港口时间
+        if (params.getInStartWaterwayTime() != null) {
+            params.setInStartWaterwayTime(params.getInStartWaterwayTime() / 1000);
+        }
+        // 出开始港口时间
+        if (params.getEndStartWaterwayTime() != null) {
+            params.setEndStartWaterwayTime(params.getEndStartWaterwayTime() / 1000);
+        }
+        // 入目标港口时间
+        if (params.getInEndWaterwayTime() != null) {
+            params.setInEndWaterwayTime(params.getInEndWaterwayTime() / 1000);
+        }
+        // 水路卸船时间
+        if (params.getUnloadShipTime() != null) {
+            params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
+        }
+        // 入末端分拨库时间
+        if (params.getInDistributeTime() != null) {
+            params.setInDistributeTime(params.getInDistributeTime() / 1000);
+        }
+    }
+
+    /**
+     * 时间数据 从数据库里面查出来以后减掉八小时 60 * 60 * 8 * 1000 = 28800000 毫秒
      *
      * @param params rows of db
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
+        // 16位 convert to 13位
+        formatMicros2Millis(params);
+
         if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
             params.setCp9OfflineTime(cp9OfflineTime);
