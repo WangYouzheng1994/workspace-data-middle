@@ -57,7 +57,7 @@ public class WaybillDwmAppSptb02Simple {
 
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_sptb02_simple"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
+        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
         log.info("checkpoint设置完成");
 
         //mysql消费源相关参数配置

@@ -50,7 +50,7 @@ public class OracleCDCKafkaApp {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
+        // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
         System.setProperty("HADOOP_USER_NAME", "yunding");

@@ -53,7 +53,7 @@ public class WaybillDwmAppClickHouseSptb02 {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_clickhouse_sptb02"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_clickhouse_sptb02"));
+        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_clickhouse_sptb02"));
 
         log.info("checkpoint设置完成");
 
