@@ -270,4 +270,14 @@ public class OotdTransition {
      */
 
     private Long FINAL_SITE_TIME;
+
+    /**
+     * 运输类型
+     */
+    private String traffic_type;
+
+    /**
+     * 公路运单物理仓库对应的仓库类型
+     */
+    private String  highwayWarehouseType;
 }
