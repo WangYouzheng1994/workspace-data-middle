@@ -135,7 +135,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String base_name = dwmSptb02.getBASE_NAME();                            //基地名称
                         ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           //记录更新时间
                         ootdTransition.setVVIN(vvin);                                           //vin码 先赋值
-                        String vyscdm = dwmSptb02.getVYSCDM();                                                  // 运输车代码 关联 mdac33.vyscdm
+                        String vyscdm = dwmSptb02.getVYSCDM();                                  //运输车代码 关联 mdac33.vyscdm
+                        Long dztxcsj = dwmSptb02.getDZTXCSJ();                                  //中铁卸车时间
                         ootdTransition.setTraffic_type(traffic_type);                           //运输类型
                         ootdTransition.setHighwayWarehouseType(highwayWarehouseType);           //ootd的赋值 公路运单物理仓库对应的仓库类型
 
@@ -237,8 +238,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                 if (in_end_platform_time != null) {
                                     ootdTransition.setIN_END_PLATFORM_TIME(in_end_platform_time);        //铁路的入目的站台时间
                                 }
-                                if (unload_railway_time != null) {
-                                    ootdTransition.setUNLOAD_RAILWAY_TIME(unload_railway_time);          //铁路的卸车时间
+                                if (dztxcsj != null) {
+                                    ootdTransition.setUNLOAD_RAILWAY_TIME(dztxcsj);                      //铁路的卸车时间
                                 }
                             }
                             //水路运输方式
