@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 @EnableFeignClients
 @EnableDiscoveryClient
 @SpringBootApplication
-public class JeecgGatewayApplication  implements CommandLineRunner {
+public class JeecgGatewayApplication implements CommandLineRunner {
 
     @Resource
     private DynamicRouteLoader dynamicRouteLoader;

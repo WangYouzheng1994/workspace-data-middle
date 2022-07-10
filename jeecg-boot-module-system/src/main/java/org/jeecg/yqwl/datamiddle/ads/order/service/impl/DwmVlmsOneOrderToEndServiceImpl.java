@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -95,11 +92,48 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                 // group concat
                 // sptbTrafficTypeByVin.stream().collect(groupingBy())
                 sptbTrafficTypeByVin.stream().collect(groupingBy(DwmVlmsSptb02::getVvin)).entrySet().stream().forEach(
-                        (item) -> {
-                            List<String> trafficLists = new ArrayList();
-                            item.getValue().stream().forEach(it -> trafficLists.add(it.getTrafficType()));
-                            oneOrderToEndList.get(listMap.get(item.getKey())).setTrafficType(formatTrafficTypeToChinese(trafficLists));
-                        }
+                    (item) -> {
+                        DwmVlmsOneOrderToEnd dbOotd = oneOrderToEndList.get(listMap.get(item.getKey()));
+                        List<String> trafficLists = new ArrayList();
+                        item.getValue().stream().forEach(it -> {
+                            // 累计多个运单的运输方式。
+                            trafficLists.add(it.getTrafficType());
+
+                            // 铁水的物流时间节点兜底处理 -- START By qingsong  2022年7月10日21:14:28
+                            // Xxx: 1. 集港/集站时间 用物流溯源时间节点来更新，无法兜底
+
+                            // 铁路单
+                            if (StringUtils.equals(it.getTrafficType(), "T")) {
+                                // 2. 始发站台离站时间 outStartPlatformTime 用运单的起运时间dsjcfsj
+                                if (dbOotd.getOutStartPlatformTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
+                                    dbOotd.setOutStartPlatformTime(it.getDsjcfsj());
+                                }
+                                // 3. 到达目标站台时间 inEndPlatformTime 用运单的dgpsdhsj
+                                if (dbOotd.getInEndPlatformTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
+                                    dbOotd.setInEndPlatformTime(it.getDgpsdhsj());
+                                }
+                            }
+
+                            // 水路单
+                            if (StringUtils.equals(it.getTrafficType(), "S")) {
+                                // 2. 始发港口离港时间 endStartWaterwayTime用运单的起运时间dsjcfsj
+                                if (dbOotd.getEndStartWaterwayTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
+                                    dbOotd.setEndStartWaterwayTime(it.getDsjcfsj());
+                                }
+                                // 3. 到达目的港时间 inEndWaterwayTime 用运单的dgpsdhsj
+                                if (dbOotd.getInEndWaterwayTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
+                                    dbOotd.setInEndWaterwayTime(it.getDgpsdhsj());
+                                }
+                            }
+
+                            // Xxx: 4. 卸船 应该用物流溯源时间节点来更新，无法兜底。
+                            // 铁水的物流时间节点处理 -- END  By qingsong
+                        });
+
+                        // 运输方式转换
+                        dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists));
+
+                    }
                 );
             }
         }
