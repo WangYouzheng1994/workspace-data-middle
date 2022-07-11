@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
@@ -630,6 +631,41 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
         Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
         List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+        page.setRecords(pageList);
+        page.setTotal(total);
+        return Result.OK(page);
+    }
+
+    /**
+     * DOCS列表页查询
+     *
+     * @param queryCriteria
+     * @return
+     */
+    @AutoLog(value = "一单到底-DOCS查询")
+    @ApiOperation(value = "一单到底-DOCS查询", notes = "一单到底-DOCS查询")
+    @PostMapping("/selectDocsList")
+    public Result<Page<DwmVlmsDocs>> selectDocsList(@RequestBody GetQueryCriteria queryCriteria) {
+        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
+        String vin = queryCriteria.getVin();
+        if (StringUtils.isNotBlank(vin)) {
+            if (StringUtils.contains(vin, ",") && StringUtils.contains(vin, "\n")) {
+                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
+            }
+            // vin码批量模式： 0 逗号， 1 回车换行
+            if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
+                queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
+            } else if (StringUtils.length(vin) > 2 && StringUtils.contains(vin, "\n")) {
+                queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
+            }
+        }
+
+        formatQueryTime(queryCriteria);
+
+        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
+        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+
         page.setRecords(pageList);
         page.setTotal(total);
         return Result.OK(page);
