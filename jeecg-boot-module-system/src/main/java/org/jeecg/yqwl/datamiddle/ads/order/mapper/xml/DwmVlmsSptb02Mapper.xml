@@ -13,6 +13,8 @@
             <foreach item="vin" collection="vins" open="(" separator="," close=")">
                 #{vin}
             </foreach>
+
+            and VYSFS != 'J'
         </where>
         order by
             CJSDBH

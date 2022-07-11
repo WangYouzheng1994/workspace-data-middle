@@ -121,7 +121,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
 
     /**
-     * 根据vin码获取 trafficType
+     * 根据vin码获取 trafficType，剔除J类型的
      *
      * @param vins
      * @return
