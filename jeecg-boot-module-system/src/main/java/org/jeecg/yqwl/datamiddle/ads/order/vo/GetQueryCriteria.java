@@ -94,4 +94,9 @@ public class GetQueryCriteria {
      * 过滤条件
      */
     private String selections;
+
+    /**
+     * 二级菜单运输类型:只要公路
+     */
+    private  String  trafficType;
 }
