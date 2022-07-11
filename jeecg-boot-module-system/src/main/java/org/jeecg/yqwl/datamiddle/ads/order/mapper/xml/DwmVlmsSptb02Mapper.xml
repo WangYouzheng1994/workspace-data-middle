@@ -7,7 +7,7 @@
     <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02" parameterType="java.util.List" >
         select TRAFFIC_TYPE, VVIN, CJSDBH, DSJCFSJ, DGPSDHSJ
         from
-             dwm_vlms_sptb02 final
+             dwm_vlms_sptb02
         <where>
             VVIN in
             <foreach item="vin" collection="vins" open="(" separator="," close=")">
