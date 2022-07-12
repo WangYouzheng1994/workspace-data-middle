@@ -396,6 +396,11 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private String END_PHYSICAL_CODE;
 
+    /**
+     * Y号
+     */
+    private String CPZDBH;
+
 
 
 }
