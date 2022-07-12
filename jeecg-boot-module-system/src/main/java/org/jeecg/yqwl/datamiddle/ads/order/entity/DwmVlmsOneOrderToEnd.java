@@ -283,5 +283,12 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "结束物理仓库代码  铁水")
 	private String endPhysicalCode;
 
+	/**
+	 * Y号
+	 */
+	@Excel(name = "Y号", width = 15)
+	@ApiModelProperty(value = "Y号")
+	private String CPZDBH;
+
 
 }
