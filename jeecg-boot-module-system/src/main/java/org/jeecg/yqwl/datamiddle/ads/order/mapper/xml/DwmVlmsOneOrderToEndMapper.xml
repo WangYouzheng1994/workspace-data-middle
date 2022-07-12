@@ -51,6 +51,18 @@
             <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
+            <if test="params.dotSiteTimeStart != null   and params.dotSiteTimeStart != 0  ">
+                AND DOT_SITE_TIME  <![CDATA[ >= ]]> #{params.dotSiteTimeStart}
+            </if>
+            <if test="params.dotSiteTimeEnd != null   and params.dotSiteTimeEnd != 0 ">
+                AND DOT_SITE_TIME  <![CDATA[ <= ]]>  #{params.dotSiteTimeEnd}
+            </if>
+            <if test="params.finalSiteTimeStart != null   and params.finalSiteTimeStart != 0  ">
+                AND FINAL_SITE_TIME  <![CDATA[ >= ]]> #{params.finalSiteTimeStart}
+            </if>
+            <if test="params.finalSiteTimeEnd != null   and params.finalSiteTimeEnd != 0 ">
+                AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
+            </if>
             <if test="params.trafficType != null   and params.trafficType != '' ">
                 AND TRAFFIC_TYPE =  #{params.trafficType}
             </if>

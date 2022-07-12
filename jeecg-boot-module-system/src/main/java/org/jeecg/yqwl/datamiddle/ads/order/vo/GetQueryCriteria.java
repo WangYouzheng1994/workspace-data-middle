@@ -99,4 +99,26 @@ public class GetQueryCriteria {
      * 二级菜单运输类型:只要公路
      */
     private  String  trafficType;
+
+    /**
+     * DCS到货开始时间
+     */
+    private Long dotSiteTimeStart;
+
+    /**
+     * DCS到货结束时间
+     */
+    private Long dotSiteTimeEnd;
+
+    /**
+     *经销商确认到货开始时间
+     */
+    private Long finalSiteTimeStart;
+
+    /**
+     *经销商确认到货结束时间
+     */
+    private Long finalSiteTimeEnd;
+
+
 }
