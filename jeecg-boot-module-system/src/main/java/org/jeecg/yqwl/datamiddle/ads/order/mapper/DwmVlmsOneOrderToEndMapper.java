@@ -38,14 +38,8 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
      * 一单到底---DOCS
      * @return
      */
-    List<DwmVlmsDocs> selectDocsList(Param("params") GetQueryCriteria queryCriteria);
+    List<DwmVlmsDocs> selectDocsList(@Param("params") GetQueryCriteria queryCriteria);
 
-
-//    /**
-//     * 同板数量
-//     * @return
-//     */
-//    List<SelectData> selectTotal(@Param("stowageNoteNo") String stowageNoteNo);
 
 
 }
