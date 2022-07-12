@@ -4,6 +4,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
@@ -138,6 +139,28 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             }
         }
         return oneOrderToEndList;
+    }
+
+    /**
+     * DOCS count计数
+     *
+     * @param queryCriteria
+     * @return
+     */
+    @Override
+    public Integer countDocsList(GetQueryCriteria queryCriteria) {
+        return null;
+    }
+
+    /**
+     * DOCS 列表页查询
+     *
+     * @param queryCriteria
+     * @return
+     */
+    @Override
+    public List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria) {
+        return null;
     }
 
     /**

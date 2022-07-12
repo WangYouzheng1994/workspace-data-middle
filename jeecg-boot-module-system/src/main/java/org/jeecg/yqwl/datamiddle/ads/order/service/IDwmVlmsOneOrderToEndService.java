@@ -2,6 +2,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
@@ -16,6 +17,12 @@ import java.util.List;
  */
 @DS("slave")
 public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderToEnd> {
+    /**
+     * 一单到底 count计数
+     *
+     * @param queryCriteria
+     * @return
+     */
     Integer countOneOrderToEndList(GetQueryCriteria queryCriteria);
 
     /**
@@ -25,10 +32,19 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
 
+    /**
+     * DOCS count计数
+     *
+     * @param queryCriteria
+     * @return
+     */
+    Integer countDocsList(GetQueryCriteria queryCriteria);
 
-//    /**
-//     * 同板数量
-//     * @return
-//     */
-//    List<SelectData> selectTotal(String stowageNoteNo);
+    /**
+     * DOCS 列表页查询
+     *
+     * @param queryCriteria
+     * @return
+     */
+    List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria);
 }
