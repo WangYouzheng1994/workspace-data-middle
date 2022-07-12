@@ -39,6 +39,11 @@ public class OotdTransition {
     private Long EPC_CP9_OFFLINE_TIME;
 
     /**
+     *  新P号(二次配板) 取sptb02.vph
+     */
+    private String VPH;
+
+    /**
      * 出厂日期 BDS表里的
      */
     private Long BDS_LEAVE_FACTORY_TIME;
@@ -80,7 +85,7 @@ public class OotdTransition {
     private Long DPZRQ;
 
     /**
-     * 配板编号
+     * 配板编号 取自sptb02.CPZDBH
      */
     private String CPZDBH;
 

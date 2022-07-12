@@ -31,7 +31,6 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
         String operate_type = dbsData.getOPERATE_TYPE();
         // 获取Shop_No匹配ware_hosue_code
         String shop_no = dbsData.getSHOP_NO();
-        System.out.println(shop_no);
 
         StringBuilder sb = new StringBuilder();
         //-------------------------------------处理更新Mysql----------------------------------//

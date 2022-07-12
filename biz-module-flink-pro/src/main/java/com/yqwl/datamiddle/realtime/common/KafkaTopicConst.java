@@ -31,7 +31,9 @@ public class KafkaTopicConst {
     //ods topic
     //oracle cdc 统一进入topic
     public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
+    public static final String CDC_VLMS_UNITE_ORACLE_ALL_0712 = "cdc_vlms_unite_oracle";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP = "cdc_vlms_unite_oracle_group";
+    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712 = "cdc_vlms_unite_oracle_group";
     //source 表sysc07 cdc kafka topic name
     public static final String ODS_VLMS_SPTB02 = "ods_vlms_sptb02";
     public static final String ODS_VLMS_SPTB02_LATEST_0701 = "ods_vlms_sptb02_latest_0701";

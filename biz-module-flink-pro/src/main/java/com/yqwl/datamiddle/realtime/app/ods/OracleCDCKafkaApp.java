@@ -84,7 +84,7 @@ public class OracleCDCKafkaApp {
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .debeziumProperties(properties)
                 .build();
 
@@ -95,8 +95,8 @@ public class OracleCDCKafkaApp {
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE));
+                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712));
 
         //输出到kafka
         oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
