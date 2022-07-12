@@ -46,7 +46,8 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
             }
             if (StringUtils.isNotBlank(in_warehouse_code) ) {
                     // 2.更新入库日期,入库仓库名称,入库仓库代码,更新更新时间
-                     sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on e.IN_WAREHOUSE_CODE = a.WAREHOUSE_CODE SET e.IN_WAREHOUSE_NAME= '" +in_warehouse_name+ "' , e.IN_WAREHOUSE_CODE= '"
+                    // sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on e.IN_WAREHOUSE_CODE = a.WAREHOUSE_CODE SET e.IN_WAREHOUSE_NAME= '" +in_warehouse_name+ "' , e.IN_WAREHOUSE_CODE= '"
+                     sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on a.WAREHOUSE_CODE ='"+ in_warehouse_code +"' SET e.IN_WAREHOUSE_NAME= '" +in_warehouse_name+ "' , e.IN_WAREHOUSE_CODE= '"
                              + in_warehouse_code + "', e.IN_SITE_TIME = " + sample_u_t_c +
                             " , e.WAREHOUSE_UPDATETIME = " + nowTime + "  WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T1' "
                             + "AND (e.IN_SITE_TIME > " + sample_u_t_c + " or e.IN_SITE_TIME = 0);");
