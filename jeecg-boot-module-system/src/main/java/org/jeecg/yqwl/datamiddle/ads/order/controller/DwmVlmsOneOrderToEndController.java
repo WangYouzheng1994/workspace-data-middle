@@ -715,5 +715,17 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         if (queryCriteria.getCp9OfflineTimeEnd() != null) {
             queryCriteria.setCp9OfflineTimeEnd(queryCriteria.getCp9OfflineTimeEnd() + 28800000);
         }
+        if (queryCriteria.getDotSiteTimeStart() != null) {
+            queryCriteria.setDotSiteTimeStart(queryCriteria.getDotSiteTimeStart() + 28800000);
+        }
+        if (queryCriteria.getDotSiteTimeEnd() != null) {
+            queryCriteria.setDotSiteTimeEnd(queryCriteria.getDotSiteTimeEnd() + 28800000);
+        }
+        if (queryCriteria.getFinalSiteTimeStart() != null) {
+            queryCriteria.setFinalSiteTimeStart(queryCriteria.getFinalSiteTimeStart() + 28800000);
+        }
+        if (queryCriteria.getFinalSiteTimeEnd() != null) {
+            queryCriteria.setFinalSiteTimeEnd(queryCriteria.getFinalSiteTimeEnd() + 28800000);
+        }
     }
 }
