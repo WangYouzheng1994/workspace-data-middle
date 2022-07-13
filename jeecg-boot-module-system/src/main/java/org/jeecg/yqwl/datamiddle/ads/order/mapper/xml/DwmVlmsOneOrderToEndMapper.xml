@@ -63,9 +63,6 @@
             <if test="params.finalSiteTimeEnd != null   and params.finalSiteTimeEnd != 0 ">
                 AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
             </if>
-            <if test="params.trafficType != null   and params.trafficType != '' ">
-                AND TRAFFIC_TYPE =  #{params.trafficType}
-            </if>
         </where>
     </sql>
 
