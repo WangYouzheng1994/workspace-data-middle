@@ -285,4 +285,9 @@ public class OotdTransition {
      * 公路运单物理仓库对应的仓库类型
      */
     private String  highwayWarehouseType;
+
+    /**
+     * 起运日期-公路 20220713新加字段
+     */
+    private Long SHIPMENT_G_TIME;
 }

@@ -401,6 +401,11 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private String CPZDBH;
 
+    /**
+     * 起运日期-公路 20220713新加字段
+     */
+    private Long SHIPMENT_G_TIME;
+
 
 
 }
