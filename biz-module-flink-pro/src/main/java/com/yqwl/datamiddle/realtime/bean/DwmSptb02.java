@@ -1377,4 +1377,9 @@ public class DwmSptb02 implements Serializable {
      */
     private String VEHICLE_NAME;
 
+    /**
+     * 车辆标识 识别是否为新能源汽车(E6,E7) 取自 mdac12表
+     */
+    private String CCXDL;
+
 }
