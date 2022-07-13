@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import javax.annotation.Resource;
 import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
@@ -149,7 +148,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     @Override
     public Integer countDocsList(GetQueryCriteria queryCriteria) {
-        return null;
+        Integer count = dwmVlmsSptb02Mapper.countDocsList(queryCriteria);
+        return count ==  null ? 0 : count;
     }
 
     /**
@@ -160,7 +160,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     @Override
     public List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria) {
-        return null;
+        if (queryCriteria.getPageNo() != null) {
+            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
+            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
+        }
+        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+
+        return dwmVlmsDocs;
     }
 
     /**
@@ -271,10 +277,10 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setVehicleReceivingTime(vehicleReceivingTime);
         }
         //stowageNoteTime
-        if (params.getStowageNoteTime() != 0) {
-            Long stowageNoteTime = params.getStowageNoteTime() - 28800000L;
-            params.setStowageNoteTime(stowageNoteTime);
-        }
+//        if (params.getStowageNoteTime() != 0) {
+//            Long stowageNoteTime = params.getStowageNoteTime() - 28800000L;
+//            params.setStowageNoteTime(stowageNoteTime);
+//        }
         //assignTime
         if (params.getAssignTime() != 0) {
             Long assignTime = params.getAssignTime() - 28800000L;
@@ -362,13 +368,5 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
     }
 
-//    /**
-//     * 查询同板数量
-//     * @return
-//     */
-//    @Override
-//    public List<SelectData> selectTotal(String stowageNoteNo) {
-////        List<SelectData> total = dwmVlmsOneOrderToEndMapper.selectTotal();
-//        return null;
-//    }
+
 }

@@ -2,10 +2,12 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
 
 import java.math.BigDecimal;
@@ -127,4 +129,18 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @return
      */
     List<DwmVlmsSptb02> getSptbTrafficTypeByVin(List<String> vins);
+
+    /**
+     * 一单到底---DOCS
+     * @return
+     */
+    List<DwmVlmsDocs> selectDocsList(@Param("params") GetQueryCriteria queryCriteria);
+
+    /**
+     *
+     * @param queryCriteria
+     * @return
+     */
+    Integer countDocsList(@Param("params") GetQueryCriteria queryCriteria);
+
 }
