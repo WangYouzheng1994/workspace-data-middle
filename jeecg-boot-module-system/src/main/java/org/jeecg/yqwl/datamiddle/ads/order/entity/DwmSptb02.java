@@ -1360,6 +1360,26 @@ public class DwmSptb02 implements Serializable {
 
     private Long UNLOAD_SHIP_TIME;
 
+    /**
+     * 开始物理仓库代码
+     */
+    private String START_PHYSICAL_CODE;
+
+    /**
+     * 结束物理仓库代码
+     */
+    private String END_PHYSICAL_CODE;
+
+    /**
+     *  车型名称
+     */
+    private String VEHICLE_NAME;
+
+    /**
+     * 车辆标识 识别是否为新能源汽车(E6,E7) 取自 mdac12表
+     */
+    private String CCXDL;
+
 
 
 }
