@@ -3,7 +3,6 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
@@ -32,14 +31,5 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
      * @return
      */
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(@Param("params") GetQueryCriteria queryCriteria);
-
-
-    /**
-     * 一单到底---DOCS
-     * @return
-     */
-    List<DwmVlmsDocs> selectDocsList(@Param("params") GetQueryCriteria queryCriteria);
-
-
 
 }
