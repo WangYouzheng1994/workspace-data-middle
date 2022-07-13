@@ -289,6 +289,12 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "Y号", width = 15)
 	@ApiModelProperty(value = "Y号")
 	private String CPZDBH;
+	/**
+	 *起运日期-公路
+	 */
+	@Excel(name = "起运日期-公路", width = 15)
+	@ApiModelProperty(value = "起运日期-公路")
+	private Long shipmentGTime;
 
 
 }
