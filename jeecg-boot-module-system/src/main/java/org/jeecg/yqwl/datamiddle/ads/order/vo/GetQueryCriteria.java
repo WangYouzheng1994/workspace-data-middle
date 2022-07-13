@@ -141,5 +141,10 @@ public class GetQueryCriteria {
      */
     private Long actualOutTimeEnd;
 
+    /**
+     *车辆标识 识别是否为新能源汽车(E6,E7)
+     */
+    private String ccxdl;
+
 
 }
