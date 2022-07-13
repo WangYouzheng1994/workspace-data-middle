@@ -232,7 +232,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // DEALER_NAME  经销商名称
                 row1.createCell(j++).setCellValue(item.getDealerName());
                 // Y 号  Y号
-                row1.createCell(j++).setCellValue(item.getCPZDBH());
+                row1.createCell(j++).setCellValue(item.getCpzdbh());
                 // cp9OfflineTime  CP9下线接车日期
                 if (item.getCp9OfflineTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getCp9OfflineTime()));
