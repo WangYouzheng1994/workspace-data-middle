@@ -67,6 +67,8 @@ public class OracleCDCKafkaApp {
         properties.put("log.mining.batch.size.max", "400000");
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
         properties.put("event.processing.failure.handling.mode", "warn");
+        properties.put("converters", "aaa");
+        properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.OracleTimeConverter");
         //properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
