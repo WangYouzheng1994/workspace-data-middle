@@ -214,137 +214,180 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             for (DwmVlmsOneOrderToEnd item : pageList) {
                 // 时间字段转换成年月日时分秒类型
                 row1 = sheet.createRow(rowNum);
+                int j = 0;
                 // vin 底盘号
-                row1.createCell(0).setCellValue(item.getVin());
+                row1.createCell(j++).setCellValue(item.getVin());
                 // brand 品牌
-                row1.createCell(1).setCellValue(formatBrandToChinese(item.getBrand()));
+                row1.createCell(j++).setCellValue(formatBrandToChinese(item.getBrand()));
                 // baseName 基地
-                row1.createCell(2).setCellValue(item.getBaseName());
+                row1.createCell(j++).setCellValue(item.getBaseName());
                 // vehicleName 车型
-                row1.createCell(3).setCellValue(item.getVehicleName());
+                row1.createCell(j++).setCellValue(item.getVehicleName());
                 // startCityName 始发城市
-                row1.createCell(4).setCellValue(item.getStartCityName());
+                row1.createCell(j++).setCellValue(item.getStartCityName());
                 // endCityName 经销商目标城市
-                row1.createCell(5).setCellValue(item.getEndCityName());
+                row1.createCell(j++).setCellValue(item.getEndCityName());
                 // vdwdm 经销商代码
-                row1.createCell(6).setCellValue(item.getVdwdm());
+                row1.createCell(j++).setCellValue(item.getVdwdm());
                 // DEALER_NAME  经销商名称
-                row1.createCell(7).setCellValue(item.getDealerName());
+                row1.createCell(j++).setCellValue(item.getDealerName());
                 // Y 号  Y号
-                row1.createCell(8).setCellValue(item.getCPZDBH());
+                row1.createCell(j++).setCellValue(item.getCPZDBH());
                 // cp9OfflineTime  CP9下线接车日期
                 if (item.getCp9OfflineTime() != 0) {
-                    row1.createCell(9).setCellValue(sdf.format(item.getCp9OfflineTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getCp9OfflineTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // leaveFactoryTime  出厂日期
                 if (item.getLeaveFactoryTime() != 0) {
-                    row1.createCell(10).setCellValue(sdf.format(item.getLeaveFactoryTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getLeaveFactoryTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // inSiteTime  入库日期
                 if (item.getInSiteTime() != 0) {
-                    row1.createCell(11).setCellValue(sdf.format(item.getInSiteTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInSiteTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // inWarehouseName  入库仓库
-                row1.createCell(12).setCellValue(item.getInWarehouseName());
+                row1.createCell(j++).setCellValue(item.getInWarehouseName());
                 // taskNo 任务单号
-                row1.createCell(13).setCellValue(item.getTaskNo());
+                row1.createCell(j++).setCellValue(item.getTaskNo());
                 // vehicleReceivingTime  计划下达日期
                 if (item.getVehicleReceivingTime() != 0) {
-                    row1.createCell(14).setCellValue(sdf.format(item.getVehicleReceivingTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getVehicleReceivingTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // stowageNoteNo  配板单号
-                row1.createCell(15).setCellValue(item.getStowageNoteNo());
+                row1.createCell(j++).setCellValue(item.getStowageNoteNo());
                 // trafficType  运输方式
-                row1.createCell(16).setCellValue(item.getTrafficType());
+                row1.createCell(j++).setCellValue(item.getTrafficType());
                 // assignTime  指派日期
                 if (item.getAssignTime() != 0) {
-                    row1.createCell(17).setCellValue(sdf.format(item.getAssignTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // carrierName  指派承运商名称
-                row1.createCell(18).setCellValue(item.getCarrierName());
+                row1.createCell(j++).setCellValue(item.getCarrierName());
                 // actualOutTime  出库日期
                 if (item.getActualOutTime() != 0) {
-                    row1.createCell(19).setCellValue(sdf.format(item.getActualOutTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getActualOutTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // shipmentTime  起运日期-公路/铁路
                 if (item.getShipmentTime() != 0) {
-                    row1.createCell(20).setCellValue(sdf.format(item.getShipmentTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getShipmentTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // transportVehicleNo  运输车号
-                row1.createCell(21).setCellValue(item.getTransportVehicleNo());
+                row1.createCell(j++).setCellValue(item.getTransportVehicleNo());
                 // samePlateNum  同板数量
-                row1.createCell(22).setCellValue(item.getSamePlateNum());
+                row1.createCell(j++).setCellValue(item.getSamePlateNum());
                 // vehicleNum  轿运车车位数
-                row1.createCell(23).setCellValue(item.getVehicleNum());
+                row1.createCell(j++).setCellValue(item.getVehicleNum());
                 // startWaterwayName  始发港名称
-                row1.createCell(24).setCellValue(item.getStartWaterwayName());
+                row1.createCell(j++).setCellValue(item.getStartWaterwayName());
                 // inStartWaterwayTime 到达始发港口时间/入港时间
                 if (item.getInStartWaterwayTime() != 0) {
-                    row1.createCell(25).setCellValue(sdf.format(item.getInStartWaterwayTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // endStartWaterwayTime 始发港口水运离港时间
                 if (item.getEndStartWaterwayTime() != 0) {
-                    row1.createCell(26).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // endWaterwayName 目的港名称
-                row1.createCell(27).setCellValue(item.getEndWaterwayName());
+                row1.createCell(j++).setCellValue(item.getEndWaterwayName());
                 // inEndWaterwayTime  到达目的港时间
                 if (item.getInEndWaterwayTime() != 0) {
-                    row1.createCell(28).setCellValue(sdf.format(item.getInEndWaterwayTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // startPlatformName  始发站名称
-                row1.createCell(29).setCellValue(item.getStartPlatformName());
+                row1.createCell(j++).setCellValue(item.getStartPlatformName());
                 // inStartPlatformTime  到达始发站时间/入站时间
                 if (item.getInStartPlatformTime() != 0) {
-                    row1.createCell(30).setCellValue(sdf.format(item.getInStartPlatformTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartPlatformTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // outStartPlatformTime  始发站台铁路离站时间
                 if (item.getOutStartPlatformTime() != 0) {
-                    row1.createCell(31).setCellValue(sdf.format(item.getOutStartPlatformTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getOutStartPlatformTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // endPlatformName  目的站名称
-                row1.createCell(32).setCellValue(item.getEndPlatformName());
+                row1.createCell(j++).setCellValue(item.getEndPlatformName());
                 // inEndPlatformTime  到达目的站时间
                 if (item.getInEndPlatformTime() != 0) {
-                    row1.createCell(33).setCellValue(sdf.format(item.getInEndPlatformTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndPlatformTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // unloadShipTime  卸船时间（水路到目的站）
                 if (item.getUnloadShipTime() != 0) {
-                    row1.createCell(34).setCellValue(sdf.format(item.getUnloadShipTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadShipTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // unloadRailwayTime  卸车时间（铁路到目的站）
                 if (item.getUnloadRailwayTime() != 0) {
-                    row1.createCell(35).setCellValue(sdf.format(item.getUnloadRailwayTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadRailwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // inDistributeTime  末端分拨中心入库时间
                 if (item.getInDistributeTime() != 0) {
-                    row1.createCell(36).setCellValue(sdf.format(item.getInDistributeTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInDistributeTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // distributeAssignTime 末端分拨中心指派时间
                 if (item.getDistributeAssignTime() != 0) {
-                    row1.createCell(37).setCellValue(sdf.format(item.getDistributeAssignTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDistributeAssignTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // distributeCarrierName   末端分拨承运商
-                row1.createCell(38).setCellValue(item.getDistributeCarrierName());
+                row1.createCell(j++).setCellValue(item.getDistributeCarrierName());
                 // distributeVehicleNo  分拨承运轿运车车牌号
-                row1.createCell(39).setCellValue(item.getDistributeVehicleNo());
+                row1.createCell(j++).setCellValue(item.getDistributeVehicleNo());
                 // distributeVehicleNum  港/站分拨承运轿运车车位数
-                row1.createCell(40).setCellValue(item.getDistributeVehicleNum());
+                row1.createCell(j++).setCellValue(item.getDistributeVehicleNum());
                 // outDistributeTime  分拨出库时间
                 if (item.getOutDistributeTime() != 0) {
-                    row1.createCell(41).setCellValue(sdf.format(item.getOutDistributeTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getOutDistributeTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // distributeShipmentTime  分拨起运时间
                 if (item.getDistributeShipmentTime() != 0) {
-                    row1.createCell(42).setCellValue(sdf.format(item.getDistributeShipmentTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDistributeShipmentTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // dotSiteTime  送达时间-DCS到货时间
                 if (item.getDotSiteTime() != 0) {
-                    row1.createCell(43).setCellValue(sdf.format(item.getDotSiteTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDotSiteTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 // finalSiteTime  经销商确认到货时间
                 if (item.getFinalSiteTime() != 0) {
-                    row1.createCell(44).setCellValue(sdf.format(item.getFinalSiteTime()));
+                    row1.createCell(j++).setCellValue(sdf.format(item.getFinalSiteTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
                 }
                 rowNum++;
             }
