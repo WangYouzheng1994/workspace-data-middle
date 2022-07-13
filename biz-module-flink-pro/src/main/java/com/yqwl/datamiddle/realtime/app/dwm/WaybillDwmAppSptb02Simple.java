@@ -101,12 +101,14 @@ public class WaybillDwmAppSptb02Simple {
                             if (StringUtils.isNotBlank(vehicle_code)){
                                     /**
                                      * 按照车型代码获取车型名称
-                                     * 根据产品编码查获取产品名称
+                                     * 按照车型代码去关联mdac12 获得 CCXDL
+                                     *  SELECT CCXDL FROM ods_vlms_mdac12 WHERE CCPDM = '4F80NL 4Z4ZMC 1909';
                                      */
-                                    String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                                    String mdac12Sql = "select VCPMC ,CCXDL  from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
                                     JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
                                     if (mdac12 != null) {
                                         dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
+                                        dwmSptb02.setCCXDL(mdac12.getString("CCXDL"));
                                     }
                             }
                         }
