@@ -15,9 +15,14 @@ import java.util.List;
 public class GetQueryCriteria {
 
     /**
-     * 底盘号
+     * 底盘号   one_order_to_end 表字段
      */
     private String vin;
+
+    /**
+     * 底盘号   dwm_vlms_sptb02 字段
+     */
+    private  String vvin;
 
     /**
      * 基地
@@ -84,7 +89,15 @@ public class GetQueryCriteria {
      */
     private Integer pageSize = 20;
 
+    /**
+     * one_order_to_end vin列表
+     */
     private List<String> vinList;
+
+    /**
+     * sptb02 vvin列表
+     */
+    private List<String> vvinList;
 
     private Integer limitStart;
 
