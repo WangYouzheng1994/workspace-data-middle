@@ -70,6 +70,7 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
                 .tableList("data_flink.dwm_vlms_sptb02")
+                //.tableList("data_middle_flink.dwm_vlms_sptb02")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
