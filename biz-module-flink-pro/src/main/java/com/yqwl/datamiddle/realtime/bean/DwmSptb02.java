@@ -1372,6 +1372,9 @@ public class DwmSptb02 implements Serializable {
      */
     private String END_PHYSICAL_CODE;
 
-
+    /**
+     *  车型名称
+     */
+    private String VEHICLE_NAME;
 
 }
