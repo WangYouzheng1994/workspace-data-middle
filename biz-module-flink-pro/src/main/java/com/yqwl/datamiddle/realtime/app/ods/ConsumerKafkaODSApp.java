@@ -84,8 +84,8 @@ public class ConsumerKafkaODSApp {
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE)
-                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP)
+                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712)
+                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();

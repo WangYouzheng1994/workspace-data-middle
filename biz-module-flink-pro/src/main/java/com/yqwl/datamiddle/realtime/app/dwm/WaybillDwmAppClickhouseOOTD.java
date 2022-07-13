@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwmAppOOTD {
+public class WaybillDwmAppClickhouseOOTD {
 
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
@@ -59,6 +59,7 @@ public class WaybillDwmAppOOTD {
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
                 .tableList("data_flink.dwm_vlms_one_order_to_end")
+                //.tableList("data_middle_flink.dwm_vlms_one_order_to_end")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
