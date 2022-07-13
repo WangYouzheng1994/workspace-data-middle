@@ -95,7 +95,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         OotdTransition ootdTransition = new OotdTransition();
                         String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
                         String vvin = dwmSptb02.getVVIN();                                      // 底盘号
-                        String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      // 车型
+                        String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      // 车型代码
+                        String vehicle_name = dwmSptb02.getVEHICLE_NAME();                      // 车型名称
                         Long ddjrq = dwmSptb02.getDDJRQ();                                      // 整车物流接收STD日期
                         String cjhdh = dwmSptb02.getCJHDH();                                    // 任务单号
                         Long dphscsj = dwmSptb02.getDPHSCSJ();                                  // 配板日期
@@ -145,16 +146,11 @@ public class OneOrderToEndDwmAppSPTB02 {
                         if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S")) {
                             if (StringUtils.isNotBlank(vehicle_code)) {
                                 ootdTransition.setVEHICLE_CODE(vehicle_code);
-                                /**
-                                 * 根据产品编码查获取产品名称
-                                 */
-                                String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
-                                JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
-                                if (mdac12 != null) {
-                                    ootdTransition.setVEHICLE_NAME(mdac12.getString("VCPMC"));
-                                }
                             }
-
+                            // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
+                            if (StringUtils.isNotBlank(vehicle_name)){
+                                ootdTransition.setVEHICLE_NAME(vehicle_name);
+                            }
                             if (StringUtils.isNotBlank(base_code)) {
                                 ootdTransition.setBASE_CODE(base_code);
                             }
