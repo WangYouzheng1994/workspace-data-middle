@@ -92,8 +92,23 @@ public class WaybillDwmAppSptb02Simple {
                         String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbh + "' limit 1 ";
                         JSONObject sptb02d1 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, sptb02d1Sql, cjsdbh);
                         if (sptb02d1 != null) {
-                            dwmSptb02.setVVIN(sptb02d1.getString("VVIN"));
-                            dwmSptb02.setVEHICLE_CODE(sptb02d1.getString("CCPDM"));
+                            // 车型代码
+                            String vehicle_code = sptb02d1.getString("CCPDM");
+                            // 车架号 vin码
+                            String vvin = sptb02d1.getString("VVIN");
+                            dwmSptb02.setVVIN(vvin);
+                            dwmSptb02.setVEHICLE_CODE(vehicle_code);
+                            if (StringUtils.isNotBlank(vehicle_code)){
+                                    /**
+                                     * 按照车型代码获取车型名称
+                                     * 根据产品编码查获取产品名称
+                                     */
+                                    String mdac12Sql = "select VCPMC from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                                    JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
+                                    if (mdac12 != null) {
+                                        dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
+                                    }
+                            }
                         }
                     }
 
