@@ -96,6 +96,11 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "运输车号")
 	private String VJSYDM;
 
+	/**同板数量*/
+	@Excel(name = "同板数量", width = 15)
+	@ApiModelProperty(value = "同板数量")
+	private Integer samePlateNum;
+
 	/**DCS到货时间*/
 	@Excel(name = "DCS到货时间", width = 15)
 	@ApiModelProperty(value = "DCS到货时间")
