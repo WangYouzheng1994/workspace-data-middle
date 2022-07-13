@@ -237,6 +237,17 @@
             <artifactId>flink-runtime-web_${scala.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.debezium</groupId>
+            <artifactId>debezium-api</artifactId>
+            <version>1.5.4.Final</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>connect-api</artifactId>
+            <version>${version.kafka}</version>
+        </dependency>-->
     </dependencies>
 
     <build>
