@@ -109,9 +109,9 @@ public class GetQueryCriteria {
     private String selections;
 
     /**
-     * 二级菜单运输类型:只要公路
+     * docs二级菜单运输类型:只要公路
      */
-    private  String  trafficType;
+    private  String  vysfs;
 
     /**
      * DCS到货开始时间
@@ -132,6 +132,14 @@ public class GetQueryCriteria {
      *经销商确认到货结束时间
      */
     private Long finalSiteTimeEnd;
+
+    /**sptb02出库日期开始*/
+    private Long actualOutTimeStart;
+
+    /**
+     * sptb02出库日期结束
+     */
+    private Long actualOutTimeEnd;
 
 
 }
