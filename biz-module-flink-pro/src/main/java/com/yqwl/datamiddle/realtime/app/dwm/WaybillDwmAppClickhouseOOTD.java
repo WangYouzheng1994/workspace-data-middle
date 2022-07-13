@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
-public class WaybillDwmAppOOTD {
+public class WaybillDwmAppClickhouseOOTD {
 
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
