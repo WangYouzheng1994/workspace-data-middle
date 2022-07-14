@@ -429,7 +429,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         SXSSFRow row = sheet.createRow(0);
         // 获取表头
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
-                "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
+                "计划下达日期", "配载单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
@@ -502,7 +502,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // vph  配板单号
+                // vph  配载单号
                 row1.createCell(j++).setCellValue(item.getCpzdbh());
                 // assignTime  指派日期
                 if (item.getAssignTime() != 0) {
@@ -582,7 +582,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         SXSSFRow row = sheet.createRow(0);
         // 获取表头
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
-                "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
+                "计划下达日期", "配载单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
@@ -659,7 +659,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // vph  配板单号
+                // vph  配载单号
                 row1.createCell(j++).setCellValue(item.getCpzdbh());
                 // assignTime  指派日期
                 if (item.getAssignTime() != 0) {
