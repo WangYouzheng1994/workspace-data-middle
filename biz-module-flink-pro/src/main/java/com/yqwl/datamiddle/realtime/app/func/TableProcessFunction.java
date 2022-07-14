@@ -4,13 +4,13 @@ import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.spi.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -19,14 +19,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * @Description:
+ * @Description: 分流算子
  * @Author: WangYouzheng
  * @Date: 2021/12/28 11:18
  * @Version: V1.0
  */
+@Slf4j
 public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject> {
-
-    private static final Logger LOGGER = LogManager.getLogger(TableProcessFunction.class);
 
     //因为要将维度数据写到侧输出流，所以定义一个侧输出流标签
     private OutputTag<JSONObject> outputTag;
@@ -63,7 +62,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
      * 初始化分流配置集合
      */
     private void initTableProcessMap() {
-        LOGGER.info("更新配置的处理信息");
+        log.info("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
         List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
@@ -166,7 +165,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
                     filterColumn(jsonObj.getJSONObject("data"), tableProcess.getSinkColumns());
                 }
             } else {
-                LOGGER.info("No This Key: {}", key);
+                log.info("No This Key: {}", key);
             }
             if (tableProcess != null && TableProcess.SINK_TYPE_HBASE.equalsIgnoreCase(tableProcess.getSinkType())) {
                 // 如果是hbase的 那么把这个数据和outputTag打标挂钩。

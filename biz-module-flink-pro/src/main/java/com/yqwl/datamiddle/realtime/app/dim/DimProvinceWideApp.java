@@ -13,6 +13,7 @@ import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.DimUtil;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -29,10 +30,8 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTime
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.sql.Timestamp;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,8 +44,8 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2022/5/12 13:30
  * @Version: V1.2
  */
+@Slf4j
 public class DimProvinceWideApp {
-    private static final Logger LOGGER = LogManager.getLogger(DimProvinceWideApp.class);
 
     public static void main(String[] args) {
         /*1. 创建环境*/
@@ -99,7 +98,7 @@ public class DimProvinceWideApp {
         SingleOutputStreamOperator<String> mdac01Source = env.fromSource(mdac01, WatermarkStrategy.noWatermarks(), "mdac01-kafka").uid("DimProvinceWideAppmdac01Source").name("DimProvinceWideAppmdac01Source");
 
 
-        LOGGER.info("1.kafka数据源收入");
+        log.info("1.kafka数据源收入");
 
         /*2. 进行数据过滤:*/
         // 过滤出sysc07的表
@@ -142,7 +141,7 @@ public class DimProvinceWideApp {
             }
         }).uid("DimProvinceWideAppfilterMdac01").name("DimProvinceWideAppfilterMdac01");
 
-        LOGGER.info("2.过滤后的数据");
+        log.info("2.过滤后的数据");
 
         /*3.进行实体类转换 */
         //  转换Sysc07的表
@@ -263,10 +262,10 @@ public class DimProvinceWideApp {
                     @Override
                     public void join(ProvincesWide wide, JSONObject dimInfoJsonObj) throws Exception {
                         if (dimInfoJsonObj.getString("CDSDM") != null) {
-                            LOGGER.info("dim cdsdm");
+                            log.info("dim cdsdm");
                             wide.setCdsdm(dimInfoJsonObj.getString("CDSDM"));
                         } else {
-                            LOGGER.info("wide csxdm");
+                            log.info("wide csxdm");
                             wide.setCdsdm(wide.getCsxdm());
                         }
                         if (dimInfoJsonObj.getString("CDSDM").equals(wide.getCdsdm08()) && dimInfoJsonObj.getString("CSQDM").equals(wide.getCsqdm())) {
@@ -291,7 +290,7 @@ public class DimProvinceWideApp {
         try {
             env.execute("KafkaSinkMysql");
         } catch (Exception e) {
-            LOGGER.error("stream invoke error", e);
+            log.error("stream invoke error", e);
         }
 
     }

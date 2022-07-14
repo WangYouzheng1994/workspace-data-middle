@@ -4,15 +4,13 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.common.MysqlConfig;
-import com.yqwl.datamiddle.realtime.common.OperateTypeConst;
-import com.yqwl.datamiddle.realtime.common.PhoenixConfig;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,7 +26,6 @@ import java.util.*;
  */
 @Slf4j
 public class DimMysqlSink extends RichSinkFunction<JSONObject> {
-    private static final Logger LOGGER = LogManager.getLogger(TableProcessDivideFunction.class);
 
     //定义mysql连接对象
     private Connection conn = null;
@@ -65,7 +62,7 @@ public class DimMysqlSink extends RichSinkFunction<JSONObject> {
 
         //根据data中属性名和属性值  生成mysql语句
         System.out.println("向mysql库中插入数据的SQL:" + sql);
-        LOGGER.info("向mysql库中插入数据的SQL:" + sql);
+        log.info("向mysql库中插入数据的SQL:" + sql);
         //执行SQL
         PreparedStatement ps = null;
         try {
