@@ -94,7 +94,7 @@ public class DwmVlmsDocs {
 	/**运输车号*/
 	@Excel(name = "运输车号", width = 15)
 	@ApiModelProperty(value = "运输车号")
-	private String VJSYDM;
+	private String vjsydm;
 
 	/**同板数量*/
 	@Excel(name = "同板数量", width = 15)

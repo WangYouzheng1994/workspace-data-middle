@@ -525,7 +525,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                     row1.createCell(j++).setCellValue("");
                 }
                 // VJSYDM 运输车号
-                row1.createCell(j++).setCellValue(item.getVJSYDM());
+                row1.createCell(j++).setCellValue(item.getVjsydm());
                 //  samePlateNum 同板数量
                 row1.createCell(j++).setCellValue(item.getSamePlateNum());
                 // dotSiteTime  DCS到货时间
@@ -682,7 +682,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                     row1.createCell(j++).setCellValue("");
                 }
                 // VJSYDM 运输车号
-                row1.createCell(j++).setCellValue(item.getVJSYDM());
+                row1.createCell(j++).setCellValue(item.getVjsydm());
                 //  samePlateNum 同板数量
                 row1.createCell(j++).setCellValue(item.getSamePlateNum());
                 // dotSiteTime  DCS到货时间
