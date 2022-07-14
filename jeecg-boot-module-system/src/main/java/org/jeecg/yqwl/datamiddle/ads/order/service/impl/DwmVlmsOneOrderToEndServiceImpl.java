@@ -166,13 +166,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
 
-        Map<String, Integer> listMap = new HashMap<>();
-        DwmVlmsDocs params = null;
-        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
-            params = dwmVlmsDocs.get(i);
-            listMap.put(params.getVvin(), i);
-            this.docsFormatTime(params);
-        }
+//        Map<String, Integer> listMap = new HashMap<>();
+//        DwmVlmsDocs params = null;
+//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+//            params = dwmVlmsDocs.get(i);
+//            listMap.put(params.getVvin(), i);
+//            this.docsFormatTime(params);
+//        }
         return dwmVlmsDocs;
     }
 
@@ -199,13 +199,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsCcxdlList(queryCriteria);
-        Map<String, Integer> listMap = new HashMap<>();
-        DwmVlmsDocs params = null;
-        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
-            params = dwmVlmsDocs.get(i);
-            listMap.put(params.getVvin(), i);
-            this.docsFormatTime(params);
-        }
+//        Map<String, Integer> listMap = new HashMap<>();
+//        DwmVlmsDocs params = null;
+//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+//            params = dwmVlmsDocs.get(i);
+//            listMap.put(params.getVvin(), i);
+//            this.docsFormatTime(params);
+//        }
         return dwmVlmsDocs;
     }
 

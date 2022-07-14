@@ -797,7 +797,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             }
         }
 
-        formatQueryTime(queryCriteria);
+//        formatQueryTime(queryCriteria);
 
         Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
         Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
@@ -836,7 +836,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             queryCriteria.setCcxdlList(Arrays.asList(StringUtils.split(ccxdl,",")));
         }
 
-        formatQueryTime(queryCriteria);
+//        formatQueryTime(queryCriteria);
 
         Integer total = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
         Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
