@@ -24,8 +24,8 @@
             <if test="params.taskNo != null and params.taskNo != '' ">
                 AND TASK_NO = #{params.taskNo}
             </if>
-            <if test="params.stowageNoteNo != null and params.stowageNoteNo != '' ">
-                AND STOWAGE_NOTE_NO = #{params.stowageNoteNo}
+            <if test="params.cpzdbh != null and params.cpzdbh != '' ">
+                AND STOWAGE_NOTE_NO = #{params.cpzdbh}
             </if>
             <if test="params.leaveFactoryTimeStart != null   and params.leaveFactoryTimeStart != 0">
                 AND LEAVE_FACTORY_TIME <![CDATA[ >= ]]> #{params.leaveFactoryTimeStart}
