@@ -170,6 +170,32 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     }
 
     /**
+     * docs车型列表页计数
+     * @param queryCriteria
+     * @return
+     */
+    @Override
+    public Integer countDocsCcxdlList(GetQueryCriteria queryCriteria) {
+        Integer num = dwmVlmsSptb02Mapper.countDocsCcxdlList(queryCriteria);
+        return num == null ? 0 : num ;
+    }
+
+    /**
+     * docs车型列表页查询
+     * @param queryCriteria
+     * @return
+     */
+    @Override
+    public List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria) {
+        if (queryCriteria.getPageNo() != null) {
+            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
+            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
+        }
+        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsCcxdlList(queryCriteria);
+        return dwmVlmsDocs;
+    }
+
+    /**
      * 英文运输方式
      *
      * @param engTrafficLists
@@ -292,9 +318,14 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setActualOutTime(actualOutTime);
         }
         //shipmentTime
-        if (params.getShipmentTime() != 0) {
-            Long shipmentTime = params.getShipmentTime() - 28800000L;
-            params.setShipmentTime(shipmentTime);
+//        if (params.getShipmentTime() != 0) {
+//            Long shipmentTime = params.getShipmentTime() - 28800000L;
+//            params.setShipmentTime(shipmentTime);
+//        }
+        // shipmentGTime
+        if (params.getShipmentGTime() != 0) {
+            Long ShipmentGTime = params.getShipmentGTime() - 28800000L;
+            params.setShipmentGTime(ShipmentGTime);
         }
         //inStartWaterwayTime,
         if (params.getInStartWaterwayTime() != 0) {

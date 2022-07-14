@@ -672,8 +672,14 @@
 
             <choose>
                 <when test="params.vvinList != null or params.selections != null ">
-                    and VVIN IN
+                    AND VVIN IN
                     <foreach collection="params.vvinList" item="value"  index="key" separator="," open="(" close=")">
+                        #{value}
+                    </foreach>
+                </when>
+                <when test="params.ccxdlList != null and params.ccxdlList != '' ">
+                    AND CCXDL IN
+                    <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">
                         #{value}
                     </foreach>
                 </when>
@@ -739,6 +745,37 @@
             resultType="java.lang.Integer">
         SELECT
                COUNT(*)
+        FROM
+        dwm_vlms_sptb02
+        <include refid="where_count_one_to_end" />
+    </select>
+
+<!--    docs 车型列表页查询-->
+    <select id="selectDocsCcxdlList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
+        WITH
+            A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
+        SELECT
+            CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
+            VVIN,BRAND,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
+            DDJRQ,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+            DOT_SITE_TIME,FINAL_SITE_TIME
+        FROM
+            dwm_vlms_sptb02  SPTB02
+        LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
+        <include refid="where_count_one_to_end" />
+        <if test="params.pageNo != 0">
+            limit ${params.limitStart}, ${params.limitEnd}
+        </if>
+
+
+    </select>
+
+<!--   docs车型计数 -->
+    <select id="countDocsCcxdlList" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
         FROM
         dwm_vlms_sptb02
         <include refid="where_count_one_to_end" />

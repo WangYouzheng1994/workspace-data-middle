@@ -143,4 +143,17 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      */
     Integer countDocsList(@Param("params") GetQueryCriteria queryCriteria);
 
+    /**
+     * 一单到底---DOCS
+     * @return
+     */
+    List<DwmVlmsDocs> selectDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
+
+    /**
+     *
+     * @param queryCriteria
+     * @return
+     */
+    Integer countDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
+
 }

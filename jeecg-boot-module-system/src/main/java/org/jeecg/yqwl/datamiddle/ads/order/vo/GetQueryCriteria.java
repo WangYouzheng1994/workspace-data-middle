@@ -146,5 +146,10 @@ public class GetQueryCriteria {
      */
     private String ccxdl;
 
+    /**
+     * 车辆标识(E6,E7)
+     */
+    private List<String> ccxdlList;
+
 
 }
