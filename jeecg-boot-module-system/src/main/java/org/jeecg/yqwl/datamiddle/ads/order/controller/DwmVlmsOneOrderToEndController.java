@@ -164,9 +164,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市","经销商目标城市","经销商代码","经销商名称",
                 "CP9下线接车日期", "出厂日期", "入库日期", "入库仓库", "任务单号", "计划下达日期", "配载单号", "运输方式", "指派日期",
                 "指派承运商名称", "出库日期", "起运日期-公路", "运输车号", "同板数量", "轿运车车位数",
-                 "始发港名称", "到达始发港口时间/入港时间", "始发港口水运离港时间", "目的港名称", "到达目的港时间", "始发站名称",
-                "到达始发站时间/入站时间", "始发站台铁路离站时间", "目的站名称", "到达目的站时间", "卸船时间（水路到目的站）",
-                "卸车时间（铁路到目的站）", "末端分拨中心入库时间", "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号",
+                "始发站名称","到达始发站时间/入站时间","始发站台铁路离站时间","目的站名称","到达目的站时间","卸车时间（铁路到目的站）",
+                "始发港名称", "到达始发港口时间/入港时间", "始发港口水运离港时间", "目的港名称", "到达目的港时间","卸船时间（水路到目的站）",
+                 "末端分拨中心入库时间", "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号",
                 "港/站分拨承运轿运车车位数", "分拨出库时间", "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
@@ -289,28 +289,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getSamePlateNum());
                 // vehicleNum  轿运车车位数
                 row1.createCell(j++).setCellValue(item.getVehicleNum());
-                // startWaterwayName  始发港名称
-                row1.createCell(j++).setCellValue(item.getStartWaterwayName());
-                // inStartWaterwayTime 到达始发港口时间/入港时间
-                if (item.getInStartWaterwayTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartWaterwayTime()));
-                }else{
-                    row1.createCell(j++).setCellValue("");
-                }
-                // endStartWaterwayTime 始发港口水运离港时间
-                if (item.getEndStartWaterwayTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
-                }else{
-                    row1.createCell(j++).setCellValue("");
-                }
-                // endWaterwayName 目的港名称
-                row1.createCell(j++).setCellValue(item.getEndWaterwayName());
-                // inEndWaterwayTime  到达目的港时间
-                if (item.getInEndWaterwayTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndWaterwayTime()));
-                }else{
-                    row1.createCell(j++).setCellValue("");
-                }
                 // startPlatformName  始发站名称
                 row1.createCell(j++).setCellValue(item.getStartPlatformName());
                 // inStartPlatformTime  到达始发站时间/入站时间
@@ -333,15 +311,37 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // unloadShipTime  卸船时间（水路到目的站）
-                if (item.getUnloadShipTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadShipTime()));
-                }else{
-                    row1.createCell(j++).setCellValue("");
-                }
                 // unloadRailwayTime  卸车时间（铁路到目的站）
                 if (item.getUnloadRailwayTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getUnloadRailwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
+                }
+                // startWaterwayName  始发港名称
+                row1.createCell(j++).setCellValue(item.getStartWaterwayName());
+                // inStartWaterwayTime 到达始发港口时间/入港时间
+                if (item.getInStartWaterwayTime() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
+                }
+                // endStartWaterwayTime 始发港口水运离港时间
+                if (item.getEndStartWaterwayTime() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
+                }
+                // endWaterwayName 目的港名称
+                row1.createCell(j++).setCellValue(item.getEndWaterwayName());
+                // inEndWaterwayTime  到达目的港时间
+                if (item.getInEndWaterwayTime() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndWaterwayTime()));
+                }else{
+                    row1.createCell(j++).setCellValue("");
+                }
+                // unloadShipTime  卸船时间（水路到目的站）
+                if (item.getUnloadShipTime() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadShipTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
