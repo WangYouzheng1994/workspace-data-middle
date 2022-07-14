@@ -35,9 +35,9 @@ public class GetQueryCriteria {
     private String taskNo;
 
     /**
-     * 配板单号
+     * 配载单号
      */
-    private String stowageNoteNo;
+    private String cpzdbh;
 
     /**
      * 出厂日期_开始

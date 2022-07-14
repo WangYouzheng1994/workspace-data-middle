@@ -166,6 +166,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
 
+//        Map<String, Integer> listMap = new HashMap<>();
+//        DwmVlmsDocs params = null;
+//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+//            params = dwmVlmsDocs.get(i);
+//            listMap.put(params.getVvin(), i);
+//            this.docsFormatTime(params);
+//        }
         return dwmVlmsDocs;
     }
 
@@ -192,6 +199,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsCcxdlList(queryCriteria);
+//        Map<String, Integer> listMap = new HashMap<>();
+//        DwmVlmsDocs params = null;
+//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+//            params = dwmVlmsDocs.get(i);
+//            listMap.put(params.getVvin(), i);
+//            this.docsFormatTime(params);
+//        }
         return dwmVlmsDocs;
     }
 
@@ -387,6 +401,23 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             Long distributeShipmentTime = params.getDistributeShipmentTime() - 28800000L;
             params.setDistributeShipmentTime(distributeShipmentTime);
         }
+        // dotSiteTime,
+        if (params.getDotSiteTime() != 0) {
+            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
+            params.setDotSiteTime(dotSiteTime);
+        }
+        // finalSiteTime
+        if (params.getFinalSiteTime() != 0) {
+            Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
+            params.setFinalSiteTime(finalSiteTime);
+        }
+    }
+
+    /**
+     * docs表时间减8小时(只有两个字段)
+     * @param params
+     */
+    private void docsFormatTime(DwmVlmsDocs params){
         // dotSiteTime,
         if (params.getDotSiteTime() != 0) {
             Long dotSiteTime = params.getDotSiteTime() - 28800000L;
