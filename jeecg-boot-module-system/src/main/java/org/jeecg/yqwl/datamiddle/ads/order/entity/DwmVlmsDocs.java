@@ -29,7 +29,7 @@ public class DwmVlmsDocs {
 	/**品牌*/
 	@Excel(name = "品牌", width = 15)
 	@ApiModelProperty(value = "品牌")
-	private String HostComCode;
+	private String hostComCode;
 
 	/**基地*/
 	@Excel(name = "基地", width = 15)
