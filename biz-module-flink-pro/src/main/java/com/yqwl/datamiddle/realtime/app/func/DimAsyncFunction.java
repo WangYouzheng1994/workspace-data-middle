@@ -66,36 +66,36 @@ public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implem
     @Override
     public void asyncInvoke(T obj, ResultFuture<T> resultFuture) throws Exception {
         executorService.submit(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            //发送异步请求
+            new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        //发送异步请求
 //                            long start = System.currentTimeMillis();
-                            //从流中事实数据获取key值
-                            Object key = getKey(obj);
-                            log.info("获取的查询条件values值:{}", key);
-                            //根据维度的主键到维度表中进行查询
-                            JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key, andSql);
-                            //System.out.println("维度数据Json格式：" + dimInfoJsonObj);
-                            // 这儿只有关联上的才会处理。
-                            if (dimInfoJsonObj != null) {
-                                //维度关联  流中的事实数据和查询出来的维度数据进行关联
-                                join(obj, dimInfoJsonObj);
-                            }
-                            //System.out.println("维度关联后的对象:" + obj);
-//                            long end = System.currentTimeMillis();
-                            //System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
-//                            log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
-                            //将关联后的数据继续向下传递
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            throw new RuntimeException(tableName + "维度异步查询失败");
+                        //从流中事实数据获取key值
+                        Object key = getKey(obj);
+                        log.info("获取的查询条件values值:{}", key);
+                        //根据维度的主键到维度表中进行查询
+                        JSONObject dimInfoJsonObj = DimUtil.getDimInfo(dbType, tableName, columnName, key, andSql);
+                        //System.out.println("维度数据Json格式：" + dimInfoJsonObj);
+                        // 这儿只有关联上的才会处理。
+                        if (dimInfoJsonObj != null) {
+                            //维度关联  流中的事实数据和查询出来的维度数据进行关联
+                            join(obj, dimInfoJsonObj);
                         }
-                        resultFuture.complete(Arrays.asList(obj));
+                        //System.out.println("维度关联后的对象:" + obj);
+//                            long end = System.currentTimeMillis();
+                        //System.out.println("异步查询维表:" + tableName + ",耗时:" + (end - start) + "毫秒");
+//                            log.info("异步查询维表:{},耗时为:{}毫秒", tableName, (end - start));
+                        //将关联后的数据继续向下传递
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(tableName + "维度异步查询失败");
                     }
+                    resultFuture.complete(Arrays.asList(obj));
                 }
+            }
         );
     }
 

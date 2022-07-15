@@ -51,7 +51,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
             public void run() {
                 initTableProcessMap();
             }
-        }, 5000, 5000);
+        }, 5000, 20000);
     }
 
     /**

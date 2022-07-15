@@ -1,8 +1,7 @@
 package com.yqwl.datamiddle.realtime.app.func;
 
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
-import com.yqwl.datamiddle.realtime.util.TestSink;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
@@ -19,16 +18,6 @@ import java.util.List;
  * 获取sink 工具类
  */
 public class JdbcSink {
-    /**
-     * 获取test sink
-     *
-     * @param <T>
-     * @return
-     */
-    public static <T> TestSink<T> getTestSink() {
-        return new TestSink<T>();
-    }
-
     /**
      * 获取批量sink
      *
@@ -85,11 +74,6 @@ public class JdbcSink {
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(5)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUrl(MysqlConfig.URL)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build());
+                PropertiesUtil.getMysqlJDBCConnection());
     }
 }

@@ -2,11 +2,11 @@ package com.yqwl.datamiddle.realtime.app.func;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
 import com.yqwl.datamiddle.realtime.enums.TableName;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import com.yqwl.datamiddle.realtime.util.DbUtil;
+import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -67,9 +67,9 @@ public class JdbcBatchSink<T> extends RichSinkFunction<List<T>> {
         //druidDataSource.setUsername(props.getStr("mysql.username"));
         //druidDataSource.setPassword(props.getStr("mysql.password"));
 
-        druidDataSource.setUrl(MysqlConfig.URL);
-        druidDataSource.setUsername(MysqlConfig.USERNAME);
-        druidDataSource.setPassword(MysqlConfig.PASSWORD);
+        druidDataSource.setUrl(PropertiesUtil.getPropsStr("mysql.url"));
+        druidDataSource.setUsername(PropertiesUtil.getPropsStr("mysql.username"));
+        druidDataSource.setPassword(PropertiesUtil.getPropsStr("mysql.password"));
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
         druidDataSource.setMaxActive(200);

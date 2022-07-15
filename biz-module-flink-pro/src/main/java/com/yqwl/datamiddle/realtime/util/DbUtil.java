@@ -3,12 +3,9 @@ package com.yqwl.datamiddle.realtime.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.google.common.base.CaseFormat;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -327,9 +324,9 @@ public class DbUtil {
     private static DruidDataSource createDruidDataSource() throws SQLException {
         DruidDataSource druidDataSource = new DruidDataSource();
         //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
-        druidDataSource.setUrl(MysqlConfig.URL);
-        druidDataSource.setUsername(MysqlConfig.USERNAME);
-        druidDataSource.setPassword(MysqlConfig.PASSWORD);
+        druidDataSource.setUrl(PropertiesUtil.getPropsStr("mysql.url"));
+        druidDataSource.setUsername(PropertiesUtil.getPropsStr("mysql.username"));
+        druidDataSource.setPassword(PropertiesUtil.getPropsStr("mysql.password"));
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
         druidDataSource.setMaxActive(1500);

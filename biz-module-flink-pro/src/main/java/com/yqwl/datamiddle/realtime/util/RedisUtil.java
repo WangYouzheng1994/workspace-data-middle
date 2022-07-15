@@ -1,7 +1,5 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import cn.hutool.setting.dialect.Props;
-import com.yqwl.datamiddle.realtime.common.JedisConfig;
 import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -23,18 +21,18 @@ public class RedisUtil {
             synchronized (RedisUtil.class) {
                 if (jedisPool == null) {
                     JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-                    jedisPoolConfig.setMaxTotal(JedisConfig.MAX_TOTAL); //最大可用连接数
+                    jedisPoolConfig.setMaxTotal(PropertiesUtil.getPropsInt("redis.MaxTotal")); //最大可用连接数
                     jedisPoolConfig.setBlockWhenExhausted(true); //连接耗尽是否等待
-                    jedisPoolConfig.setMaxWaitMillis(JedisConfig.MAX_WAIT_MILLIS); //等待时间
-                    jedisPoolConfig.setMaxIdle(JedisConfig.MAX_IDLE); //最大闲置连接数
-                    jedisPoolConfig.setMinIdle(JedisConfig.MIN_IDLE); //最小闲置连接数
+                    jedisPoolConfig.setMaxWaitMillis(PropertiesUtil.getPropsInt("redis.MaxWaitMillis")); //等待时间
+                    jedisPoolConfig.setMaxIdle(PropertiesUtil.getPropsInt("redis.MaxIdle")); //最大闲置连接数
+                    jedisPoolConfig.setMinIdle(PropertiesUtil.getPropsInt("redis.MinIdle")); //最小闲置连接数
                     jedisPoolConfig.setTestOnBorrow(false); //取连接的时候进行一下测试 ping pong
                     jedisPool = new JedisPool(
                             jedisPoolConfig,
-                            JedisConfig.HOSTNAME,
-                            JedisConfig.PORT,
-                            JedisConfig.TIMEOUT,
-                            JedisConfig.PASSWORD);
+                            PropertiesUtil.getPropsStr("redis.hostname"),
+                            PropertiesUtil.getPropsInt("redis.port"),
+                            PropertiesUtil.getPropsInt("redis.timeout"),
+                            PropertiesUtil.getPropsStr("redis.password"));
                 }
             }
         }

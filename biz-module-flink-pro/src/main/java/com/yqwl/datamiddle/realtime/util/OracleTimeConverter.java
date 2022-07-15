@@ -16,6 +16,12 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @Description: oracle cdc debezium 转换回调
+ * @Author: xiaofeng
+ * @Date: 2022年7月15日15:51:21
+ * @Version: V1.0
+ */
 public class OracleTimeConverter implements CustomConverter<SchemaBuilder, RelationalColumn> {
 
     private static final ZoneId GMT_ZONE_ID = ZoneId.systemDefault();

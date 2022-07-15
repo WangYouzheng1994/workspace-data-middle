@@ -3,19 +3,15 @@ package com.yqwl.datamiddle.realtime.app.func;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -24,6 +20,7 @@ import java.util.*;
  * @Date: 2022/05/07
  * @Version: V1.0
  */
+@Deprecated
 @Slf4j
 public class DimMysqlSink extends RichSinkFunction<JSONObject> {
 
@@ -33,7 +30,7 @@ public class DimMysqlSink extends RichSinkFunction<JSONObject> {
     @Override
     public void open(Configuration parameters) throws Exception {
         //对连接对象进行初始化
-        Class.forName(MysqlConfig.DRIVER);
+        Class.forName("mysql"); // TODO: 如果使用该类需要注入驱动包全限定名称 2022年7月15日15:22:11 By QingSong
         Props props = PropertiesUtil.getProps();
         conn = DriverManager.getConnection(props.getStr("mysql.url"), props.getStr("mysql.username"), props.getStr("mysql.password"));
     }

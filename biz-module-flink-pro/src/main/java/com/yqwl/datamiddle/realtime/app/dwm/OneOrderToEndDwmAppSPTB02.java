@@ -6,7 +6,6 @@ import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -463,12 +462,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withBatchIntervalMs(2000L)
                         .withMaxRetries(5)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlG").name("OneOrderToEndDwmAppSPTB02FilterAddSinkMysqlG");
+                PropertiesUtil.getMysqlJDBCConnection()
+        )).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlG").name("OneOrderToEndDwmAppSPTB02FilterAddSinkMysqlG");
 
         //-------------------------------------------------------------------------------------------更新铁路的运单---------------------------------------------------------------------------------//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterT = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
@@ -598,12 +593,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withBatchIntervalMs(2000L)
                         .withMaxRetries(5)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlT").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlT");
+                PropertiesUtil.getMysqlJDBCConnection()
+            )).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlT").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlT");
 
         //--------------------------------------------------------------------水路运单插入------------------------------------------------------------------------------------------------//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterS = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
@@ -732,12 +723,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withBatchIntervalMs(2000L)
                         .withMaxRetries(5)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlS").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlS");
+                PropertiesUtil.getMysqlJDBCConnection()
+        )).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlS").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlS");
 
         //---------------------------------------------------------------------公路末端配送的插入-----------------------------------------------------------------------------------------//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterEndG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
@@ -868,12 +855,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withBatchIntervalMs(2000L)
                         .withMaxRetries(5)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("OneOrderToEndDwmAppSPTB02SinkMysqlEndG").name("OneOrderToEndDwmAppSPTB02SinkMysqlEndG");
+                PropertiesUtil.getMysqlJDBCConnection()
+        )).uid("OneOrderToEndDwmAppSPTB02SinkMysqlEndG").name("OneOrderToEndDwmAppSPTB02SinkMysqlEndG");
 
 
        /* //5.sptb02与一单到底对应的字段插入mysql

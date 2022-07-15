@@ -1,28 +1,23 @@
 package com.yqwl.datamiddle.realtime.util;
 
-import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.base.CaseFormat;
-import com.yqwl.datamiddle.realtime.bean.TableProcess;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.enums.TableName;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.java.tuple.Tuple2;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @Description: 主要是执行mysql 查询
  * @Author: WangYouzheng
  * @Date: 2021/12/28 11:09
  * @Version: V1.0

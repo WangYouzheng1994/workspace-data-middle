@@ -4,14 +4,12 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.common.MysqlConfig;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -102,12 +100,7 @@ public class OneOrderToEndDwmAppEPC {
                         .withBatchIntervalMs(5000L)
                         .withMaxRetries(2)
                         .build(),
-                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(MysqlConfig.URL)
-                        .withDriverName(MysqlConfig.DRIVER)
-                        .withUsername(MysqlConfig.USERNAME)
-                        .withPassword(MysqlConfig.PASSWORD)
-                        .build())).uid("OneOrderToEndDwmAppEPCBaseStationDataEpcSink").name("OneOrderToEndDwmAppEPCBaseStationDataEpcSink");
+                PropertiesUtil.getMysqlJDBCConnection())).uid("OneOrderToEndDwmAppEPCBaseStationDataEpcSink").name("OneOrderToEndDwmAppEPCBaseStationDataEpcSink");
         //==============================================dwd_base_station_data_epc处理 END====================================================================//
 
         env.execute("bsdEpc更新一单到底表");

@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @Date: 2022/05/07
  * @Version: V1.0
  */
+@Deprecated
 @Slf4j
 public class TableProcessDivideFunction extends ProcessFunction<JSONObject, JSONObject> {
 

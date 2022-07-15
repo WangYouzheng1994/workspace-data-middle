@@ -41,29 +41,30 @@ public class PropertiesUtil {
     private static final String FILENAME_PROD = "cdc-prod.properties";
 
     /**
-     * 指定读取的properties版本, dev或prod
-     *
-     * @param active
-     * @return
-     */
-    @Deprecated
-    public static Props getProps(String active) {
-        if (ACTIVE_DEV.equals(active)) {
-            return new Props(FILENAME_DEV);
-        }
-        if (ACTIVE_PROD.equals(active)) {
-            return new Props(FILENAME_PROD);
-        }
-        return null;
-    }
-
-    /**
      * 获取当前环境版本下的配置文件。
      *
      * @return
      */
     public static Props getProps() {
         return new Props("cdc-"+ACTIVE_TYPE+".properties", CharsetUtil.CHARSET_UTF_8);
+    }
+
+    /**
+     * 获取字符串类型Value值
+     *
+     * @return
+     */
+    public static String getPropsStr(String key) {
+        return GetterUtil.getString(getProps().getStr(key));
+    }
+
+    /**
+     * 获取 int类型Value值
+     * @return
+     */
+    public static int getPropsInt(String key) {
+        return GetterUtil.getInt(getProps().getInt(key));
+
     }
 
     /**
@@ -97,6 +98,20 @@ public class PropertiesUtil {
                 .withUrl(GetterUtil.getString(getProps().get("clickhouse.url")))
                 .withUsername(GetterUtil.getString(getProps().get("clickhouse.username")))
                 .withPassword(GetterUtil.getString(getProps().get("clickhouse.password")))
+                .build();
+    }
+
+    /**
+     * 读取配置文件，获取MySQL Master当前连接信息
+     *
+     * @return
+     */
+    public static JdbcConnectionOptions getMysqlJDBCConnection() {
+        return new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                .withDriverName(getPropsStr("mysql.driver"))
+                .withUrl(getPropsStr("mysql.url"))
+                .withUsername(getPropsStr("mysql.username"))
+                .withPassword(getPropsStr("mysql.password"))
                 .build();
     }
 }
