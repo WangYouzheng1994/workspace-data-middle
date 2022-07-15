@@ -736,6 +736,7 @@
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
         <include refid="where_count_one_to_end" />
+        ORDER BY SPTB02.DDJRQ DESC
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
         </if>
@@ -765,6 +766,7 @@
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
         <include refid="where_count_one_to_end" />
+        ORDER BY SPTB02.DDJRQ DESC
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
         </if>
