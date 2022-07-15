@@ -166,13 +166,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
 
-//        Map<String, Integer> listMap = new HashMap<>();
-//        DwmVlmsDocs params = null;
-//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
-//            params = dwmVlmsDocs.get(i);
-//            listMap.put(params.getVvin(), i);
-//            this.docsFormatTime(params);
-//        }
+        Map<String, Integer> listMap = new HashMap<>();
+        DwmVlmsDocs params = null;
+        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+            params = dwmVlmsDocs.get(i);
+            listMap.put(params.getVvin(), i);
+            this.docsFormatTime(params);
+        }
         return dwmVlmsDocs;
     }
 
@@ -199,13 +199,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsCcxdlList(queryCriteria);
-//        Map<String, Integer> listMap = new HashMap<>();
-//        DwmVlmsDocs params = null;
-//        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
-//            params = dwmVlmsDocs.get(i);
-//            listMap.put(params.getVvin(), i);
-//            this.docsFormatTime(params);
-//        }
+        Map<String, Integer> listMap = new HashMap<>();
+        DwmVlmsDocs params = null;
+        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
+            params = dwmVlmsDocs.get(i);
+            listMap.put(params.getVvin(), i);
+            this.docsFormatTime(params);
+        }
         return dwmVlmsDocs;
     }
 
@@ -414,10 +414,30 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     }
 
     /**
-     * docs表时间减8小时(只有两个字段)
+     * docs表时间减8小时(六个字段)
      * @param params
      */
     private void docsFormatTime(DwmVlmsDocs params){
+        // ddjrq
+        if (params.getDdjrq() != 0) {
+            Long ddjrq = params.getDdjrq() - 28800000L;
+            params.setDdjrq(ddjrq);
+        }
+        // assignTime
+        if (params.getAssignTime() != 0) {
+            Long assignTime = params.getAssignTime() - 28800000L;
+            params.setAssignTime(assignTime);
+        }
+        // shipmentTime
+        if (params.getShipmentTime() != 0) {
+            Long shipmentTime = params.getShipmentTime() - 28800000L;
+            params.setShipmentTime(shipmentTime);
+        }
+        // actualOutTime
+        if (params.getActualOutTime() != 0) {
+            Long actualOutTime = params.getActualOutTime() - 28800000L;
+            params.setActualOutTime(actualOutTime);
+        }
         // dotSiteTime,
         if (params.getDotSiteTime() != 0) {
             Long dotSiteTime = params.getDotSiteTime() - 28800000L;

@@ -29,7 +29,7 @@ public class DwmVlmsDocs {
 	/**品牌*/
 	@Excel(name = "品牌", width = 15)
 	@ApiModelProperty(value = "品牌")
-	private String brand;
+	private String hostComCode;
 
 	/**基地*/
 	@Excel(name = "基地", width = 15)
@@ -66,9 +66,9 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "计划下达日期")
 	private Long ddjrq;
 
-	/**配板单号*/
-	@Excel(name = "配板单号", width = 15)
-	@ApiModelProperty(value = "配板单号")
+	/**配载单号*/
+	@Excel(name = "配载单号", width = 15)
+	@ApiModelProperty(value = "配载单号")
 	private String cpzdbh;
 
 	/**指派日期*/
@@ -94,7 +94,7 @@ public class DwmVlmsDocs {
 	/**运输车号*/
 	@Excel(name = "运输车号", width = 15)
 	@ApiModelProperty(value = "运输车号")
-	private String VJSYDM;
+	private String vjsydm;
 
 	/**同板数量*/
 	@Excel(name = "同板数量", width = 15)
