@@ -677,12 +677,6 @@
                         #{value}
                     </foreach>
                 </when>
-                <when test="params.ccxdlList != null and params.ccxdlList != '' ">
-                    AND CCXDL IN
-                    <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">
-                        #{value}
-                    </foreach>
-                </when>
                 <otherwise>
                     <if test="params.vvin != null and params.vvin != '' ">
                         AND VVIN = #{params.vvin}
@@ -718,6 +712,12 @@
             </if>
             <if test="params.vysfs != null   and params.vysfs != '' ">
                 AND VYSFS =  #{params.vysfs}
+            </if>
+            <if test="params.ccxdlList != null and params.ccxdlList != '' ">
+                AND CCXDL IN
+                <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">
+                    #{value}
+                </foreach>
             </if>
         </where>
     </sql>
