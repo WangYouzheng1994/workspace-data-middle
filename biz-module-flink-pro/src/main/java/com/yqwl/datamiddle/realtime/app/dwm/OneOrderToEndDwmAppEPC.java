@@ -97,7 +97,7 @@ public class OneOrderToEndDwmAppEPC {
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)
-                        .withBatchIntervalMs(5000L)
+                        .withBatchIntervalMs(2000L)
                         .withMaxRetries(2)
                         .build(),
                 PropertiesUtil.getMysqlJDBCConnection())).uid("OneOrderToEndDwmAppEPCBaseStationDataEpcSink").name("OneOrderToEndDwmAppEPCBaseStationDataEpcSink");
