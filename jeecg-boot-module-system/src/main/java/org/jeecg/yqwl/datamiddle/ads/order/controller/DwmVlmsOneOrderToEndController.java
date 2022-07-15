@@ -231,19 +231,19 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getVdwdm());
                 // DEALER_NAME  经销商名称
                 row1.createCell(j++).setCellValue(item.getDealerName());
-                // cp9OfflineTime  CP9下线接车日期
+                // cp9OfflineTime  CP9下线接车日期  11
                 if (item.getCp9OfflineTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getCp9OfflineTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // leaveFactoryTime  出厂日期
+                // leaveFactoryTime  出厂日期      16WEI
                 if (item.getLeaveFactoryTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getLeaveFactoryTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // inSiteTime  入库日期
+                // inSiteTime  入库日期   16WEI
                 if (item.getInSiteTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInSiteTime()));
                 }else{
@@ -253,7 +253,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getInWarehouseName());
                 // taskNo 任务单号
                 row1.createCell(j++).setCellValue(item.getTaskNo());
-                // vehicleReceivingTime  计划下达日期
+                // vehicleReceivingTime  计划下达日期  11
                 if (item.getVehicleReceivingTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getVehicleReceivingTime()));
                 }else{
@@ -263,7 +263,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getCpzdbh());
                 // trafficType  运输方式
                 row1.createCell(j++).setCellValue(item.getTrafficType());
-                // assignTime  指派日期
+                // assignTime  指派日期  11
                 if (item.getAssignTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
                 }else{
@@ -271,13 +271,13 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // carrierName  指派承运商名称
                 row1.createCell(j++).setCellValue(item.getCarrierName());
-                // actualOutTime  出库日期
+                // actualOutTime  出库日期  11
                 if (item.getActualOutTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getActualOutTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // shipmentTime  起运日期-公路
+                // shipmentTime  起运日期-公路   11
                 if (item.getShipmentGTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getShipmentGTime()));
                 }else{
@@ -291,13 +291,13 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getVehicleNum());
                 // startPlatformName  始发站名称
                 row1.createCell(j++).setCellValue(item.getStartPlatformName());
-                // inStartPlatformTime  到达始发站时间/入站时间
+                // inStartPlatformTime  到达始发站时间/入站时间   16WEI
                 if (item.getInStartPlatformTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInStartPlatformTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // outStartPlatformTime  始发站台铁路离站时间
+                // outStartPlatformTime  始发站台铁路离站时间    16WEI
                 if (item.getOutStartPlatformTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getOutStartPlatformTime()));
                 }else{
@@ -305,13 +305,13 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // endPlatformName  目的站名称
                 row1.createCell(j++).setCellValue(item.getEndPlatformName());
-                // inEndPlatformTime  到达目的站时间
+                // inEndPlatformTime  到达目的站时间     16WEI
                 if (item.getInEndPlatformTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInEndPlatformTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // unloadRailwayTime  卸车时间（铁路到目的站）
+                // unloadRailwayTime  卸车时间（铁路到目的站）   16WEI
                 if (item.getUnloadRailwayTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getUnloadRailwayTime()));
                 }else{
@@ -319,13 +319,13 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // startWaterwayName  始发港名称
                 row1.createCell(j++).setCellValue(item.getStartWaterwayName());
-                // inStartWaterwayTime 到达始发港口时间/入港时间
+                // inStartWaterwayTime 到达始发港口时间/入港时间    16WEI
                 if (item.getInStartWaterwayTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInStartWaterwayTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // endStartWaterwayTime 始发港口水运离港时间
+                // endStartWaterwayTime 始发港口水运离港时间  16WEI
                 if (item.getEndStartWaterwayTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
                 }else{
@@ -333,25 +333,25 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // endWaterwayName 目的港名称
                 row1.createCell(j++).setCellValue(item.getEndWaterwayName());
-                // inEndWaterwayTime  到达目的港时间
+                // inEndWaterwayTime  到达目的港时间    16WEI
                 if (item.getInEndWaterwayTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInEndWaterwayTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // unloadShipTime  卸船时间（水路到目的站）
+                // unloadShipTime  卸船时间（水路到目的站）   16WEI
                 if (item.getUnloadShipTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getUnloadShipTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // inDistributeTime  末端分拨中心入库时间
+                // inDistributeTime  末端分拨中心入库时间   16WEI
                 if (item.getInDistributeTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInDistributeTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // distributeAssignTime 末端分拨中心指派时间
+                // distributeAssignTime 末端分拨中心指派时间   11
                 if (item.getDistributeAssignTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getDistributeAssignTime()));
                 }else{
@@ -363,25 +363,25 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getDistributeVehicleNo());
                 // distributeVehicleNum  港/站分拨承运轿运车车位数
                 row1.createCell(j++).setCellValue(item.getDistributeVehicleNum());
-                // outDistributeTime  分拨出库时间
+                // outDistributeTime  分拨出库时间   11
                 if (item.getOutDistributeTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getOutDistributeTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // distributeShipmentTime  分拨起运时间
+                // distributeShipmentTime  分拨起运时间  11
                 if (item.getDistributeShipmentTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getDistributeShipmentTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // dotSiteTime  送达时间-DCS到货时间
+                // dotSiteTime  送达时间-DCS到货时间  11
                 if (item.getDotSiteTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getDotSiteTime()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // finalSiteTime  经销商确认到货时间
+                // finalSiteTime  经销商确认到货时间  11
                 if (item.getFinalSiteTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getFinalSiteTime()));
                 }else{
@@ -482,8 +482,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 int j = 0;
                 // vvin 底盘号
                 row1.createCell(j++).setCellValue(item.getVvin());
-                // brand  品牌
-                row1.createCell(j++).setCellValue(formatBrandToChinese(item.getBrand()));
+                // HostComCode  品牌
+                row1.createCell(j++).setCellValue(formatBrandToChinese(item.getHostComCode()));
                 // baseName  基地
                 row1.createCell(j++).setCellValue(item.getBaseName());
                 // vehicleName  车型
@@ -639,8 +639,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 int j = 0;
                 // vvin 底盘号
                 row1.createCell(j++).setCellValue(item.getVvin());
-                // brand  品牌
-                row1.createCell(j++).setCellValue(formatBrandToChinese(item.getBrand()));
+                // HostComCode  品牌
+                row1.createCell(j++).setCellValue(formatBrandToChinese(item.getHostComCode()));
                 // baseName  基地
                 row1.createCell(j++).setCellValue(item.getBaseName());
                 // vehicleName  车型
