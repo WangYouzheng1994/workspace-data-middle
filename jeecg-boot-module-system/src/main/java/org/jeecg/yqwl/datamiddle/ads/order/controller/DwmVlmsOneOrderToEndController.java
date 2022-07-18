@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -417,8 +419,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
      * @param response
      * @throws IOException
      */
-    @AutoLog(value = "导出")
-    @ApiOperation(value = "导出", notes = "导出")
+    @AutoLog(value = "docs")
+    @ApiOperation(value = "docs", notes = "docs")
     @PostMapping(value = "/exportXlsList")
     public void exportXlsList(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
         // 创建工作簿
@@ -565,22 +567,35 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
     }
 
     /**
-     *docs车型页面导出
+     *docsID车型页面导出
      * @param queryCriteria
      * @param response
      * @throws IOException
      */
-    @AutoLog(value = "导出")
-    @ApiOperation(value = "导出", notes = "导出")
+    @AutoLog(value = "docs ID车型")
+    @ApiOperation(value = "docs ID车型", notes = "docs ID车型")
     @PostMapping(value = "/exportXlsCcxdlList")
     public void exportXlsCcxdlList(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
         // 创建工作簿
         SXSSFWorkbook wb = new SXSSFWorkbook();
         // 在工作簿中创建sheet页
         SXSSFSheet sheet = wb.createSheet("sheet1");
+//        // 设置列宽(写死)
+//        int [] width = {20,6,6,25,10,15,15,30,20,15,20,15,20,20,15,8,20,20};
+//        for (int columnIndex = 0; columnIndex < 18; columnIndex++) {
+//            sheet.setColumnWidth(columnIndex, width[columnIndex] * 256);
+//        }
+//
+//        // 设置
+//        Font font = wb.createFont();
+//        CellStyle style = wb.createCellStyle();
+
+
         // 创建行,从0开始
         SXSSFRow row = sheet.createRow(0);
-        // 获取表头
+        // 设置表头行高
+//        row.setHeight((short) (22.50 * 20));
+        // 获取表头   18个字段
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
                 "计划下达日期", "配载单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
@@ -712,6 +727,16 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             }
         } while (intervalFlag);
 
+        // 设置表格默认行高
+//        sheet.setDefaultRowHeight((short) (16.5 * 20));
+
+
+//        for ( int j = 0; j < pageList.size(); j++ ) {
+//            sheet.trackAllColumnsForAutoSizing();
+//            sheet.autoSizeColumn(j);
+//            int width = Math.max(15 * 256, Math.min(256 * 256, sheet.getColumnWidth(j) * 12 / 10));
+//            sheet.setColumnWidth(j, width);
+//        }
         // 设置内容类型
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         OutputStream outputStream = response.getOutputStream();
