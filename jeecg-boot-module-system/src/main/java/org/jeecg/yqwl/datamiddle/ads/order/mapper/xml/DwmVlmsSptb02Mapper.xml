@@ -713,6 +713,9 @@
             <if test="params.vysfs != null   and params.vysfs != '' ">
                 AND VYSFS =  #{params.vysfs}
             </if>
+            <if test="params.cpzdbh != null   and params.cpzdbh != '' ">
+                AND CPZDBH =  #{params.cpzdbh}
+            </if>
             <if test="params.ccxdlList != null and params.ccxdlList != '' ">
                 AND CCXDL IN
                 <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">

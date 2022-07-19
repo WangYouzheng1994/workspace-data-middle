@@ -76,9 +76,9 @@ public class DwmVlmsOneOrderToEnd {
 	@Excel(name = "任务单号", width = 15)
     @ApiModelProperty(value = "任务单号 取sptb02.cjhdh")
 	private String taskNo;
-	/**配载单编号 Y号  取sptb02.cpzdbh*/
+	/**配板单号 Y号  取sptb02.cpzdbh*/
 	@Excel(name = "配板单号", width = 15)
-    @ApiModelProperty(value = "配载单编号 Y号  取sptb02.cpzdbh")
+    @ApiModelProperty(value = "配板单号 Y号  取sptb02.cpzdbh")
 	private String stowageNoteNo;
 	/**配载单日期   sptb02.DPZRQ*/
 	@Excel(name = "配板日期", width = 15)
@@ -284,10 +284,10 @@ public class DwmVlmsOneOrderToEnd {
 	private String endPhysicalCode;
 
 	/**
-	 * Y号
+	 * 配板单号  Y号
 	 */
-	@Excel(name = "Y号", width = 15)
-	@ApiModelProperty(value = "Y号")
+	@Excel(name = "配板单号", width = 15)
+	@ApiModelProperty(value = "配板单号")
 	private String cpzdbh;
 	/**
 	 *起运日期-公路

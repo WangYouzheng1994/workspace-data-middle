@@ -66,9 +66,9 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "计划下达日期")
 	private Long ddjrq;
 
-	/**配载单号*/
-	@Excel(name = "配载单号", width = 15)
-	@ApiModelProperty(value = "配载单号")
+	/**配板单号*/
+	@Excel(name = "配板单号", width = 15)
+	@ApiModelProperty(value = "配板单号")
 	private String cpzdbh;
 
 	/**指派日期*/
