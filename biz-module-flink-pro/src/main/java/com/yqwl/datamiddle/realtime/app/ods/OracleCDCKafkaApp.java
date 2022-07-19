@@ -61,7 +61,7 @@ public class OracleCDCKafkaApp {
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
-        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        properties.put("log.mining.strategy", "redo_log_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
         properties.put("log.mining.batch.size.default", "2000");
         properties.put("log.mining.batch.size.max", "400000");
