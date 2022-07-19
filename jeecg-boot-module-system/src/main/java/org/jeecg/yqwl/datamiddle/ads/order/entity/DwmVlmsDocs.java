@@ -104,7 +104,7 @@ public class DwmVlmsDocs {
 	/**DCS到货时间*/
 	@Excel(name = "DCS到货时间", width = 15)
 	@ApiModelProperty(value = "DCS到货时间")
-	private Long dotSiteTime;
+	private Long dtvsdhsj;
 
 	/**经销商确认到货时间*/
 	@Excel(name = "经销商确认到货时间", width = 15)
