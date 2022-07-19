@@ -698,11 +698,11 @@
             <if test="params.endCityName != null and params.endCityName != '' ">
                 AND END_CITY_NAME = #{params.endCityName}
             </if>
-            <if test="params.dotSiteTimeStart != null   and params.dotSiteTimeStart != 0  ">
-                AND DOT_SITE_TIME  <![CDATA[ >= ]]> #{params.dotSiteTimeStart}
+            <if test="params.dtvsdhsjStart != null   and params.dtvsdhsjStart != 0  ">
+                AND DTVSDHSJ  <![CDATA[ >= ]]> #{params.dtvsdhsjStart}
             </if>
-            <if test="params.dotSiteTimeEnd != null   and params.dotSiteTimeEnd != 0 ">
-                AND DOT_SITE_TIME  <![CDATA[ <= ]]>  #{params.dotSiteTimeEnd}
+            <if test="params.dtvsdhsjEnd != null   and params.dtvsdhsjEnd != 0 ">
+                AND DTVSDHSJ  <![CDATA[ <= ]]>  #{params.dtvsdhsjEnd}
             </if>
             <if test="params.finalSiteTimeStart != null   and params.finalSiteTimeStart != 0  ">
                 AND FINAL_SITE_TIME  <![CDATA[ >= ]]> #{params.finalSiteTimeStart}
@@ -731,7 +731,7 @@
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
            VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
            DDJRQ,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-           DOT_SITE_TIME,FINAL_SITE_TIME
+           DTVSDHSJ,FINAL_SITE_TIME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
@@ -761,7 +761,7 @@
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
             VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
             DDJRQ,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-            DOT_SITE_TIME,FINAL_SITE_TIME
+            DTVSDHSJ,FINAL_SITE_TIME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH

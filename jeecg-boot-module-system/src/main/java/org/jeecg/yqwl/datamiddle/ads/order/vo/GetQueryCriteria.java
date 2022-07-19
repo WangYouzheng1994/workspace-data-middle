@@ -151,5 +151,16 @@ public class GetQueryCriteria {
      */
     private List<String> ccxdlList;
 
+    /**
+     * DCS到货开始时间docs页面使用
+     */
+    private Long dtvsdhsjStart;
+
+    /**
+     * DCS到货结束时间docs页面使用
+     */
+    private Long dtvsdhsjEnd;
+
+
 
 }

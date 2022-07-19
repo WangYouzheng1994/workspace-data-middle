@@ -530,9 +530,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getVjsydm());
                 //  samePlateNum 同板数量
                 row1.createCell(j++).setCellValue(item.getSamePlateNum());
-                // dotSiteTime  DCS到货时间
-                if (item.getDotSiteTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getDotSiteTime()));
+                // Dtvsdhsj  DCS到货时间
+                if (item.getDtvsdhsj() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
@@ -700,9 +700,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 row1.createCell(j++).setCellValue(item.getVjsydm());
                 //  samePlateNum 同板数量
                 row1.createCell(j++).setCellValue(item.getSamePlateNum());
-                // dotSiteTime  DCS到货时间
-                if (item.getDotSiteTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getDotSiteTime()));
+                // Dtvsdhsj  DCS到货时间
+                if (item.getDtvsdhsj() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
@@ -926,6 +926,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         }
         if (queryCriteria.getFinalSiteTimeEnd() != null) {
             queryCriteria.setFinalSiteTimeEnd(queryCriteria.getFinalSiteTimeEnd() + 28800000);
+        }
+        if (queryCriteria.getDtvsdhsjStart() != null) {
+            queryCriteria.setDtvsdhsjStart(queryCriteria.getDtvsdhsjStart() + 28800000);
+        }
+        if (queryCriteria.getDtvsdhsjEnd() != null) {
+            queryCriteria.setDtvsdhsjEnd(queryCriteria.getDtvsdhsjEnd() + 28800000);
         }
     }
 }
