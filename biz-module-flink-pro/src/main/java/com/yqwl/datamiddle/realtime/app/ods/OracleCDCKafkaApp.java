@@ -63,6 +63,7 @@ public class OracleCDCKafkaApp {
         properties.put("database.tablename.case.insensitive", "false");
         properties.put("log.mining.strategy", "redo_log_catalog"); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        properties.put("log.mining.archive.log.only.mode", "true");   //读archive log
         properties.put("log.mining.batch.size.default", "2000");
         properties.put("log.mining.batch.size.max", "400000");
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
