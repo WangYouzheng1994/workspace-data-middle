@@ -414,17 +414,17 @@ public class DwmOneOrderToEnd implements Serializable {
     /**
      * 是否为公路的运输方式 1为是 0为否 20220719添加
      */
-    private Integer IS_G;
+    private Integer TYPE_G;
 
     /**
      * 是否为铁路的运输方式 1为是 0为否 20220719添加
      */
-    private Integer IS_T;
+    private Integer TYPE_T;
 
     /**
      * 是否为水路的运输方式 1为是 0为否 20220719添加
      */
-    private Integer IS_S;
+    private Integer TYPE_S;
 
 
 }
