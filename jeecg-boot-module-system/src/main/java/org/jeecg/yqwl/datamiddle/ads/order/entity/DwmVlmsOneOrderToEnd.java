@@ -308,21 +308,21 @@ public class DwmVlmsOneOrderToEnd {
 	 */
 	@Excel(name = "是否为公路的运输方式 1为是 0为否", width = 15)
 	@ApiModelProperty(value = "是否为公路的运输方式 1为是 0为否")
-	private Integer IS_G;
+	private Integer typeG;
 
 	/**
 	 * 是否为铁路的运输方式 1为是 0为否 20220719添加
 	 */
 	@Excel(name = "是否为铁路的运输方式 1为是 0为否", width = 15)
 	@ApiModelProperty(value = "是否为铁路的运输方式 1为是 0为否")
-	private Integer IS_T;
+	private Integer typeT;
 
 	/**
 	 * 是否为水路的运输方式 1为是 0为否 20220719添加
 	 */
 	@Excel(name = "是否为水路的运输方式 1为是 0为否", width = 15)
 	@ApiModelProperty(value = "是否为水路的运输方式 1为是 0为否")
-	private Integer IS_S;
+	private Integer typeS;
 
 
 }
