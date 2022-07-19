@@ -296,5 +296,11 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "起运日期-公路")
 	private Long shipmentGTime;
 
+	/**
+	 * DCS到货时间(从sptb02中取)
+	 */
+
+	private Long DTVSDHSJ;
+
 
 }

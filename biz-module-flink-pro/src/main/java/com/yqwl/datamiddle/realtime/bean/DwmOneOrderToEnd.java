@@ -406,6 +406,11 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private Long SHIPMENT_G_TIME;
 
+    /**
+     * DCS到货时间(从sptb02中取)
+     */
+
+    private Long DTVSDHSJ;
 
 
 }
