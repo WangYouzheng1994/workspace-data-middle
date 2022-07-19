@@ -710,8 +710,8 @@
             <if test="params.finalSiteTimeEnd != null   and params.finalSiteTimeEnd != 0 ">
                 AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
             </if>
-            <if test="params.vysfs != null   and params.vysfs != '' ">
-                AND VYSFS =  #{params.vysfs}
+            <if test="params.trafficType != null   and params.trafficType != '' ">
+                AND TRAFFIC_TYPE =  #{params.trafficType}
             </if>
             <if test="params.cpzdbh != null   and params.cpzdbh != '' ">
                 AND CPZDBH =  #{params.cpzdbh}

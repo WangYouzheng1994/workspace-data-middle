@@ -111,7 +111,7 @@ public class GetQueryCriteria {
     /**
      * docs二级菜单运输类型:只要公路
      */
-    private  String  vysfs;
+    private  String  trafficType;
 
     /**
      * DCS到货开始时间
