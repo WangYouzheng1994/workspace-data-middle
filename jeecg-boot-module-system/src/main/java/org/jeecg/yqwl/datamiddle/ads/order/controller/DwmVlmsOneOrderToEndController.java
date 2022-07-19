@@ -164,7 +164,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 //                "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间"};
         // 最新表头  2022.7.12 更改 顺序更改和添加经销商名称  Y号  删除配板日期,将整车物流接收STD日期 改为 计划下达日期
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市","经销商目标城市","经销商代码","经销商名称",
-                "CP9下线接车日期", "出厂日期", "入库日期", "入库仓库", "任务单号", "计划下达日期", "配板单号", "运输方式", "指派日期",
+                "CP9下线接车日期", "入库日期", "入库仓库", "任务单号", "计划下达日期", "配板单号", "运输方式", "指派日期",
                 "指派承运商名称", "出库日期", "起运日期-公路", "运输车号", "同板数量", "轿运车车位数",
                 "始发站名称","到达始发站时间/入站时间","始发站台铁路离站时间","目的站名称","到达目的站时间","卸车时间（铁路到目的站）",
                 "始发港名称", "到达始发港口时间/入港时间", "始发港口水运离港时间", "目的港名称", "到达目的港时间","卸船时间（水路到目的站）",
@@ -239,12 +239,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // leaveFactoryTime  出厂日期      16WEI
-                if (item.getLeaveFactoryTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getLeaveFactoryTime()));
-                }else{
-                    row1.createCell(j++).setCellValue("");
-                }
+//                // leaveFactoryTime  出厂日期      16WEI
+//                if (item.getLeaveFactoryTime() != 0) {
+//                    row1.createCell(j++).setCellValue(sdf.format(item.getLeaveFactoryTime()));
+//                }else{
+//                    row1.createCell(j++).setCellValue("");
+//                }
                 // inSiteTime  入库日期   16WEI
                 if (item.getInSiteTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getInSiteTime()));
