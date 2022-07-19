@@ -51,11 +51,11 @@
             <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
                 AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
             </if>
-            <if test="params.dotSiteTimeStart != null   and params.dotSiteTimeStart != 0  ">
-                AND DOT_SITE_TIME  <![CDATA[ >= ]]> #{params.dotSiteTimeStart}
+            <if test="params.dtvsdhsjStart != null   and params.dtvsdhsjStart != 0  ">
+                AND DTVSDHSJ  <![CDATA[ >= ]]> #{params.dtvsdhsjStart}
             </if>
-            <if test="params.dotSiteTimeEnd != null   and params.dotSiteTimeEnd != 0 ">
-                AND DOT_SITE_TIME  <![CDATA[ <= ]]>  #{params.dotSiteTimeEnd}
+            <if test="params.dtvsdhsjEnd != null   and params.dtvsdhsjEnd != 0 ">
+                AND DTVSDHSJ  <![CDATA[ <= ]]>  #{params.dtvsdhsjEnd}
             </if>
             <if test="params.finalSiteTimeStart != null   and params.finalSiteTimeStart != 0  ">
                 AND FINAL_SITE_TIME  <![CDATA[ >= ]]> #{params.finalSiteTimeStart}
@@ -83,7 +83,7 @@
             END_WATERWAY_NAME,IN_END_WATERWAY_TIME,START_PLATFORM_NAME,IN_START_PLATFORM_TIME,OUT_START_PLATFORM_TIME,
             END_PLATFORM_NAME,IN_END_PLATFORM_TIME,UNLOAD_SHIP_TIME,UNLOAD_RAILWAY_TIME,IN_DISTRIBUTE_TIME,
             DISTRIBUTE_ASSIGN_TIME,DISTRIBUTE_CARRIER_NAME,DISTRIBUTE_VEHICLE_NO,DISTRIBUTE_VEHICLE_NUM,
-            OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DOT_SITE_TIME,FINAL_SITE_TIME
+            OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DTVSDHSJ,FINAL_SITE_TIME
         FROM
             dwm_vlms_one_order_to_end TOEND
         left join A on TOEND.CPZDBH = A.CPZDBH

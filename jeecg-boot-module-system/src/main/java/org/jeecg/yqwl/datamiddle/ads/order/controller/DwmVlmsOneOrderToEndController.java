@@ -377,9 +377,9 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
-                // dotSiteTime  送达时间-DCS到货时间  11
-                if (item.getDotSiteTime() != 0) {
-                    row1.createCell(j++).setCellValue(sdf.format(item.getDotSiteTime()));
+                // dtvsdhsj  送达时间-DCS到货时间  11
+                if (item.getDtvsdhsj() != 0) {
+                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
                 }else{
                     row1.createCell(j++).setCellValue("");
                 }
@@ -915,12 +915,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         if (queryCriteria.getCp9OfflineTimeEnd() != null) {
             queryCriteria.setCp9OfflineTimeEnd(queryCriteria.getCp9OfflineTimeEnd() + 28800000);
         }
-        if (queryCriteria.getDotSiteTimeStart() != null) {
-            queryCriteria.setDotSiteTimeStart(queryCriteria.getDotSiteTimeStart() + 28800000);
-        }
-        if (queryCriteria.getDotSiteTimeEnd() != null) {
-            queryCriteria.setDotSiteTimeEnd(queryCriteria.getDotSiteTimeEnd() + 28800000);
-        }
+//        if (queryCriteria.getDotSiteTimeStart() != null) {
+//            queryCriteria.setDotSiteTimeStart(queryCriteria.getDotSiteTimeStart() + 28800000);
+//        }
+//        if (queryCriteria.getDotSiteTimeEnd() != null) {
+//            queryCriteria.setDotSiteTimeEnd(queryCriteria.getDotSiteTimeEnd() + 28800000);
+//        }
         if (queryCriteria.getFinalSiteTimeStart() != null) {
             queryCriteria.setFinalSiteTimeStart(queryCriteria.getFinalSiteTimeStart() + 28800000);
         }
