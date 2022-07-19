@@ -402,9 +402,14 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setDistributeShipmentTime(distributeShipmentTime);
         }
         // dotSiteTime,
-        if (params.getDotSiteTime() != 0) {
-            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
-            params.setDotSiteTime(dotSiteTime);
+//        if (params.getDotSiteTime() != 0) {
+//            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
+//            params.setDotSiteTime(dotSiteTime);
+//        }
+        // dotSiteTime,
+        if (params.getDtvsdhsj() != 0) {
+            Long dtvsdhsj = params.getDtvsdhsj() - 28800000L;
+            params.setDtvsdhsj(dtvsdhsj);
         }
         // finalSiteTime
         if (params.getFinalSiteTime() != 0) {
