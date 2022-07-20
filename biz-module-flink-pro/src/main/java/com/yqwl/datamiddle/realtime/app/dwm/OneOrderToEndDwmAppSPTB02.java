@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
-import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -58,12 +57,10 @@ public class OneOrderToEndDwmAppSPTB02 {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
-
         Properties properties = new Properties();
         // 遇到错误跳过
         properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
         properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
-
 
         //mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();

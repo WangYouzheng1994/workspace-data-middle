@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * 获取clickhouse jdbcSink，自动根据实体类去反射生成preparestatement阶段的赋值。
+ */
 public class ClickHouseUtil {
 
     public static <T> SinkFunction<T> getSink(String sql) {

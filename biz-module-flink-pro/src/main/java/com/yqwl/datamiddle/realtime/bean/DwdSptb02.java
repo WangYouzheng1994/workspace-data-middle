@@ -52,13 +52,13 @@ public class DwdSptb02 implements Serializable {
     private Integer NKCFY;
 
     /**
-     * 里程        number 转 int
+     * 里程  number 转 int
      */
 
     private Integer NSFFY;
 
     /**
-     * 结算时间    date 统一时间戳 bigint
+     * 结算时间  date 统一时间戳 bigint
      */
 
     private Long DJSSJ;

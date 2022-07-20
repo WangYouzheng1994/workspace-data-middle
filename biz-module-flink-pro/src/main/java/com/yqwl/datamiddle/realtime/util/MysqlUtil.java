@@ -31,7 +31,7 @@ public class MysqlUtil {
      *
      * @param sql
      * @param clazz
-     * @param underScoreToCamel 是否把对应字段的下划线名转为驼峰名
+     * @param underScoreToCamel 是否把对应DB字段的下划线名转为驼峰名
      * @param <T>
      * @return
      */

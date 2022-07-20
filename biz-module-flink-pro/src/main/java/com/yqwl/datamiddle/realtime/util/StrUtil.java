@@ -30,6 +30,7 @@ public class StrUtil {
             if (annotation != null) {
                 continue;
             }
+
             list.add(field);
         }
         List<String> wildcard = new ArrayList<>();
