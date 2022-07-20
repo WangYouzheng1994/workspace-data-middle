@@ -111,5 +111,12 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "经销商确认到货时间")
 	private Long finalSiteTime;
 
+	/**
+	 * 位置信息
+	 */
+	@Excel(name = "位置信息", width = 15)
+	@ApiModelProperty(value = "位置信息")
+	private String vwz;
+
 
 }
