@@ -4,11 +4,9 @@ import cn.hutool.setting.dialect.Props;
 import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.CustomerDeserialization;
-import com.yqwl.datamiddle.realtime.util.KafkaUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
-import com.yqwl.datamiddle.realtime.util.StrUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -17,6 +15,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +30,28 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OracleCDCKafkaApp {
 
+    /**
+     * 获取当前上下文环境下 数仓中的分流到clickhouse的表名，用以MySqlCDC抽取。
+     * @return
+     * @throws Exception
+     */
+    public static List<String> getSourceTableList() throws Exception {
+        Props props = PropertiesUtil.getProps();
+        List<Map<String, Object>> sourceTableList = DbUtil.executeQuery("select distinct(source_table) as source_table from table_process where  level_name='ods'" );
+        List<String> sourceTable = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(sourceTableList)) {
+            // sourceTableList
+            for (Map<String, Object> sourceTableKV : sourceTableList) {
+                String sourceTableName = GetterUtil.getString(sourceTableKV.get("source_table"));
+                sourceTable.add(props.getStr("cdc.oracle.schema.list") + "." + sourceTableName);
+            }
+        }
+        return sourceTable;
+    }
+
     public static void main(String[] args) throws Exception {
+        // 获取抽取的数据源
+        List<String> sourceTableList = getSourceTableList();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         //flink程序重启，每次之间间隔10s
@@ -83,7 +105,7 @@ public class OracleCDCKafkaApp {
                 .port(props.getInt("cdc.oracle.port"))
                 .database(props.getStr("cdc.oracle.database"))
                 .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
-                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
+                .tableList(sourceTableList.toArray(new String[sourceTableList.size()]))
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
