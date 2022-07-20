@@ -185,6 +185,32 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
         }
 
+        // 获取一单到底的运输方式
+        String trafficType = queryCriteria.getTrafficType();
+        String precise = queryCriteria.getPrecise();
+        // 精准查询
+        if ( StringUtils.isNotBlank(trafficType) ) {
+
+            if ( StringUtils.contains(trafficType,"typeG") ) {
+                queryCriteria.setTypeG(1);
+            }else{
+                queryCriteria.setTypeG(0);
+            }
+
+            if ( StringUtils.contains(trafficType,"typeT") ) {
+                queryCriteria.setTypeT(1);
+            }else{
+                queryCriteria.setTypeT(0);
+            }
+
+            if ( StringUtils.contains(trafficType,"typeS") ) {
+                queryCriteria.setTypeS(1);
+            }else{
+                queryCriteria.setTypeS(0);
+            }
+
+        }
+
         // 过滤选中的数据
         String selections = queryCriteria.getSelections();
         if (StringUtil.length(selections) > 2) {
