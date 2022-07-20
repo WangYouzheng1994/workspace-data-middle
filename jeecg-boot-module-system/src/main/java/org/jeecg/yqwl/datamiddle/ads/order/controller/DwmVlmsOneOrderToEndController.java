@@ -451,6 +451,33 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             }
         }
 
+        // 获取一单到底的运输方式
+        String trafficType = queryCriteria.getTrafficType();
+        String precise = queryCriteria.getPrecise();
+        // 精准查询
+        if ( StringUtils.isNotBlank(trafficType) ) {
+
+            if ( StringUtils.contains(trafficType,"typeG") ) {
+                queryCriteria.setTypeG(1);
+            }else{
+                queryCriteria.setTypeG(0);
+            }
+
+            if ( StringUtils.contains(trafficType,"typeT") ) {
+                queryCriteria.setTypeT(1);
+            }else{
+                queryCriteria.setTypeT(0);
+            }
+
+            if ( StringUtils.contains(trafficType,"typeS") ) {
+                queryCriteria.setTypeS(1);
+            }else{
+                queryCriteria.setTypeS(0);
+            }
+
+        }
+
+
         DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
         // TODO: 临时设置成只看大众，后续改成根据角色查询不同客户品牌。

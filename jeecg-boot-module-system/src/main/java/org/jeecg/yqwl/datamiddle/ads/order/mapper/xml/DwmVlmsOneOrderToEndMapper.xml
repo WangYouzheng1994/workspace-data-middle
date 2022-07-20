@@ -63,6 +63,25 @@
             <if test="params.finalSiteTimeEnd != null   and params.finalSiteTimeEnd != 0 ">
                 AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
             </if>
+            <if test="params.typeG != null   and params.typeG != '' ">
+                AND TYPE_G =  #{params.typeG}
+            </if>
+            <if test="params.typeT != null   and params.typeT != '' ">
+                OR TYPE_T =  #{params.typeT}
+            </if>
+            <if test="params.typeS != null  and params.typeS != ''  ">
+                OR TYPE_S =  #{params.typeS}
+            </if>
+<!--            <if test="params.typeG != null   and params.typeG != ''  ">-->
+<!--                AND TYPE_G =  #{params.typeG}-->
+<!--            </if>-->
+<!--            <if test="params.typeT != null   and params.typeT != ''  ">-->
+<!--                AND TYPE_T =  #{params.typeT}-->
+<!--            </if>-->
+<!--            <if test="params.typeS != null   and params.typeS != ''  ">-->
+<!--                AND TYPE_S =  #{params.typeS}-->
+<!--            </if>-->
+
         </where>
     </sql>
 

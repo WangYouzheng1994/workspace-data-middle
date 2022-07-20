@@ -161,6 +161,24 @@ public class GetQueryCriteria {
      */
     private Long dtvsdhsjEnd;
 
+    /**
+     * 是否为公路的运输方式 1为是 0为否 20220719添
+     */
+    private Integer typeG;
+
+    /**
+     * 是否为铁路的运输方式 1为是 0为否 20220719添
+     */
+    private Integer typeT;
+
+    /**
+     * 是否为水路的运输方式 1为是 0为否 20220719添
+     */
+    private Integer typeS;
 
 
+    /**
+     * 是否是精准查询 是  TRUE  否  False
+     */
+    private String  precise;
 }
