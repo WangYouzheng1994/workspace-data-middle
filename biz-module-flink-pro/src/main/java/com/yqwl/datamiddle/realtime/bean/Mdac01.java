@@ -21,7 +21,7 @@ public class Mdac01 implements Serializable {
 
     private static final long serialVersionUID = 1L;
     /**
-     * 大区代码
+     *  大区代码
      */
 
     private String CDQDM;
