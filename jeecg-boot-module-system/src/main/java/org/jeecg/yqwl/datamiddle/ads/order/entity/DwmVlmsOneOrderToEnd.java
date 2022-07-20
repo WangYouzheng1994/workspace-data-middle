@@ -324,5 +324,12 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "是否为水路的运输方式 1为是 0为否")
 	private Integer typeS;
 
+	/**
+	 * 位置信息
+	 */
+	@Excel(name = "位置信息", width = 15)
+	@ApiModelProperty(value = "位置信息")
+	private String vwz;
+
 
 }
