@@ -49,7 +49,7 @@
 		<justauth-spring-boot-starter.version>1.3.4</justauth-spring-boot-starter.version>
 		<dom4j.version>1.6.1</dom4j.version>
 		<qiniu-java-sdk.version>7.4.0</qiniu-java-sdk.version>
-		<clickhouse-java-version>0.3.1</clickhouse-java-version>
+		<clickhouse-java-version>0.3.2</clickhouse-java-version>
 	</properties>
 
 	<modules>
