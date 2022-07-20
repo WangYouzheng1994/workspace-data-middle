@@ -1,13 +1,18 @@
 package com.yqwl.datamiddle.realtime.bean;
 
 import java.io.Serializable;
+
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 
 
 @Data
+@TableName("ods_vlms_dcs_orders")
 @EqualsAndHashCode(callSuper = false)
+@CamelUnderline(isChange = false)
 public class OdsVlmsDcsOrders implements Serializable{
 
     /**pk*/

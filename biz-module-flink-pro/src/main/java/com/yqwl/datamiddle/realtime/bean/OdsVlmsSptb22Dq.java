@@ -1,5 +1,7 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.io.Serializable;
@@ -7,7 +9,9 @@ import java.math.BigDecimal;
 
 
 @Data
+@TableName("ods_vlms_sptb22_dq")
 @EqualsAndHashCode(callSuper = false)
+@CamelUnderline(isChange = false)
 public class OdsVlmsSptb22Dq implements Serializable  {
     /**idnum*/
    
