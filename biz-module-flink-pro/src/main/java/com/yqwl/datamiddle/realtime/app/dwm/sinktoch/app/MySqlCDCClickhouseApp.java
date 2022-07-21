@@ -130,7 +130,7 @@ public class MySqlCDCClickhouseApp {
         // mysqlSourceStream.addSink(new DimBatchSink()).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
         windowCollect.addSink(new MySqlDynamicCHSink());
         log.info("add sink kafka设置完成");
-        env.execute("oracle-cdc-kafka");
+        env.execute("cdc:数仓自身的mysql到clickhouse");
         log.info("oracle-cdc-kafka job开始执行");
     }
 }
