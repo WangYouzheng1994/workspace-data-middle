@@ -1296,25 +1296,13 @@ public class DwmVlmsSptb02 {
     @ApiModelProperty(value = "铁路类型" )
     private java.lang.Integer railwayTrainType;
 
-//    /**
-//     * 总数
-//     */
-//    private Integer totalNum;
-//    /**
-//     * 日期
-//     */
-//    private String dates;
-//    /**
-//     * 到货准时率中已到达未迟到的数量
-//     */
-//    private Integer finalNum;
-//    /**
-//     * 到货准时率中未到达未迟到的数量
-//     */
-//    private Integer nowNum;
-//    /**
-//     * 到货准时率的小数形式
-//     */
-//    private Double percentage;
+    /**
+     * sptb22_dq 铁水打点采集时间字段
+     */
+    private Long DCJSJ;
 
+    /**
+     * dcs_orders 公路nowDate打点采集时间
+     */
+    private Long nowDate;
 }

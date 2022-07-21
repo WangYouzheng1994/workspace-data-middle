@@ -128,11 +128,12 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
                             // Xxx: 4. 卸船 应该用物流溯源时间节点来更新，无法兜底。
                             // 铁水的物流时间节点处理 -- END  By qingsong
+
+
                         });
 
                         // 运输方式转换
-                        dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists));
-
+                        // dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists)); DELETE By QingSong for Fix zental:
                     }
                 );
             }

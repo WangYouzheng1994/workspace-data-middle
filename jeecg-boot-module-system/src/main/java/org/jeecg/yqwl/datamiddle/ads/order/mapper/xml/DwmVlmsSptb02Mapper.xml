@@ -5,15 +5,18 @@
         <result column="TRAFFIC_TYPE" property="trafficType" />
     </resultMap>
     <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02" parameterType="java.util.List" >
-        select TRAFFIC_TYPE, VVIN, CJSDBH, DSJCFSJ, DGPSDHSJ
+        select a.TRAFFIC_TYPE as TRAFFIC_TYPE, a.VVIN as VVIN, a.CJSDBH as CJSDBH, a.DSJCFSJ as DSJCFSJ, a.DGPSDHSJ as DGPSDHSJ, b.NOW_DATE as NOW_DATE, c.DCJSJ as DCJSJ
         from
-             dwm_vlms_sptb02
+             dwm_vlms_sptb02 a
+        left join ods_vlms_dcs_orders b
+        on a.VVIN = b.VIN_NO
+        left join ods_vlms_sptb22_dq c
+        on a.VJSYDM = c.CPZH
         <where>
             VVIN in
             <foreach item="vin" collection="vins" open="(" separator="," close=")">
                 #{vin}
             </foreach>
-
             and VYSFS != 'J'
         </where>
         order by
