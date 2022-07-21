@@ -484,27 +484,22 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         String precise = queryCriteria.getPrecise();
         // 精准查询
         if ( StringUtils.isNotBlank(trafficType) ) {
-
             if ( StringUtils.contains(trafficType,"typeG") ) {
                 queryCriteria.setTypeG(1);
-            }else{
+            } else {
                 queryCriteria.setTypeG(0);
             }
-
             if ( StringUtils.contains(trafficType,"typeT") ) {
                 queryCriteria.setTypeT(1);
-            }else{
+            } else {
                 queryCriteria.setTypeT(0);
             }
-
             if ( StringUtils.contains(trafficType,"typeS") ) {
                 queryCriteria.setTypeS(1);
-            }else{
+            } else {
                 queryCriteria.setTypeS(0);
             }
-
         }
-
 
         DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 

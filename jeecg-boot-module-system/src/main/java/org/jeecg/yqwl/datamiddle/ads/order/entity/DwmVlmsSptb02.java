@@ -1305,4 +1305,9 @@ public class DwmVlmsSptb02 {
      * dcs_orders 公路nowDate打点采集时间
      */
     private Long nowDate;
+
+    /**
+     * 运单在途位置信息
+     */
+    private String VWZ;
 }
