@@ -76,6 +76,7 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
                 .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
+                .serverId("5417-5420")
                 .build();
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppClickHouseSptb02MysqlSource").uid("WaybillDwmAppClickHouseSptb02").name("WaybillDwmAppClickHouseSptb02");
