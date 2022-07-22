@@ -243,7 +243,16 @@ public class WaybillDwdAppSptb02Simple {
                         if (siteWarehouse != null) {
                             dwdSptb02.setSTART_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
                             dwdSptb02.setSTART_WAREHOUSE_NAME(siteWarehouse.getString("WAREHOUSE_NAME"));
+                        }else {
+                            // 兜底行为  优先取溯源，取不到 取sptc34的vwlckmc 禅道#877 20220722
+                            String sptc34Sql="select VWLCKDM, VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vfczt + "'";
+                            JSONObject sptc34Vwlckdm = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34Sql, vfczt);
+                            if (sptc34Vwlckdm != null){
+                                dwdSptb02.setSTART_WAREHOUSE_CODE(sptc34Vwlckdm.getString("VWLCKDM"));
+                                dwdSptb02.setSTART_WAREHOUSE_NAME(sptc34Vwlckdm.getString("VWLCKMC"));
+                            }
                         }
+
                     }
                     /**
                      *  处理 收车站台 对应的仓库代码 仓库名称
@@ -259,6 +268,15 @@ public class WaybillDwdAppSptb02Simple {
                         if (siteWarehouse != null) {
                             dwdSptb02.setEND_WAREHOUSE_CODE(siteWarehouse.getString("WAREHOUSE_CODE"));
                             dwdSptb02.setEND_WAREHOUSE_NAME(siteWarehouse.getString("WAREHOUSE_NAME"));
+                        }
+                        else if(siteWarehouse == null){
+                            String sptc34Sql="select VWLCKDM, VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vsczt + "'";
+                            JSONObject sptc34Vwlckdm = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34Sql, vsczt);
+                            if (sptc34Vwlckdm != null){
+                                // 兜底行为  优先取溯源，取不到 取sptc34的vwlckmc 禅道#877 20220722
+                                dwdSptb02.setEND_WAREHOUSE_CODE(sptc34Vwlckdm.getString("VWLCKDM"));
+                                dwdSptb02.setEND_WAREHOUSE_NAME(sptc34Vwlckdm.getString("VWLCKMC"));
+                            }
                         }
                     }
                     /**
