@@ -5,7 +5,18 @@
         <result column="TRAFFIC_TYPE" property="trafficType" />
     </resultMap>
     <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02" parameterType="java.util.List" >
-        select a.TRAFFIC_TYPE as TRAFFIC_TYPE, a.VVIN as VVIN, a.CJSDBH as CJSDBH, a.DSJCFSJ as DSJCFSJ, a.DGPSDHSJ as DGPSDHSJ, b.NOW_DATE as NOW_DATE, c.DCJSJ as DCJSJ
+        select
+               a.TRAFFIC_TYPE as TRAFFIC_TYPE,
+               a.VVIN as VVIN,
+               a.CJSDBH as CJSDBH,
+               a.DSJCFSJ as DSJCFSJ,
+               a.DGPSDHSJ as DGPSDHSJ,
+                case when (a.TRAFFIC_TYPE = 'G' and(a.DDHSJ != 0 or a.DGPSDHSJ != 0 )) then '已到货'
+                when (a.TRAFFIC_TYPE in ('T', 'S') and (a.DDHSJ != 0 or a.DTVSDHSJ != 0)) then '已到货'
+                when (a.DCKRQ = 0) then '未出库'
+                when (b.NOW_DATE > a.DSJCFSJ and a.TRAFFIC_TYPE = 'G') then b.NOW_ADDRESS || b.NOW_CITY_NAME
+                when (c.DCJSJ > a.DSJCFSJ and a.TRAFFIC_TYPE in ('T', 'S')) then c.VWZ
+                end VWZ
         from
              dwm_vlms_sptb02 a
         left join ods_vlms_dcs_orders b
