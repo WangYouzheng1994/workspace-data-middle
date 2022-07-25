@@ -94,11 +94,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                 sptbTrafficTypeByVin.stream().collect(groupingBy(DwmVlmsSptb02::getVvin)).entrySet().stream().forEach(
                     (item) -> {
                         DwmVlmsOneOrderToEnd dbOotd = oneOrderToEndList.get(listMap.get(item.getKey()));
+                        final int[] orderIdx = {0};
+                        final String[] lastVwz = {""};
                         // List<String> trafficLists = new ArrayList();  DELETE By QingSong for Fix zental: 871
                         item.getValue().stream().forEach(it -> {
+                            orderIdx[0]++;
                             // 累计多个运单的运输方式。
                             // trafficLists.add(it.getTrafficType());  DELETE By QingSong for Fix zental: 871
-
                             // 铁水的物流时间节点兜底处理 -- START By qingsong  2022年7月10日21:14:28
                             // Xxx: 1. 集港/集站时间 用物流溯源时间节点来更新，无法兜底
                             // 铁路单
@@ -126,8 +128,20 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
                             // Xxx: 4. 卸船 应该用物流溯源时间节点来更新，无法兜底。
                             // 铁水的物流时间节点处理 -- END  By qingsong
 
-                            // 对于在途位置的处理：根据运单区分顺序。依次取值赋值即可
-                            dbOotd.setVwz(it.getVWZ());
+                            // 对于在途位置的处理：根据运单区分顺序。依次取值赋值即可 Add BY QingSong
+                            // 如果上一个节点到货那么显示下个节点。
+                            if (orderIdx[0] == 1) {
+                                // 如果是第一个节点。
+                                dbOotd.setVwz(it.getVWZ());
+                            } else if (StringUtils.isBlank(lastVwz[0])) {
+                                // 如果上一个节点没有信息，那么也要显示本次节点，作为兜底。
+                                dbOotd.setVwz(it.getVWZ());
+                            } else if (StringUtils.equals(lastVwz[0], "已到货")) {
+                                // 如果上一个节点是已到货 才能赋值。
+                                dbOotd.setVwz(it.getVWZ());
+                            }
+                            // 上一个节点 赋值
+                            lastVwz[0] = it.getVWZ();
                         });
                         // 运输方式转换
                         // dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists)); DELETE By QingSong for Fix zental: 871
