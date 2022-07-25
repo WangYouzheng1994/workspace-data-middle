@@ -3,10 +3,12 @@ package com.yqwl.datamiddle.realtime.util;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 获取Druid连接下的 Clickhouse操作
@@ -119,29 +121,62 @@ public class ClickhouseDruidUtil {
     /**
      * 执行SQL更新
      *
-     * @param sqlBatch
+     * @param insertChMap 批量写入的集合 {表名: {insert语句 : [values部分数值结合]}}
      * @throws SQLException
      */
-    public static void insertPrepare(String sqlBatch, List<List<Object>> valueList) throws SQLException {
+    public static void insertPrepare(Map<String, Map<String, List<List<Object>>>> insertChMap) throws SQLException {
         Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = getDruidConnection();
-            List<String> strings = Arrays.asList(sqlBatch.split(";"));
-            for (int i = 0; i < strings.size(); i++) {
-                int index = 1;
-                String sql = strings.get(i);
-                preparedStatement = connection.prepareStatement(sql);
-                valueList.get(i);
-                List<Object> objects = valueList.get(i);
-                for (Object object : objects) {
-                    preparedStatement.setObject(index, object);
-                    index++;
-                }
-                preparedStatement.addBatch();
-                preparedStatement.executeBatch();
-            }
+        final PreparedStatement[] preparedStatement = {null};
 
+        if (MapUtils.isNotEmpty(insertChMap)) {
+
+            try {
+                connection = getDruidConnection();
+
+                Connection finalConnection = connection;
+                final PreparedStatement[] finalPreparedStatement = {preparedStatement[0]};
+                insertChMap.forEach((k, v) -> {
+                    Map.Entry<String, List<List<Object>>> stringListEntry = v.entrySet().stream().findFirst().get();
+                    String insertTable = stringListEntry.getKey();
+                    List<List<Object>> value = stringListEntry.getValue();
+                    try {
+                        finalPreparedStatement[0] = finalConnection.prepareStatement(insertTable);
+
+                        // 循环每个对象
+                        for (List<Object> itemObj : value) {
+                            // 循环每一列
+                            int fieldIdx = 1;
+                            for (Object field : itemObj) {
+                                finalPreparedStatement[0].setObject(fieldIdx, field);
+                                fieldIdx++;
+                            }
+                            finalPreparedStatement[0].addBatch();
+                        }
+                        finalPreparedStatement[0].executeBatch();
+                    } catch (SQLException e) {
+                        log.error(e.getMessage(), e);
+                    }
+                });
+/*
+                List<String> strings = Arrays.asList(sqlBatch.split(";"));
+                for (int i = 0; i < strings.size(); i++) {
+                    int index = 1;
+                    String sql = strings.get(i);
+                    if (i == 0) {
+                        preparedStatement = connection.prepareStatement(sql);
+                    }
+
+                    valueList.get(i);
+                    List<Object> objects = valueList.get(i);
+                    for (Object object : objects) {
+                        preparedStatement.setObject(index, object);
+                        index++;
+                    }
+                    preparedStatement.addBatch();
+                }
+
+                preparedStatement.executeBatch();
+*/
             /*if (CollectionUtils.isNotEmpty(valueList)) {
                 int index = 1;
                 for (int i = 0; i < valueList.size(); i++) {
@@ -152,12 +187,13 @@ public class ClickhouseDruidUtil {
                     }
                 }
             }*/
-            // log.info("单条数据执行成功情况,{}", index);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            // 切记!!! 一定要释放资源
-            closeResource(connection, preparedStatement, null);
+                // log.info("单条数据执行成功情况,{}", index);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                // 切记!!! 一定要释放资源
+                closeResource(connection, preparedStatement[0], null);
+            }
         }
     }
 }

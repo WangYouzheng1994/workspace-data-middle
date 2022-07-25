@@ -106,7 +106,7 @@ public class MySqlCDCClickhouseApp {
 
         // 定义水位线---聚合数据，ch批量写吞吐更高
         // SingleOutputStreamOperator<String> jsonStreamOperator = mysqlSourceStream.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(2L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
+        SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(10L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
 
             /**
              * Evaluates the window and outputs none or several elements.

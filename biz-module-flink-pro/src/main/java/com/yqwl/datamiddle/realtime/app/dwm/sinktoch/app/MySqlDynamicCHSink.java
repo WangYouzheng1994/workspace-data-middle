@@ -10,6 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+import org.apache.tools.ant.Project;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -60,13 +61,16 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
     @Override
     public void invoke(List<String> cdcJsonList, Context context) throws Exception {
         if (CollectionUtils.isNotEmpty(cdcJsonList)) {
-            StringBuilder totalSb = new StringBuilder();
 
+            // 输入的cdcJson
             JSONObject cdcJsonObj = null;
+            // 输入表名
             String tableName = null;
             StringBuilder sb = null;
-            // value值部分
-            List<List<Object>> valueList = new ArrayList(cdcJsonList.size());
+            // 输出表名
+            String sinkTable = null;
+            // 表名: {insert语句 : [数值value集合, ...]}
+            Map<String, Map<String, List<List<Object>>>> insertChMap = new HashMap<>();
 
             for (String cdcJson : cdcJsonList) {
                 // 1. 反序列化
@@ -74,20 +78,32 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
                 // 2. 获取动态分流后的目标表信息 tableName
                 tableName = cdcJsonObj.getString("tableName");
                 TableProcess tableProcess = processTableMap.get(tableName);
-                // 3. 动态拼接批量SQL
-                sb = new StringBuilder();
-                sb.append("insert into ")
-                .append(tableProcess.getSinkTable());
-                sb.append(" values ");
-                sb.append(getValueSql(tableProcess.getClazz()));
-                sb.append(";");
-                // 4. 执行
-                totalSb.append(sb);
-                valueList.add(getValueList(cdcJsonObj.getJSONObject("after")));
+                sinkTable = tableProcess.getSinkTable();
+
+                // 判定现有集合中是否存在
+                if (insertChMap.containsKey(tableProcess.getSinkTable())) {
+                    // 如果存在，累计到现有容器中
+                    Map<String, List<List<Object>>> stringListMap = insertChMap.get(tableProcess.getSinkTable());
+                    stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(cdcJsonObj.getJSONObject("after")));
+                } else {
+                    // 3. 动态拼接批量SQL
+                    sb = new StringBuilder().append("insert into ")
+                    .append(tableProcess.getSinkTable())
+                    .append(" values ");
+                    // 拼接问号占位符
+                    sb.append(getValueSql(tableProcess.getClazz()));
+
+                    List<List<Object>> valueObjects = new ArrayList<>();
+                    valueObjects.add(getValueList(cdcJsonObj.getJSONObject("after")));
+                    HashMap<String, List<List<Object>>> insertItemMap = new HashMap<>();
+                    insertItemMap.put(sb.toString(), valueObjects);
+
+                    insertChMap.put(sinkTable, insertItemMap);
+                }
             }
 
             // 提交
-            ClickhouseDruidUtil.insertPrepare(totalSb.toString(), valueList);
+            ClickhouseDruidUtil.insertPrepare(insertChMap);
         }
     }
 
