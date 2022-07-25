@@ -92,58 +92,54 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
      */
     @Override
     public void processElement(JSONObject jsonObj, Context ctx, Collector<JSONObject> out) throws Exception {
-        //获取表名
-        //System.err.println("processElement执行:" + jsonObj);
-        //log.info("processElement执行json数据:{}", jsonObj);
-        //获取表名
-        String tableName = JsonPartUtil.getTableNameStr(jsonObj);
-        //将表名置为小写
-        String lowerTableName = StringUtils.toRootLowerCase(tableName);
-//        System.err.println("获取表名:" + lowerTableName);
-        //log.info("获取json中表名:{}", lowerTableName);
-        //获取操作类型
-        String type = JsonPartUtil.getTypeStr(jsonObj);
-        //获取配置表的信息
-        if (MapUtils.isNotEmpty(tableProcessMap)) {
-            //将源表和操作类型组合成key, 例如：key=MDAC32:insert
-            String key = StringUtils.joinWith(":", lowerTableName, type);
-            CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
-            if (CollectionUtils.isNotEmpty(tableProcesses)) {
-                for (TableProcess tableProcess : tableProcesses) {
-                    //将sink的表添加到当前流记录中
-                    jsonObj.put("sink_table", tableProcess.getSinkTable());
-                    jsonObj.put("sink_pk", tableProcess.getSinkPk());
+        if (jsonObj != null) {
+            //获取表名
+            String tableName = JsonPartUtil.getTableNameStr(jsonObj);
+            //将表名置为小写
+            String lowerTableName = StringUtils.toRootLowerCase(tableName);
+            //获取操作类型
+            String type = JsonPartUtil.getTypeStr(jsonObj);
+            //获取配置表的信息
+            if (MapUtils.isNotEmpty(tableProcessMap)) {
+                //将源表和操作类型组合成key, 例如：key=MDAC32:insert
+                String key = StringUtils.joinWith(":", lowerTableName, type);
+                CopyOnWriteArraySet<TableProcess> tableProcesses = tableProcessMap.get(key);
+                if (CollectionUtils.isNotEmpty(tableProcesses)) {
+                    for (TableProcess tableProcess : tableProcesses) {
+                        //将sink的表添加到当前流记录中
+                        jsonObj.put("sink_table", tableProcess.getSinkTable());
+                        jsonObj.put("sink_pk", tableProcess.getSinkPk());
 
-                    //比对sinkType, 如果是写到mysql，打上标签
-                    if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                        // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
-                        // 单条处理
-                        // 对数据转换成实体类,对默认值进行赋值
-                        Class<?> aClass = Class.forName(tableProcess.getClassName());
-                        //System.err.println("Class类实例:{}" + aClass);
-                        //log.info("Class类实例:{}", aClass);
-                        //获取after真实数据后，映射为实体类
-                        Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
-                        //System.err.println("反射后映射的实体类:" + afterObj);
-                        //log.info("反射后的实例:{}", afterObj);
-                        //对映射后的实体类为null字段
-                        Object bean = JsonPartUtil.getBean(afterObj);
-                        Object o = JSON.toJSON(bean);
-                        //log.info("实体赋值默认值后数据:{}", o);
-                        jsonObj.put("after", o);
-                        ctx.output(outputTag, jsonObj);
-                        aClass = null;
-                        afterObj = null;
-                        bean = null;
-                        // 如果是写到kafka的 那么直接写入到kafka中
-                    } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
-                        out.collect(jsonObj);
+                        //比对sinkType, 如果是写到mysql，打上标签
+                        if (TableProcess.SINK_TYPE_MYSQL.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                            // 如果是写到mysql的 那么把这个数据和outputTag标签绑定
+                            // 单条处理
+                            // 对数据转换成实体类,对默认值进行赋值
+                            Class<?> aClass = Class.forName(tableProcess.getClassName());
+                            //System.err.println("Class类实例:{}" + aClass);
+                            //log.info("Class类实例:{}", aClass);
+                            //获取after真实数据后，映射为实体类
+                            Object afterObj = JsonPartUtil.getAfterObj(jsonObj, aClass);
+                            //System.err.println("反射后映射的实体类:" + afterObj);
+                            //log.info("反射后的实例:{}", afterObj);
+                            //对映射后的实体类为null字段
+                            Object bean = JsonPartUtil.getBean(afterObj);
+                            Object o = JSON.toJSON(bean);
+                            //log.info("实体赋值默认值后数据:{}", o);
+                            jsonObj.put("after", o);
+                            ctx.output(outputTag, jsonObj);
+                            aClass = null;
+                            afterObj = null;
+                            bean = null;
+                            // 如果是写到kafka的 那么直接写入到kafka中
+                        } else if (TableProcess.SINK_TYPE_KAFKA.equalsIgnoreCase(tableProcess.getSinkType().trim())) {
+                            out.collect(jsonObj);
+                        }
                     }
+                } else {
+                    log.info("No This Key: {}", key);
                 }
-            } else {
-                log.info("No This Key: {}", key);
             }
-
         }
     }
 }
