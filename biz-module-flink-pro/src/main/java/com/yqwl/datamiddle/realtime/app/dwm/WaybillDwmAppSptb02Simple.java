@@ -285,32 +285,14 @@ public class WaybillDwmAppSptb02Simple {
                             }
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
-                            //实体类中null值进行默认值赋值
-                            DwmSptb02 bean = JsonPartUtil.getBean(dwmSptb02);
-                            out.collect(bean);
-                        }
-                        }
+                        //实体类中null值进行默认值赋值
+                        DwmSptb02 bean = JsonPartUtil.getBean(dwmSptb02);
+                        out.collect(bean);
                     }
+                }
+            }
             }
         }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
-
-
-        //===================================sink kafka=======================================================//
-        SingleOutputStreamOperator<String> dwmSptb02Json = dwmSptb02Process.map(new MapFunction<DwmSptb02, String>() {
-            @Override
-            public String map(DwmSptb02 obj) throws Exception {
-                return JSON.toJSONString(obj);
-            }
-        }).uid("WaybillDwmAppSptb02SimpleDwmSptb02Json").name("WaybillDwmAppSptb02SimpleDwmSptb02Json");
-
-        //获取kafka生产者
-        FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
-                props.getStr("kafka.hostname"),
-                KafkaTopicConst.DWM_VLMS_SPTB02,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.DWM_VLMS_SPTB02));
-
-        dwmSptb02Json.addSink(sinkKafka).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkKafka").name("WaybillDwmAppSptb02Simple_SinkKafka");
-
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getSql(DwmSptb02.class);
