@@ -38,7 +38,7 @@ public class JdbcSink {
                         try {
                             // 获取所有的属性信息
                             Field[] fields = t.getClass().getDeclaredFields();
-                            List<Field> list = new ArrayList<>();
+                            int fieldIdx = 0;
                             for (Field field : fields) {
                                 String fieldName = field.getName();
                                 // 序列化id不处理
@@ -50,10 +50,16 @@ public class JdbcSink {
                                 if (annotation != null) {
                                     continue;
                                 }
-                                list.add(field);
+                                // 设置私有属性可访问
+                                field.setAccessible(true);
+                                // 获取值
+                                Object value = field.get(t);
+                                // 给预编译SQL对象赋值
+                                preparedStatement.setObject(fieldIdx + 1, value);
+                                fieldIdx++;
                             }
 
-                            // 遍历字段
+                            /*// 遍历字段
                             for (int i = 0; i < list.size(); i++) {
                                 // 获取字段
                                 Field field = list.get(i);
@@ -63,7 +69,7 @@ public class JdbcSink {
                                 Object value = field.get(t);
                                 // 给预编译SQL对象赋值
                                 preparedStatement.setObject(i + 1, value);
-                            }
+                            }*/
                         } catch (IllegalAccessException e) {
                             throw new RuntimeException(e);
                         }
