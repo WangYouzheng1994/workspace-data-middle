@@ -1,6 +1,7 @@
 package com.yqwl.datamiddle.realtime.app.ods;
 
 import cn.hutool.setting.dialect.Props;
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
@@ -34,6 +35,7 @@ import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.eclipse.jetty.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.nio.charset.Charset;
@@ -103,12 +105,21 @@ public class ConsumerKafkaODSApp {
                 JSONObject jsonObj = JSON.parseObject(json);
                 //获取cdc进入kafka的时间
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
-                //获取after数据
-                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                afterObj.put("WAREHOUSE_CREATETIME", tsStr);
-                afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
-                jsonObj.put("after", afterObj);
-                return jsonObj;
+                String tableName = JsonPartUtil.getTableNameStr(jsonObj);
+                if (StringUtil.isNotBlank(tableName)) {
+                    //将表名置为小写
+                    String lowerTableName = org.apache.commons.lang3.StringUtils.toRootLowerCase(tableName);
+                    if (!lowerTableName.equals("sptb22_dq") && !lowerTableName.equals("dcs_orders")) {
+                        return null;
+                    }
+                    //获取after数据
+                    JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
+                    afterObj.put("WAREHOUSE_CREATETIME", tsStr);
+                    afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
+                    jsonObj.put("after", afterObj);
+                    return jsonObj;
+                }
+                return null;
             }
         }).uid("ConsumerKafkaODSAppJsonStream").name("ConsumerKafkaODSAppJsonStream");
         //jsonStream.print("json转化map输出:");
