@@ -54,7 +54,7 @@ public class SimpleBsdSinkOOTD<T> extends RichSinkFunction<DwdBaseStationData> {
                         // 3.更新末端配送入库时间
                         sb.append("UPDATE dwm_vlms_one_order_to_end e JOIN dim_vlms_warehouse_rs a on a.WAREHOUSE_CODE = '" + in_warehouse_code +
                                 "' JOIN dwm_vlms_sptb02 s on e.VIN = s.VVIN SET e.IN_DISTRIBUTE_TIME = " + sample_u_t_c +
-                                " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' AND s.VYSFS = 'G' "
+                                " , e.WAREHOUSE_UPDATETIME = " + nowTime + " WHERE e.VIN = '" + vin + "'  AND e.LEAVE_FACTORY_TIME < " + sample_u_t_c + " AND a.WAREHOUSE_TYPE = 'T2' AND s.TRAFFIC_TYPE = 'G' "
                                 + " AND e.IN_SITE_TIME < " + sample_u_t_c + ";");
                     }
             }
