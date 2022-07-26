@@ -34,7 +34,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
         StringBuilder sb = new StringBuilder();
 
         //==============================================处理铁路运单=============================================================//
-        //1.查询铁路运单 根据仓库代码 vvin码定位一条记录 ,每一个站台都会有两个时间，入站台时间和出站台时间
+        //  1.查询铁路运单 根据仓库代码 vvin码定位一条记录 ,每一个站台都会有两个时间，入站台时间和出站台时间
         //  1.1 处理入 开始站台时间 (集站时间)
         if (StringUtils.isNotBlank(data.getVIN())) {
             if (IN_STORE.equals(operateType)) {
@@ -58,7 +58,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                 );
             }
 
-            //1.3 处理目的站台的入站台时间和出站台时间
+            // 1.3 处理目的站台的入站台时间和出站台时间
             if (IN_STORE.equals(operateType)) {
                 sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
                         " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
@@ -80,7 +80,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
             }
 
             //==============================================处理水路运单运单=============================================================//
-            // 1.1 处理入 开始站台时间 (集港时间)
+            // 2.1 处理入 开始站台时间 (集港时间)
             if (IN_STORE.equals(operateType)) {
                 sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
                           " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
@@ -90,7 +90,8 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                         + " SET d1.IN_START_WATERWAY_TIME= " + data.getSAMPLE_U_T_C() + " ;"
                 );
             }
-            // 1.2 处理出 开始站台时间
+
+            // 2.2 处理出 开始站台时间
             if (OUT_STOCK.equals(operateType)) {
                 sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
                         " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
@@ -101,7 +102,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                 );
             }
 
-            //1.3 处理目的站台的入站台时间
+            // 2.3 处理目的站台的入站台时间
             if (IN_STORE.equals(operateType)) {
                 sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
                         " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
@@ -111,7 +112,8 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                         + " SET d1.IN_END_WATERWAY_TIME= " + data.getSAMPLE_U_T_C() + " ;"
                 );
             }
-            //处理出目的站台时间
+
+            // 2.4处理出目的站台时间
             if (IN_STORE.equals(operateType)) {
                 sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
                         " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
@@ -121,7 +123,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                         + " SET d1.UNLOAD_SHIP_TIME= " + data.getSAMPLE_U_T_C() + " ;"
                 );
             }
-            // 2.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
+            // 3.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
             if (StringUtils.isNotBlank(warehouse_type) && StringUtils.isNotBlank(physical_code) && StringUtils.isNotBlank(vin) && StringUtils.equals(operate_type, "OutStock")) {
                 sb.append("UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + physical_code + "' AND VVIN ='" + vin + "';");
             }
