@@ -80,9 +80,9 @@ public class Sptc34WideApp {
                 //获取表字段并将没有值的数据添加默认值
                 Sptc34Wide sptc34Wide = JsonPartUtil.getAfterObjWithDefault(value, Sptc34Wide.class);
                 //合并省区市县字段
-                String vsqsxdm = StringUtils.join(sptc34Wide.getVsqdm(), sptc34Wide.getVsxdm());
+                String vsqsxdm = StringUtils.join(sptc34Wide.getVSQDM(), sptc34Wide.getVSXDM());
                 //将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
-                sptc34Wide.setVsqsxdm(vsqsxdm);
+                sptc34Wide.setVSQSXDM(vsqsxdm);
 //                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
                 //获取kafka的时间戳作为创建时间和更新时间
                 String tsStr = JsonPartUtil.getTsStr(value);
@@ -93,10 +93,10 @@ public class Sptc34WideApp {
                 if ( typeStr.equals("insert") ) {
 
                     //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
-                    sptc34Wide.setWarehouseCreatetime(aLong);
+                    sptc34Wide.setWAREHOUSE_CREATETIME(aLong);
                 }else if ( typeStr.equals("update") ) {
                     //获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
-                    sptc34Wide.setWarehouseUpdatetime(aLong);
+                    sptc34Wide.setWAREHOUSE_UPDATETIME(aLong);
                 }
                 return sptc34Wide;
             }
