@@ -111,7 +111,7 @@ public class TimestampConverter implements CustomConverter<SchemaBuilder, Relati
                     return rawValue;
                 }
                 Integer numLength = rawValue.toString().length();
-                System.err.println(rawValue+":"+rawValue.toString().length());
+                //System.err.println(rawValue+":"+rawValue.toString().length());
                 // 2022-06-23 01:42:18.0   LENGTH: 21
                 if (numLength ==21){
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
