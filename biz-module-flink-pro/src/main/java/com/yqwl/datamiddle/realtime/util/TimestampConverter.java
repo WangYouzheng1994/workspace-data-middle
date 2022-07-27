@@ -120,6 +120,35 @@ public class TimestampConverter implements CustomConverter<SchemaBuilder, Relati
                         return s;
                     }
                 }
+                if (numLength ==22){
+                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
+                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                    if (s != null){
+                        return s;
+                    }
+                }
+                if (numLength ==23){
+                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                    if (s != null){
+                        return s;
+                    }
+                }
+                // 2022-07-15 15:27:06.0103   LENGTH: 24
+                if (numLength ==24){
+                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS");
+                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                    if (s != null){
+                        return s;
+                    }
+                }
+                if (numLength ==25){
+                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSS");
+                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                    if (s != null){
+                        return s;
+                    }
+                }
                 // 2022-07-14 11:36:44.893154   LENGTH: 26
                 if (numLength ==26){
                     DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
