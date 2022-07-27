@@ -1306,11 +1306,13 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * 到达站台仓库名称
+     * 源: {@link DwdSptb02#END_WAREHOUSE_NAME}
      */
     private String END_WAREHOUSE_NAME;
 
     /**
      * 公路单物理仓库代码对应的仓库类型 rfid_warehouse表中类型 基础库 T1 分拨中心站 T2 港口 T3 站台 T4
+     * 源:{@link DwdSptb02#HIGHWAY_WAREHOUSE_TYPE}
      */
     private String HIGHWAY_WAREHOUSE_TYPE;
 
