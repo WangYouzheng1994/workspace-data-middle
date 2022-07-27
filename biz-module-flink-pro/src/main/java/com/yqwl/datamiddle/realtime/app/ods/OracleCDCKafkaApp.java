@@ -70,7 +70,7 @@ public class OracleCDCKafkaApp {
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         ck.setMinPauseBetweenCheckpoints(5000);
         // 设置checkpoint点二级目录位置
-        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
+        //ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
         // 设置savepoint点二级目录位置
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
         //同一时间只允许进行一个检查点
@@ -92,7 +92,7 @@ public class OracleCDCKafkaApp {
         properties.put("event.processing.failure.handling.mode", "warn");
         properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
         //properties.put("converters", "aaa");
-        //properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.OracleTimeConverter");
+        //properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.TimestampConverter");
         //properties.put("database.serverTimezone", "UTC");
         //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
@@ -100,7 +100,7 @@ public class OracleCDCKafkaApp {
                 props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" +
                 props.getStr("cdc.oracle.database") + ")))");
 
-        //读取oracle连接配置属性
+        // 读取oracle连接配置属性
         SourceFunction<String> oracleSource = OracleSource.<String>builder()
                 .hostname(props.getStr("cdc.oracle.hostname"))
                 .port(props.getInt("cdc.oracle.port"))
@@ -124,7 +124,7 @@ public class OracleCDCKafkaApp {
                 KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712,
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712));
 
-        //输出到kafka
+        // 输出到kafka
         oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
