@@ -58,12 +58,12 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
      * 初始化分流配置集合
      */
     private void initTableProcessMap() {
-        log.info("更新配置的处理信息");
+        log.debug("更新配置的处理信息");
         //查询 MySQL 中的配置表数据
         List<TableProcess> tableProcessList = MysqlUtil.queryList("select * from table_process where is_use = 1 order by id", TableProcess.class, true);
         //遍历查询结果,将数据存入结果集合
         for (TableProcess tableProcess : tableProcessList) {
-            log.info("输出分流配置表中数据:{}", tableProcess.toString());
+            log.debug("输出分流配置表中数据:{}", tableProcess.toString());
             //获取源表表名
             String sourceTable = tableProcess.getSourceTable();
             String sourceTableLow = StringUtils.toRootLowerCase(sourceTable);
@@ -137,7 +137,7 @@ public class TableProcessDivideFunctionList extends ProcessFunction<JSONObject, 
                         }
                     }
                 } else {
-                    log.info("No This Key: {}", key);
+                    log.warn("No This Key: {}", key);
                 }
             }
         }
