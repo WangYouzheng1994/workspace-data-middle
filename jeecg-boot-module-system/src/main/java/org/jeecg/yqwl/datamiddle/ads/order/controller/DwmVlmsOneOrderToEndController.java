@@ -190,25 +190,21 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         String precise = queryCriteria.getPrecise();
         // 精准查询
         if ( StringUtils.isNotBlank(trafficType) ) {
-
             if ( StringUtils.contains(trafficType,"typeG") ) {
                 queryCriteria.setTypeG(1);
             }else{
                 queryCriteria.setTypeG(0);
             }
-
             if ( StringUtils.contains(trafficType,"typeT") ) {
                 queryCriteria.setTypeT(1);
             }else{
                 queryCriteria.setTypeT(0);
             }
-
             if ( StringUtils.contains(trafficType,"typeS") ) {
                 queryCriteria.setTypeS(1);
             }else{
                 queryCriteria.setTypeS(0);
             }
-
         }
 
         // 过滤选中的数据
@@ -289,7 +285,40 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // Cpzdbh 配板单号
                 row1.createCell(j++).setCellValue(item.getCpzdbh());
                 // trafficType  运输方式
-                row1.createCell(j++).setCellValue(item.getTrafficType());
+                // 利用获取的typeT,typeS,typeG 进行拼接 并将值赋值给trafficType
+                String typeT = item.getTypeT().toString();
+                String typeS = item.getTypeS().toString();
+                String typeG = item.getTypeG().toString();
+                // 将运输方式转换成公铁水
+                if ( "1".equals(typeT) ) {
+                    typeT = "铁";
+                } else if ( "0".equals(typeT) ) {
+                    typeT = "";
+                }
+                if ( "1".equals(typeS) ) {
+                    typeS = "水";
+                }else if ( "0".equals(typeS) ) {
+                    typeS = "";
+                }
+                if ( "1".equals(typeG) ) {
+                    typeG = "公";
+                }else if ( "0".equals(typeG) ) {
+                    typeG = "";
+                }
+                // 判断公铁水的值是否为空并添加到list集合中
+                List<String> list = new ArrayList<>();
+                if ( StringUtils.isNotBlank(typeT)  ) {
+                    list.add(typeT);
+                }
+                if ( StringUtils.isNotBlank(typeS)  ) {
+                    list.add(typeS);
+                }
+                if ( StringUtils.isNotBlank(typeG)  ) {
+                    list.add(typeG);
+                }
+                // 将公铁水的值拼接起来并赋值给trafficType
+                trafficType = StringUtils.join(list,",");
+                row1.createCell(j++).setCellValue(item.setTrafficType(trafficType));
                 // assignTime  指派日期  11
                 if (item.getAssignTime() != 0) {
                     row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
