@@ -250,11 +250,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                     // 兜底: 取的是sptb02的实际出发时间
                                     ootdTransition.setOUT_START_PLATFORM_TIME(dsjcfsj);
                                 }
-                                // 铁路的入目的站台时间 + 兜底 默认取的是物流溯源节点来更新
+                                // 铁路的入目的站台时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
                                 if (in_end_platform_time != null && in_end_platform_time!=0) {
-                                    ootdTransition.setIN_END_PLATFORM_TIME(in_end_platform_time);
-                                } else if (dgpsdhsj != null){
-                                    // 兜底: 取的是sptb02的gps到货时间
                                     ootdTransition.setIN_END_PLATFORM_TIME(dgpsdhsj);
                                 }
                                 // 中铁卸车时间 + 兜底  默认取的是物流溯源节点来更新
@@ -287,11 +284,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                     // 兜底: 取的是sptb02的实际出发时间
                                     ootdTransition.setEND_START_WATERWAY_TIME(dsjcfsj);
                                 }
-                                // 水路的入目的港口时间
+                                // 水路的入目的港口时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
                                 if (in_end_waterway_time != null && in_end_waterway_time != 0) {
-                                    ootdTransition.setIN_END_WATERWAY_TIME(in_end_waterway_time);
-                                }else if (dgpsdhsj != null){
-                                    // 兜底: 取的是sptb02的gps到货时间
                                     ootdTransition.setIN_END_WATERWAY_TIME(dgpsdhsj);
                                 }
                                 // 水路的卸船时间
@@ -374,7 +368,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " BASE_CODE = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ,BASE_NAME= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) , VEHICLE_NUM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM) ,CPZDBH=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ,SHIPMENT_G_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_G_TIME), SHIPMENT_G_TIME), " +
-                        " FINAL_SITE_TIME=if(FINAL_SITE_TIME=0, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if(DTVSDHSJ = 0 , VALUES(DTVSDHSJ), DTVSDHSJ),TYPE_G = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G)",
+                        " FINAL_SITE_TIME=if(FINAL_SITE_TIME = 0 or VALUES(FINAL_SITE_TIME) > FINAL_SITE_TIME, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if( DTVSDHSJ = 0 or VALUES(DTVSDHSJ) > DTVSDHSJ , VALUES(DTVSDHSJ), DTVSDHSJ),TYPE_G = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G)",
                 (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
@@ -510,7 +504,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " START_PLATFORM_NAME = VALUES(START_PLATFORM_NAME), END_PLATFORM_NAME = VALUES(END_PLATFORM_NAME), IN_START_PLATFORM_TIME = VALUES(IN_START_PLATFORM_TIME), OUT_START_PLATFORM_TIME = VALUES(OUT_START_PLATFORM_TIME), IN_END_PLATFORM_TIME = VALUES(IN_END_PLATFORM_TIME), UNLOAD_RAILWAY_TIME = VALUES(UNLOAD_RAILWAY_TIME),  " +
                         " BASE_CODE = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ,BASE_NAME= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) , VEHICLE_NUM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), CPZDBH=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
-                        " DOT_SITE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), FINAL_SITE_TIME=if(FINAL_SITE_TIME=0, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if(DTVSDHSJ = 0 , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_T = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T)",
+                        " DOT_SITE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), FINAL_SITE_TIME=if(FINAL_SITE_TIME = 0 or VALUES(FINAL_SITE_TIME) > FINAL_SITE_TIME, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if( DTVSDHSJ = 0 or VALUES(DTVSDHSJ) > DTVSDHSJ , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_T = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T)",
                 (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
@@ -646,7 +640,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " START_WATERWAY_NAME = VALUES(START_WATERWAY_NAME), END_WATERWAY_NAME = VALUES(END_WATERWAY_NAME), IN_START_WATERWAY_TIME = VALUES(IN_START_WATERWAY_TIME), END_START_WATERWAY_TIME = VALUES(END_START_WATERWAY_TIME), IN_END_WATERWAY_TIME = VALUES(IN_END_WATERWAY_TIME), UNLOAD_SHIP_TIME = VALUES(UNLOAD_SHIP_TIME) ,  BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " BASE_CODE = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ,BASE_NAME= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) , VEHICLE_NUM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), CPZDBH=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
-                        " DOT_SITE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME),  FINAL_SITE_TIME=if(FINAL_SITE_TIME=0, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if(DTVSDHSJ = 0 , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_S = if(TYPE_S = 0 , VALUES(TYPE_S), TYPE_S)",
+                        " DOT_SITE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME),  FINAL_SITE_TIME=if(FINAL_SITE_TIME = 0 or VALUES(FINAL_SITE_TIME) > FINAL_SITE_TIME, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if( DTVSDHSJ = 0 or VALUES(DTVSDHSJ) > DTVSDHSJ , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_S = if(TYPE_S = 0 , VALUES(TYPE_S), TYPE_S)",
                (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        //底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        //车型
@@ -781,7 +775,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_BOARD_TIME = VALUES(DISTRIBUTE_BOARD_TIME), OUT_DISTRIBUTE_TIME = VALUES(OUT_DISTRIBUTE_TIME), DISTRIBUTE_ASSIGN_TIME = VALUES(DISTRIBUTE_ASSIGN_TIME), DISTRIBUTE_CARRIER_NAME = VALUES(DISTRIBUTE_CARRIER_NAME), DISTRIBUTE_VEHICLE_NO = VALUES(DISTRIBUTE_VEHICLE_NO) , DISTRIBUTE_SHIPMENT_TIME = VALUES(DISTRIBUTE_SHIPMENT_TIME) , DISTRIBUTE_VEHICLE_NUM= VALUES(DISTRIBUTE_VEHICLE_NUM)," +
                         " BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " BASE_CODE = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ,BASE_NAME= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) , VEHICLE_NUM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM ), CPZDBH=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH), " +
-                        " FINAL_SITE_TIME=if(FINAL_SITE_TIME=0, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if(DTVSDHSJ = 0 , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_G = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G)",
+                        " FINAL_SITE_TIME=if(FINAL_SITE_TIME = 0 or VALUES(FINAL_SITE_TIME) > FINAL_SITE_TIME, VALUES(FINAL_SITE_TIME), FINAL_SITE_TIME), DTVSDHSJ = if( DTVSDHSJ = 0 or VALUES(DTVSDHSJ) > DTVSDHSJ , VALUES(DTVSDHSJ), DTVSDHSJ), TYPE_G = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G)",
 
                (ps, ootd) -> {
                     String vvin = ootd.getVVIN();                                        // 底盘号

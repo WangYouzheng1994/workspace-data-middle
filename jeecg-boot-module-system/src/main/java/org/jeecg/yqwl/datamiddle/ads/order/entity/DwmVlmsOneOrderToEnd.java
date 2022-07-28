@@ -331,5 +331,8 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "位置信息")
 	private String vwz;
 
-
+	public String setTrafficType(String trafficType) {
+		this.trafficType = trafficType;
+		return trafficType;
+	}
 }
