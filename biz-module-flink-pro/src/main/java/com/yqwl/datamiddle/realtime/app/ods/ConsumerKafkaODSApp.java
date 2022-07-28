@@ -35,6 +35,7 @@ import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.eclipse.jetty.util.StringUtil;
 
 import javax.annotation.Nullable;
@@ -52,6 +53,11 @@ import java.util.concurrent.TimeUnit;
 public class ConsumerKafkaODSApp {
 
     public static void main(String[] args) throws Exception {
+        // 从偏移量表中读取指定的偏移量模式
+        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712, 0);
+        offsetMap.put(topicPartition, 500L);
+
         //====================================stream env配置===============================================//
         // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -90,6 +96,8 @@ public class ConsumerKafkaODSApp {
                 .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
+                // .setBounded(OffsetsInitializer.offsets(offsetMap)) // 终止 60 6-1
                 .build();
         // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
