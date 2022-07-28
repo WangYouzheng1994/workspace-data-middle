@@ -250,11 +250,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                     // 兜底: 取的是sptb02的实际出发时间
                                     ootdTransition.setOUT_START_PLATFORM_TIME(dsjcfsj);
                                 }
-                                // 铁路的入目的站台时间 + 兜底 默认取的是物流溯源节点来更新
+                                // 铁路的入目的站台时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
                                 if (in_end_platform_time != null && in_end_platform_time!=0) {
-                                    ootdTransition.setIN_END_PLATFORM_TIME(in_end_platform_time);
-                                } else if (dgpsdhsj != null){
-                                    // 兜底: 取的是sptb02的gps到货时间
                                     ootdTransition.setIN_END_PLATFORM_TIME(dgpsdhsj);
                                 }
                                 // 中铁卸车时间 + 兜底  默认取的是物流溯源节点来更新
@@ -287,11 +284,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                     // 兜底: 取的是sptb02的实际出发时间
                                     ootdTransition.setEND_START_WATERWAY_TIME(dsjcfsj);
                                 }
-                                // 水路的入目的港口时间
+                                // 水路的入目的港口时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
                                 if (in_end_waterway_time != null && in_end_waterway_time != 0) {
-                                    ootdTransition.setIN_END_WATERWAY_TIME(in_end_waterway_time);
-                                }else if (dgpsdhsj != null){
-                                    // 兜底: 取的是sptb02的gps到货时间
                                     ootdTransition.setIN_END_WATERWAY_TIME(dgpsdhsj);
                                 }
                                 // 水路的卸船时间
