@@ -331,6 +331,14 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "位置信息")
 	private String vwz;
 
+	/**
+	 * 是否同城异地 0无 1同城 2异地
+	 * 默认值为0  20220729添加
+	 */
+	@Excel(name = "同城异地", width = 15)
+	@ApiModelProperty(value = "同城异地")
+	private Integer typeTc;
+
 	public String setTrafficType(String trafficType) {
 		this.trafficType = trafficType;
 		return trafficType;

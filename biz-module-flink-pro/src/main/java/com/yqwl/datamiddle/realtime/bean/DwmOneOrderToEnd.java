@@ -426,5 +426,11 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private Integer TYPE_S;
 
+    /**
+     * 是否同城异地 0无 1同城 2异地
+     * 默认值为0  20220729添加
+     */
+    private Integer TYPE_TC;
+
 
 }
