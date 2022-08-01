@@ -168,7 +168,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 "始发站名称","到达始发站时间/入站时间","始发站台铁路离站时间","目的站名称","到达目的站时间","卸车时间（铁路到目的站）",
                 "始发港名称", "到达始发港口时间/入港时间", "始发港口水运离港时间", "目的港名称", "到达目的港时间","卸船时间（水路到目的站）",
                  "末端分拨中心入库时间", "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号",
-                "港/站分拨承运轿运车车位数", "分拨出库时间", "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间","位置信息"};
+                "港/站分拨承运轿运车车位数", "分拨出库时间", "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间","位置信息","是否同城异地"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
         for (String header : headers) {
@@ -445,6 +445,16 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 }
                 // vwz 位置信息
                 row1.createCell(j++).setCellValue(item.getVwz());
+                // TYPE_TC 是否同城异地
+                String typeTc = item.getTypeTc().toString();
+                if ( "0".equals(typeTc) ) {
+                    typeTc = "";
+                }else if ( "1".equals(typeTc) ) {
+                    typeTc = "同城";
+                }else if ( "2".equals(typeTc) ) {
+                    typeTc = "异地";
+                }
+                row1.createCell(j++).setCellValue(item.setTypeTc(typeTc));
                 rowNum++;
             }
 
