@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * @Description: 动态根据 分流 去 clickhouse
+ * @Description: 动态根据 分流mysql 去 clickhouse
  * @Author: WangYouzheng
  * @Date: 2022/7/20 13:48
  * @Version: V1.0
@@ -84,7 +84,7 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
                 if (insertChMap.containsKey(tableProcess.getSinkTable())) {
                     // 如果存在，累计到现有容器中
                     Map<String, List<List<Object>>> stringListMap = insertChMap.get(tableProcess.getSinkTable());
-                    stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(cdcJsonObj.getJSONObject("after")));
+                    stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(JSONObject.parseObject(cdcJsonObj.getString("after"), tableProcess.getClazz())));
                 } else {
                     // 3. 动态拼接批量SQL
                     sb = new StringBuilder().append("insert into ")
@@ -109,9 +109,13 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
 
     /**
      * 获取每行的数据 用于拼接prepare阶段的 value赋值。
+     *
+     * 此处有风险 会因为dblog日志的表结构不同和目前的Bean形成不一样的field数量
+     *
      * @param afterData
      * @return
      */
+    @Deprecated
     private List<Object> getValueList(JSONObject afterData) {
         List<Object> newList = new ArrayList<>();
         afterData.forEach((k, v) -> {
@@ -120,6 +124,15 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
             }
         });
         return newList;
+    }
+
+    /**
+     * 获取每行的数据 用于拼接prepare阶段的 value赋值。
+     *
+     * @return
+     */
+    private List<Object> getValueList() {
+
     }
 
     /**
