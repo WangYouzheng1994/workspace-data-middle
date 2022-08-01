@@ -343,4 +343,12 @@ public class DwmVlmsOneOrderToEnd {
 		this.trafficType = trafficType;
 		return trafficType;
 	}
+
+	public void setTypeTc(Integer typeTc) {
+		this.typeTc = typeTc;
+	}
+
+	public String setTypeTc(String typeTc) {
+		return typeTc;
+	}
 }
