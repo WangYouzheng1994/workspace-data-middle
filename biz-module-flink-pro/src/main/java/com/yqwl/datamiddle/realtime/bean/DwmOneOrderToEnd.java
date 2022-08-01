@@ -432,5 +432,30 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private Integer TYPE_TC;
 
+    /**
+     *发车站台的省区代码
+     */
+    private String VFCZT_PROVINCE_CODE;
+
+    /**
+     * 发车站台的市县代码
+     */
+    private String VFCZT_CITY_CODE;
+
+    /**
+     * 收车站台的省区代码
+     */
+    private String VSCZT_PROVINCE_CODE;
+
+    /**
+     *收车站台的市县代码
+     */
+    private String VSCZT_CITY_CODE;
+
+    /**
+     *最后一个运单的结算单编号
+     */
+    private String SETTLEMENT_LAST;
+
 
 }
