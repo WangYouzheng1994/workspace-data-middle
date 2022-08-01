@@ -243,11 +243,14 @@
             <artifactId>debezium-api</artifactId>
             <version>1.5.4.Final</version>
         </dependency>
-        <!--<dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>connect-api</artifactId>
-            <version>${version.kafka}</version>
-        </dependency>-->
+
+        <!--  https://github.com/couchbase/spymemcached -->
+        <!--  https://help.aliyun.com/document_detail/48354.html -->
+        <dependency>
+            <groupId>net.spy</groupId>
+            <artifactId>spymemcached</artifactId>
+            <version>2.12.3</version>
+        </dependency>
     </dependencies>
 
     <build>

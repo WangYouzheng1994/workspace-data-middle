@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import lombok.extern.slf4j.Slf4j;
 import net.spy.memcached.AddrUtil;
 import net.spy.memcached.ConnectionFactoryBuilder;
 import net.spy.memcached.MemcachedClient;
@@ -16,19 +17,21 @@ import java.util.concurrent.ExecutionException;
  * @Date: 2022/8/1 13:26
  * @Version: V1.0
  */
+@Slf4j
 public class MemcachedUtil {
+    private static final MemcachedClient connect = connect();
 
     public static void main(String[] args) {
-        final String host = "xxxxxxxx.m.yyyyyyyyyy.ocs.aliyuncs.com";//控制台上的“内网地址”
+        final String host = "192.168.3.96";//控制台上的“内网地址”
         final String port ="11211"; //默认端口 11211，不用改
-        final String username = "xxxxxxxxx";//控制台上的“实例ID”，新版ocs的username可以置空
-        final String password = "my_password";//邮件中提供的“密码”
+        final String username = "root";//控制台上的“实例ID”，新版ocs的username可以置空
+        final String password = "fqwl@123!";//邮件中提供的“密码”
         MemcachedClient cache = null;
         try {
             AuthDescriptor ad = new AuthDescriptor(new String[]{"PLAIN"}, new PlainCallbackHandler(username, password));
             cache = new MemcachedClient(
                     new ConnectionFactoryBuilder().setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
-                            .setAuthDescriptor(ad)
+                            // .setAuthDescriptor(ad)
                             .build(),
                     AddrUtil.getAddresses(host + ":" + port));
             System.out.println("OCS Sample Code");
@@ -60,5 +63,68 @@ public class MemcachedUtil {
         if (cache != null) {
             cache.shutdown();
         }
+    }
+
+    public static void loginWithAuth() {
+
+    }
+    public static void loginNoAuth() {
+
+    }
+
+    /**
+     * 建立Memcache 连接
+     *
+     * @return
+     */
+    public static MemcachedClient connect() {
+        MemcachedClient cache = null;
+        final String host = "192.168.3.96";//控制台上的“内网地址”
+        final String port ="11211"; //默认端口 11211，不用改
+        try {
+            cache = new MemcachedClient(
+                    new ConnectionFactoryBuilder().setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
+                            // .setAuthDescriptor(ad)
+                            .build(),
+                    AddrUtil.getAddresses(host + ":" + port));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+
+        return cache;
+    }
+
+    /**
+     * 同步设置值，成功返回true,否则false
+     *
+     * tips: 会通过future阻塞
+     *
+     * @param key
+     * @param exp
+     * @param value
+     * @return
+     */
+    public static Boolean setValue(String key, int exp, Object value) {
+
+        OperationFuture<Boolean> future = connect.set(key, exp, value);
+        try {
+            return future.get();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return false;
+    }
+
+    /**
+     * 异步设置值
+     *
+     * @param key
+     * @param exp
+     * @param value
+     * @return
+     */
+    public static OperationFuture<Boolean> setValueAsync(String key, int exp, Object value) {
+        return connect.set(key, exp, value);
     }
 }
