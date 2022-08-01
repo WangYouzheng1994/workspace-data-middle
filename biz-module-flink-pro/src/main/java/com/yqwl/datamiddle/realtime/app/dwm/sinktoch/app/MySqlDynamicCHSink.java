@@ -140,12 +140,12 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
         Field[] declaredFields = clzz.getDeclaredFields();
         log.info("展示:{}",name);
         List<Object> newList = new ArrayList<>();
-            Object o = JSONObject.parseObject(afterData.toString(), clzz);
+            Object objBean = JSONObject.parseObject(afterData.toString(), clzz);
             for (Field declaredField : declaredFields) {
                 if (!StringUtils.equals(declaredField.getName(), "IDNUM")) {
                     declaredField.setAccessible(true);
                     try {
-                        Object getValue = declaredField.get(o);
+                        Object getValue = declaredField.get(objBean);
                         newList.add(getValue);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
