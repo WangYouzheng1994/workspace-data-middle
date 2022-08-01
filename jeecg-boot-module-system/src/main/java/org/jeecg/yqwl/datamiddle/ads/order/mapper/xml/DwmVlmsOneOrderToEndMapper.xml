@@ -45,11 +45,17 @@
             <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0">
                 AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <if test="params.cp9OfflineTimeStart != null   and params.cp9OfflineTimeStart != 0  ">
-                AND CP9_OFFLINE_TIME <![CDATA[ >= ]]> #{params.cp9OfflineTimeStart}
+            <if test="params.vehicleReceivingTimeStart != null   and params.vehicleReceivingTimeStart != 0  ">
+                AND VEHICLE_RECEIVING_TIME <![CDATA[ >= ]]> #{params.vehicleReceivingTimeStart}
             </if>
-            <if test="params.cp9OfflineTimeEnd != null   and params.cp9OfflineTimeEnd != 0 ">
-                AND CP9_OFFLINE_TIME <![CDATA[ <= ]]>  #{params.cp9OfflineTimeEnd}
+            <if test="params.vehicleReceivingTimeEnd != null   and params.vehicleReceivingTimeEnd != 0 ">
+                AND VEHICLE_RECEIVING_TIME <![CDATA[ <= ]]>  #{params.vehicleReceivingTimeEnd}
+            </if>
+            <if test="params.actualOutTimeStart != null   and params.actualOutTimeStart != 0  ">
+                AND ACTUAL_OUT_TIME <![CDATA[ >= ]]> #{params.actualOutTimeStart}
+            </if>
+            <if test="params.actualOutTimeEnd != null   and params.actualOutTimeEnd != 0 ">
+                AND ACTUAL_OUT_TIME <![CDATA[ <= ]]>  #{params.actualOutTimeEnd}
             </if>
             <if test="params.dtvsdhsjStart != null   and params.dtvsdhsjStart != 0  ">
                 AND DTVSDHSJ  <![CDATA[ >= ]]> #{params.dtvsdhsjStart}

@@ -133,6 +133,26 @@ public class GetQueryCriteria {
      */
     private Long finalSiteTimeEnd;
 
+    /**
+     * 计划下达日期开始时间 一单到底
+     */
+    private Long vehicleReceivingTimeStart;
+
+    /**
+     * 计划下达日起结束时间  一单到底
+     */
+    private Long vehicleReceivingTimeEnd;
+
+    /**
+     * 计划下达日期开始  sptb02
+     */
+    private Long ddjrqStart;
+
+    /**
+     * 计划下达日期结束  sptb02
+     */
+    private Long ddjrqEnd;
+
     /**sptb02出库日期开始*/
     private Long actualOutTimeStart;
 

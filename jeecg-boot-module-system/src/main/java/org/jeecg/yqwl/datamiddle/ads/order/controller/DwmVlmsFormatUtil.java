@@ -48,12 +48,12 @@ public class DwmVlmsFormatUtil {
         if (queryCriteria.getInSiteTimeEnd() != null) {
             queryCriteria.setInSiteTimeEnd(queryCriteria.getInSiteTimeEnd() + 28800000);
         }
-        if (queryCriteria.getCp9OfflineTimeStart() != null) {
-            queryCriteria.setCp9OfflineTimeStart(queryCriteria.getCp9OfflineTimeStart() + 28800000);
-        }
-        if (queryCriteria.getCp9OfflineTimeEnd() != null) {
-            queryCriteria.setCp9OfflineTimeEnd(queryCriteria.getCp9OfflineTimeEnd() + 28800000);
-        }
+//        if (queryCriteria.getCp9OfflineTimeStart() != null) {
+//            queryCriteria.setCp9OfflineTimeStart(queryCriteria.getCp9OfflineTimeStart() + 28800000);
+//        }
+//        if (queryCriteria.getCp9OfflineTimeEnd() != null) {
+//            queryCriteria.setCp9OfflineTimeEnd(queryCriteria.getCp9OfflineTimeEnd() + 28800000);
+//        }
 //        if (queryCriteria.getDotSiteTimeStart() != null) {
 //            queryCriteria.setDotSiteTimeStart(queryCriteria.getDotSiteTimeStart() + 28800000);
 //        }
@@ -72,5 +72,18 @@ public class DwmVlmsFormatUtil {
         if (queryCriteria.getDtvsdhsjEnd() != null) {
             queryCriteria.setDtvsdhsjEnd(queryCriteria.getDtvsdhsjEnd() + 28800000);
         }
+        if (queryCriteria.getVehicleReceivingTimeStart() != null) {
+            queryCriteria.setVehicleReceivingTimeStart(queryCriteria.getVehicleReceivingTimeStart() + 28800000);
+        }
+        if (queryCriteria.getVehicleReceivingTimeEnd() != null) {
+            queryCriteria.setVehicleReceivingTimeEnd(queryCriteria.getVehicleReceivingTimeEnd() + 28800000);
+        }
+        if (queryCriteria.getActualOutTimeStart() != null) {
+            queryCriteria.setActualOutTimeStart(queryCriteria.getActualOutTimeStart() + 28800000);
+        }
+        if (queryCriteria.getActualOutTimeEnd() != null) {
+            queryCriteria.setActualOutTimeEnd(queryCriteria.getActualOutTimeEnd() + 28800000);
+        }
+
     }
 }
