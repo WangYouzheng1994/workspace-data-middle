@@ -89,8 +89,10 @@ public class WaybillDwmAppSptb02Simple {
                         String vvin = sptb02d1.getString("VVIN");
                 //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
                         if (StringUtils.isNotBlank(vvin)){
-                            dwmSptb02.setSTART_PHYSICAL_CODE(dwmSptb02.getVFCZT());
-                            dwmSptb02.setEND_PHYSICAL_CODE(dwmSptb02.getVSCZT());
+                            String vfczt = dwmSptb02.getVFCZT();
+                            String vsczt = dwmSptb02.getVSCZT();
+                            dwmSptb02.setSTART_PHYSICAL_CODE(vfczt);
+                            dwmSptb02.setEND_PHYSICAL_CODE(vsczt);
                             // 车型代码
                             String vehicle_code = sptb02d1.getString("CCPDM");
                             // 车架号 vin码
@@ -262,6 +264,39 @@ public class WaybillDwmAppSptb02Simple {
                                 }
                             }
 
+                            /** 收车站台的相关字段赋值
+                             *  处理 vfczt的 VFCZT_PROVINCE_CODE  VFCZT_CITY_CODE 给这俩字段赋值
+                             *  inner join sptc34 b on a.vwlckdm = b.VFCZT
+                             */
+                            if (StringUtils.isNotBlank(vfczt)) {
+                                String sptc34VFCZTSql = "select VSQDM, VSXDM from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vfczt + "' limit 1 ";
+                                JSONObject odsVlmsSptc34VFCZT = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34VFCZTSql, vfczt);
+                                if (odsVlmsSptc34VFCZT != null) {
+                                    // 发车站台的省区代码
+                                    String VFCZT_PROVINCE_CODE_34 = odsVlmsSptc34VFCZT.getString("VSQDM");
+                                    // 发车站台的市县代码
+                                    String VFCZT_CITY_CODE_34 = odsVlmsSptc34VFCZT.getString("VSXDM");
+                                    dwmSptb02.setVFCZT_PROVINCE_CODE(VFCZT_PROVINCE_CODE_34);
+                                    dwmSptb02.setVFCZT_CITY_CODE(VFCZT_CITY_CODE_34);
+                                }
+                            }
+
+                            /** 发车站台的相关字段赋值
+                             *  处理 vsczt的 VSCZT_PROVINCE_CODE  VSCZT_CITY_CODE 给这俩字段赋值
+                             *  inner join sptc34 b on a.vwlckdm = b.VSCZT
+                             */
+                            if (StringUtils.isNotBlank(vfczt)) {
+                                String sptc34VSCZTSql = "select VSQDM, VSXDM from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vsczt + "' limit 1 ";
+                                JSONObject odsVlmsSptc34VSCZT = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34VSCZTSql, vsczt);
+                                if (odsVlmsSptc34VSCZT != null) {
+                                    // 收车站台的省区代码
+                                    String VSCZT_PROVINCE_CODE_34 = odsVlmsSptc34VSCZT.getString("VSQDM");
+                                    // 收车站台的市县代码
+                                    String VSCZT_CITY_CODE_34 = odsVlmsSptc34VSCZT.getString("VSXDM");
+                                    dwmSptb02.setVSCZT_PROVINCE_CODE(VSCZT_PROVINCE_CODE_34);
+                                    dwmSptb02.setVSCZT_CITY_CODE(VSCZT_CITY_CODE_34);
+                                }
+                            }
                             /**
                              * 处理 到货地  省区 县区名称
                              * 关联合并后的维表 dim_vlms_provinces
@@ -281,6 +316,45 @@ public class WaybillDwmAppSptb02Simple {
                                     dwmSptb02.setEND_PROVINCE_NAME(province.getString("vsqmc"));
                                     //例如 市县名称: 齐河
                                     dwmSptb02.setEND_CITY_NAME(province.getString("vsxmc"));
+                                }
+
+                                /**
+                                 * 铁水的 cdhddm组成的 END_PROVINCE_CODE + END_CITY_CODE 与 其他 I.公路(vwlckdm) II.铁水(vsczt)作比较
+                                 * 若相等 则为同城 1 否则为异地 2 默认为 0
+                                  */
+                            //  获取运单类型
+                                String traffic_type = dwmSptb02.getTRAFFIC_TYPE();
+                            //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
+                                String provincesEnd = endProvinceCode + endCityCode;
+                            //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
+                                if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode) && StringUtils.equals("G", traffic_type)){
+                                    // 公路的省市县代码
+                                    String provincesG = startProvinceCode + startCityCode;
+                                    if (StringUtils.equals(provincesEnd,provincesG)){
+                                        dwmSptb02.setTYPE_TC(1);
+                                    } else {
+                                        dwmSptb02.setTYPE_TC(2);
+                                    }
+                                }
+                            //-----------------开始比较: 铁 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'T' ----------------------------------------------------------//
+                                String vsczt_province_code = dwmSptb02.getVSCZT_PROVINCE_CODE();
+                                String vsczt_city_code = dwmSptb02.getVSCZT_CITY_CODE();
+                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("T", traffic_type)){
+                                    String provincesT = vsczt_province_code + vsczt_city_code;
+                                    if (StringUtils.equals(provincesEnd,provincesT)){
+                                        dwmSptb02.setTYPE_TC(1);
+                                    } else {
+                                        dwmSptb02.setTYPE_TC(2);
+                                    }
+                                }
+                            //-----------------开始比较: 水 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'S' ----------------------------------------------------------//
+                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("S", traffic_type)){
+                                    String provincesS = vsczt_province_code + vsczt_city_code;
+                                    if (StringUtils.equals(provincesEnd,provincesS)){
+                                        dwmSptb02.setTYPE_TC(1);
+                                    } else {
+                                        dwmSptb02.setTYPE_TC(2);
+                                    }
                                 }
                             }
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
