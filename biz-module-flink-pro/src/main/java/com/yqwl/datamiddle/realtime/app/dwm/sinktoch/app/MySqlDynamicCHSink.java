@@ -84,7 +84,8 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
                 if (insertChMap.containsKey(tableProcess.getSinkTable())) {
                     // 如果存在，累计到现有容器中
                     Map<String, List<List<Object>>> stringListMap = insertChMap.get(tableProcess.getSinkTable());
-                    stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(JSONObject.parseObject(cdcJsonObj.getString("after"), tableProcess.getClazz())));
+                    // TODO: 晓冯处理
+                    // stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(JSONObject.parseObject(cdcJsonObj.getString("after"), tableProcess.getClazz())));
                 } else {
                     // 3. 动态拼接批量SQL
                     sb = new StringBuilder().append("insert into ")
@@ -128,11 +129,11 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
 
     /**
      * 获取每行的数据 用于拼接prepare阶段的 value赋值。
-     *
+     * TODO:
      * @return
      */
     private List<Object> getValueList() {
-
+        return null;
     }
 
     /**
