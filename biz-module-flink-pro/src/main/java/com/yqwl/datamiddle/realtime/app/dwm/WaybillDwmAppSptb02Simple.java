@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 消费mysql的 dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段
+ * @Description: 消费mysql的 dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段成 dwm_vlms_sptb02表
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0

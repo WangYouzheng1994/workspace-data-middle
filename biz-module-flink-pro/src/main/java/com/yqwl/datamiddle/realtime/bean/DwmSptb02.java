@@ -1384,4 +1384,30 @@ public class DwmSptb02 implements Serializable {
      */
     private String CCXDL;
 
+    /**
+     * 是否同城异地 0无 1同城 2异地
+     * 默认值为0  20220801添加
+     */
+    private Integer TYPE_TC;
+
+    /**
+     *发车站台的省区代码
+     */
+    private String VFCZT_PROVINCE_CODE;
+
+    /**
+     * 发车站台的市县代码
+     */
+    private String VFCZT_CITY_CODE;
+
+    /**
+     * 收车站台的省区代码
+     */
+    private String VSCZT_PROVINCE_CODE;
+
+    /**
+     *收车站台的市县代码
+     */
+    private String VSCZT_CITY_CODE;
+
 }
