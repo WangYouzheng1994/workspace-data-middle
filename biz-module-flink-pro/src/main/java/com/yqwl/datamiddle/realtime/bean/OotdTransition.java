@@ -310,4 +310,30 @@ public class OotdTransition {
      * 是否为水路的运输方式 1为是 0为否 20220719添加
      */
     private Integer TYPE_S;
+
+    /**
+     * 是否同城异地 0无 1同城 2异地
+     * 默认值为0  20220801添加
+     */
+    private Integer TYPE_TC;
+
+    /**
+     *发车站台的省区代码
+     */
+    private String VFCZT_PROVINCE_CODE;
+
+    /**
+     * 发车站台的市县代码
+     */
+    private String VFCZT_CITY_CODE;
+
+    /**
+     * 收车站台的省区代码
+     */
+    private String VSCZT_PROVINCE_CODE;
+
+    /**
+     *收车站台的市县代码
+     */
+    private String VSCZT_CITY_CODE;
 }
