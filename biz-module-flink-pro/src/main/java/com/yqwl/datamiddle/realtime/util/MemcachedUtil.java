@@ -10,7 +10,6 @@ import net.spy.memcached.internal.OperationFuture;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: MemcacheUtil
@@ -21,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class MemcachedUtil {
     private static final MemcachedClient connect = connect();
-
+/*
     public static void main(String[] args) {
         final String host = "192.168.3.96";//控制台上的“内网地址”
         final String port ="11211"; //默认端口 11211，不用改
@@ -64,13 +63,22 @@ public class MemcachedUtil {
         if (cache != null) {
             cache.shutdown();
         }
-    }
+    }*/
 
     public static void loginWithAuth() {
 
     }
     public static void loginNoAuth() {
 
+    }
+
+    public static void main(String[] args) {
+        MemcachedClient connect = connect();
+        Object o = connect.get("@@scn0");
+        System.out.println(connect.get("1"));
+        connect.get("@@scn1");
+        System.out.println(connect.get("2"));
+        System.out.println();
     }
 
     /**
@@ -81,16 +89,16 @@ public class MemcachedUtil {
      */
     public static MemcachedClient connect() {
         final String host = PropertiesUtil.getPropsStr("memcache.host");
-        final String port = PropertiesUtil.getPropsStr("memcache.memcache.port");
+        final String port = PropertiesUtil.getPropsStr("memcache.port");
         MemcachedClient cache = null;
 
         try {
             cache = new MemcachedClient(
                     new ConnectionFactoryBuilder().setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
-                            .setOpTimeout(1233)
                             // .setAuthDescriptor(ad)
                             .build(),
                     AddrUtil.getAddresses(host + ":" + port));
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
