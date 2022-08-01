@@ -13,6 +13,7 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class CustomerDeserialization implements DebeziumDeserializationSchema<String> {
 
@@ -21,7 +22,7 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
     private static final String INSERT_TYPE = "insert";
     private static final String UPDATE_TYPE = "update";
     private static final String QUERY_TYPE = "query";
-
+    private static final ThreadPoolExecutor instance = ThreadPoolUtil.getInstance();
 
     /**
      * 序列化后封装的统一数据结构格式
@@ -138,6 +139,14 @@ public class CustomerDeserialization implements DebeziumDeserializationSchema<St
         //System.out.println("序列化统一数据格式：" + result.toJSONString());
 
         // 8. 输出数据
+        // TODO:1. 如果scn存在，就跳过。3. 同时对于每个小时的scn进行记录，方便下游的数据回放，保证下游数据的释放是正常的. 2. 跳过大于2020年1月1号以前的数据。
+        /*if () {
+
+
+
+
+        }*/
+
         collector.collect(result.toJSONString());
     }
 
