@@ -157,37 +157,6 @@ public class ClickhouseDruidUtil {
                         log.error(e.getMessage(), e);
                     }
                 });
-/*
-                List<String> strings = Arrays.asList(sqlBatch.split(";"));
-                for (int i = 0; i < strings.size(); i++) {
-                    int index = 1;
-                    String sql = strings.get(i);
-                    if (i == 0) {
-                        preparedStatement = connection.prepareStatement(sql);
-                    }
-
-                    valueList.get(i);
-                    List<Object> objects = valueList.get(i);
-                    for (Object object : objects) {
-                        preparedStatement.setObject(index, object);
-                        index++;
-                    }
-                    preparedStatement.addBatch();
-                }
-
-                preparedStatement.executeBatch();
-*/
-            /*if (CollectionUtils.isNotEmpty(valueList)) {
-                int index = 1;
-                for (int i = 0; i < valueList.size(); i++) {
-                    List<Object> objects = valueList.get(i);
-                    for (Object object : objects) {
-                        preparedStatement.setObject(index, object);
-                        index++;
-                    }
-                }
-            }*/
-                // log.info("单条数据执行成功情况,{}", index);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             } finally {
