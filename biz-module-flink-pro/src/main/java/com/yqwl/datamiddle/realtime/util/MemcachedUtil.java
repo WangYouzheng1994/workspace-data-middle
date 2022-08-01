@@ -10,6 +10,7 @@ import net.spy.memcached.internal.OperationFuture;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: MemcacheUtil
@@ -74,16 +75,19 @@ public class MemcachedUtil {
 
     /**
      * 建立Memcache 连接
+     * 从配置文件中读取
      *
      * @return
      */
     public static MemcachedClient connect() {
+        final String host = PropertiesUtil.getPropsStr("memcache.host");
+        final String port = PropertiesUtil.getPropsStr("memcache.memcache.port");
         MemcachedClient cache = null;
-        final String host = "192.168.3.96";//控制台上的“内网地址”
-        final String port ="11211"; //默认端口 11211，不用改
+
         try {
             cache = new MemcachedClient(
                     new ConnectionFactoryBuilder().setProtocol(ConnectionFactoryBuilder.Protocol.BINARY)
+                            .setOpTimeout(1233)
                             // .setAuthDescriptor(ad)
                             .build(),
                     AddrUtil.getAddresses(host + ":" + port));
@@ -122,9 +126,29 @@ public class MemcachedUtil {
      * @param key
      * @param exp
      * @param value
-     * @return
+     * @return @See{@link net.spy.memcached.internal.OperationFuture}
      */
     public static OperationFuture<Boolean> setValueAsync(String key, int exp, Object value) {
         return connect.set(key, exp, value);
+    }
+
+    /**
+     * 获取指定的 key 值。
+     *
+     * @param key
+     * @return
+     */
+    public static Object get(String key) {
+        return connect.get(key);
+    }
+
+    /**
+     * 异步读取
+     *
+     * @param key
+     * @return
+     */
+    public static Object getAsync(String key) {
+        return connect.asyncGet(key);
     }
 }

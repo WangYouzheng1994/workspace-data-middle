@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.util;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.setting.dialect.Props;
 import com.yqwl.datamiddle.realtime.common.ClickhouseConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 
 import java.io.InputStream;
@@ -10,10 +11,15 @@ import java.util.Properties;
 
 /**
  * 解析properties配置文件
+ * 默认走的是dev环境。即：resources/cdc-dev.properties
  */
+@Slf4j
 public class PropertiesUtil {
-
+    /**
+     * 当前打包环境 跟着maven的profile走的
+     */
     public static String ACTIVE_TYPE = "dev";
+
     static {
         try (InputStream resourceAsStream =
                      PropertiesUtil.class.getResourceAsStream("/application.properties")) {
@@ -25,25 +31,14 @@ public class PropertiesUtil {
                 ACTIVE_TYPE = o.toString();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
-
-    //开启哪个模式
-    //public static final String ACTIVE_TYPE = "prod";
-
-    //开发模式
-    private static final String ACTIVE_DEV = "dev";
-    //生产模式
-    private static final String ACTIVE_PROD = "prod";
-
-    private static final String FILENAME_DEV = "cdc-dev.properties";
-    private static final String FILENAME_PROD = "cdc-prod.properties";
 
     /**
      * 获取当前环境版本下的配置文件。
      *
-     * @return
+     * @return cn.hutool.setting.dialect.Props
      */
     public static Props getProps() {
         return new Props("cdc-"+ACTIVE_TYPE+".properties", CharsetUtil.CHARSET_UTF_8);
@@ -52,7 +47,7 @@ public class PropertiesUtil {
     /**
      * 获取字符串类型Value值
      *
-     * @return
+     * @return java.lang.String
      */
     public static String getPropsStr(String key) {
         return GetterUtil.getString(getProps().getStr(key));
@@ -60,6 +55,7 @@ public class PropertiesUtil {
 
     /**
      * 获取 int类型Value值
+     *
      * @return
      */
     public static int getPropsInt(String key) {
@@ -71,7 +67,7 @@ public class PropertiesUtil {
      * 获取当前环境版本下的 checkPoint
      *
      * @param checkpointSubDir 在公共目录下面的二级目录
-     * @return
+     * @return java.lang.String
      */
     public static String getCheckpointStr(String checkpointSubDir) {
         return PropertiesUtil.getProps().getStr("checkpoint.hdfs.url") + checkpointSubDir;
@@ -81,7 +77,7 @@ public class PropertiesUtil {
      * 获取当前环境版本下的 checkPoint
      *
      * @param savePointSubDir 在公共目录下面的二级目录
-     * @return
+     * @return java.lang.String
      */
     public static String getSavePointStr(String savePointSubDir) {
         return PropertiesUtil.getProps().getStr("savepoint.hdfs.url") + savePointSubDir;
@@ -90,7 +86,7 @@ public class PropertiesUtil {
     /**
      * 读取配置文件，获取Clickhouse当前连接信息
      *
-     * @return
+     * @return org.apache.flink.connector.jdbc.JdbcConnectionOptions
      */
     public static JdbcConnectionOptions getClickhouseJDBCConnection() {
         return new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
@@ -104,7 +100,7 @@ public class PropertiesUtil {
     /**
      * 读取配置文件，获取MySQL Master当前连接信息
      *
-     * @return
+     * @return org.apache.flink.connector.jdbc.JdbcConnectionOptions
      */
     public static JdbcConnectionOptions getMysqlJDBCConnection() {
         return new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
