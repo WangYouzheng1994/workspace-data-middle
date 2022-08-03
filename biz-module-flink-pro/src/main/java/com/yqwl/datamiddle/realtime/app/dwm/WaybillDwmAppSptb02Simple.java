@@ -7,6 +7,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
@@ -74,11 +75,11 @@ public class WaybillDwmAppSptb02Simple {
         //1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppSptb02SimpleMysqlSource").uid("WaybillDwmAppSptb02SimpleMysqlSourceStream").name("WaybillDwmAppSptb02SimpleMysqlSourceStream");
 
-        SingleOutputStreamOperator<DwmSptb02> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02>() {
+        SingleOutputStreamOperator<DwmSptb02No8TimeFields> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02No8TimeFields>() {
             @Override
-            public void processElement(String value, Context ctx, Collector<DwmSptb02> out) throws Exception {
+            public void processElement(String value, Context ctx, Collector<DwmSptb02No8TimeFields> out) throws Exception {
                 //获取真实数据
-                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
+                DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
@@ -360,7 +361,7 @@ public class WaybillDwmAppSptb02Simple {
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
                         //实体类中null值进行默认值赋值
-                        DwmSptb02 bean = JsonPartUtil.getBean(dwmSptb02);
+                            DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
                         out.collect(bean);
                     }
                 }
@@ -369,8 +370,8 @@ public class WaybillDwmAppSptb02Simple {
         }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
         //====================================sink mysql===============================================//
-        String sql = MysqlUtil.getSql(DwmSptb02.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
+        String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");
