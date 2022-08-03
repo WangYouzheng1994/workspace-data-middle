@@ -39,20 +39,20 @@ public class OneOrderToEndDwmAppSPTB02 {
     private static final long END = 1672502399000L;
 
     public static void main(String[] args) throws Exception {
-        //Configuration configuration1 = new Configuration();
-        //flink parallelism=16 savepoint state
+        // Configuration configuration1 = new Configuration();
+        // flink parallelism=16 savepoint state
         // configuration1.setString("execution.savepoint.path",
         // "hdfs://hadoop195:8020/flink/checkpoint/be4ef18e17df472b9c62fee199e8fb21/4641d34ccce58cab8466c991a62ed103/chk-66");
-        //1.创建环境  Flink 流式处理环境
+        // 1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+        // 设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
@@ -62,7 +62,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
         properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
 
-        //mysql消费源相关参数配置
+        // mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
                 .hostname(props.getStr("cdc.mysql.hostname"))
@@ -74,18 +74,18 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .distributionFactorUpper(10.0d)   //针对cdc的错误算法的更改
+                .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
 
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppSPTB02MysqlSource").uid("OneOrderToEndDwmAppSPTB02MysqlSourceStream").name("OneOrderToEndDwmAppSPTB02MysqlSourceStream");
         //==============================================dwm_vlms_sptb02处理START=============================================================================//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndUpdateProcess = mysqlSourceStream.process(new ProcessFunction<String, OotdTransition>() {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
-                //DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
+                // DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 Long ddjrq1 = dwmSptb02.getDDJRQ();
                 if (Objects.nonNull(ddjrq1) && ddjrq1 > 0) {
                     if (ddjrq1 >= START && ddjrq1 <= END) {
@@ -108,7 +108,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String end_city_name = dwmSptb02.getEND_CITY_NAME();                    // 目的城市
                         String vdwdm = dwmSptb02.getVDWDM();                                    // 经销商代码
                         String dealer_name = dwmSptb02.getDEALER_NAME();                        // 经销商名称
-                        //String vysfs = dwmSptb02.getVYSFS();                                  // 原始的运输方式
+                        // String vysfs = dwmSptb02.getVYSFS();                                  // 原始的运输方式
                         String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      // dwm的合出来的运输方式
                         String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      // 开始站台/港口仓库名称
                         String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          // 到达站台/港口仓库名称
@@ -233,7 +233,7 @@ public class OneOrderToEndDwmAppSPTB02 {
 
                         //=====================================铁水运单处理=====================================================//
                         if (StringUtils.isNotBlank(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
-                            //铁路运输方式
+                            // 铁路运输方式
                             if ("T".equals(traffic_type) || "L1".equals(traffic_type)) {
                                 // 开始站台仓库名称
                                 if (StringUtils.isNotBlank(start_warehouse_name)) {
@@ -267,7 +267,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                                 }
                                 ootdTransition.setTYPE_T(1);
                             }
-                            //水路运输方式
+                            // 水路运输方式
                             if ("S".equals(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
                                 // 开始站台仓库名称
                                 if (StringUtils.isNotBlank(start_warehouse_name)) {
@@ -411,8 +411,6 @@ public class OneOrderToEndDwmAppSPTB02 {
                     Long unload_ship_time = ootd.getUNLOAD_SHIP_TIME();                  // 水路卸船时间
                     Integer typeTc = ootd.getTYPE_TC();                                  // 同城异地标识符 0无 1同城 2异地   默认值为0
 
-
-
                     int i = 1;
 
                     ps.setString(i++, vvin);                                             // 底盘号
@@ -434,7 +432,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, cjsdbh);                                           // 结算单编号
 
 
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     ps.setString(i++, start_platform_name);                              // 铁路开始站台
                     ps.setString(i++, end_platform_name);                                // 铁路目的站台
                     ps.setLong  (i++, in_start_platform_time);                           // 铁路入开始站台时间
@@ -538,7 +536,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     Integer jyccws = ootd.getJYCCWS();                                   // 轿运车车位数
                     Integer distribute_vehicle_num = ootd.getDISTRIBUTE_VEHICLE_NUM();   // 末端配送轿运车车位数
 
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     String start_platform_name = ootd.getSTART_PLATFORM_NAME();          // 铁路开始站台
                     String end_platform_name = ootd.getEND_PLATFORM_NAME();              // 铁路目的站台
                     Long in_start_platform_time = ootd.getIN_START_PLATFORM_TIME();      // 铁路入开始站台时间
@@ -574,7 +572,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, cjsdbh);                                           // 结算单编号
 
 
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     ps.setString(i++, start_platform_name);                              // 铁路开始站台
                     ps.setString(i++, end_platform_name);                                // 铁路目的站台
                     ps.setLong  (i++, in_start_platform_time);                           // 铁路入开始站台时间
@@ -678,7 +676,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String base_name = ootd.getBASE_NAME();                              // 基地名称
                     Integer jyccws = ootd.getJYCCWS();                                   // 轿运车车位数
                     Integer distribute_vehicle_num = ootd.getDISTRIBUTE_VEHICLE_NUM();   // 末端配送轿运车车位数
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     String start_platform_name = ootd.getSTART_PLATFORM_NAME();          // 铁路开始站台
                     String end_platform_name = ootd.getEND_PLATFORM_NAME();              // 铁路目的站台
                     Long in_start_platform_time = ootd.getIN_START_PLATFORM_TIME();      // 铁路入开始站台时间
@@ -692,7 +690,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                     Long in_end_waterway_time = ootd.getIN_END_WATERWAY_TIME();          // 水路入目的港口时间
                     Long unload_ship_time = ootd.getUNLOAD_SHIP_TIME();                  // 水路卸船时间
                     Integer typeTc = ootd.getTYPE_TC();                                  // 同城异地标识符 0无 1同城 2异地   默认值为0
+
                     int i = 1;
+
                     ps.setString(i++, vvin);                                             // 底盘号
                     ps.setString(i++, vehicle_code);                                     // 车型
                     ps.setString(i++, vehicle_name);                                     // 车型名称
@@ -815,7 +815,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     Integer jyccws = ootd.getJYCCWS();                                   // 轿运车车位数
                     Integer distribute_vehicle_num = ootd.getDISTRIBUTE_VEHICLE_NUM();   // 末端配送轿运车车位数
 
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     String start_platform_name = ootd.getSTART_PLATFORM_NAME();          // 铁路开始站台
                     String end_platform_name = ootd.getEND_PLATFORM_NAME();              // 铁路目的站台
                     Long in_start_platform_time = ootd.getIN_START_PLATFORM_TIME();      // 铁路入开始站台时间
@@ -851,7 +851,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, cjsdbh);                        // 结算单编号
 
 
-                    //新添加铁水出入站台/港口的十二个字段
+                    // 新添加铁水出入站台/港口的十二个字段
                     ps.setString(i++, start_platform_name);           // 铁路开始站台
                     ps.setString(i++, end_platform_name);             // 铁路目的站台
                     ps.setLong  (i++, in_start_platform_time);        // 铁路入开始站台时间
