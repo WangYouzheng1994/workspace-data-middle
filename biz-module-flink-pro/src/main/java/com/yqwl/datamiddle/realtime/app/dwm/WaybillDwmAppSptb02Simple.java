@@ -6,16 +6,12 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
-import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
-import com.yqwl.datamiddle.realtime.util.KafkaUtil;
-import com.yqwl.datamiddle.realtime.util.MysqlUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -25,9 +21,9 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -42,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class WaybillDwmAppSptb02Simple {
 
     public static void main(String[] args) throws Exception {
-        //Flink 流式处理环境
+        // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
@@ -51,18 +47,18 @@ public class WaybillDwmAppSptb02Simple {
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
-        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_sptb02_simple"));
+        // ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_sptb02_simple"));
         // 设置savepoint点二级目录位置
-        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
+        // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
         log.info("checkpoint设置完成");
 
-        //mysql消费源相关参数配置
+        // mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
-        //kafka消费源相关参数配置
+        // kafka消费源相关参数配置
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
@@ -71,14 +67,14 @@ public class WaybillDwmAppSptb02Simple {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppSptb02SimpleMysqlSource").uid("WaybillDwmAppSptb02SimpleMysqlSourceStream").name("WaybillDwmAppSptb02SimpleMysqlSourceStream");
 
-        SingleOutputStreamOperator<DwmSptb02> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02>() {
+        SingleOutputStreamOperator<DwmSptb02No8TimeFields> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02No8TimeFields>() {
             @Override
-            public void processElement(String value, Context ctx, Collector<DwmSptb02> out) throws Exception {
+            public void processElement(String value, Context ctx, Collector<DwmSptb02No8TimeFields> out) throws Exception {
                 //获取真实数据
-                DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
+                DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
@@ -132,11 +128,11 @@ public class WaybillDwmAppSptb02Simple {
                                 String specConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
                                 JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, specConfigSql, hostComCode, baseCode, transModeCode);
                                 if (specConfig != null) {
-                                    //定义要增加的时间戳
+                                    // 定义要增加的时间戳
                                     Long outSiteTime = null;
-                                    //获取增加的时间步长
+                                    // 获取增加的时间步长
                                     String hours = specConfig.getString("STANDARD_HOURS");
-                                    //获取前置节点代码
+                                    // 获取前置节点代码
                                     String nodeCode = specConfig.getString("START_CAL_NODE_CODE").trim();
                                     /**
                                      * DZJDJRQ 主机厂计划下达时间       公路
@@ -152,7 +148,7 @@ public class WaybillDwmAppSptb02Simple {
                                     // 水运 是否是根据SPTB02_SEA_RK.DRKRQ  溯源系统入港扫描时间
                                     if (outSiteTime != null) {
                                         Date outSiteDate = new Date(outSiteTime);
-                                        //格式化时间
+                                        // 格式化时间
                                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                         String formatDate = formatter.format(outSiteDate);
                                         DateTime parse = DateUtil.parse(formatDate);
@@ -257,9 +253,9 @@ public class WaybillDwmAppSptb02Simple {
                                 String provinceSql = "select vsqmc, vsxmc from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + startProvinceCode + "' and csxdm = '" + startCityCode + "' limit 1 ";
                                 JSONObject province = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_PROVINCES, provinceSql, startProvinceCode, startCityCode);
                                 if (province != null) {
-                                    //省区名称：山东省
+                                    // 省区名称：山东省
                                     dwmSptb02.setSTART_PROVINCE_NAME(province.getString("vsqmc"));
-                                    //市县名称: 齐河
+                                    // 市县名称: 齐河
                                     dwmSptb02.setSTART_CITY_NAME(province.getString("vsxmc"));
                                 }
                             }
@@ -312,9 +308,9 @@ public class WaybillDwmAppSptb02Simple {
                                 String provinceSql = "select vsqmc, vsxmc from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + endProvinceCode + "' and csxdm = '" + endCityCode + "' limit 1 ";
                                 JSONObject province = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_PROVINCES, provinceSql, endProvinceCode, endCityCode);
                                 if (province != null) {
-                                    //例如 省区名称：山东省
+                                    // 例如 省区名称：山东省
                                     dwmSptb02.setEND_PROVINCE_NAME(province.getString("vsqmc"));
-                                    //例如 市县名称: 齐河
+                                    // 例如 市县名称: 齐河
                                     dwmSptb02.setEND_CITY_NAME(province.getString("vsxmc"));
                                 }
 
@@ -357,10 +353,206 @@ public class WaybillDwmAppSptb02Simple {
                                     }
                                 }
                             }
+//                            // 分配及时率  出库及时率  起运及时率 到货及时率
+//                            /**
+//                             * 处理理论出库时间 THEORY_OUT_TIME
+//                             * 关联LC_SPEC_CONFIG 获取前置节点, 标准时长,指标代码,标准时长,状态
+//                             * 前置节点代码  START_CAL_NODE_CODE
+//                             * 标准时长(小时,需要转成秒级别)  STANDARD_HOURS
+//                             * 指标代码(取2): SPEC_CODE  0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
+//                             * 使用到dwdSptb02 的czjgsdm  cqwh vysfs
+//                             * vysfs 已经处理成 TRAFFIC_TYPE    dwdsptb02
+//                             *                 TRANS_MODE_CODE   lc_spec_config
+//                             * czjgsdm  已经处理成sptb02.HOST_COM_CODE 1:大众  2:红旗 3:马自达
+//                             * cqwh 已经处理成sptb02.BASE_CODE  1:长春  2:成都  3.佛山 5:天津
+//                             * 只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ+24小时(86400L)  主机公司代码是1 (大众)
+//                             * 红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
+//                             * 马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
+//                             */
+//                            log.info("获取查询需要的主机公司代码,基地代码,运输方式代码" , hostComCode , baseCode ,transModeCode);
+//                            if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
+//                                String configSql = " select * from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '2' limit 1 ";
+//                                JSONObject config = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG,configSql, hostComCode , baseCode ,transModeCode,"1","2");
+//                                if ( config != null ) {
+//                                    // 获取前置节点代码  START_CAL_NODE_CODE
+//                                    String nodeCodeStr = config.getString("START_CAL_NODE_CODE").trim();
+//                                    // 将标准时长并将小时转换成毫秒级别  STANDARD_HOURS
+//                                    Long second = Long.parseLong(config.getString("STANDARD_HOURS")) * 60 * 60 * 1000L;
+//                                    // 获取主机公司代码 HOST_COM_CODE
+//                                    String hostCode = config.getString("HOST_COM_CODE").trim();
+//                                    // 获取运输方式名称  TRANS_MODE_NAME
+//                                    String transName = config.getString("TRANS_MODE_NAME").trim();
+//                                    // 获取基地名称 BASE_NAME
+//                                    String baseName = config.getString("BASE_NAME").trim();
+//                                    // 只处理大众理论出库时间  不区分公铁水和基地  取大众计划下达时间 DZJDJRQ +24小时(86400L)  主机公司代码是1 (大众)  主机厂下达计划时间  取sptb02.dpzrq
+//                                    if ("1".equals(hostCode) && "DZJDJRQ".equals(nodeCodeStr)) {
+//                                        if (dwmSptb02.getDPZRQ() != 0) {
+//                                            dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDPZRQ() + second);
+//                                        }
+//                                    }
+//                                    // 红旗理论出库时间  基地只有长春基地,  取运输商指派时间 sptb02.DYSSZPSJ  公路:+24小时(86400L)   铁路:+72小时(259200L)  水路:+36小时(172800L)  红旗  主机公司代码是2
+//                                    if ("2".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCodeStr)) {
+//                                        if (dwmSptb02.getDYSSZPSJ() != 0) {
+//                                            switch (transName) {
+//                                                case "公路":
+//                                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+//                                                    break;
+//                                                case "铁路":
+//                                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+//                                                    break;
+//                                                case "水路":
+//                                                    dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+//                                                    break;
+//                                            }
+//                                        }
+//                                    }
+//                                    // 马自达理论出库时间  基地只有长春  取运输商指派时间 sptb02.DYSSZPSJ 公路:+24小时(86400L)  铁路和水路:+36小时(172800L)  马自达  主机公司代码是 3
+//                                    if ("3".equals(hostCode) && "长春基地".equals(baseName) && "DYSSZPSJ".equals(nodeCodeStr)) {
+//                                        if (dwmSptb02.getDYSSZPSJ() != 0) {
+//                                            if ("公路".equals(transName)) {
+//                                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+//                                            } else if ("铁路".equals(transName) || "水路".equals(transName)) {
+//                                                dwmSptb02.setTHEORY_OUT_TIME(dwmSptb02.getDYSSZPSJ() + second);
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            /**
+//                             * 处理理论到货时间  THEORY_SITE_TIME (铁路和水路数据)
+//                             * 先处理dwmsptb02表与sptb013表的字段
+//                             * SPTB013 需要的字段 NSJSL,VPH
+//                             * 1 (b3.nsjsl /10 >= 26) 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 3 b3.nsjsl /10 <15
+//                             * 关联条件  left  join sptb013    b3 on a.vph = b3.vph
+//                             * 字段  RAILWAY_TRAIN_TYPE  铁路种类
+//                             */
+//                            // 获取vph
+//                            String vph = dwmSptb02.getVPH();
+//                            String trafficType = dwmSptb02.getTRAFFIC_TYPE();
+//                            log.info("获取需要查询的vph {}",vph);
+//                            if (StringUtils.isNotBlank(vph) && "T".equals(trafficType) || "S".equals(trafficType)) {
+//                                String sptb013Sql = " select  * from " + KafkaTopicConst.ODS_VLMS_SPTB013 + " where vph = '" + vph +  "' limit 1 ";
+//                                JSONObject sptb013 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB013,sptb013Sql,vph);
+//                                if ( sptb013 != null ) {
+//                                    // 获取实际数量
+//                                    Integer nsjsl = sptb013.getIntValue("NSJSL");
+//                                    // 1 (b3.nsjsl /10 >= 26)
+//                                    // 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26)
+//                                    // 3 b3.nsjsl /10 <15
+//                                    if (nsjsl != 0) {
+//                                        // 大于26  1
+//                                        if (nsjsl / 10 >= 26) {
+//                                            dwmSptb02.setRAILWAY_TRAIN_TYPE(1);
+//                                            // 大于等于 15 小于26  2
+//                                        } else if (nsjsl / 10 >= 15 && nsjsl / 10 < 26) {
+//                                            dwmSptb02.setRAILWAY_TRAIN_TYPE(2);
+//                                            // 小于15 3
+//                                        } else if (nsjsl / 10 < 15) {
+//                                            dwmSptb02.setRAILWAY_TRAIN_TYPE(3);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                            /**
+//                             * 处理理论到货时间
+//                             * 与spti32表关联  取公路的理论到货时间
+//                             *  ##### c1  sptc34  c2 mdac32  a sptb02  i spti32
+//                             * left join spti32 i on c1.vsqdm = i.cqssqdm and c1.vsxdm = i.cqscsdm and c2.csqdm = i.cmbsqdm and c2.csxdm = i.cmbcsdm
+//                             *        and a.czjgsdm = i.czjgs and a.traffic_type = i.vysfs
+//                             * 关联条件  CQSSQDM 起始省区代码  CQSCSDM 起始市县代码  CMBSQDM 目标省区代码 CMBCSDM 目标市县代码  CZJGS 主机公司代码  VYSFS 运输方式
+//                             * SPTB02
+//                             *            END_PROVINCE_CODE 到货地省区代码     CMBSQDM
+//                             *            END_CITY_CODE  到货地市县代码      CMBCSDM
+//                             *            START_PROVINCE_CODE  起货地省区代码    CQSSQDM
+//                             *            START_CITY_CODE 起货地市县代码     CQSCSDM
+//                             *            TRAFFIC_TYPE 运输方式        VYSFS
+//                             *            HOST_COM_CODE 主机公司代码     CZJGS
+//                             */
+//                            // 获取起始省区代码
+//                            String startprovincecode = dwmSptb02.getSTART_PROVINCE_CODE();
+//                            // 获取起始市县代码  START_CITY_CODE
+//                            String startcitycode = dwmSptb02.getSTART_CITY_CODE();
+//                            // 获取到货地省区代码  END_PROVINCE_CODE
+//                            String endprovincecode = dwmSptb02.getEND_PROVINCE_CODE();
+//                            // 获取到货地市县代码   END_CITY_CODE
+//                            String endcitycode = dwmSptb02.getEND_CITY_CODE();
+//                            // 获取主机公司名称  HOST_COM_CODE
+//                            // 前面已经获取到数据  直接拿过来用即可
+//                            // String czjgsdm = dwmSptb02.getCZJGSDM();
+//                            // 获取运输方式  TRAFFIC_TYPE
+//                            // String trafficType = dwmSptb02.getTRAFFIC_TYPE();
+//                            if (StringUtils.isNotBlank(startprovincecode) && StringUtils.isNotBlank(startcitycode) && StringUtils.isNotBlank(endprovincecode) && StringUtils.isNotBlank(endcitycode) && StringUtils.isNotBlank(czjgsdm) && StringUtils.isNotBlank(trafficType)) {
+//                                String spti32Sql = " select *  from " + KafkaTopicConst.ODS_VLMS_SPTI32 + " where CQSSQDM = '" + startprovincecode + "'and CQSCSDM = '" + startcitycode + "'and CMBSQDM = '" + endprovincecode + "' and  CMBCSDM = '" + endcitycode+ "'and CZJGS = '" + czjgsdm + "' and VYSFS = '" + trafficType + "' limit 1" ;
+//                                JSONObject spti32 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTI32,spti32Sql,startprovincecode,startcitycode,endprovincecode,endcitycode,czjgsdm);
+//                                if ( spti32 != null ) {
+//                                    // VYSFS 运输方式
+//                                    String vysfs = spti32.getString("VYSFS");
+//                                    // sptb02.dckrq+spti32.ndhsj_xt
+//                                    Long ndhsj_xt = spti32.getLong("NDHSJ_XT") * 60 * 60 * 1000L;
+//                                    if (ndhsj_xt != 0 && "G".equals(vysfs)) {
+//                                        dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDCKRQ() + ndhsj_xt);
+//                                    }
+//                                }
+//                            }
+//                            /**
+//                             * 处理理论到货时间  THEORY_SITE_TIME
+//                             * 与 spti32_rail_sea 关联
+//                             * 关联字段  CZJGSDM  主机公司名称  vysfs S T
+//                             *  left  join spti32_rail_sea i1 on a.CZJGSDM = i1.CZJGSDM and decode(a.VYSFS,''S'',''S'',''T'') = i1.VYSFS and   a.VFCZT = i1.CQSZTDM and a.VSCZT = i1.CMBZTDM
+//                             *  RAILWAY_TRAIN_TYPE  1 (b3.nsjsl /10 >= 26) 2 (b3.nsjsl /10 >= 15 and b3.nsjsl /10 <26) 3 b3.nsjsl /10 <15
+//                             *  SPTB02
+//                             *  CZJGSDM 主机公司代码
+//                             *  TRAFFIC_TYPE 运输方式
+//                             *  VFCZT  发车站台
+//                             *
+//                             *  VSCZT  收车站台
+//                             *  铁水只有符合条件的才有理论到货时间
+//                             */
+//                            // 获取主机公司名称,运输方式  发车站台  收车站台等
+//                            String czjgs = dwmSptb02.getCZJGSDM();
+////                            String trafficType = dwmSptb02.getTRAFFIC_TYPE();
+//                            // 上面已经添加次字段的取值  这边直接拿着用就可以了
+////                            String vfczt = dwmSptb02.getVFCZT();
+////                            String vsczt = dwmSptb02.getVSCZT();
+//                            if (StringUtils.isNotBlank(czjgs) && StringUtils.isNotBlank(trafficType) && StringUtils.isNotBlank(vfczt) && StringUtils.isNotBlank(vsczt)) {
+//                                String spti32RailSeaSql = "select * from " +  KafkaTopicConst.ODS_VLMS_SPTI32_RAIL_SEA + " where CZJGSDM = '" + czjgs + "' and VYSFS = '" + trafficType  + "' and CQSZTDM = '" + vfczt + "' and CMBZTDM = '" + vsczt + "' limit 1";
+//                                JSONObject spti32RailSea = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTI32_RAIL_SEA,spti32RailSeaSql,czjgs,trafficType,vfczt,vsczt);
+//                                if ( spti32RailSea != null ) {
+//                                    // 获取NDHSJ_XTDH_ml(满列)  大于26  RAILWAY_TRAIN_TYPE 1 准换成毫秒级别数据
+//                                    BigDecimal ml = spti32RailSea.getBigDecimal("NDHSJ_XTDH_ML");
+//                                    long ndhsjxtdhml = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(ml)).setScale(0).longValue();
+//                                    // 获取NDHSJ_XTDH_dz(大组)  15<= x < 26   RAILWAY_TRAIN_TYPE 2
+//                                    BigDecimal dz = spti32RailSea.getBigDecimal("NDHSJ_XTDH_DZ");
+//                                    long ndhsjxtdhdz = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dz)).setScale(0).longValue();
+//                                    // 获取NDHSJ_XTDH_sl(散列) 小于15  RAILWAY_TRAIN_TYPE 3
+//                                    BigDecimal sl = spti32RailSea.getBigDecimal("NDHSJ_XTDH_SL");
+//                                    long ndhsjxtdhsl = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(sl)).setScale(0).longValue();
+//                                    // ndhsj_dz_ml  S
+//                                    BigDecimal dzml = spti32RailSea.getBigDecimal("NDHSJ_DZ_ML");
+//                                    long ndhsjdzml = BigDecimalUtil.multiply(BigDecimalUtil.getBigDecimal("3600000"), BigDecimalUtil.getBigDecimal(dzml)).setScale(0).longValue();
+//                                    // left  join spti32_rail_sea i1 on a.CZJGSDM = i1.CZJGSDM and decode(a.VYSFS,''S'',''S'',''T'') = i1.VYSFS and   a.VFCZT = i1.CQSZTDM and a.VSCZT = i1.CMBZTDM
+//                                    String seavysfs = spti32RailSea.getString("VYSFS");
+//                                    if (dwmSptb02.getDSJCFSJ() != 0) {
+//                                        if ("S".equals(seavysfs)) {
+//                                            dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjdzml);
+//                                        } else if ("T".equals(seavysfs)) {
+//                                            if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 1) {
+//                                                dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhml);
+//                                            } else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 2) {
+//                                                dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhdz);
+//                                            } else if (dwmSptb02.getRAILWAY_TRAIN_TYPE() == 3) {
+//                                                dwmSptb02.setTHEORY_SITE_TIME(dwmSptb02.getDSJCFSJ() + ndhsjxtdhsl);
+//                                            }
+//                                        }
+//                                    }
+//
+//                                }
+//                            }
+
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
                         //实体类中null值进行默认值赋值
-                        DwmSptb02 bean = JsonPartUtil.getBean(dwmSptb02);
+                            DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
                         out.collect(bean);
                     }
                 }
@@ -369,8 +561,8 @@ public class WaybillDwmAppSptb02Simple {
         }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
         //====================================sink mysql===============================================//
-        String sql = MysqlUtil.getSql(DwmSptb02.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
+        String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");

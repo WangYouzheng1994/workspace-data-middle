@@ -1,6 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.dwm.sinktoch.app;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.yqwl.datamiddle.realtime.bean.DcsOrders;
+import com.yqwl.datamiddle.realtime.bean.Sptb22Dq;
 import com.yqwl.datamiddle.realtime.bean.TableProcess;
 import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import com.yqwl.datamiddle.realtime.util.ClickhouseDruidUtil;
@@ -69,6 +71,8 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
             StringBuilder sb = null;
             // 输出表名
             String sinkTable = null;
+
+            String className = null;
             // 表名: {insert语句 : [数值value集合, ...]}
             Map<String, Map<String, List<List<Object>>>> insertChMap = new HashMap<>();
 
@@ -84,8 +88,7 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
                 if (insertChMap.containsKey(tableProcess.getSinkTable())) {
                     // 如果存在，累计到现有容器中
                     Map<String, List<List<Object>>> stringListMap = insertChMap.get(tableProcess.getSinkTable());
-                    // TODO: 晓冯处理
-                    // stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueList(JSONObject.parseObject(cdcJsonObj.getString("after"), tableProcess.getClazz())));
+                    stringListMap.entrySet().stream().findFirst().get().getValue().add(getValueListToBean(JSONObject.parseObject(cdcJsonObj.getString("after")), tableProcess.getClazz()));
                 } else {
                     // 3. 动态拼接批量SQL
                     sb = new StringBuilder().append("insert into ")
@@ -95,7 +98,7 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
                     sb.append(getValueSql(tableProcess.getClazz()));
 
                     List<List<Object>> valueObjects = new ArrayList<>();
-                    valueObjects.add(getValueList(cdcJsonObj.getJSONObject("after")));
+                    valueObjects.add(getValueListToBean(JSONObject.parseObject(cdcJsonObj.getString("after")), tableProcess.getClazz()));
                     HashMap<String, List<List<Object>>> insertItemMap = new HashMap<>();
                     insertItemMap.put(sb.toString(), valueObjects);
 
@@ -129,11 +132,28 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
 
     /**
      * 获取每行的数据 用于拼接prepare阶段的 value赋值。
-     * TODO:
      * @return
      */
-    private List<Object> getValueList() {
-        return null;
+    private List<Object> getValueListToBean(JSONObject afterData, Class clzz) {
+        log.info("展示: {}",afterData);
+        String name = clzz.getName();
+        Field[] declaredFields = clzz.getDeclaredFields();
+        log.info("展示:{}",name);
+        List<Object> newList = new ArrayList<>();
+            Object objBean = JSONObject.parseObject(afterData.toString(), clzz);
+            for (Field declaredField : declaredFields) {
+                if (!StringUtils.equals(declaredField.getName(), "IDNUM")) {
+                    declaredField.setAccessible(true);
+                    try {
+                        Object getValue = declaredField.get(objBean);
+                        newList.add(getValue);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        }
+        return newList;
+
     }
 
     /**

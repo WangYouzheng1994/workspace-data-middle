@@ -131,6 +131,50 @@ public class MysqlUtil {
         return sql.toString();
     }
 
+    /**
+     * 根据类组装sql
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> String getOnDuplicateKeySql(Class<T> clazz) {
+        TableName tableName = clazz.getAnnotation(TableName.class);
+        if (Objects.isNull(tableName)) {
+            throw new RuntimeException("当前类没有添加 TableName 注解");
+        }
+        Field[] fields = clazz.getDeclaredFields();
+        StringBuffer sql = new StringBuffer();
+        sql.append("INSERT INTO ").append(tableName.value());
+        List<String> columnList = new ArrayList<>();
+        List<String> valueList = new ArrayList<>();
+        List<String> columnAndValueList = new ArrayList<>();
+        for (Field field : fields) {
+            if (field.getAnnotation(TransientSink.class) != null) {
+                continue;
+            }
+            if (StringUtils.equals(field.getName(), "serialVersionUID")) {
+                continue;
+            }
+            columnList.add(field.getName());
+            columnAndValueList.add(field.getName()+" = VALUES("+ field.getName() + ")");
+            valueList.add("?");
+        }
+
+        //  INSERT INTO test ( id, `name`, auto )
+        //  VALUES
+        //	( 1, '3', 666661 )
+        //	ON DUPLICATE KEY UPDATE auto = VALUES( auto );
+
+        sql.append(" (").append(StringUtils.join(columnList, ",")).append(") ");
+        sql.append("values");
+        sql.append(" (").append(StringUtils.join(valueList, ",")).append(") ");
+        sql.append(" ON DUPLICATE KEY UPDATE ");
+        sql.append(StringUtils.join(columnAndValueList,","));
+
+        return sql.toString();
+    }
+
 
     public static JSONObject querySingle(String tableName, String sql, Object... value) {
         String redisKey = "dwm:vlms:" + tableName.toLowerCase() + ":";

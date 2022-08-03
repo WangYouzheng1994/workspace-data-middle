@@ -38,29 +38,29 @@ public class Sptc34WideApp {
 
         Configuration conf = new Configuration();
         conf.setString(RestOptions.BIND_PORT, "50100-50200"); // 指定访问端口
-        //获取执行环境
+        // 获取执行环境
         // StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 
-        //设置并行度
+        // 设置并行度
         env.setParallelism(1);
         // env.disableOperatorChaining();
-        //设置checkpoint`
+        // 设置checkpoint`
         CheckpointConfig ck = env.getCheckpointConfig();
-        //触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
+        // 触发保存点的时间间隔, 每隔1000 ms进行启动一个检查点
         ck.setCheckpointInterval(10000);
-        //采用精确一次模式
+        // 采用精确一次模式
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //检查点保存路径
+        // 检查点保存路径
         ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
-        //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
+        // 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "root");
 
 
         Props props = PropertiesUtil.getProps();
 
-        //从kafka消费数据
+        // 从kafka消费数据
         KafkaSource<String> kafkasource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_SPTC34)
@@ -73,29 +73,29 @@ public class Sptc34WideApp {
         // kafkaStream.print(System.currentTimeMillis()+"");
 //        kafkaStream.print();
 
-        //sptc34Wide表转换成实体类(sptc34表的数据传到sptc34Wide中)    sptc34表里面有176条数据省区市县代码是空值  已经使用空串代替
+        // sptc34Wide表转换成实体类(sptc34表的数据传到sptc34Wide中)    sptc34表里面有176条数据省区市县代码是空值  已经使用空串代替
         SingleOutputStreamOperator<Sptc34Wide> Sptc34MapSteeam = kafkaStream.map(new MapFunction<String, Sptc34Wide>() {
             @Override
             public Sptc34Wide map(String value) throws Exception {
-                //获取表字段并将没有值的数据添加默认值
+                // 获取表字段并将没有值的数据添加默认值
                 Sptc34Wide sptc34Wide = JsonPartUtil.getAfterObjWithDefault(value, Sptc34Wide.class);
-                //合并省区市县字段
+                // 合并省区市县字段
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVSQDM(), sptc34Wide.getVSXDM());
-                //将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
+                // 将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
                 sptc34Wide.setVSQSXDM(vsqsxdm);
 //                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
-                //获取kafka的时间戳作为创建时间和更新时间
+                // 获取kafka的时间戳作为创建时间和更新时间
                 String tsStr = JsonPartUtil.getTsStr(value);
-                //将String类型的时间戳转换成Long类型
+                // 将String类型的时间戳转换成Long类型
                 Long aLong = Long.valueOf(tsStr);
-                //获取数据类型
+                // 获取数据类型
                 String typeStr = JsonPartUtil.getTypeStr(value);
                 if ( typeStr.equals("insert") ) {
 
-                    //获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
+                    // 获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
                     sptc34Wide.setWAREHOUSE_CREATETIME(aLong);
                 }else if ( typeStr.equals("update") ) {
-                    //获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
+                    // 获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
                     sptc34Wide.setWAREHOUSE_UPDATETIME(aLong);
                 }
                 return sptc34Wide;
@@ -136,7 +136,7 @@ public class Sptc34WideApp {
             }
         }).addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");
 */
-        //连接mysql数据库,将数据存到mysql中
+        // 连接mysql数据库,将数据存到mysql中
         /*Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("REPLACE INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
                         "   NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
                         "  CGLKQKW, CCCSDM, VCFTJ, CWX,  CGS, CSCFBJH,  VDZCKDM,  CYSSDM,  CYSCDM,  VWLCKJC,  CWLBM,  CWLMC, " +
@@ -144,7 +144,7 @@ public class Sptc34WideApp {
                         "  FINAL_APPROVAL_USER,  FINAL_APPROVAL_DATE,  CZJGSDM,  VZTMC_ZT, VSQSXDM, WAREHOUSE_CREATETIME,  WAREHOUSE_UPDATETIME) VALUES " +
                         "(?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)"))
                 .uid("sptc34sinkMysql").name("sptc34sinkMysql");*/
-        //启动
+        // 启动
         env.execute("Sptc34WideApp");
     }
 }
