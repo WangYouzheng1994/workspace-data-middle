@@ -56,7 +56,7 @@ public class WaybillDwdAppSptb02Simple {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         // System.setProperty("HADOOP_USER_NAME", "yunding");
         // 设置checkpoint点二级目录位置
-        // ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwd_sptb02_simple"));
+         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwd_sptb02_simple"));
         // 设置savepoint点二级目录位置
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwd_sptb02_simple"));
 
