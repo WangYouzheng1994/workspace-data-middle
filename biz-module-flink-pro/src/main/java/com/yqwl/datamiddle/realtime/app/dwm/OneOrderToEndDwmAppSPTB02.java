@@ -219,9 +219,11 @@ public class OneOrderToEndDwmAppSPTB02 {
                             if (dtvsdhsj !=null){
                                 ootdTransition.setDTVSDHSJ(dtvsdhsj);
                             }
-                            if (type_tc != null){
-                                ootdTransition.setTYPE_TC(type_tc);
-                            }
+
+                        }
+                        // 同城异地赋值
+                        if (type_tc != null){
+                            ootdTransition.setTYPE_TC(type_tc);
                         }
                         // 干线公路运单的起运时间
                         if ("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)){
