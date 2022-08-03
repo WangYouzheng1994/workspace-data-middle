@@ -8,12 +8,11 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 
 /**
- * <p>
  * 运单主表-数据拉宽，增加相关字段
- * </p>
- *
- * @author yiqi
- * @since 2022-05-18
+ * 此实体类是删除了 HIGHWAY_WAREHOUSE_TYPE字段与八个时间节点的字段
+ * 用于dwd更新dwm时不影响到由bsd驱动过来的八个时间节点
+ * @author XiaoFeng
+ * @since 2022-08-03
  */
 @CamelUnderline(isChange = false)
 @TableName("dwm_vlms_sptb02")
@@ -1307,7 +1306,6 @@ public class DwmSptb02No8TimeFields implements Serializable {
      * 源: {@link DwdSptb02#END_WAREHOUSE_NAME}
      */
     private String END_WAREHOUSE_NAME;
-
 
     /**
      * 开始物理仓库代码
