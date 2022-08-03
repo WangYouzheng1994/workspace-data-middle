@@ -41,28 +41,28 @@ import java.util.concurrent.TimeUnit;
 public class WaybillDwdAppSptb02Simple {
 
     public static void main(String[] args) throws Exception {
-        //Flink 流式处理环境
+        // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
         log.info("初始化流处理环境完成");
 
-        //====================================checkpoint配置===============================================//
+        // ====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        //System.setProperty("HADOOP_USER_NAME", "yunding");
+        // System.setProperty("HADOOP_USER_NAME", "yunding");
         // 设置checkpoint点二级目录位置
-        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwd_sptb02_simple"));
+        // ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwd_sptb02_simple"));
         // 设置savepoint点二级目录位置
-        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwd_sptb02_simple"));
+        // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwd_sptb02_simple"));
 
         log.info("checkpoint设置完成");
 
-        //kafka消费源相关参数配置
+        // kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
@@ -72,43 +72,43 @@ public class WaybillDwdAppSptb02Simple {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwdAppSptb02SimpleMysqlSource").uid("WaybillDwdAppSptb02SimpleMysqlSourceStream").name("WaybillDwdAppSptb02SimpleMysqlSourceStream");
 
-        //对一些时间字段进行单独字段处理保存
+        // 对一些时间字段进行单独字段处理保存
         SingleOutputStreamOperator<DwdSptb02> dataDwdProcess = mysqlSource.process(new ProcessFunction<String, DwdSptb02>() {
             @Override
             public void processElement(String value, Context context, Collector<DwdSptb02> collector) throws Exception {
-                //获取真实数据
+                // 获取真实数据
                 JSONObject jsonObject = JSON.parseObject(value);
                 String after = jsonObject.getString("after");
                 Sptb02 sptb02 = JSON.parseObject(after, Sptb02.class);
                 if (Objects.nonNull(sptb02) && StringUtils.isNotBlank(sptb02.getCJSDBH())) {
-                    //处理实体类 将数据copy到dwdSptb02
+                    // 处理实体类 将数据copy到dwdSptb02
                     DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
-                    //获取原数据的运输方式
+                    // 获取原数据的运输方式
                     String vysfs = sptb02.getVYSFS();
                     log.info("运单运输方式数据:{}", vysfs);
                     if (StringUtils.isNotEmpty(vysfs)) {
-                        //1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
-                        //('J','TD','SD','G')='G'
+                        // 1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
+                        // ('J','TD','SD','G')='G'
                         if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
                             dwdSptb02.setTRAFFIC_TYPE("G");
-                            //运输方式 适配 lc_spec_config
+                            // 运输方式 适配 lc_spec_config
                             dwdSptb02.setTRANS_MODE_CODE("1");
                         }
-                        //(''L1'','T') ='T'
+                        // (''L1'','T') ='T'
                         if (vysfs.equals("L1") || vysfs.equals("T")) {
                             dwdSptb02.setTRAFFIC_TYPE("T");
                             dwdSptb02.setTRANS_MODE_CODE("2");
                         }
-                        //('S') ='S'
+                        // ('S') ='S'
                         if (vysfs.equals("S")) {
                             dwdSptb02.setTRAFFIC_TYPE("S");
                             dwdSptb02.setTRANS_MODE_CODE("3");
                         }
-                        //2.处理 起运时间
-                        //公路取sptb02.dtvscfsj，其他取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
+                        // 2.处理 起运时间
+                        // 公路取sptb02.dtvscfsj，其他取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
                         if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
                             dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                         }
@@ -116,27 +116,27 @@ public class WaybillDwdAppSptb02Simple {
                             dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
                         }
                     }
-                    //3.处理 计划下达时间
+                    // 3.处理 计划下达时间
                     if (Objects.nonNull(sptb02.getDPZRQ())) {
                         dwdSptb02.setPLAN_RELEASE_TIME(sptb02.getDPZRQ());
                     }
-                    //4.处理 运单指派时间
+                    // 4.处理 运单指派时间
                     if (Objects.nonNull(sptb02.getDYSSZPSJ())) {
                         dwdSptb02.setASSIGN_TIME(sptb02.getDYSSZPSJ());
                     }
-                    //5.处理 打点到货时间
+                    // 5.处理 打点到货时间
                     if (Objects.nonNull(sptb02.getDGPSDHSJ())) {
                         dwdSptb02.setDOT_SITE_TIME(sptb02.getDGPSDHSJ());
                     }
-                    //6.处理 最终到货时间
+                    // 6.处理 最终到货时间
                     if (Objects.nonNull(sptb02.getDDHSJ())) {
                         dwdSptb02.setFINAL_SITE_TIME(sptb02.getDDHSJ());
                     }
-                    //7.处理 运单生成时间
+                    // 7.处理 运单生成时间
                     if (Objects.nonNull(sptb02.getDDJRQ())) {
                         dwdSptb02.setORDER_CREATE_TIME(sptb02.getDDJRQ());
                     }
-                    //8.处理 基地代码 适配 lc_spec_config
+                    // 8.处理 基地代码 适配 lc_spec_config
                     String cqwh = sptb02.getCQWH();
                     if (Objects.nonNull(cqwh)) {
                         /**
@@ -159,42 +159,42 @@ public class WaybillDwdAppSptb02Simple {
                             dwdSptb02.setBASE_CODE("3");
                         }
                     }
-                    //9.处理 主机公司代码
+                    // 9.处理 主机公司代码
                     /**
                      * 主机公司代码 适配 lc_spec_config
                      *   1  一汽大众
                      *   2  一汽红旗
                      *   3  一汽马自达
                      */
-                    //获取主机公司代码
-                    //sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
-                    //主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
+                    // 获取主机公司代码
+                    // sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
+                    // 主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
                     String czjgsdm = sptb02.getCZJGSDM();
                     if (StringUtils.isNotEmpty(czjgsdm)) {
-                        //大众 1
+                        // 大众 1
                         if ("1".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("1");
                         }
-                        //红旗 2
+                        // 红旗 2
                         if ("17".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("2");
                         }
-                        //马自达 3
+                        // 马自达 3
                         if ("29".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("3");
                         }
-                        //奔腾 4
+                        // 奔腾 4
                         if ("2".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("4");
                         }
-                        //解放 5
+                        // 解放 5
                         if ("3".equals(czjgsdm)) {
                             dwdSptb02.setHOST_COM_CODE("5");
                         }
 
                     }
-                    //添加新的处理逻辑(新加)
-                    //10.处理 ACTUAL_OUT_TIME(实际出库时间)  取 sptb02.dckrq字段
+                    // 添加新的处理逻辑(新加)
+                    // 10.处理 ACTUAL_OUT_TIME(实际出库时间)  取 sptb02.dckrq字段
                     if (Objects.nonNull(sptb02.getDCKRQ())) {
                         dwdSptb02.setACTUAL_OUT_TIME(sptb02.getDCKRQ());
                     }
@@ -293,9 +293,9 @@ public class WaybillDwdAppSptb02Simple {
                         }
                     }
 
-                    //对保存的数据为null的填充默认值
+                    // 对保存的数据为null的填充默认值
                     DwdSptb02 bean = JsonPartUtil.getBean(dwdSptb02);
-                    //实际保存的值为after里的值
+                    // 实际保存的值为after里的值
                     collector.collect(bean);
                     dwdSptb02 = null;
                 }
@@ -310,7 +310,7 @@ public class WaybillDwdAppSptb02Simple {
             }
         }).uid("WaybillDwdAppSptb02SimpleDwdSptb02Json").name("WaybillDwdAppSptb02SimpleDwdSptb02Json");
 
-        //获取kafka生产者
+        // 获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_SPTB02,
