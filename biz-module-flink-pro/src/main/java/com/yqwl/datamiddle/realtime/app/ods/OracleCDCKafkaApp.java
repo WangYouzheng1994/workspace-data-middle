@@ -71,7 +71,7 @@ public class OracleCDCKafkaApp {
         //确保检查点之间有至少500 ms的间隔【CheckPoint最小间隔】
         ck.setMinPauseBetweenCheckpoints(5000);
         // 设置checkpoint点二级目录位置
-        //ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oracle_cdc_kafka_app"));
         // 设置savepoint点二级目录位置
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
         //同一时间只允许进行一个检查点
