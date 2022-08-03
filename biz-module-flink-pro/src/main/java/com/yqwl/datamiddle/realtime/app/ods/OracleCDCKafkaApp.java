@@ -5,6 +5,7 @@ import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
+import io.debezium.connector.oracle.OracleConnectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -83,14 +84,16 @@ public class OracleCDCKafkaApp {
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
-        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        properties.put("log.mining.strategy", OracleConnectorConfig.LogMiningStrategy.ONLINE_CATALOG); //解决归档日志数据延迟
         properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
-        properties.put("log.mining.archive.log.only.mode", "true");   //读archive log
+        // properties.put("log.mining.archive.log.only.mode", true);   //只读archive log
+
         properties.put("log.mining.batch.size.default", "2000");
         // properties.put("log.mining.batch.size.max", "400000");
         properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        properties.put("event.processing.failure.handling.mode", "warn");
-        properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
+        // properties.put("event.processing.failure.handling.mode", "warn");
+        // properties.put("log.mining.archive.log.hours", 1L);
+        // properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
         //properties.put("converters", "aaa");
         //properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.TimestampConverter");
         //properties.put("database.serverTimezone", "UTC");
