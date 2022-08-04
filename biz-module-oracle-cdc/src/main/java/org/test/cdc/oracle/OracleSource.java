@@ -69,10 +69,13 @@ public class OracleSource {
 
     /**
      * 初始化connection的初始化加载 logminer
+     * 此阶段主要负责 确定好实际开始的scn 与 结束的 scn 并且把此信息同步到任务层面。
+     * （此方案后续如果需要断点恢复任务需要持久化到mysql，目前人工处理从 #start 方法进入的时候写死一个scn的值）
      *
      * @param connecUtil
      */
     public void payLoad(OracleCDCConnecUtil connecUtil) {
+
 /*
         for (LogMinerConnection logMinerConnection : needLoadList) {
             logMinerConnection.checkAndResetConnection();
