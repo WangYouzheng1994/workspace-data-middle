@@ -30,6 +30,7 @@ public class DwmVlmsFormatUtil {
         return value;
     }
 
+    // 2022.8.4 本地注销统一减8小时的代码,etl时间已经处理完毕
     /**
      * 日期转换 统一减掉8小时，目前etl没处理好。
      *

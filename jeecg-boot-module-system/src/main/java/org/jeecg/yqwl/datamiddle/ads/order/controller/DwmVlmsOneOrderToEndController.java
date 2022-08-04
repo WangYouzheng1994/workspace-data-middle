@@ -230,7 +230,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         if (StringUtil.length(selections) > 2) {
             queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
-        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
         Integer pageNo = 1;
         Integer pageSize = 5000;
 
@@ -906,7 +906,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             }
         }
 
-        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
         // TODO: 临时设置成只看大众，后续改成根据角色查询不同客户品牌。
 

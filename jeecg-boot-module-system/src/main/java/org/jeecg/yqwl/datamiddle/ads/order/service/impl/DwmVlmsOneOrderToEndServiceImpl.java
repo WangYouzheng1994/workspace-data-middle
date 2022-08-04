@@ -66,7 +66,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             // unloadRailwayTime,inDistributeTime,distributeAssignTime,distributeCarrierName,distributeVehicleNo,distributeVehicleNum,outDistributeTime,  4
             // distributeShipmentTime,dotSiteTime,finalSiteTime    3   共22个时间字段
 //            Long second = 8 * 60 * 60 * 1000L;
-            this.formatTime(params);
+            //this.formatTime(params);
 
             //查询配载单编号
 /*            String stowageNoteNo = params.getStowageNoteNo();
@@ -83,7 +83,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //                }
             }*/
         }
-
        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
             // 运输方式拼接显示处理。
             ArrayList<String> vinList = oneOrderToEndList.stream().collect(ArrayList::new, (list, item) -> list.add(item.getVin()), ArrayList::addAll);
@@ -183,7 +182,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         for (int i = 0; i < dwmVlmsDocs.size(); i++) {
             params = dwmVlmsDocs.get(i);
             listMap.put(params.getVvin(), i);
-            this.docsFormatTime(params);
+            //this.docsFormatTime(params);
         }
         return dwmVlmsDocs;
     }
@@ -216,7 +215,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         for (int i = 0; i < dwmVlmsDocs.size(); i++) {
             params = dwmVlmsDocs.get(i);
             listMap.put(params.getVvin(), i);
-            this.docsFormatTime(params);
+//            this.docsFormatTime(params);
         }
         return dwmVlmsDocs;
     }
@@ -305,8 +304,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @param params rows of db
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
-        // 16位 convert to 13位
-        formatMicros2Millis(params);
+        // 16位 convert to 13位 注销时间处理  2022.8.4
+        // formatMicros2Millis(params);
 
         if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
