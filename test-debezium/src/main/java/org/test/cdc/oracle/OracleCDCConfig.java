@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @Description: 开启一个CDC 任务的参数，此类需要考虑持久化到数据库，从数据库加载。
  * @Author: WangYouzheng
  * @Date: 2022/8/3 13:19
  * @Version: V1.0

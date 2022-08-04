@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * @Description: Oracle Logminer CDC
+ * @Description: Oracle Logminer CDC  一个CDC的任务
  * @Author: WangYouzheng
  * @Date: 2022/8/3 13:08
  * @Version: V1.0
