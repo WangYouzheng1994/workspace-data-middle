@@ -64,7 +64,7 @@
         <module>biz-module-realtime</module>
         <module>biz-module-flink-demo</module>
         <module>biz-module-flink-pro</module>
-		<module>test-debezium</module>
+		<module>biz-module-oracle-cdc</module>
 	</modules>
 
 	<distributionManagement>
