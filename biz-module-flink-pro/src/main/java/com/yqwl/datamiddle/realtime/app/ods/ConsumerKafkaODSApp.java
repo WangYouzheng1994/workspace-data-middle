@@ -92,8 +92,8 @@ public class ConsumerKafkaODSApp {
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712)
-                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712)
+                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804)
+                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
