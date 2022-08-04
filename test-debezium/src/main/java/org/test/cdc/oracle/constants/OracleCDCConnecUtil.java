@@ -1,8 +1,12 @@
-package org.test.cdc.oracle;
+package org.test.cdc.oracle.constants;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.test.cdc.oracle.OracleCDCConfig;
+import org.test.cdc.oracle.OracleDBUtil;
+import org.test.cdc.oracle.SqlUtil;
 
-import java.sql.Connection;
+import java.sql.*;
 
 /**
  * @Description:
@@ -11,6 +15,7 @@ import java.sql.Connection;
  * @Version: V1.0
  */
 @Slf4j
+@Data
 public class OracleCDCConnecUtil {
     private Connection connection;
     private CallableStatement logMinerStartStmt;
@@ -24,7 +29,6 @@ public class OracleCDCConnecUtil {
 
     public OracleCDCConnecUtil(OracleCDCConfig config) {
         this.config = config;
-        return this;
     }
 
     /**
@@ -32,14 +36,19 @@ public class OracleCDCConnecUtil {
      *
      * @return
      */
-    protected boolean getConnection(OracleCDCConfig config) {
+    public boolean getConnection(OracleCDCConfig config) {
         int interval = 1;
         log.debug("connection driver class: {}", config.getDriverClass());
         log.info("connection user: {}", config.getUsername());
         log.info("connection password: {}", config.getPassword());
 
         // 加载驱动
-        Class.forName(config.getDriverClass());
+        try {
+            Class.forName(config.getDriverClass());
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
 
         do {
             try {
@@ -57,7 +66,7 @@ public class OracleCDCConnecUtil {
         do {
             try {
                 connection.prepareStatement(SqlUtil.SQL_ALTER_NLS_SESSION_PARAMETERS);
-                preparedStatement.execute();
+                logMinerSelectStmt.execute();
                 interval = 5;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -66,6 +75,12 @@ public class OracleCDCConnecUtil {
             }
         } while(interval < 3);
 
-        connection == null ? return false : return true;
+        boolean result = false;
+        if (connection == null) {
+            result = false;
+        } else {
+            result = true;
+        }
+        return result;
     }
 }

@@ -2,6 +2,8 @@ package org.test.cdc.oracle;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @Description:
  * @Author: WangYouzheng
