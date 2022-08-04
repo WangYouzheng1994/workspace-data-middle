@@ -85,8 +85,8 @@ public class OracleCDCKafkaApp {
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
         properties.put("log.mining.strategy", OracleConnectorConfig.LogMiningStrategy.ONLINE_CATALOG); //解决归档日志数据延迟
-        properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
-        // properties.put("log.mining.archive.log.only.mode", true);   //只读archive log
+        // properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        properties.put("log.mining.archive.log.only.mode", true);   //只读archive log
 
         properties.put("log.mining.batch.size.default", "2000");
         // properties.put("log.mining.batch.size.max", "400000");
