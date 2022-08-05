@@ -586,7 +586,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // TYPE_TC 是否同城异地
                 String typeTc = item.getTypeTc().toString();
                 if ( "0".equals(typeTc) ) {
-                    typeTc = "";
+                    typeTc = "无";
                 }else if ( "1".equals(typeTc) ) {
                     typeTc = "同城";
                 }else if ( "2".equals(typeTc) ) {
