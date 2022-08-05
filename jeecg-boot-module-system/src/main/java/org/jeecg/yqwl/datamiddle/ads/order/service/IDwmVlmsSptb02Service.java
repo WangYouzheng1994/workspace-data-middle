@@ -25,13 +25,6 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @return
      */
     Result<ShipmentVO> findTop10StockOutList(GetBaseBrandTime baseBrandTime);
-    /**
-     * 查询top10发运量列表
-     *@param baseBrandTime
-     * @return
-     */
-//    Result<ShipmentVO> findTop10SendList(GetBaseBrandTime baseBrandTime);
-
 
     /**
      * 查询top10待发量列表

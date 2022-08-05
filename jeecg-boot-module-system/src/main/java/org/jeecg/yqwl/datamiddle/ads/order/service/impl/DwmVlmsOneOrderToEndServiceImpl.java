@@ -59,29 +59,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params = oneOrderToEndList.get(i);
             listMap.put(params.getVin(), i);
             // 添加逻辑  如果是时间字段  需要在得到的值进行-8小时处理
-            // cp9OfflineTime,leaveFactoryTime,inSiteTime,inWarehouseName,taskNo,vehicleReceivingTime,   4
-            // stowageNoteTime,stowageNoteNo,trafficType,assignTime,carrierName,actualOutTime,shipmentTime,transportVehicleNo,samePlateNum,   4
-            // vehicleNum,startCityName,endCityName,vdwdm,startWaterwayName,inStartWaterwayTime,endStartWaterwayTime,endWaterwayName,  2
-            // inEndWaterwayTime,startPlatformName,inStartPlatformTime,outStartPlatformTime,endPlatformName,inEndPlatformTime,unloadShipTime,   5
-            // unloadRailwayTime,inDistributeTime,distributeAssignTime,distributeCarrierName,distributeVehicleNo,distributeVehicleNum,outDistributeTime,  4
-            // distributeShipmentTime,dotSiteTime,finalSiteTime    3   共22个时间字段
-//            Long second = 8 * 60 * 60 * 1000L;
             //this.formatTime(params);
-
-            //查询配载单编号
-/*            String stowageNoteNo = params.getStowageNoteNo();
-            //计算同板数量
-            if (StringUtils.isNotBlank(stowageNoteNo)) {
-//                if (samePlateNumMap.containsKey(stowageNoteNo)) {
-//                    params.setSamePlateNum(samePlateNumMap.get(stowageNoteNo));
-//                } else {
-//                    List<SelectData> samePlateNumList = dwmVlmsOneOrderToEndMapper.selectTotal(stowageNoteNo);
-//                    if ( CollectionUtils.isNotEmpty(samePlateNumList) ) {
-//                        samePlateNumMap.put(stowageNoteNo, samePlateNumList.get(0).getSamePlateNum());
-//                        params.setSamePlateNum(samePlateNumList.get(0).getSamePlateNum());
-//                    }
-//                }
-            }*/
         }
        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
             // 运输方式拼接显示处理。

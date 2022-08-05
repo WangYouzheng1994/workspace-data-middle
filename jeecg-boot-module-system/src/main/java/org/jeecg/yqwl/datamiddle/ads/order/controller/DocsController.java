@@ -241,66 +241,6 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                     cell17.setCellStyle(cellstyle);
                     cell17.setCellValue("");
                 }
-//                // vvin 底盘号
-//                row1.createCell(j++).setCellValue(item.getVvin());
-//                // HostComCode  品牌
-//                row1.createCell(j++).setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getHostComCode()));
-//                // baseName  基地
-//                row1.createCell(j++).setCellValue(item.getBaseName());
-//                // vehicleName  车型
-//                row1.createCell(j++).setCellValue(item.getVehicleName());
-//                // startCityName  始发城市
-//                row1.createCell(j++).setCellValue(item.getStartCityName());
-//                // endCityName   经销商目标城市
-//                row1.createCell(j++).setCellValue(item.getEndCityName());
-//                // vdwdm  经销商代码
-//                row1.createCell(j++).setCellValue(item.getVdwdm());
-//                //  DEALER_NAME   经销商名称
-//                row1.createCell(j++).setCellValue(item.getDealerName());
-//                // ddjrq 计划下达日期
-//                if (item.getDdjrq() != 0 ) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDdjrq()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // vph  配板单号
-//                row1.createCell(j++).setCellValue(item.getCpzdbh());
-//                // assignTime  指派日期
-//                if (item.getAssignTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // TRANSPORT_NAME 指派承运商名称
-//                row1.createCell(j++).setCellValue(item.getTransportName());
-//                // actualOutTime  出库日期
-//                if (item.getActualOutTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getActualOutTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // shipmentTime  起运日期
-//                if (item.getShipmentTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getShipmentTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // VJSYDM 运输车号
-//                row1.createCell(j++).setCellValue(item.getVjsydm());
-//                //  samePlateNum 同板数量
-//                row1.createCell(j++).setCellValue(item.getSamePlateNum());
-//                // Dtvsdhsj  DCS到货时间
-//                if (item.getDtvsdhsj() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // finalSiteTime   经销商确认到货时间
-//                if (item.getFinalSiteTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getFinalSiteTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
 
                 // 设置数据的行高
                 row1.setHeight((short) (16.5 * 20));
@@ -371,11 +311,6 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
                 "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
-        // 设置列宽(写死)
-//        int [] width = {20,6,6,25,10,15,15,30,20,15,20,15,20,20,15,8,20,20};
-//        for (int columnIndex = 0; columnIndex < headers.length; columnIndex++) {
-//            sheet.setColumnWidth(columnIndex, width[columnIndex] * 256);
-//        }
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
         for (String header : headers) {
@@ -542,69 +477,6 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                     cell17.setCellValue("");
                 }
 
-//                // vvin 底盘号
-//                row1.createCell(j++).setCellValue(item.getVvin());
-//                // HostComCode  品牌
-//                row1.createCell(j++).setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getHostComCode()));
-//                // baseName  基地
-//                row1.createCell(j++).setCellValue(item.getBaseName());
-//                // vehicleName  车型
-//                row1.createCell(j++).setCellValue(item.getVehicleName());
-//                // startCityName  始发城市
-//                row1.createCell(j++).setCellValue(item.getStartCityName());
-//                // endCityName   经销商目标城市
-//                row1.createCell(j++).setCellValue(item.getEndCityName());
-//                // vdwdm  经销商代码
-//                row1.createCell(j++).setCellValue(item.getVdwdm());
-//                //  DEALER_NAME   经销商名称
-//                row1.createCell(j++).setCellValue(item.getDealerName());
-//                // ddjrq 计划下达日期
-//                if (item.getDdjrq() != 0 ) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDdjrq()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // Cpzdbh  配板单号
-//                row1.createCell(j++).setCellValue(item.getCpzdbh());
-//                // assignTime  指派日期
-//                if (item.getAssignTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // TRANSPORT_NAME 指派承运商名称
-//                row1.createCell(j++).setCellValue(item.getTransportName());
-//                // actualOutTime  出库日期
-//                if (item.getActualOutTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getActualOutTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // shipmentTime  起运日期
-//                if (item.getShipmentTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getShipmentTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // VJSYDM 运输车号
-//                row1.createCell(j++).setCellValue(item.getVjsydm());
-//                //  samePlateNum 同板数量
-//                row1.createCell(j++).setCellValue(item.getSamePlateNum());
-//                // Dtvsdhsj  DCS到货时间
-//                if (item.getDtvsdhsj() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // finalSiteTime   经销商确认到货时间
-//                if (item.getFinalSiteTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getFinalSiteTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-
-
-                // 设置表格默认行高
                 // 设置数据的行高
                 row1.setHeight((short) (16.5 * 20));
                 // 设置自适应列宽

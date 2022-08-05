@@ -168,13 +168,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         // 设置表头行高
         row.setHeight((short) (22.50 * 20));
         // 获取表头(前端页面一共有44个字段,entity一共是57个字段)
-//        String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "CP9下线接车日期", "出厂日期", "入库日期", "入库仓库", "任务单号",
-//                "整车物流接收STD日期", "配板日期", "配板单号", "运输方式", "指派日期", "指派承运商名称", "出库日期", "起运日期-公路/铁路",
-//                "运输车号", "同板数量", "轿运车车位数", "始发城市", "目的城市", "经销商代码", "始发港名称", "到达始发港口时间/入港时间",
-//                "始发港口水运离港时间", "目的港名称", "到达目的港时间", "始发站名称", "到达始发站时间/入站时间", "始发站台铁路离站时间",
-//                "目的站名称", "到达目的站时间", "卸船时间（水路到目的站）", "卸车时间（铁路到目的站）", "末端分拨中心入库时间",
-//                "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号", "港/站分拨承运轿运车车位数", "分拨出库时间",
-//                "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间"};
         // 最新表头  2022.7.12 更改 顺序更改和添加经销商名称  Y号  删除配板日期,将整车物流接收STD日期 改为 计划下达日期
         String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市","经销商目标城市","经销商代码","经销商名称",
                 "CP9下线接车日期", "入库日期", "入库仓库", "任务单号", "计划下达日期", "配板单号", "运输方式", "指派日期",
@@ -205,8 +198,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
         // 获取一单到底的运输方式
         String trafficType = queryCriteria.getTrafficType();
-        String precise = queryCriteria.getPrecise();
-        // 精准查询
         if ( StringUtils.isNotBlank(trafficType) ) {
             if ( StringUtils.contains(trafficType,"typeG") ) {
                 queryCriteria.setTypeG(1);
@@ -586,7 +577,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // TYPE_TC 是否同城异地
                 String typeTc = item.getTypeTc().toString();
                 if ( "0".equals(typeTc) ) {
-                    typeTc = "";
+                    typeTc = "无";
                 }else if ( "1".equals(typeTc) ) {
                     typeTc = "同城";
                 }else if ( "2".equals(typeTc) ) {
@@ -595,219 +586,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 SXSSFCell cell43 = row1.createCell(j++);
                 cell43.setCellStyle(cellstyle);
                 cell43.setCellValue(item.setTypeTc(typeTc));
-
-
-//                // vin 底盘号
-//                row1.createCell(j++).setCellValue(item.getVin());
-//                // brand 品牌
-//                row1.createCell(j++).setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getBrand()));
-//                // baseName 基地
-//                row1.createCell(j++).setCellValue(item.getBaseName());
-//                // vehicleName 车型
-//                row1.createCell(j++).setCellValue(item.getVehicleName());
-//                // startCityName 始发城市
-//                row1.createCell(j++).setCellValue(item.getStartCityName());
-//                // endCityName 经销商目标城市
-//                row1.createCell(j++).setCellValue(item.getEndCityName());
-//                // vdwdm 经销商代码
-//                row1.createCell(j++).setCellValue(item.getVdwdm());
-//                // DEALER_NAME  经销商名称
-//                row1.createCell(j++).setCellValue(item.getDealerName());
-//                // cp9OfflineTime  CP9下线接车日期  11
-//                if (item.getCp9OfflineTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getCp9OfflineTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // inSiteTime  入库日期   16WEI
-//                if (item.getInSiteTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInSiteTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // inWarehouseName  入库仓库
-//                row1.createCell(j++).setCellValue(item.getInWarehouseName());
-//                // taskNo 任务单号
-//                row1.createCell(j++).setCellValue(item.getTaskNo());
-//                // vehicleReceivingTime  计划下达日期  11
-//                if (item.getVehicleReceivingTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getVehicleReceivingTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // Cpzdbh 配板单号
-//                row1.createCell(j++).setCellValue(item.getCpzdbh());
-//                // trafficType  运输方式
-//                // 利用获取的typeT,typeS,typeG 进行拼接 并将值赋值给trafficType
-//                String typeT = item.getTypeT().toString();
-//                String typeS = item.getTypeS().toString();
-//                String typeG = item.getTypeG().toString();
-//                // 将运输方式转换成公铁水
-//                if ( "1".equals(typeT) ) {
-//                    typeT = "铁";
-//                } else if ( "0".equals(typeT) ) {
-//                    typeT = "";
-//                }
-//                if ( "1".equals(typeS) ) {
-//                    typeS = "水";
-//                }else if ( "0".equals(typeS) ) {
-//                    typeS = "";
-//                }
-//                if ( "1".equals(typeG) ) {
-//                    typeG = "公";
-//                }else if ( "0".equals(typeG) ) {
-//                    typeG = "";
-//                }
-//                // 判断公铁水的值是否为空并添加到list集合中
-//                List<String> list = new ArrayList<>();
-//                if ( StringUtils.isNotBlank(typeT)  ) {
-//                    list.add(typeT);
-//                }
-//                if ( StringUtils.isNotBlank(typeS)  ) {
-//                    list.add(typeS);
-//                }
-//                if ( StringUtils.isNotBlank(typeG)  ) {
-//                    list.add(typeG);
-//                }
-//                // 将公铁水的值拼接起来并赋值给trafficType
-//                trafficType = StringUtils.join(list,",");
-//                row1.createCell(j++).setCellValue(item.setTrafficType(trafficType));
-//                // assignTime  指派日期  11
-//                if (item.getAssignTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getAssignTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // carrierName  指派承运商名称
-//                row1.createCell(j++).setCellValue(item.getCarrierName());
-//                // actualOutTime  出库日期  11
-//                if (item.getActualOutTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getActualOutTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // shipmentTime  起运日期-公路   11
-//                if (item.getShipmentGTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getShipmentGTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // transportVehicleNo  运输车号
-//                row1.createCell(j++).setCellValue(item.getTransportVehicleNo());
-//                // samePlateNum  同板数量
-//                row1.createCell(j++).setCellValue(item.getSamePlateNum());
-//                // vehicleNum  轿运车车位数
-//                row1.createCell(j++).setCellValue(item.getVehicleNum());
-//                // startPlatformName  始发站名称
-//                row1.createCell(j++).setCellValue(item.getStartPlatformName());
-//                // inStartPlatformTime  到达始发站时间/入站时间   16WEI
-//                if (item.getInStartPlatformTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartPlatformTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // outStartPlatformTime  始发站台铁路离站时间    16WEI
-//                if (item.getOutStartPlatformTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getOutStartPlatformTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // endPlatformName  目的站名称
-//                row1.createCell(j++).setCellValue(item.getEndPlatformName());
-//                // inEndPlatformTime  到达目的站时间     16WEI
-//                if (item.getInEndPlatformTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndPlatformTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // unloadRailwayTime  卸车时间（铁路到目的站）   16WEI
-//                if (item.getUnloadRailwayTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadRailwayTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // startWaterwayName  始发港名称
-//                row1.createCell(j++).setCellValue(item.getStartWaterwayName());
-//                // inStartWaterwayTime 到达始发港口时间/入港时间    16WEI
-//                if (item.getInStartWaterwayTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInStartWaterwayTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // endStartWaterwayTime 始发港口水运离港时间  16WEI
-//                if (item.getEndStartWaterwayTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getEndStartWaterwayTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // endWaterwayName 目的港名称
-//                row1.createCell(j++).setCellValue(item.getEndWaterwayName());
-//                // inEndWaterwayTime  到达目的港时间    16WEI
-//                if (item.getInEndWaterwayTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInEndWaterwayTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // unloadShipTime  卸船时间（水路到目的站）   16WEI
-//                if (item.getUnloadShipTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getUnloadShipTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // inDistributeTime  末端分拨中心入库时间   16WEI
-//                if (item.getInDistributeTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getInDistributeTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // distributeAssignTime 末端分拨中心指派时间   11
-//                if (item.getDistributeAssignTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDistributeAssignTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // distributeCarrierName   末端分拨承运商
-//                row1.createCell(j++).setCellValue(item.getDistributeCarrierName());
-//                // distributeVehicleNo  分拨承运轿运车车牌号
-//                row1.createCell(j++).setCellValue(item.getDistributeVehicleNo());
-//                // distributeVehicleNum  港/站分拨承运轿运车车位数
-//                row1.createCell(j++).setCellValue(item.getDistributeVehicleNum());
-//                // outDistributeTime  分拨出库时间   11
-//                if (item.getOutDistributeTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getOutDistributeTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // distributeShipmentTime  分拨起运时间  11
-//                if (item.getDistributeShipmentTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDistributeShipmentTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // dtvsdhsj  送达时间-DCS到货时间  11
-//                if (item.getDtvsdhsj() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getDtvsdhsj()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // finalSiteTime  经销商确认到货时间  11
-//                if (item.getFinalSiteTime() != 0) {
-//                    row1.createCell(j++).setCellValue(sdf.format(item.getFinalSiteTime()));
-//                }else{
-//                    row1.createCell(j++).setCellValue("");
-//                }
-//                // vwz 位置信息
-//                row1.createCell(j++).setCellValue(item.getVwz());
-//                // TYPE_TC 是否同城异地
-//                String typeTc = item.getTypeTc().toString();
-//                if ( "0".equals(typeTc) ) {
-//                    typeTc = "";
-//                }else if ( "1".equals(typeTc) ) {
-//                    typeTc = "同城";
-//                }else if ( "2".equals(typeTc) ) {
-//                    typeTc = "异地";
-//                }
-//                row1.createCell(j++).setCellValue(item.setTypeTc(typeTc));
 
                 // 设置数据的行高
                 row1.setHeight((short) (16.5 * 20));
@@ -886,8 +664,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
         // 获取一单到底的运输方式
         String trafficType = queryCriteria.getTrafficType();
-        String precise = queryCriteria.getPrecise();
-        // 精准查询
         if ( StringUtils.isNotBlank(trafficType) ) {
             if ( StringUtils.contains(trafficType,"typeG") ) {
                 queryCriteria.setTypeG(1);

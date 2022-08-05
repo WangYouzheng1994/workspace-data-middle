@@ -70,16 +70,6 @@ public class GetQueryCriteria {
     private Long inSiteTimeEnd;
 
     /**
-     * cp9下线接车日期_开始
-     */
-    private Long cp9OfflineTimeStart;
-
-    /**
-     * cp9下线接车日期_结束
-     */
-    private Long cp9OfflineTimeEnd;
-
-    /**
      * 分页：页码
      */
     private Integer pageNo = 1;
@@ -112,16 +102,6 @@ public class GetQueryCriteria {
      * docs二级菜单运输类型:只要公路
      */
     private  String  trafficType;
-
-    /**
-     * DCS到货开始时间
-     */
-    private Long dotSiteTimeStart;
-
-    /**
-     * DCS到货结束时间
-     */
-    private Long dotSiteTimeEnd;
 
     /**
      *经销商确认到货开始时间
@@ -172,33 +152,28 @@ public class GetQueryCriteria {
     private List<String> ccxdlList;
 
     /**
-     * DCS到货开始时间docs页面使用
+     * DCS到货开始时间(docs检索和docs车型页面使用)
      */
     private Long dtvsdhsjStart;
 
     /**
-     * DCS到货结束时间docs页面使用
+     * DCS到货结束时间(docs检索和docs车型页面使用)
      */
     private Long dtvsdhsjEnd;
 
     /**
-     * 是否为公路的运输方式 1为是 0为否 20220719添
+     * 是否为公路的运输方式 1为是 0为否 (20220719添加)
      */
     private Integer typeG;
 
     /**
-     * 是否为铁路的运输方式 1为是 0为否 20220719添
+     * 是否为铁路的运输方式 1为是 0为否 (20220719添加)
      */
     private Integer typeT;
 
     /**
-     * 是否为水路的运输方式 1为是 0为否 20220719添
+     * 是否为水路的运输方式 1为是 0为否 (20220719添加)
      */
     private Integer typeS;
 
-
-    /**
-     * 是否是精准查询 是  TRUE  否  False
-     */
-    private String  precise;
 }
