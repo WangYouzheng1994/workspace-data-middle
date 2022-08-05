@@ -152,7 +152,7 @@ public class OracleDBUtil {
     /**
      *  根据leftScn 以及加载的日志大小限制 获取可加载的scn范围 以及此范围对应的日志文件
      */
-    protected Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
+    public static Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
             throws SQLException {
         return getEndScn(connection, startScn, logFiles, true);
     }
@@ -166,7 +166,7 @@ public class OracleDBUtil {
      * @return org.apache.commons.lang3.tuple.Pair
      * @throws SQLException
      */
-    protected Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles, boolean addRedoLog) throws SQLException {
+    public static Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles, boolean addRedoLog) throws SQLException {
 
         List<LogFile> logFileLists = new ArrayList<>();
         PreparedStatement statement = null;
@@ -390,5 +390,64 @@ public class OracleDBUtil {
         return String.format(
                 "OPERATION_CODE in (%s) ",
                 StringUtils.join(standardOperations, ConstantValue.COMMA_SYMBOL));
+    }
+
+    /** 启动LogMiner */
+    public static void startOrUpdateLogMiner(Connection connection, BigInteger startScn, BigInteger endScn) {
+
+        String startSql;
+        try {
+            /*this.startScn = startScn;
+            this.endScn = endScn;
+            this.CURRENT_STATE.set(STATE.FILEADDING);*/
+
+            // checkAndResetConnection();
+
+            // 防止没有数据更新的时候频繁查询数据库，限定查询的最小时间间隔 QUERY_LOG_INTERVAL
+            /*if (lastQueryTime > 0) {
+                long time = System.currentTimeMillis() - lastQueryTime;
+                if (time < QUERY_LOG_INTERVAL) {
+                    try {
+                        Thread.sleep(QUERY_LOG_INTERVAL - time);
+                    } catch (InterruptedException e) {
+                        LOG.warn("", e);
+                    }
+                }
+            }*/
+            // lastQueryTime = System.currentTimeMillis();
+
+           /* if (logMinerConfig.getSupportAutoAddLog()) {
+                startSql =
+                        oracleInfo.isOracle10()
+                                ? SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG_10
+                                : SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG;
+            } else {*/
+                startSql = SqlUtil.SQL_START_LOGMINER;
+            // }
+
+            // resetLogminerStmt(startSql);
+
+            /*
+            if (logMinerConfig.getSupportAutoAddLog()) {
+                logMinerStartStmt.setString(1, startScn.toString());
+            } else {
+                logMinerStartStmt.setString(1, startScn.toString());
+                logMinerStartStmt.setString(2, endScn.toString());
+            }
+
+            logMinerStartStmt.execute();
+            this.CURRENT_STATE.set(STATE.FILEADDED);*/
+            // 查找出加载到logMiner里的日志文件
+            // this.addedLogFiles = queryAddedLogFiles();
+            /*LOG.info(
+                    "Log group changed, startScn = {},endScn = {} new log group = {}",
+                    startScn,
+                    endScn,
+                    GsonUtil.GSON.toJson(this.addedLogFiles));*/
+        } catch (Exception e) {
+            // this.CURRENT_STATE.set(STATE.FAILED);
+            // this.exception = e;
+            throw new RuntimeException(e);
+        }
     }
 }
