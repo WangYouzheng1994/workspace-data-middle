@@ -256,19 +256,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     }
 
     /**
-     * top10发运量
-     * @param
-     * @return
-     */
-//    @AutoLog(value = "DwmVlmsSptb02-top10发运量")
-//    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10发运量")
-//    @PostMapping(value = "/findTop10SendList")
-//    public Result<?> findTop10SendList(@RequestBody GetBaseBrandTime baseBrandTime) {
-//        Result<ShipmentVO> top10SendList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10SendList(baseBrandTime));
-//        return top10SendList;
-//    }
-
-    /**
      * top10待发量
      * @param
      * @return
@@ -280,8 +267,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         Result<ShipmentVO> top10PendingList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime));
         return top10PendingList;
     }
-
-
 
     /**
      * top10在途量

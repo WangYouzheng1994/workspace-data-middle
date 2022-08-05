@@ -51,23 +51,6 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     }
 
     /**
-     * 查询top10发运量列表
-     * @param baseBrandTime
-     * @return  品牌或基地  数量  时间
-     */
-
-    //@Override
-//    public Result<ShipmentVO> findTop10SendList(GetBaseBrandTime baseBrandTime) {
-//        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.sendList(baseBrandTime);
-//        //todo:对返回前端的值做处理
-//        List<String> timingList = this.formatTimingList(baseBrandTime);
-//        ShipmentVO resultVO = ShipmentVO.of(timingList);
-//
-//
-//        return Result.OK(resultVO);
-//    }
-
-    /**
      * 查询top10待发量列表
      * @param  baseBrandTime
      * @return  品牌或基地  数量  时间

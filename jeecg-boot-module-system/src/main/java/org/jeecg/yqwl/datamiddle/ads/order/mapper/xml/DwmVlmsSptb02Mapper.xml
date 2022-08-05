@@ -252,65 +252,6 @@
             )
         </where>
     </select>
-
-    <!--  top10 发运量  select count(*) cnf  from dwm_vlms_sptb02_test where SHIPMENT_TIME between '1491485187000' and '1492008443000' and shipment_time !=0 group by Date(fromUnixTimestamp64Milli(shipment_time)) order by cnf desc -->
-    <!--    <select id="sendList"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
-            SELECT
-                    count(dvs.CJSDBH)  AS totalNum ,
-            <if test="params.timeType == 'day' ">
-                toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
-            </if>
-            <if test="params.timeType == 'week' ">
-                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
-            </if>
-            <if test="params.timeType == 'month' ">
-                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
-            </if>
-            <if test="params.timeType == 'quarter' ">
-                CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
-            </if>
-            <if test="params.timeType == 'year' ">
-                YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
-            </if>
-            <choose>
-                <when test="params.cqwh =='' and params.czjgsdm !=''">
-                    ,dvs.CUSTOMER_NAME as groupName
-                </when>
-                <otherwise>
-                    ,dvs.BASE_NAME as groupName
-                </otherwise>
-            </choose>
-            FROM
-                    dwm_vlms_sptb02 dvs
-            <where>
-                (dvs.CJSDBH,dvs.WAREHOUSE_UPDATETIME) IN (
-                    SELECT
-                            v.CJSDBH,MAX(v.WAREHOUSE_UPDATETIME)
-                    FROM
-                            dwm_vlms_sptb02 v
-                    <where>
-                        <if test="  params.startTime != null and params.endTime !=null ">
-                            AND v.DTVSCFSJ <![CDATA[ != ]]> 0
-                        </if>
-                        <if test=" params.startTime != null and params.endTime !=null">
-                            AND v.DTVSCFSJ BETWEEN  #{params.startTime} AND #{params.endTime}
-                        </if>
-                        <if test="params.cqwh != null and params.cqwh !=''">
-                            AND v.CQWH =  #{params.cqwh}
-                        </if>
-                        <if test="params.czjgsdm != null and params.czjgsdm !='' ">
-                            AND v.CZJGSDM = #{params.czjgsdm}
-                        </if>
-                    </where>
-                    GROUP BY v.CJSDBH
-                )
-            </where>
-            GROUP BY  dates,groupName
-
-    </select>-->
-
     <!--  top10待发量  select count(*) cnf   from dwm_vlms_sptb02 where THEORY_OUT_TIME between '1491485187000' and '1492008443000' group by Date(fromUnixTimestamp64Milli(THEORY_OUT_TIME))  order by cnf desc    -->
     <select id="pendingList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
