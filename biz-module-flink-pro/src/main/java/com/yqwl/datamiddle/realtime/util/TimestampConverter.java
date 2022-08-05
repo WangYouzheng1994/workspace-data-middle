@@ -95,6 +95,7 @@ public class TimestampConverter implements CustomConverter<SchemaBuilder, Relati
             boolean isTime = "time".equalsIgnoreCase(column.typeName());
             // Use a new SchemaBuilder every time in order to avoid changing "Already set" options
             // in the schema builder between tables.
+            // 增量: TO_TIMESTAMP('2022-08-04 16:52:28.')
             registration.register(SchemaBuilder.string().optional(), rawValue -> {
                 if (rawValue == null) {
                     // DEBUG
@@ -110,51 +111,135 @@ public class TimestampConverter implements CustomConverter<SchemaBuilder, Relati
                     }
                     return rawValue;
                 }
-                Integer numLength = rawValue.toString().length();
-                //System.err.println(rawValue+":"+rawValue.toString().length());
+                String rawValueStr = rawValue.toString();
+                Integer numLength = rawValueStr.length();
+                // 当前已支持版本 :
                 // 2022-06-23 01:42:18.0   LENGTH: 21
-                if (numLength ==21){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                // TO_TIMESTAMP('2022-08-04 09:19:14.600131').length              : 42
+                // TO_DATE('2022-08-03 22:18:18', 'YYYY-MM-DD HH24:MI:SS').length : 55
+                //
+                if (numLength > 33 && numLength < 50){
+                    String rawValueSubStr = rawValueStr.substring(rawValueStr.indexOf("'") + 1, rawValueStr.lastIndexOf("'"));
+                    Integer rawValueSubStrLength = rawValueSubStr.length();
+                    if (rawValueSubStrLength == 20){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
                     }
-                }
-                if (numLength ==22){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                    if (rawValueSubStrLength == 21){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
                     }
-                }
-                if (numLength ==23){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                    if (rawValueSubStrLength == 22){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
                     }
-                }
-                // 2022-07-15 15:27:06.0103   LENGTH: 24
-                if (numLength ==24){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                    if (rawValueSubStrLength == 23){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
                     }
-                }
-                if (numLength ==25){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSS");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                    if (rawValueSubStrLength == 24){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
                     }
-                }
-                // 2022-07-14 11:36:44.893154   LENGTH: 26
-                if (numLength ==26){
-                    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
-                    String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
-                    if (s != null){
-                        return s;
+                    if (rawValueSubStrLength == 25){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSS");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
+                    }
+                    if (rawValueSubStrLength == 26){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
+                    }
+
+                }else if(numLength >=50){
+                    String rawValueSubStr50 = rawValueStr.substring(rawValueStr.indexOf("'") + 1, rawValueStr.indexOf("'")+20);
+                    Integer rawValueSubStrLength50 = rawValueSubStr50.length();
+
+                    if (rawValueSubStrLength50 == 19){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        String timeValues = String.valueOf(LocalDateTime.parse(rawValueSubStr50, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (timeValues != null){
+                            return timeValues;
+                        }
+                    }
+                }else {
+                    if (numLength ==19){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        String s = String.valueOf(LocalDateTime.parse(rawValueStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    if (numLength ==20){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.");
+                        String s = String.valueOf(LocalDateTime.parse(rawValueStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    if (numLength ==21){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S");
+                        String s = String.valueOf(LocalDateTime.parse(rawValueStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    if (numLength ==22){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
+                        String s = String.valueOf(LocalDateTime.parse(rawValueStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    if (numLength ==23){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+                        String s = String.valueOf(LocalDateTime.parse(rawValueStr, df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    // 2022-07-15 15:27:06.0103   LENGTH: 24
+                    if (numLength ==24){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSS");
+                        String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    if (numLength ==25){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSS");
+                        String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
+                    }
+                    // 2022-07-14 11:36:44.893154   LENGTH: 26
+                    if (numLength ==26){
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
+                        String s = String.valueOf(LocalDateTime.parse(rawValue.toString(), df).toInstant(ZoneOffset.of("+8")).toEpochMilli());
+                        if (s != null){
+                            return s;
+                        }
                     }
                 }
 
