@@ -139,6 +139,47 @@ public class SqlUtil {
                     + "    scn >= ? \n"
                     + "    AND scn < ? \n";
 
+
+    /** 加载包含startSCN和endSCN之间日志的日志文件 */
+    public static final String SQL_START_LOGMINER =
+            "DECLARE \n"
+                    + "    st          BOOLEAN := true;\n"
+                    + "    start_scn   NUMBER := ?;\n"
+                    + "    endScn   NUMBER := ?;\n"
+                    + "BEGIN\n"
+                    + "    FOR l_log_rec IN (\n"
+                    + "        SELECT\n"
+                    + "            MIN(name) name,\n"
+                    + "            first_change#\n"
+                    + "        FROM\n"
+                    + "          (\n"
+                    + "            SELECT \n"
+                    + "              member AS name, \n"
+                    + "              first_change# \n"
+                    + "            FROM \n"
+                    + "              v$log   l \n"
+                    + "           INNER JOIN v$logfile   f ON l.group# = f.group# \n"
+                    + "           WHERE (l.STATUS = 'CURRENT' OR l.STATUS = 'ACTIVE' )\n"
+                    + "           AND first_change# < endScn \n"
+                    + "           UNION \n"
+                    + "           SELECT  \n"
+                    + "              name, \n"
+                    + "              first_change# \n"
+                    + "           FROM \n"
+                    + "              v$archived_log \n"
+                    + "           WHERE \n"
+                    + "              name IS NOT NULL \n"
+                    + "           AND STANDBY_DEST='NO'\n"
+                    + "           AND  first_change# < endScn  AND next_change# > start_scn )group by first_change# order by first_change#  )LOOP IF st THEN \n"
+                    + "  SYS.DBMS_LOGMNR.add_logfile(l_log_rec.name, SYS.DBMS_LOGMNR.new); \n"
+                    + "      st := false; \n"
+                    + "  ELSE \n"
+                    + "  SYS.DBMS_LOGMNR.add_logfile(l_log_rec.name); \n"
+                    + "  END IF; \n"
+                    + "  END LOOP;\n"
+                    + "  SYS.DBMS_LOGMNR.start_logmnr(       options =>          SYS.DBMS_LOGMNR.skip_corruption        + SYS.DBMS_LOGMNR.no_sql_delimiter        + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n"
+                    + "  + SYS.DBMS_LOGMNR.dict_from_online_catalog    );\n"
+                    + "   end;";
     public static void main(String[] args) {
         System.out.println(SqlUtil.SQL_QUERY_LOG_FILE);
 
