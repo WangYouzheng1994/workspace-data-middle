@@ -59,7 +59,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params = oneOrderToEndList.get(i);
             listMap.put(params.getVin(), i);
             // 添加逻辑  如果是时间字段  需要在得到的值进行-8小时处理
-            //this.formatTime(params);
+            this.formatTime(params);
         }
        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
             // 运输方式拼接显示处理。
@@ -160,7 +160,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         for (int i = 0; i < dwmVlmsDocs.size(); i++) {
             params = dwmVlmsDocs.get(i);
             listMap.put(params.getVvin(), i);
-            //this.docsFormatTime(params);
+            this.docsFormatTime(params);
         }
         return dwmVlmsDocs;
     }
@@ -193,7 +193,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         for (int i = 0; i < dwmVlmsDocs.size(); i++) {
             params = dwmVlmsDocs.get(i);
             listMap.put(params.getVvin(), i);
-//            this.docsFormatTime(params);
+            this.docsFormatTime(params);
         }
         return dwmVlmsDocs;
     }
@@ -283,7 +283,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
         // 16位 convert to 13位 注销时间处理  2022.8.4
-        // formatMicros2Millis(params);
+         formatMicros2Millis(params);
 
         if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
