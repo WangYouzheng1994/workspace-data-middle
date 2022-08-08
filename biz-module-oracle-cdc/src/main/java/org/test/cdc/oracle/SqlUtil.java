@@ -201,4 +201,8 @@ public class SqlUtil {
     // 查找加载到logminer的日志文件
     public static final String SQL_QUERY_ADDED_LOG =
             "select filename ,thread_id ,low_scn,next_scn,type,filesize,status,type from  V$LOGMNR_LOGS ";
+
+    public static boolean isCreateTemporaryTableSql(String sql) {
+        return sql.contains("temporary tables");
+    }
 }

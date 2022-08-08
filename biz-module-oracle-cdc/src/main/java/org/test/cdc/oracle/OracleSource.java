@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.test.cdc.oracle.constants.OracleCDCConnecUtil;
+import org.test.cdc.oracle.bean.TransactionManager;
 
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -58,6 +58,12 @@ public class OracleSource {
     private BigInteger currentSinkPosition;
 
     /**
+     * 缓存控制器，放在这一层 你可以认为任务后续会管控多线程模式下的抽取动作
+     */
+    private TransactionManager transactionManager;
+
+
+    /**
      * 概要设计：
      * 1. 建立连接测试
      * 2. 读取日志 获取每个日志的范围
@@ -65,8 +71,10 @@ public class OracleSource {
      * 4. 循环取值 幂等过滤 把信息 推给传入的handler
      */
     public void start(OracleCDCConfig oracleCDCConfig) {
+
+
         // 初始化连接
-        OracleDBUtil oracleCDCConnecUtil = init(oracleCDCConfig);
+        OracleCDCConnection oracleCDCConnecUtil = init(oracleCDCConfig);
         // 获取开始偏移量 根据模式判定
         startScn = getStartSCN(oracleCDCConnecUtil, new BigInteger("0"));
 
@@ -82,7 +90,7 @@ public class OracleSource {
      *
      * @param connecUtil
      */
-    public void payLoad(OracleDBUtil connecUtil) {
+    public void payLoad(OracleCDCConnection connecUtil) {
         BigInteger currentMaxScn = null;
 
         Connection connection = connecUtil.getConnection();
@@ -177,11 +185,11 @@ public class OracleSource {
      * 2. 测试权限
      * 3. 测试用户权限
      */
-    public OracleDBUtil init(OracleCDCConfig config) {
+    public OracleCDCConnection init(OracleCDCConfig config) {
         this.oracleCDCConfig = config;
         // 单任务哈 后续如果中台建设完毕 可以考虑动态新增任务的时候才这样处理。
         this.executor = Executors.newSingleThreadExecutor(threadFactory);
-        OracleDBUtil oracleCDCConnecUtil = new OracleDBUtil(config);
+        OracleCDCConnection oracleCDCConnecUtil = new OracleCDCConnection(config, transactionManager);
 
         if (!oracleCDCConnecUtil.getConnection(oracleCDCConfig)) {
             log.error("初始化oracle 连接失败");
@@ -195,7 +203,7 @@ public class OracleSource {
     /**
      * 获取起始SCN
      */
-    public BigInteger getStartSCN(OracleDBUtil oracleCDCConnecUtil, BigInteger startScn) {
+    public BigInteger getStartSCN(OracleCDCConnection oracleCDCConnecUtil, BigInteger startScn) {
         Connection connection = oracleCDCConnecUtil.getConnection();
 
         // 如果从保存点模式开始 并且不是0 证明保存点是ok的

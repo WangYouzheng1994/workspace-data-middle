@@ -7,40 +7,59 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.test.cdc.oracle.bean.LogFile;
+import org.test.cdc.oracle.bean.QueueData;
+import org.test.cdc.oracle.bean.RecordLog;
+import org.test.cdc.oracle.bean.TransactionManager;
+import org.test.cdc.oracle.bean.element.ColumnRowData;
+import org.test.cdc.oracle.bean.element.column.StringColumn;
+import org.test.cdc.oracle.bean.element.column.TimestampColumn;
 import org.test.cdc.oracle.constants.ConstantValue;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Description: Oracle CDC 连接工具。 每个实例里面保存了当前JDBC的上下文
+ * @Description: Oracle CDC连接。 每个实例里面保存了当前JDBC的上下文，以及任务级别的配置，还有cdc任务级别的缓存transactionManager
  * @Author: WangYouzheng
  * @Date: 2022/8/3 15:02
  * @Version: V1.0
  */
 @Slf4j
 @Data
-public class OracleDBUtil {
+public class OracleCDCConnection {
 
+    // -------- JDBC Start
     private Connection connection;
     private CallableStatement logMinerStartStmt;
     private PreparedStatement logMinerSelectStmt;
     private ResultSet logMinerData;
+    // --------JDBC END
+
     // 查询logminer的超时时间
     private Long logminerQueryTimeout = 300L;
+
+    // 本连接相关联任务的 启动配置参数
     private OracleCDCConfig config;
+    // 本连接加入的logFiles
     private List<LogFile> addedLogFiles = new ArrayList<>();
+    // 本连接抽取的scn开始
     private BigInteger startScn = null;
+    // 本连接抽取的scn结束
     private BigInteger endScn = null;
+    // 本次任务抽取相关联的缓存。（持有的是任务级别的，非连接级别）
+    private TransactionManager transactionManager;
+    /** 为delete类型的rollback语句查找对应的insert语句的connection */
+    private OracleCDCConnection queryDataForRollbackConnection;
+    private QueueData result;
 
-
-    public OracleDBUtil() {
-
+    public OracleCDCConnection() {
     }
 
-    public OracleDBUtil(OracleCDCConfig config) {
+    public OracleCDCConnection(OracleCDCConfig config, TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
         this.config = config;
     }
 
@@ -474,7 +493,7 @@ public class OracleDBUtil {
     }
 
     /** 启动LogMiner */
-    public void startOrUpdateLogMiner(OracleDBUtil connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog) {
+    public void startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog) {
 
         String startSql;
         try {
@@ -573,5 +592,327 @@ public class OracleDBUtil {
             throw new RuntimeException(e.getMessage(), e);
 
         }
+    }
+
+    /**
+     * 从当前的ResultSet读取数据
+     *
+     * @return
+     * @throws SQLException
+     * @throws UnsupportedEncodingException
+     */
+    public boolean hasNext() throws SQLException, UnsupportedEncodingException {
+/*
+            TODO: 任务的状态控制
+            if (null == logMinerData
+                || logMinerData.isClosed()
+                || this.CURRENT_STATE.get().equals(STATE.READEND)) {
+            this.CURRENT_STATE.set(STATE.READEND);
+            return false;
+        }*/
+
+        String sqlLog;
+        while (logMinerData.next()) {
+            String sql = logMinerData.getString(LogminerKeyConstants.KEY_SQL_REDO);
+            if (StringUtils.isBlank(sql)) {
+                continue;
+            }
+            StringBuilder sqlRedo = new StringBuilder(sql);
+            StringBuilder sqlUndo =
+                    new StringBuilder(
+                            Objects.nonNull(logMinerData.getString(LogminerKeyConstants.KEY_SQL_UNDO))
+                                    ? logMinerData.getString(LogminerKeyConstants.KEY_SQL_UNDO)
+                                    : "");
+            // 临时表没有日志。
+            if (SqlUtil.isCreateTemporaryTableSql(sqlRedo.toString())) {
+                continue;
+            }
+            BigInteger scn = new BigInteger(logMinerData.getString(LogminerKeyConstants.KEY_SCN));
+            String operation = logMinerData.getString(LogminerKeyConstants.KEY_OPERATION);
+            int operationCode = logMinerData.getInt(LogminerKeyConstants.KEY_OPERATION_CODE);
+            String tableName = logMinerData.getString(LogminerKeyConstants.KEY_TABLE_NAME);
+
+            boolean hasMultiSql;
+
+            String xidSqn = logMinerData.getString(LogminerKeyConstants.KEY_XID_SQN);
+            String xidUsn = logMinerData.getString(LogminerKeyConstants.KEY_XID_USN);
+            String xidSLt = logMinerData.getString(LogminerKeyConstants.KEY_XID_SLT);
+            String rowId = logMinerData.getString(LogminerKeyConstants.KEY_ROW_ID);
+            boolean rollback = logMinerData.getBoolean(LogminerKeyConstants.KEY_ROLLBACK);
+
+            // 操作类型为commit，清理缓存
+            if (operationCode == 7) {
+                transactionManager.cleanCache(xidUsn, xidSLt, xidSqn);
+                continue;
+            }
+
+            // 用CSF来判断一条sql是在当前这一行结束，sql超过4000 字节，会处理成多行
+            boolean isSqlNotEnd = logMinerData.getBoolean(LogminerKeyConstants.KEY_CSF);
+            // 是否存在多条SQL
+            hasMultiSql = isSqlNotEnd;
+
+            while (isSqlNotEnd) {
+                logMinerData.next();
+                // redoLog 实际上不需要发生切割  但是sqlUndo发生了切割，导致redolog值为null
+                String sqlRedoValue = logMinerData.getString(LogminerKeyConstants.KEY_SQL_REDO);
+                if (Objects.nonNull(sqlRedoValue)) {
+                    sqlRedo.append(sqlRedoValue);
+                }
+
+                String sqlUndoValue = logMinerData.getString(LogminerKeyConstants.KEY_SQL_UNDO);
+                if (Objects.nonNull(sqlUndoValue)) {
+                    sqlUndo.append(sqlUndoValue);
+                }
+                isSqlNotEnd = logMinerData.getBoolean(LogminerKeyConstants.KEY_CSF);
+            }
+
+            // delete from "table"."ID" where ROWID = 'AAADcjAAFAAAABoAAC' delete语句需要rowid条件需要替换
+            // update "schema"."table" set "ID" = '29' 缺少where条件
+            if (rollback && (operationCode == 2 || operationCode == 3)) {
+                StringBuilder undoLog = new StringBuilder(1024);
+
+                // 从缓存里查找rollback对应的DML语句
+                RecordLog recordLog =
+                        transactionManager.queryUndoLogFromCache(
+                                xidUsn, xidSLt, xidSqn, rowId, scn);
+
+                if (Objects.isNull(recordLog)) {
+                    // 如果DML语句不在缓存 或者 和rollback不再同一个日志文件里 会递归从日志文件里查找
+                    recordLog =
+                            recursionQueryDataForRollback(
+                                    new RecordLog(
+                                            scn,
+                                            "",
+                                            "",
+                                            xidUsn,
+                                            xidSLt,
+                                            xidSqn,
+                                            rowId,
+                                            operationCode,
+                                            false,
+                                            logMinerData.getString(LogminerKeyConstants.KEY_TABLE_NAME)));
+                }
+
+                if (Objects.nonNull(recordLog)) {
+                    RecordLog rollbackLog =
+                            new RecordLog(
+                                    scn,
+                                    sqlUndo.toString(),
+                                    sqlRedo.toString(),
+                                    xidUsn,
+                                    xidSLt,
+                                    xidSqn,
+                                    rowId,
+                                    operationCode,
+                                    hasMultiSql,
+                                    tableName);
+                    String rollbackSql = getRollbackSql(rollbackLog, recordLog);
+                    undoLog.append(rollbackSql);
+                    hasMultiSql = recordLog.getHasMultiSql();
+                }
+
+                if (undoLog.length() == 0) {
+                    // 没有查找到对应的insert语句 会将delete where rowid=xxx 语句作为redoLog
+                    log.warn("has not found undoLog for scn {}", scn);
+                } else {
+                    sqlRedo = undoLog;
+                }
+                log.debug(
+                        "find rollback sql,scn is {},rowId is {},xisSqn is {}", scn, rowId, xidSqn);
+            }
+
+            // oracle10中文编码且字符串大于4000，LogMiner可能出现中文乱码导致SQL解析异常
+            // if (hasMultiSql && oracleInfo.isOracle10() && oracleInfo.isGbk()) {
+            //     String redo = sqlRedo.toString();
+            //     String hexStr = new String(Hex.encodeHex(redo.getBytes("GBK")));
+            //     boolean hasChange = false;
+            //
+            //     // delete 条件不以'结尾 如 where id = '1 以?结尾的需要加上'
+            //     if (operationCode == 2 && hexStr.endsWith("3f")) {
+            //         LOG.info(
+            //                 "current scn is: {},\noriginal redo sql is: {},\nhex redo string is: {}",
+            //                 scn,
+            //                 redo,
+            //                 hexStr);
+            //         hexStr = hexStr + "27";
+            //         hasChange = true;
+            //     }
+            //
+            //     if (operationCode == 1 && hexStr.contains("3f2c")) {
+            //         LOG.info(
+            //                 "current scn is: {},\noriginal redo sql is: {},\nhex redo string is: {}",
+            //                 scn,
+            //                 redo,
+            //                 hexStr);
+            //         hasChange = true;
+            //         hexStr = hexStr.replace("3f2c", "272c");
+            //     }
+            //     if (operationCode != 1) {
+            //         if (hexStr.contains("3f20616e64")) {
+            //             LOG.info(
+            //                     "current scn is: {},\noriginal redo sql is: {},\nhex redo string is: {}",
+            //                     scn,
+            //                     redo,
+            //                     hexStr);
+            //             hasChange = true;
+            //             // update set "" = '' and "" = '' where "" = '' and "" = '' where后可能存在中文乱码
+            //             // delete from where "" = '' and "" = '' where后可能存在中文乱码
+            //             // ?空格and -> '空格and
+            //             hexStr = hexStr.replace("3f20616e64", "2720616e64");
+            //         }
+            //
+            //         if (hexStr.contains("3f207768657265")) {
+            //             LOG.info(
+            //                     "current scn is: {},\noriginal redo sql is: {},\nhex redo string is: {}",
+            //                     scn,
+            //                     redo,
+            //                     hexStr);
+            //             hasChange = true;
+            //             // ? where 改为 ' where
+            //             hexStr = hexStr.replace("3f207768657265", "27207768657265");
+            //         }
+            //     }
+            //
+            //     if (hasChange) {
+            //         sqlLog = new String(Hex.decodeHex(hexStr.toCharArray()), "GBK");
+            //         LOG.info("final redo sql is: {}", sqlLog);
+            //     } else {
+            //         sqlLog = sqlRedo.toString();
+            //     }
+            // } else {
+                sqlLog = sqlRedo.toString();
+            // }
+
+            String schema = logMinerData.getString(LogminerKeyConstants.KEY_SEG_OWNER);
+            Timestamp timestamp = logMinerData.getTimestamp(LogminerKeyConstants.KEY_TIMESTAMP);
+
+            ColumnRowData columnRowData = new ColumnRowData(5);
+            columnRowData.addField(new StringColumn(schema));
+            columnRowData.addHeader("schema");
+
+            columnRowData.addField(new StringColumn(tableName));
+            columnRowData.addHeader("tableName");
+
+            columnRowData.addField(new StringColumn(operation));
+            columnRowData.addHeader("operation");
+
+            columnRowData.addField(new StringColumn(sqlLog));
+            columnRowData.addHeader("sqlLog");
+
+            columnRowData.addField(new TimestampColumn(timestamp));
+            columnRowData.addHeader("opTime");
+
+            result = new QueueData(scn);
+
+            // 只有非回滚的insert update解析的数据放入缓存
+            if (!rollback) {
+                transactionManager.putCache(
+                        new RecordLog(
+                                scn,
+                                sqlUndo.toString(),
+                                sqlLog,
+                                xidUsn,
+                                xidSLt,
+                                xidSqn,
+                                rowId,
+                                operationCode,
+                                hasMultiSql,
+                                tableName));
+            }
+            return true;
+        }
+
+        // this.CURRENT_STATE.set(STATE.READEND); TODO: 任务控制
+        return false;
+    }
+
+    // --------------- 处理CDC日志解析的动作
+
+    /**
+     * 回滚语句根据对应的dml日志找出对应的undoog
+     *
+     * @param rollbackLog 回滚语句
+     * @param dmlLog 对应的dml语句
+     */
+    public String getRollbackSql(RecordLog rollbackLog, RecordLog dmlLog) {
+        // 如果回滚日志是update，则其where条件没有 才会进入
+        if (rollbackLog.getOperationCode() == 3 && dmlLog.getOperationCode() == 3) {
+            return dmlLog.getSqlUndo();
+        }
+
+        // 回滚日志是delete
+        // delete回滚两种场景 如果客户表字段存在blob字段且插入时blob字段为空 此时会出现insert emptyBlob语句以及一个update语句之外
+        // 之后才会有一个delete语句，而此delete语句rowid对应的上面update语句 所以直接返回delete from "table"."ID" where ROWID =
+        // 'AAADcjAAFAAAABoAAC'（blob不支持）
+        if (rollbackLog.getOperationCode() == 2 && dmlLog.getOperationCode() == 1) {
+            return dmlLog.getSqlUndo();
+        }
+        log.warn("dmlLog [{}]  is not hit for rollbackLog [{}]", dmlLog, rollbackLog);
+        return "";
+    }
+
+    /**
+     * 递归查找 delete的rollback对应的insert语句
+     *
+     * @param rollbackRecord rollback参数
+     * @return insert语句
+     */
+    public RecordLog recursionQueryDataForRollback(RecordLog rollbackRecord)
+            throws SQLException, UnsupportedEncodingException {
+        if (Objects.isNull(queryDataForRollbackConnection)) {
+            queryDataForRollbackConnection =
+                    new OracleCDCConnection(config, transactionManager);
+        }
+
+        if (Objects.isNull(queryDataForRollbackConnection.connection)
+                || queryDataForRollbackConnection.connection.isClosed()) {
+            // LOG.info("queryDataForRollbackConnection start connect");
+            queryDataForRollbackConnection.getConnection();
+        }
+
+        // 查找出当前加载归档日志文件里的最小scn  递归查找此scn之前的文件
+        List<LogFile> logFiles =
+                queryAddedLogFiles().stream()
+                        .filter(
+                                i ->
+                                        i.getStatus() != 4
+                                                && i.getType().equalsIgnoreCase("ARCHIVED")) // 归档日志
+                        .collect(Collectors.toList());
+
+        // 默认每次往前查询4000个scn
+        BigInteger step = new BigInteger("4000");
+        if (CollectionUtils.isNotEmpty(logFiles)) {
+            // nextChange-firstChange 为一个文件包含多少的scn，将其*2 代表加载此scn之前2个文件
+            step =
+                    logFiles.get(0)
+                            .getNextChange()
+                            .subtract(logFiles.get(0).getFirstChange())
+                            .multiply(new BigInteger("2"));
+        }
+
+        BigInteger startScn = rollbackRecord.getScn().subtract(step);
+        BigInteger endScn = rollbackRecord.getScn();
+
+       /* for (int i = 0; i < 2; i++) {
+            queryDataForRollbackConnection.startOrUpdateLogMiner(startScn, endScn);
+            queryDataForRollbackConnection.queryDataForDeleteRollback(
+                    rollbackRecord, SqlUtil.queryDataForRollback);
+            // while循环查找所有数据 并都加载到缓存里去
+            while (queryDataForRollbackConnection.hasNext()) {}
+            // 从缓存里取
+            RecordLog dmlLog =
+                    transactionManager.queryUndoLogFromCache(
+                            rollbackRecord.getXidUsn(),
+                            rollbackRecord.getXidSlt(),
+                            rollbackRecord.getXidSqn(),
+                            rollbackRecord.getRowId(),
+                            rollbackRecord.getScn());
+            if (Objects.nonNull(dmlLog)) {
+                return dmlLog;
+            }
+            endScn = startScn;
+            startScn = startScn.subtract(step);
+        }*/
+        return null;
     }
 }
