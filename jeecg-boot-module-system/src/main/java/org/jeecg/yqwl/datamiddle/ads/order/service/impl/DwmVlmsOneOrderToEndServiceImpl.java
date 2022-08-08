@@ -239,37 +239,37 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setInSiteTime(params.getInSiteTime() / 1000);
         }
         // 入开始站台时间
-        if (params.getInStartPlatformTime() != null) {
-            params.setInStartPlatformTime(params.getInStartPlatformTime() / 1000);
-        }
-        // 出开始站台时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
-        if (params.getOutStartPlatformTime() != null && StringUtils.length(params.getOutStartPlatformTime() + "") == 16) {
-            params.setOutStartPlatformTime(params.getOutStartPlatformTime() / 1000);
-        }
-        // 入目标站台时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
-        if (params.getInEndPlatformTime() != null && StringUtils.length(params.getInEndPlatformTime() + "") == 16) {
-            params.setInEndPlatformTime(params.getInEndPlatformTime() / 1000);
-        }
-        // 铁路卸车时间，需要判定 兜底赋值为13位的情况。兜底：DZTXCSJ
-        if (params.getUnloadRailwayTime() != null && StringUtils.length(params.getUnloadRailwayTime() + "") == 16) {
-            params.setUnloadRailwayTime(params.getUnloadRailwayTime() / 1000);
-        }
-        // 入开始港口时间
-        if (params.getInStartWaterwayTime() != null) {
-            params.setInStartWaterwayTime(params.getInStartWaterwayTime() / 1000);
-        }
-        // 出开始港口时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
-        if (params.getEndStartWaterwayTime() != null && StringUtils.length(params.getEndStartWaterwayTime() + "") == 16) {
-            params.setEndStartWaterwayTime(params.getEndStartWaterwayTime() / 1000);
-        }
-        // 入目标港口时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
-        if (params.getInEndWaterwayTime() != null && StringUtils.length(params.getInEndWaterwayTime() + "") == 16) {
-            params.setInEndWaterwayTime(params.getInEndWaterwayTime() / 1000);
-        }
-        // 水路卸船时间
-        if (params.getUnloadShipTime() != null) {
-            params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
-        }
+//        if (params.getInStartPlatformTime() != null) {
+//            params.setInStartPlatformTime(params.getInStartPlatformTime() / 1000);
+//        }
+//        // 出开始站台时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
+//        if (params.getOutStartPlatformTime() != null && StringUtils.length(params.getOutStartPlatformTime() + "") == 16) {
+//            params.setOutStartPlatformTime(params.getOutStartPlatformTime() / 1000);
+//        }
+//        // 入目标站台时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
+//        if (params.getInEndPlatformTime() != null && StringUtils.length(params.getInEndPlatformTime() + "") == 16) {
+//            params.setInEndPlatformTime(params.getInEndPlatformTime() / 1000);
+//        }
+//        // 铁路卸车时间，需要判定 兜底赋值为13位的情况。兜底：DZTXCSJ
+//        if (params.getUnloadRailwayTime() != null && StringUtils.length(params.getUnloadRailwayTime() + "") == 16) {
+//            params.setUnloadRailwayTime(params.getUnloadRailwayTime() / 1000);
+//        }
+//        // 入开始港口时间
+//        if (params.getInStartWaterwayTime() != null) {
+//            params.setInStartWaterwayTime(params.getInStartWaterwayTime() / 1000);
+//        }
+//        // 出开始港口时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
+//        if (params.getEndStartWaterwayTime() != null && StringUtils.length(params.getEndStartWaterwayTime() + "") == 16) {
+//            params.setEndStartWaterwayTime(params.getEndStartWaterwayTime() / 1000);
+//        }
+//        // 入目标港口时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
+//        if (params.getInEndWaterwayTime() != null && StringUtils.length(params.getInEndWaterwayTime() + "") == 16) {
+//            params.setInEndWaterwayTime(params.getInEndWaterwayTime() / 1000);
+//        }
+//        // 水路卸船时间
+//        if (params.getUnloadShipTime() != null) {
+//            params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
+//        }
         // 入末端分拨库时间
         if (params.getInDistributeTime() != null && StringUtils.length(params.getInDistributeTime() + "") == 16) {
             params.setInDistributeTime(params.getInDistributeTime() / 1000);
