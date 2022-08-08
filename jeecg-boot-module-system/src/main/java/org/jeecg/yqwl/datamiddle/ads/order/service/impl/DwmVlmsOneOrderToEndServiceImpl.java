@@ -271,7 +271,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
         }
         // 入末端分拨库时间
-        if (params.getInDistributeTime() != null) {
+        if (params.getInDistributeTime() != null && StringUtils.length(params.getInDistributeTime() + "") == 16) {
             params.setInDistributeTime(params.getInDistributeTime() / 1000);
         }
     }
@@ -395,11 +395,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 ////            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
 ////            params.setDotSiteTime(dotSiteTime);
 ////        }
-//        // dotSiteTime,
-//        if (params.getDtvsdhsj() != 0) {
-//            Long dtvsdhsj = params.getDtvsdhsj() - 28800000L;
-//            params.setDtvsdhsj(dtvsdhsj);
-//        }
+        // dotSiteTime,
+        if (params.getDtvsdhsj() != 0) {
+            Long dtvsdhsj = params.getDtvsdhsj() - 28800000L;
+            params.setDtvsdhsj(dtvsdhsj);
+        }
 //        // finalSiteTime
 //        if (params.getFinalSiteTime() != 0) {
 //            Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
