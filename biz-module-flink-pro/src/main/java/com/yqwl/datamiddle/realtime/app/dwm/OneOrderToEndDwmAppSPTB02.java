@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OneOrderToEndDwmAppSPTB02 {
 
-    //2019-12-31 00:00:00
-    private static final long START = 1577721600000L;
+    //2022-01-01 00:00:00
+    private static final long START = 1640966400000L;
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
 

@@ -4,6 +4,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.ClickHouseUtil;
@@ -30,8 +31,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppClickHouseSptb02 {
-    //2019-12-31 00:00:00
-    private static final long START = 1577721600000L;
+    //2022-01-01 00:00:00
+    private static final long START = 1640966400000L;
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
 
@@ -75,6 +76,7 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
+                .startupOptions(StartupOptions.initial())
                 .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .serverId("5417-5420")
                 .build();

@@ -106,7 +106,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             queryCriteria.setVvinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
 
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
         Integer pageNo = 1;
         Integer pageSize = 5000;
@@ -342,7 +342,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         if (StringUtil.length(selections) > 2) {
             queryCriteria.setVvinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
         Integer pageNo = 1;
         Integer pageSize = 5000;
 
