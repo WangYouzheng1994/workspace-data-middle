@@ -1,5 +1,6 @@
 package org.test.cdc.oracle;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,16 +15,90 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Description: Oracle CDC JDBC连接处理工具 把SCN的交互解耦。以便后续其他的地方使用
+ * @Description: Oracle CDC 连接工具。 每个实例里面保存了当前JDBC的上下文
  * @Author: WangYouzheng
  * @Date: 2022/8/3 15:02
  * @Version: V1.0
  */
 @Slf4j
+@Data
 public class OracleDBUtil {
 
+    private Connection connection;
+    private CallableStatement logMinerStartStmt;
+    private PreparedStatement logMinerSelectStmt;
+    private ResultSet logMinerData;
+    // 查询logminer的超时时间
+    private Long logminerQueryTimeout = 300L;
+    private OracleCDCConfig config;
+    private List<LogFile> addedLogFiles = new ArrayList<>();
+    private BigInteger startScn = null;
+    private BigInteger endScn = null;
+
+
+    public OracleDBUtil() {
+
+    }
+
+    public OracleDBUtil(OracleCDCConfig config) {
+        this.config = config;
+    }
+
+    /**
+     * 获取连接，并且设置好字符集
+     *
+     * @return
+     */
+    public boolean getConnection(OracleCDCConfig config) {
+        int interval = 1;
+        log.debug("connection driver class: {}", config.getDriverClass());
+        log.info("connection user: {}", config.getUsername());
+        log.info("connection password: {}", config.getPassword());
+
+        // 加载驱动
+        try {
+            Class.forName(config.getDriverClass());
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+
+        do {
+            try {
+                connection = DriverManager.getConnection(config.getJdbcUrl(), config.getUsername(), config.getPassword());
+                interval = 5;
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                closeResources(null, null, connection);
+                interval++;
+            }
+        } while(interval < 3);
+
+        interval = 1;
+        // 设置编码和日期类型
+        do {
+            try {
+                connection.prepareStatement(SqlUtil.SQL_ALTER_NLS_SESSION_PARAMETERS);
+                logMinerSelectStmt.execute();
+                interval = 5;
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                closeResources(null, null, connection);
+                interval++;
+            }
+        } while(interval < 3);
+
+        boolean result = false;
+        if (connection == null) {
+            result = false;
+        } else {
+            result = true;
+        }
+        return result;
+    }
+
     /** 关闭数据库连接资源 */
-    public static void closeResources(ResultSet rs, Statement stmt, Connection conn) {
+    public void closeResources(ResultSet rs, Statement stmt, Connection conn) {
         if (null != rs) {
             try {
                 rs.close();
@@ -45,7 +120,7 @@ public class OracleDBUtil {
     }
 
     /** 关闭Statement */
-    private static void closeStmt(Statement statement) {
+    private void closeStmt(Statement statement) {
         try {
             if (statement != null && !statement.isClosed()) {
                 statement.close();
@@ -55,6 +130,12 @@ public class OracleDBUtil {
         }
     }
 
+    /** 重置 启动logminer的statement */
+    public  void resetLogminerStmt(String startSql) throws SQLException {
+        closeStmt(logMinerStartStmt);
+        logMinerStartStmt = connection.prepareCall(startSql);
+        // configStatement(logMinerStartStmt);
+    }
 
     /**
      * 获取当前SCN
@@ -62,7 +143,7 @@ public class OracleDBUtil {
      * @param connection
      * @return
      */
-    public static BigInteger getCurrentScn(Connection connection) {
+    public BigInteger getCurrentScn(Connection connection) {
         BigInteger currentScn = null;
         CallableStatement currentScnStmt = null;
         ResultSet currentScnResultSet = null;
@@ -91,7 +172,7 @@ public class OracleDBUtil {
      * @param startTime 13位时间戳
      * @return
      */
-    public static BigInteger getLogFileStartPositionByTime(Connection connection, Long startTime) {
+    public BigInteger getLogFileStartPositionByTime(Connection connection, Long startTime) {
         BigInteger logFileFirstChange = null;
 
         PreparedStatement lastLogFileStmt = null;
@@ -127,7 +208,7 @@ public class OracleDBUtil {
      * @param connection
      * @return
      */
-    public static BigInteger getMinScn(Connection connection) {
+    public BigInteger getMinScn(Connection connection) {
         BigInteger minScn = null;
         PreparedStatement minScnStmt = null;
         ResultSet minScnResultSet = null;
@@ -152,7 +233,7 @@ public class OracleDBUtil {
     /**
      *  根据leftScn 以及加载的日志大小限制 获取可加载的scn范围 以及此范围对应的日志文件
      */
-    public static Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
+    public Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
             throws SQLException {
         return getEndScn(connection, startScn, logFiles, true);
     }
@@ -166,7 +247,7 @@ public class OracleDBUtil {
      * @return org.apache.commons.lang3.tuple.Pair
      * @throws SQLException
      */
-    public static Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles, boolean addRedoLog) throws SQLException {
+    public Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles, boolean addRedoLog) throws SQLException {
 
         List<LogFile> logFileLists = new ArrayList<>();
         PreparedStatement statement = null;
@@ -276,7 +357,7 @@ public class OracleDBUtil {
      * @param listenerTables 需要采集的schema+表名 SCHEMA1.TABLE1,SCHEMA2.TABLE2
      * @return
      */
-    public static String buildSelectSql(
+    public String buildSelectSql(
             String listenerOptions, String listenerTables, boolean isCdb) {
         StringBuilder sqlBuilder = new StringBuilder(SqlUtil.SQL_SELECT_DATA);
 
@@ -303,7 +384,7 @@ public class OracleDBUtil {
      * @param listenerTables 需要采集的schema+表名 SCHEMA1.TABLE1,SCHEMA2.TABLE2
      * @return
      */
-    private static String buildSchemaTableFilter(String listenerTables, boolean isCdb) {
+    private String buildSchemaTableFilter(String listenerTables, boolean isCdb) {
         List<String> filters = new ArrayList<>();
 
         String[] tableWithSchemas = listenerTables.split(ConstantValue.COMMA_SYMBOL);
@@ -348,7 +429,7 @@ public class OracleDBUtil {
      *
      * @return
      */
-    private static String buildExcludeSchemaFilter() {
+    private String buildExcludeSchemaFilter() {
         List<String> filters = new ArrayList<>();
         for (String excludeSchema : EXCLUDE_SCHEMAS) {
             filters.add(String.format("SEG_OWNER != '%s'", excludeSchema));
@@ -363,7 +444,7 @@ public class OracleDBUtil {
      * @param listenerOptions 需要采集操作类型字符串 delete,insert,update
      * @return
      */
-    private static String buildOperationFilter(String listenerOptions) {
+    private String buildOperationFilter(String listenerOptions) {
         List<String> standardOperations = new ArrayList<>();
 
         String[] operations = listenerOptions.split(ConstantValue.COMMA_SYMBOL);
@@ -393,42 +474,25 @@ public class OracleDBUtil {
     }
 
     /** 启动LogMiner */
-    public static void startOrUpdateLogMiner(Connection connection, BigInteger startScn, BigInteger endScn) {
+    public void startOrUpdateLogMiner(OracleDBUtil connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog) {
 
         String startSql;
         try {
-            /*this.startScn = startScn;
-            this.endScn = endScn;
-            this.CURRENT_STATE.set(STATE.FILEADDING);*/
 
-            // checkAndResetConnection();
+            // TODO：防止没有数据更新的时候频繁查询数据库，限定查询的最小时间间隔 QUERY_LOG_INTERVAL
 
-            // 防止没有数据更新的时候频繁查询数据库，限定查询的最小时间间隔 QUERY_LOG_INTERVAL
-            /*if (lastQueryTime > 0) {
-                long time = System.currentTimeMillis() - lastQueryTime;
-                if (time < QUERY_LOG_INTERVAL) {
-                    try {
-                        Thread.sleep(QUERY_LOG_INTERVAL - time);
-                    } catch (InterruptedException e) {
-                        LOG.warn("", e);
-                    }
-                }
-            }*/
-            // lastQueryTime = System.currentTimeMillis();
-
-           /* if (logMinerConfig.getSupportAutoAddLog()) {
-                startSql =
-                        oracleInfo.isOracle10()
-                                ? SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG_10
-                                : SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG;
-            } else {*/
+            if (autoaddLog) {
+                startSql = SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG;
+            } else {
                 startSql = SqlUtil.SQL_START_LOGMINER;
-            // }
+            }
 
-            // resetLogminerStmt(startSql);
+            connection.getConnection();
 
-            /*
-            if (logMinerConfig.getSupportAutoAddLog()) {
+            connection.resetLogminerStmt(startSql);
+
+            // 这个auto 不是很明白怎么个意思
+            if (autoaddLog) {
                 logMinerStartStmt.setString(1, startScn.toString());
             } else {
                 logMinerStartStmt.setString(1, startScn.toString());
@@ -436,18 +500,78 @@ public class OracleDBUtil {
             }
 
             logMinerStartStmt.execute();
-            this.CURRENT_STATE.set(STATE.FILEADDED);*/
             // 查找出加载到logMiner里的日志文件
-            // this.addedLogFiles = queryAddedLogFiles();
-            /*LOG.info(
-                    "Log group changed, startScn = {},endScn = {} new log group = {}",
-                    startScn,
-                    endScn,
-                    GsonUtil.GSON.toJson(this.addedLogFiles));*/
+            this.addedLogFiles = queryAddedLogFiles();
         } catch (Exception e) {
             // this.CURRENT_STATE.set(STATE.FAILED);
             // this.exception = e;
             throw new RuntimeException(e);
+        }
+    }
+
+    /** 获取logminer加载的日志文件 */
+    private List<LogFile> queryAddedLogFiles() throws SQLException {
+        List<LogFile> logFileLists = new ArrayList<>();
+        try (PreparedStatement statement =
+                     connection.prepareStatement(SqlUtil.SQL_QUERY_ADDED_LOG)) {
+            statement.setQueryTimeout(logminerQueryTimeout.intValue());
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    LogFile logFile = new LogFile();
+                    logFile.setFileName(rs.getString("filename"));
+                    logFile.setFirstChange(new BigInteger(rs.getString("low_scn")));
+                    logFile.setNextChange(new BigInteger(rs.getString("next_scn")));
+                    logFile.setThread(rs.getLong("thread_id"));
+                    logFile.setBytes(rs.getLong("filesize"));
+                    logFile.setStatus(rs.getInt("status"));
+                    logFile.setType(rs.getString("type"));
+                    logFileLists.add(logFile);
+                }
+            }
+        }
+        return logFileLists;
+    }
+
+    /** 从LogMiner视图查询数据 */
+    public boolean queryData(String logMinerSelectSql) {
+
+        try {
+/*
+            this.CURRENT_STATE.set(STATE.LOADING);
+            checkAndResetConnection();*/
+
+            closeStmt(logMinerSelectStmt);
+            logMinerSelectStmt =
+                    connection.prepareStatement(
+                            logMinerSelectSql,
+                            ResultSet.TYPE_FORWARD_ONLY,
+                            ResultSet.CONCUR_READ_ONLY);
+            // configStatement(logMinerSelectStmt);
+
+            logMinerSelectStmt.setFetchSize(3000);
+            logMinerSelectStmt.setString(1, startScn.toString());
+            logMinerSelectStmt.setString(2, endScn.toString());
+            long before = System.currentTimeMillis();
+
+            logMinerData = logMinerSelectStmt.executeQuery();
+
+            // this.CURRENT_STATE.set(STATE.READABLE);
+            long timeConsuming = (System.currentTimeMillis() - before) / 1000;
+            // LOG.info(
+            //         "query LogMiner data, startScn:{},endScn:{},timeConsuming {}",
+            //         startScn,
+            //         endScn,
+            //         timeConsuming);
+            return true;
+        } catch (Exception e) {
+            // this.CURRENT_STATE.set(STATE.FAILED);
+            // this.exception = e;
+            // String message =
+            //         String.format(
+            //                 "query logMiner data failed, sql:[%s], e: %s",
+            //                 logMinerSelectSql, ExceptionUtil.getErrorMessage(e));
+            throw new RuntimeException(e.getMessage(), e);
+
         }
     }
 }

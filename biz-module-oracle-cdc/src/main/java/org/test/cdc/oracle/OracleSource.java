@@ -52,10 +52,10 @@ public class OracleSource {
      */
     private Boolean loadRedo = false;
 
-    // 最后一条数据的位点
+    /**
+     * 最后一条数据的位点
+     */
     private BigInteger currentSinkPosition;
-
-
 
     /**
      * 概要设计：
@@ -64,10 +64,9 @@ public class OracleSource {
      * 3. 过滤指定的表
      * 4. 循环取值 幂等过滤 把信息 推给传入的handler
      */
-
     public void start(OracleCDCConfig oracleCDCConfig) {
         // 初始化连接
-        OracleCDCConnecUtil oracleCDCConnecUtil = init(oracleCDCConfig);
+        OracleDBUtil oracleCDCConnecUtil = init(oracleCDCConfig);
         // 获取开始偏移量 根据模式判定
         startScn = getStartSCN(oracleCDCConnecUtil, new BigInteger("0"));
 
@@ -83,12 +82,12 @@ public class OracleSource {
      *
      * @param connecUtil
      */
-    public void payLoad(OracleCDCConnecUtil connecUtil) {
+    public void payLoad(OracleDBUtil connecUtil) {
         BigInteger currentMaxScn = null;
 
         Connection connection = connecUtil.getConnection();
 
-        currentMaxScn = OracleDBUtil.getCurrentScn(connection);
+        currentMaxScn = connecUtil.getCurrentScn(connection);
 
         if (Objects.isNull(connection) || currentMaxScn.subtract(this.endScn).compareTo(logminerStep) > 0) {
 
@@ -104,13 +103,18 @@ public class OracleSource {
             Pair<BigInteger, Boolean> endScn =
                     null;
             try {
-                endScn = OracleDBUtil.getEndScn(connection, currentStartScn, new ArrayList<>(32));
+                endScn = connecUtil.getEndScn(connection, currentStartScn, new ArrayList<>(32));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            OracleDBUtil.startOrUpdateLogMiner(connection, currentStartScn, endScn.getLeft());
+            connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
             // 读取v$logmnr_contents 数据由线程池加载
-            // loadData(logMinerConnection, logMinerSelectSql);
+            String logMinerSelectSql = ""; // 这个地方需要根据指定的表名 动态组装SQL
+            logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
+
+            // 请求logmnr_contents查看结果。 因为这个操作很慢，所以需要用多线程获取结果。
+            connecUtil.queryData(logMinerSelectSql);
+
             this.endScn = endScn.getLeft();
             this.loadRedo = endScn.getRight();
             // if (Objects.isNull(currentConnection)) {
@@ -173,11 +177,11 @@ public class OracleSource {
      * 2. 测试权限
      * 3. 测试用户权限
      */
-    public OracleCDCConnecUtil init(OracleCDCConfig config) {
+    public OracleDBUtil init(OracleCDCConfig config) {
         this.oracleCDCConfig = config;
         // 单任务哈 后续如果中台建设完毕 可以考虑动态新增任务的时候才这样处理。
         this.executor = Executors.newSingleThreadExecutor(threadFactory);
-        OracleCDCConnecUtil oracleCDCConnecUtil = new OracleCDCConnecUtil(config);
+        OracleDBUtil oracleCDCConnecUtil = new OracleDBUtil(config);
 
         if (!oracleCDCConnecUtil.getConnection(oracleCDCConfig)) {
             log.error("初始化oracle 连接失败");
@@ -191,7 +195,7 @@ public class OracleSource {
     /**
      * 获取起始SCN
      */
-    public BigInteger getStartSCN(OracleCDCConnecUtil oracleCDCConnecUtil, BigInteger startScn) {
+    public BigInteger getStartSCN(OracleDBUtil oracleCDCConnecUtil, BigInteger startScn) {
         Connection connection = oracleCDCConnecUtil.getConnection();
 
         // 如果从保存点模式开始 并且不是0 证明保存点是ok的
@@ -202,15 +206,15 @@ public class OracleSource {
         // 恢复位置为0，则根据配置项进行处理
         if (SCNReadType.ALL.name().equalsIgnoreCase(oracleCDCConfig.getReadPosition())) {
             // 获取最开始的scn
-            startScn = OracleDBUtil.getMinScn(connection);
+            startScn = oracleCDCConnecUtil.getMinScn(connection);
         } else if (SCNReadType.CURRENT.name().equalsIgnoreCase(oracleCDCConfig.getReadPosition())) {
-            startScn = OracleDBUtil.getCurrentScn(connection);
+            startScn = oracleCDCConnecUtil.getCurrentScn(connection);
         } else if (SCNReadType.TIME.name().equalsIgnoreCase(oracleCDCConfig.getReadPosition())) {
             // 根据指定的时间获取对应时间段的日志文件的起始位置
             if (oracleCDCConfig.getStartTime() == 0) {
                 throw new IllegalArgumentException("[startTime] must not be null or empty when readMode is [time]");
             }
-            startScn = OracleDBUtil.getLogFileStartPositionByTime(connection, oracleCDCConfig.getStartTime());
+            startScn = oracleCDCConnecUtil.getLogFileStartPositionByTime(connection, oracleCDCConfig.getStartTime());
         } else if (SCNReadType.SCN.name().equalsIgnoreCase(oracleCDCConfig.getReadPosition())) {
             // 根据指定的scn获取对应日志文件的起始位置
             if (StringUtils.isEmpty(oracleCDCConfig.getStartSCN())) {

@@ -180,8 +180,25 @@ public class SqlUtil {
                     + "  SYS.DBMS_LOGMNR.start_logmnr(       options =>          SYS.DBMS_LOGMNR.skip_corruption        + SYS.DBMS_LOGMNR.no_sql_delimiter        + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n"
                     + "  + SYS.DBMS_LOGMNR.dict_from_online_catalog    );\n"
                     + "   end;";
-    public static void main(String[] args) {
-        System.out.println(SqlUtil.SQL_QUERY_LOG_FILE);
 
-    }
+    /**
+     * 启动logminer，以自动添加日志的模式
+     */
+    public static final String SQL_START_LOG_MINER_AUTO_ADD_LOG =
+            ""
+                    + "BEGIN SYS.DBMS_LOGMNR.START_LOGMNR("
+                    + "   STARTSCN => ?,"
+                    + "   OPTIONS => SYS.DBMS_LOGMNR.SKIP_CORRUPTION "
+                    + "       + SYS.DBMS_LOGMNR.NO_SQL_DELIMITER "
+                    + "       + SYS.DBMS_LOGMNR.NO_ROWID_IN_STMT "
+                    + "       + SYS.DBMS_LOGMNR.DICT_FROM_ONLINE_CATALOG "
+                    + "       + SYS.DBMS_LOGMNR.CONTINUOUS_MINE "
+                    + "       + SYS.DBMS_LOGMNR.COMMITTED_DATA_ONLY "
+                    + "       + SYS.DBMS_LOGMNR.STRING_LITERALS_IN_STMT"
+                    + ");"
+                    + "END;";
+
+    // 查找加载到logminer的日志文件
+    public static final String SQL_QUERY_ADDED_LOG =
+            "select filename ,thread_id ,low_scn,next_scn,type,filesize,status,type from  V$LOGMNR_LOGS ";
 }
