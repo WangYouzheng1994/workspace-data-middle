@@ -59,7 +59,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             params = oneOrderToEndList.get(i);
             listMap.put(params.getVin(), i);
             // 添加逻辑  如果是时间字段  需要在得到的值进行-8小时处理
-//            this.formatTime(params);
+            this.formatTime(params);
         }
        if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
             // 运输方式拼接显示处理。
@@ -231,49 +231,49 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void formatMicros2Millis(DwmVlmsOneOrderToEnd params) {
         // 出厂日期
-        if (params.getLeaveFactoryTime() != null) {
-            params.setLeaveFactoryTime(params.getLeaveFactoryTime() / 1000);
-        }
+//        if (params.getLeaveFactoryTime() != null) {
+//            params.setLeaveFactoryTime(params.getLeaveFactoryTime() / 1000);
+//        }
         // 入库日期
         if (params.getInSiteTime() != null) {
             params.setInSiteTime(params.getInSiteTime() / 1000);
         }
         // 入开始站台时间
-        if (params.getInStartPlatformTime() != null) {
-            params.setInStartPlatformTime(params.getInStartPlatformTime() / 1000);
-        }
-        // 出开始站台时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
-        if (params.getOutStartPlatformTime() != null && StringUtils.length(params.getOutStartPlatformTime() + "") == 16) {
-            params.setOutStartPlatformTime(params.getOutStartPlatformTime() / 1000);
-        }
-        // 入目标站台时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
-        if (params.getInEndPlatformTime() != null && StringUtils.length(params.getInEndPlatformTime() + "") == 16) {
-            params.setInEndPlatformTime(params.getInEndPlatformTime() / 1000);
-        }
-        // 铁路卸车时间，需要判定 兜底赋值为13位的情况。兜底：DZTXCSJ
-        if (params.getUnloadRailwayTime() != null && StringUtils.length(params.getUnloadRailwayTime() + "") == 16) {
-            params.setUnloadRailwayTime(params.getUnloadRailwayTime() / 1000);
-        }
-        // 入开始港口时间
-        if (params.getInStartWaterwayTime() != null) {
-            params.setInStartWaterwayTime(params.getInStartWaterwayTime() / 1000);
-        }
-        // 出开始港口时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
-        if (params.getEndStartWaterwayTime() != null && StringUtils.length(params.getEndStartWaterwayTime() + "") == 16) {
-            params.setEndStartWaterwayTime(params.getEndStartWaterwayTime() / 1000);
-        }
-        // 入目标港口时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
-        if (params.getInEndWaterwayTime() != null && StringUtils.length(params.getInEndWaterwayTime() + "") == 16) {
-            params.setInEndWaterwayTime(params.getInEndWaterwayTime() / 1000);
-        }
-        // 水路卸船时间
-        if (params.getUnloadShipTime() != null) {
-            params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
-        }
-        // 入末端分拨库时间
-        if (params.getInDistributeTime() != null) {
-            params.setInDistributeTime(params.getInDistributeTime() / 1000);
-        }
+//        if (params.getInStartPlatformTime() != null) {
+//            params.setInStartPlatformTime(params.getInStartPlatformTime() / 1000);
+//        }
+//        // 出开始站台时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
+//        if (params.getOutStartPlatformTime() != null && StringUtils.length(params.getOutStartPlatformTime() + "") == 16) {
+//            params.setOutStartPlatformTime(params.getOutStartPlatformTime() / 1000);
+//        }
+//        // 入目标站台时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
+//        if (params.getInEndPlatformTime() != null && StringUtils.length(params.getInEndPlatformTime() + "") == 16) {
+//            params.setInEndPlatformTime(params.getInEndPlatformTime() / 1000);
+//        }
+//        // 铁路卸车时间，需要判定 兜底赋值为13位的情况。兜底：DZTXCSJ
+//        if (params.getUnloadRailwayTime() != null && StringUtils.length(params.getUnloadRailwayTime() + "") == 16) {
+//            params.setUnloadRailwayTime(params.getUnloadRailwayTime() / 1000);
+//        }
+//        // 入开始港口时间
+//        if (params.getInStartWaterwayTime() != null) {
+//            params.setInStartWaterwayTime(params.getInStartWaterwayTime() / 1000);
+//        }
+//        // 出开始港口时间，需要判定 兜底赋值为13位的情况。兜底：dsjcfsj
+//        if (params.getEndStartWaterwayTime() != null && StringUtils.length(params.getEndStartWaterwayTime() + "") == 16) {
+//            params.setEndStartWaterwayTime(params.getEndStartWaterwayTime() / 1000);
+//        }
+//        // 入目标港口时间，需要判定 兜底赋值为13位的情况。兜底：gps到货时间
+//        if (params.getInEndWaterwayTime() != null && StringUtils.length(params.getInEndWaterwayTime() + "") == 16) {
+//            params.setInEndWaterwayTime(params.getInEndWaterwayTime() / 1000);
+//        }
+//        // 水路卸船时间
+//        if (params.getUnloadShipTime() != null) {
+//            params.setUnloadShipTime(params.getUnloadShipTime() / 1000);
+//        }
+//        // 入末端分拨库时间
+//        if (params.getInDistributeTime() != null) {
+//            params.setInDistributeTime(params.getInDistributeTime() / 1000);
+//        }
     }
 
     /**
@@ -283,7 +283,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
         // 16位 convert to 13位 注销时间处理  2022.8.4
-//         formatMicros2Millis(params);
+         formatMicros2Millis(params);
 
         if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
@@ -291,120 +291,120 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
 
         //leaveFactoryTime
-        if (params.getLeaveFactoryTime() != 0) {
-            Long leaveFactoryTime = params.getLeaveFactoryTime() - 28800000L;
-            params.setLeaveFactoryTime(leaveFactoryTime);
-        }
-        //inSiteTime
-        if (params.getInSiteTime() != 0) {
-            Long inSiteTime = params.getInSiteTime() - 28800000L;
-            params.setInSiteTime(inSiteTime);
-        }
-        //vehicleReceivingTime
-        if (params.getVehicleReceivingTime() != 0) {
-            Long vehicleReceivingTime = params.getVehicleReceivingTime() - 28800000L;
-            params.setVehicleReceivingTime(vehicleReceivingTime);
-        }
-        //stowageNoteTime
-//        if (params.getStowageNoteTime() != 0) {
-//            Long stowageNoteTime = params.getStowageNoteTime() - 28800000L;
-//            params.setStowageNoteTime(stowageNoteTime);
+//        if (params.getLeaveFactoryTime() != 0) {
+//            Long leaveFactoryTime = params.getLeaveFactoryTime() - 28800000L;
+//            params.setLeaveFactoryTime(leaveFactoryTime);
 //        }
-        //assignTime
-        if (params.getAssignTime() != 0) {
-            Long assignTime = params.getAssignTime() - 28800000L;
-            params.setAssignTime(assignTime);
-        }
-        //actualOutTime
-        if (params.getActualOutTime() != 0) {
-            Long actualOutTime = params.getActualOutTime() - 28800000L;
-            params.setActualOutTime(actualOutTime);
-        }
-        //shipmentTime
-//        if (params.getShipmentTime() != 0) {
-//            Long shipmentTime = params.getShipmentTime() - 28800000L;
-//            params.setShipmentTime(shipmentTime);
+//        //inSiteTime
+//        if (params.getInSiteTime() != 0) {
+//            Long inSiteTime = params.getInSiteTime() - 28800000L;
+//            params.setInSiteTime(inSiteTime);
 //        }
-        // shipmentGTime
-        if (params.getShipmentGTime() != 0) {
-            Long ShipmentGTime = params.getShipmentGTime() - 28800000L;
-            params.setShipmentGTime(ShipmentGTime);
-        }
-        //inStartWaterwayTime,
-        if (params.getInStartWaterwayTime() != 0) {
-            Long inStartWaterwayTime = params.getInStartWaterwayTime() - 28800000L;
-            params.setInStartWaterwayTime(inStartWaterwayTime);
-        }
-        // endStartWaterwayTime
-        if (params.getEndStartWaterwayTime() != 0) {
-            Long endStartWaterwayTime = params.getEndStartWaterwayTime() - 28800000L;
-            params.setEndStartWaterwayTime(endStartWaterwayTime);
-        }
-        //inEndWaterwayTime
-        if (params.getInEndWaterwayTime() != 0) {
-            Long inEndWaterwayTime = params.getInEndWaterwayTime() - 28800000L;
-            params.setInEndWaterwayTime(inEndWaterwayTime);
-        }
-        // inStartPlatformTime
-        if (params.getInStartPlatformTime() != 0) {
-            Long inStartPlatformTime = params.getInStartPlatformTime() - 28800000L;
-            params.setInStartPlatformTime(inStartPlatformTime);
-        }
-        // outStartPlatformTime
-        if (params.getOutStartPlatformTime() != 0) {
-            Long outStartPlatformTime = params.getOutStartPlatformTime() - 28800000L;
-            params.setOutStartPlatformTime(outStartPlatformTime);
-        }
-        // inEndPlatformTime,
-        if (params.getInEndPlatformTime() != 0) {
-            Long inEndPlatformTime = params.getInEndPlatformTime() - 28800000L;
-            params.setInEndPlatformTime(inEndPlatformTime);
-        }
-        // unloadShipTime,
-        if (params.getUnloadShipTime() != 0) {
-            Long unloadShipTime = params.getUnloadShipTime() - 28800000L;
-            params.setUnloadShipTime(unloadShipTime);
-        }
-        // unloadRailwayTime,
-        if (params.getUnloadRailwayTime() != 0) {
-            Long unloadRailwayTime = params.getUnloadRailwayTime() - 28800000L;
-            params.setUnloadRailwayTime(unloadRailwayTime);
-        }
-        // inDistributeTime,
-        if (params.getInDistributeTime() != 0) {
-            Long inDistributeTime = params.getInDistributeTime() - 28800000L;
-            params.setInDistributeTime(inDistributeTime);
-        }
-        // distributeAssignTime
-        if (params.getDistributeAssignTime() != 0) {
-            Long distributeAssignTime = params.getDistributeAssignTime() - 28800000L;
-            params.setDistributeAssignTime(distributeAssignTime);
-        }
-        //outDistributeTime
-        if (params.getOutDistributeTime() != 0) {
-            Long outDistributeTime = params.getOutDistributeTime() - 28800000L;
-            params.setOutDistributeTime(outDistributeTime);
-        }
-        // distributeShipmentTime,
-        if (params.getDistributeShipmentTime() != 0) {
-            Long distributeShipmentTime = params.getDistributeShipmentTime() - 28800000L;
-            params.setDistributeShipmentTime(distributeShipmentTime);
-        }
-        // dotSiteTime,
-//        if (params.getDotSiteTime() != 0) {
-//            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
-//            params.setDotSiteTime(dotSiteTime);
+//        //vehicleReceivingTime
+//        if (params.getVehicleReceivingTime() != 0) {
+//            Long vehicleReceivingTime = params.getVehicleReceivingTime() - 28800000L;
+//            params.setVehicleReceivingTime(vehicleReceivingTime);
 //        }
-        // dotSiteTime,
-        if (params.getDtvsdhsj() != 0) {
-            Long dtvsdhsj = params.getDtvsdhsj() - 28800000L;
-            params.setDtvsdhsj(dtvsdhsj);
-        }
-        // finalSiteTime
-        if (params.getFinalSiteTime() != 0) {
-            Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
-            params.setFinalSiteTime(finalSiteTime);
-        }
+//        //stowageNoteTime
+////        if (params.getStowageNoteTime() != 0) {
+////            Long stowageNoteTime = params.getStowageNoteTime() - 28800000L;
+////            params.setStowageNoteTime(stowageNoteTime);
+////        }
+//        //assignTime
+//        if (params.getAssignTime() != 0) {
+//            Long assignTime = params.getAssignTime() - 28800000L;
+//            params.setAssignTime(assignTime);
+//        }
+//        //actualOutTime
+//        if (params.getActualOutTime() != 0) {
+//            Long actualOutTime = params.getActualOutTime() - 28800000L;
+//            params.setActualOutTime(actualOutTime);
+//        }
+//        //shipmentTime
+////        if (params.getShipmentTime() != 0) {
+////            Long shipmentTime = params.getShipmentTime() - 28800000L;
+////            params.setShipmentTime(shipmentTime);
+////        }
+//        // shipmentGTime
+//        if (params.getShipmentGTime() != 0) {
+//            Long ShipmentGTime = params.getShipmentGTime() - 28800000L;
+//            params.setShipmentGTime(ShipmentGTime);
+//        }
+//        //inStartWaterwayTime,
+//        if (params.getInStartWaterwayTime() != 0) {
+//            Long inStartWaterwayTime = params.getInStartWaterwayTime() - 28800000L;
+//            params.setInStartWaterwayTime(inStartWaterwayTime);
+//        }
+//        // endStartWaterwayTime
+//        if (params.getEndStartWaterwayTime() != 0) {
+//            Long endStartWaterwayTime = params.getEndStartWaterwayTime() - 28800000L;
+//            params.setEndStartWaterwayTime(endStartWaterwayTime);
+//        }
+//        //inEndWaterwayTime
+//        if (params.getInEndWaterwayTime() != 0) {
+//            Long inEndWaterwayTime = params.getInEndWaterwayTime() - 28800000L;
+//            params.setInEndWaterwayTime(inEndWaterwayTime);
+//        }
+//        // inStartPlatformTime
+//        if (params.getInStartPlatformTime() != 0) {
+//            Long inStartPlatformTime = params.getInStartPlatformTime() - 28800000L;
+//            params.setInStartPlatformTime(inStartPlatformTime);
+//        }
+//        // outStartPlatformTime
+//        if (params.getOutStartPlatformTime() != 0) {
+//            Long outStartPlatformTime = params.getOutStartPlatformTime() - 28800000L;
+//            params.setOutStartPlatformTime(outStartPlatformTime);
+//        }
+//        // inEndPlatformTime,
+//        if (params.getInEndPlatformTime() != 0) {
+//            Long inEndPlatformTime = params.getInEndPlatformTime() - 28800000L;
+//            params.setInEndPlatformTime(inEndPlatformTime);
+//        }
+//        // unloadShipTime,
+//        if (params.getUnloadShipTime() != 0) {
+//            Long unloadShipTime = params.getUnloadShipTime() - 28800000L;
+//            params.setUnloadShipTime(unloadShipTime);
+//        }
+//        // unloadRailwayTime,
+//        if (params.getUnloadRailwayTime() != 0) {
+//            Long unloadRailwayTime = params.getUnloadRailwayTime() - 28800000L;
+//            params.setUnloadRailwayTime(unloadRailwayTime);
+//        }
+//        // inDistributeTime,
+//        if (params.getInDistributeTime() != 0) {
+//            Long inDistributeTime = params.getInDistributeTime() - 28800000L;
+//            params.setInDistributeTime(inDistributeTime);
+//        }
+//        // distributeAssignTime
+//        if (params.getDistributeAssignTime() != 0) {
+//            Long distributeAssignTime = params.getDistributeAssignTime() - 28800000L;
+//            params.setDistributeAssignTime(distributeAssignTime);
+//        }
+//        //outDistributeTime
+//        if (params.getOutDistributeTime() != 0) {
+//            Long outDistributeTime = params.getOutDistributeTime() - 28800000L;
+//            params.setOutDistributeTime(outDistributeTime);
+//        }
+//        // distributeShipmentTime,
+//        if (params.getDistributeShipmentTime() != 0) {
+//            Long distributeShipmentTime = params.getDistributeShipmentTime() - 28800000L;
+//            params.setDistributeShipmentTime(distributeShipmentTime);
+//        }
+//        // dotSiteTime,
+////        if (params.getDotSiteTime() != 0) {
+////            Long dotSiteTime = params.getDotSiteTime() - 28800000L;
+////            params.setDotSiteTime(dotSiteTime);
+////        }
+//        // dotSiteTime,
+//        if (params.getDtvsdhsj() != 0) {
+//            Long dtvsdhsj = params.getDtvsdhsj() - 28800000L;
+//            params.setDtvsdhsj(dtvsdhsj);
+//        }
+//        // finalSiteTime
+//        if (params.getFinalSiteTime() != 0) {
+//            Long finalSiteTime = params.getFinalSiteTime() - 28800000L;
+//            params.setFinalSiteTime(finalSiteTime);
+//        }
     }
 
     /**
