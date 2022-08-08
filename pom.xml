@@ -65,7 +65,8 @@
         <module>biz-module-flink-demo</module>
         <module>biz-module-flink-pro</module>
 		<module>biz-module-oracle-cdc</module>
-	</modules>
+        <module>biz-module-common</module>
+    </modules>
 
 	<distributionManagement>
 	  	<repository>
