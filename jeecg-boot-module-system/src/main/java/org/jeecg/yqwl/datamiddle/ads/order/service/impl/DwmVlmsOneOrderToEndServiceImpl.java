@@ -283,7 +283,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void formatTime(DwmVlmsOneOrderToEnd params) {
         // 16位 convert to 13位 注销时间处理  2022.8.4
-         formatMicros2Millis(params);
+//         formatMicros2Millis(params);
 
         if (params.getCp9OfflineTime() != 0) {
             Long cp9OfflineTime = params.getCp9OfflineTime() - 28800000L;
