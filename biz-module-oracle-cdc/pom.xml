@@ -9,9 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>test-debezium</artifactId>
+    <artifactId>biz-module-oracle-cdc</artifactId>
 
-    <name>test-debezium</name>
+    <name>biz-module-oracle-cdc</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 
