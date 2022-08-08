@@ -29,7 +29,6 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
         String operateType = data.getOPERATE_TYPE();
         // 获取vin码
         String vin = data.getVIN();
-        String wlckdm = data.getPHYSICAL_CODE();
         String warehouse_type = data.getWAREHOUSE_TYPE();
         String shop_no = data.getSHOP_NO();
         String physical_code = data.getPHYSICAL_CODE();
