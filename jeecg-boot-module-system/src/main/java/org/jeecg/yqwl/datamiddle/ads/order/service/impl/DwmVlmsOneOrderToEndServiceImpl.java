@@ -231,11 +231,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void formatMicros2Millis(DwmVlmsOneOrderToEnd params) {
         // 出厂日期
-        if (params.getLeaveFactoryTime() != null && StringUtils.length(params.getLeaveFactoryTime() + "") == 16) {
+        if (params.getLeaveFactoryTime() != null) {
             params.setLeaveFactoryTime(params.getLeaveFactoryTime() / 1000);
         }
         // 入库日期
-        if (params.getInSiteTime() != null && StringUtils.length(params.getLeaveFactoryTime() + "") == 16) {
+        if (params.getInSiteTime() != null) {
             params.setInSiteTime(params.getInSiteTime() / 1000);
         }
         // 入开始站台时间
