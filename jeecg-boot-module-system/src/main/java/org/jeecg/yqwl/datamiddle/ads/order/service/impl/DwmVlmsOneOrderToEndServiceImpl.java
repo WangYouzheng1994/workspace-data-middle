@@ -230,7 +230,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @param params
      */
     private void formatMicros2Millis(DwmVlmsOneOrderToEnd params) {
-        // 出厂日期
+        // 出厂日期  此字段目前在一单到底的页面中已经删除(雨落)
         if (params.getLeaveFactoryTime() != null && StringUtils.length(params.getLeaveFactoryTime() + "") == 16) {
             params.setLeaveFactoryTime(params.getLeaveFactoryTime() / 1000);
         }
