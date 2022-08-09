@@ -17,6 +17,8 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.util.Collector;
 
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +30,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppBSD {
-
+    // 2021-06-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
+    private static final long START = 1622476800000L;
+    // 2022-12-31 23:59:59
+    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -64,8 +69,17 @@ public class OneOrderToEndDwmAppBSD {
                 return JSON.parseObject(json, DwdBaseStationData.class);
             }
         }).uid("OneOrderToEndDwmAppBSDTransitionBASE_STATION_DATA").name("OneOrderToEndDwmAppBSDTransitionBASE_STATION_DATA");
+        // 新增过滤时间的操作
+        SingleOutputStreamOperator<DwdBaseStationData> mapBsdFilterTime = mapBsd.process(new ProcessFunction<DwdBaseStationData, DwdBaseStationData>() {
+            @Override
+            public void processElement(DwdBaseStationData value, ProcessFunction<DwdBaseStationData, DwdBaseStationData>.Context ctx, Collector<DwdBaseStationData> out) throws Exception {
+                if (value.getSAMPLE_U_T_C() >= START && value.getSAMPLE_U_T_C() <= END) {
+                    out.collect(value);
+                }
+            }
+        }).uid("OneOrderToEndDwmAppFilter2022Time").name("OneOrderToEndDwmAppFilter2022Time");
         // 3.更新 dwdBds->dwmOOTD 一单到底表
-        mapBsd.addSink(new SimpleBsdSinkOOTD<DwdBaseStationData>()).uid("OneOrderToEndDwmAppBSDBsdSinkOOTD").name("OneOrderToEndDwmAppBSDBsdSinkOOTD");
+        mapBsdFilterTime.addSink(new SimpleBsdSinkOOTD<DwdBaseStationData>()).uid("OneOrderToEndDwmAppBSDBsdSinkOOTD").name("OneOrderToEndDwmAppBSDBsdSinkOOTD");
         //==============================================dwd_base_station_data处理 END==========================================================================//
         env.execute("dwdBsd更新一单到底表");
         log.info("base_station_data job任务开始执行");
