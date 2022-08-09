@@ -36,7 +36,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppSptb02Simple {
-
+    //2022-01-01 00:00:00
+    private static final long START = 1640966400000L;
+    //2022-12-31 23:59:59
+    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -51,7 +54,7 @@ public class WaybillDwmAppSptb02Simple {
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
-         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_sptb02_simple"));
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("waybill_dwm_sptb02_simple"));
         // 设置savepoint点二级目录位置
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
         log.info("checkpoint设置完成");
@@ -63,7 +66,7 @@ public class WaybillDwmAppSptb02Simple {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -76,15 +79,17 @@ public class WaybillDwmAppSptb02Simple {
                 //获取真实数据
                 DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
+                Long ddjrq = dwmSptb02.getDDJRQ();
+                if (ddjrq >= START && ddjrq <= END) {
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {
                     String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbhSource + "' limit 1 ";
                     JSONObject sptb02d1 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, sptb02d1Sql, cjsdbhSource);
-                    if (sptb02d1 != null){
+                    if (sptb02d1 != null) {
                         String vvin = sptb02d1.getString("VVIN");
-                //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
-                        if (StringUtils.isNotBlank(vvin)){
+                        //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
+                        if (StringUtils.isNotBlank(vvin)) {
                             String vfczt = dwmSptb02.getVFCZT();
                             String vsczt = dwmSptb02.getVSCZT();
                             dwmSptb02.setSTART_PHYSICAL_CODE(vfczt);
@@ -317,36 +322,36 @@ public class WaybillDwmAppSptb02Simple {
                                 /**
                                  * 铁水的 cdhddm组成的 END_PROVINCE_CODE + END_CITY_CODE 与 其他 I.公路(vwlckdm) II.铁水(vsczt)作比较
                                  * 若相等 则为同城 1 否则为异地 2 默认为 0
-                                  */
-                            //  获取运单类型
+                                 */
+                                //  获取运单类型
                                 String traffic_type = dwmSptb02.getTRAFFIC_TYPE();
-                            //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
+                                //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
                                 String provincesEnd = endProvinceCode + endCityCode;
-                            //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
-                                if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode) && StringUtils.equals("G", traffic_type)){
+                                //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
+                                if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode) && StringUtils.equals("G", traffic_type)) {
                                     // 公路的省市县代码
                                     String provincesG = startProvinceCode + startCityCode;
-                                    if (StringUtils.equals(provincesEnd,provincesG)){
+                                    if (StringUtils.equals(provincesEnd, provincesG)) {
                                         dwmSptb02.setTYPE_TC(1);
                                     } else {
                                         dwmSptb02.setTYPE_TC(2);
                                     }
                                 }
-                            //-----------------开始比较: 铁 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'T' ----------------------------------------------------------//
+                                //-----------------开始比较: 铁 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'T' ----------------------------------------------------------//
                                 String vsczt_province_code = dwmSptb02.getVSCZT_PROVINCE_CODE();
                                 String vsczt_city_code = dwmSptb02.getVSCZT_CITY_CODE();
-                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("T", traffic_type)){
+                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("T", traffic_type)) {
                                     String provincesT = vsczt_province_code + vsczt_city_code;
-                                    if (StringUtils.equals(provincesEnd,provincesT)){
+                                    if (StringUtils.equals(provincesEnd, provincesT)) {
                                         dwmSptb02.setTYPE_TC(1);
                                     } else {
                                         dwmSptb02.setTYPE_TC(2);
                                     }
                                 }
-                            //-----------------开始比较: 水 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'S' ----------------------------------------------------------//
-                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("S", traffic_type)){
+                                //-----------------开始比较: 水 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'S' ----------------------------------------------------------//
+                                if (StringUtils.isNotBlank(vsczt_province_code) && StringUtils.isNotBlank(vsczt_city_code) && StringUtils.equals("S", traffic_type)) {
                                     String provincesS = vsczt_province_code + vsczt_city_code;
-                                    if (StringUtils.equals(provincesEnd,provincesS)){
+                                    if (StringUtils.equals(provincesEnd, provincesS)) {
                                         dwmSptb02.setTYPE_TC(1);
                                     } else {
                                         dwmSptb02.setTYPE_TC(2);
@@ -551,9 +556,10 @@ public class WaybillDwmAppSptb02Simple {
 
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
-                        //实体类中null值进行默认值赋值
+                            //实体类中null值进行默认值赋值
                             DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
-                        out.collect(bean);
+                            out.collect(bean);
+                        }
                     }
                 }
             }
