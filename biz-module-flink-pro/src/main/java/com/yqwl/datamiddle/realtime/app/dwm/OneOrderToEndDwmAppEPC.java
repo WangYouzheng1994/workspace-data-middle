@@ -18,6 +18,8 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.ProcessFunction;
+import org.apache.flink.util.Collector;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +31,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppEPC {
-
+    // 2021-06-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
+    private static final long START = 1622476800000L;
+    // 2022-12-31 23:59:59
+    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -72,8 +77,18 @@ public class OneOrderToEndDwmAppEPC {
                 return JSON.parseObject(json, DwdBaseStationDataEpc.class);
             }
         }).uid("OneOrderToEndDwmAppEPCTransitionBASE_STATION_DATA_EPCMap").name("OneOrderToEndDwmAppEPCTransitionBASE_STATION_DATA_EPCMap");
+        // 新增过滤时间的操作
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpcFilterTime = mapBsdEpc.process(new ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>() {
+            @Override
+            public void processElement(DwdBaseStationDataEpc value, ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>.Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
+                if (value.getCP9_OFFLINE_TIME() >= START && value.getCP9_OFFLINE_TIME() <= END) {
+                    out.collect(value);
+                }
+            }
+        }).uid("OneOrderToEndDwmAppEpcFilter2022Time").name("OneOrderToEndDwmAppEpcFilter2022Time");
+
         //4.插入mysql
-        mapBsdEpc.addSink(JdbcSink.sink(
+        mapBsdEpcFilterTime.addSink(JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME )\n" +
                         "VALUES\n" +
