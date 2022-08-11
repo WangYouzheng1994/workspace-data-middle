@@ -17,6 +17,8 @@
  */
 package org.test.cdc.oracle.bean.element;
 
+import org.test.cdc.oracle.bean.RowData;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
@@ -29,7 +31,7 @@ import static org.test.cdc.oracle.bean.element.ClassSizeUtil.getStringSize;
  *
  * @author tudou
  */
-public final class ColumnRowData implements  Serializable {
+public final class ColumnRowData implements RowData, Serializable {
 
     private static final long serialVersionUID = 1L;
     private final List<AbstractBaseColumn> columnList;

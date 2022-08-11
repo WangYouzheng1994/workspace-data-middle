@@ -77,10 +77,10 @@ public class OracleSource {
         OracleCDCConnection oracleCDCConnecUtil = init(oracleCDCConfig);
         // 获取开始偏移量 根据模式判定
         startScn = getStartSCN(oracleCDCConnecUtil, new BigInteger("0"));
-
         // 初始化Logminer
-
+        payLoad(oracleCDCConnecUtil);
         // 读取Log日志
+
     }
 
     /**

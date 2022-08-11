@@ -18,6 +18,8 @@
 package org.test.cdc.oracle.bean;
 
 
+import org.test.cdc.oracle.bean.element.ColumnRowData;
+
 import java.math.BigInteger;
 
 /**
@@ -27,23 +29,23 @@ import java.math.BigInteger;
  */
 public class QueueData {
     private final BigInteger scn;
-    // private final RowData data;
+    private final RowData data;
 
-    public QueueData(BigInteger lsn) {
+    public QueueData(BigInteger lsn, RowData data) {
         this.scn = lsn;
-        // this.data = data;
+        this.data = data;
     }
 
     public BigInteger getScn() {
         return scn;
     }
 
-    // public RowData getData() {
-    //     return data;
-    // }
+    public RowData getData() {
+        return data;
+    }
 
-    // @Override
-    // public String toString() {
-    //     return "QueueData{" + "scn=" + scn + ", data=" + data + '}';
-    // }
+    @Override
+    public String toString() {
+        return "QueueData{" + "scn=" + scn + ", data=" + data + '}';
+    }
 }
