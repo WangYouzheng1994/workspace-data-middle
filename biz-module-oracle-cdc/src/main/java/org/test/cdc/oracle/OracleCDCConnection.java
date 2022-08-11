@@ -508,9 +508,10 @@ public class OracleCDCConnection {
 
             connection.getConnection();
 
+            // 重置，清空preparestatement，重新简历logminer连接
             connection.resetLogminerStmt(startSql);
 
-            // 这个auto 不是很明白怎么个意思
+            // 这个auto 不是很明白区别
             if (autoaddLog) {
                 logMinerStartStmt.setString(1, startScn.toString());
             } else {
@@ -535,8 +536,9 @@ public class OracleCDCConnection {
                      connection.prepareStatement(SqlUtil.SQL_QUERY_ADDED_LOG)) {
             statement.setQueryTimeout(logminerQueryTimeout.intValue());
             try (ResultSet rs = statement.executeQuery()) {
+                LogFile logFile = null;
                 while (rs.next()) {
-                    LogFile logFile = new LogFile();
+                    logFile = new LogFile();
                     logFile.setFileName(rs.getString("filename"));
                     logFile.setFirstChange(new BigInteger(rs.getString("low_scn")));
                     logFile.setNextChange(new BigInteger(rs.getString("next_scn")));
@@ -567,11 +569,13 @@ public class OracleCDCConnection {
                             ResultSet.CONCUR_READ_ONLY);
             // configStatement(logMinerSelectStmt);
 
+            // 3000一批次。
             logMinerSelectStmt.setFetchSize(3000);
             logMinerSelectStmt.setString(1, startScn.toString());
             logMinerSelectStmt.setString(2, endScn.toString());
             long before = System.currentTimeMillis();
 
+            // 抽取出解析到的 lgminerData
             logMinerData = logMinerSelectStmt.executeQuery();
 
             // this.CURRENT_STATE.set(STATE.READABLE);
@@ -611,6 +615,7 @@ public class OracleCDCConnection {
             return false;
         }*/
 
+        // 从JDBC ResultSEt中获取数据并解析多行SQL。如果解析到了以后 此方法返回True，并且把解析后的数据存放到QueueData中。
         String sqlLog;
         while (logMinerData.next()) {
             String sql = logMinerData.getString(LogminerKeyConstants.KEY_SQL_REDO);
@@ -651,6 +656,7 @@ public class OracleCDCConnection {
             // 是否存在多条SQL
             hasMultiSql = isSqlNotEnd;
 
+            // 如果出现了多行sql。那么就继续迭代。
             while (isSqlNotEnd) {
                 logMinerData.next();
                 // redoLog 实际上不需要发生切割  但是sqlUndo发生了切割，导致redolog值为null
@@ -802,7 +808,7 @@ public class OracleCDCConnection {
             columnRowData.addField(new TimestampColumn(timestamp));
             columnRowData.addHeader("opTime");
 
-            result = new QueueData(scn);
+            result = new QueueData(scn, columnRowData);
 
             // 只有非回滚的insert update解析的数据放入缓存
             if (!rollback) {
@@ -852,7 +858,7 @@ public class OracleCDCConnection {
     }
 
     /**
-     * 递归查找 delete的rollback对应的insert语句
+     * 递归查找 delete的rollback对应的insert语句 TODO: 未完成。
      *
      * @param rollbackRecord rollback参数
      * @return insert语句
