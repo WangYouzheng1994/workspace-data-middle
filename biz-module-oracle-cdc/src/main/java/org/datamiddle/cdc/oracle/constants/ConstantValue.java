@@ -19,6 +19,8 @@
 package org.datamiddle.cdc.oracle.constants;
 
 /**
+ * Constants class
+ *
  * @author jiangbo
  * @date 2020/2/12
  */

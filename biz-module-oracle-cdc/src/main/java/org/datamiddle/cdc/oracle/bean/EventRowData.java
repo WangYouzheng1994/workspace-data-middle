@@ -19,7 +19,7 @@
 package org.datamiddle.cdc.oracle.bean;
 
 /**
- * 每个事件的名称和值
+ * 每个字段的名称和值
  *
  * @author dujie
  */

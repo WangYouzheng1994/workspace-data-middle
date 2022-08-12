@@ -24,7 +24,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * 行数据的值
+ * 行数据的值，保存了 before和after的列表 其中是 每一个EventRowData
  *
  * @author dujie
  *     <p>事件数据

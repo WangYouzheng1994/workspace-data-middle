@@ -21,13 +21,15 @@ package org.datamiddle.cdc.oracle.bean;
 import java.math.BigInteger;
 
 /**
- * Date: 2021/08/13 Company: www.dtstack.com
+ * <p>v$logmnr_contents 对应的实体 logminer读取出的数据实体
  *
  * @author dujie
- *     <p>v$logmnr_contents 对应的实体 logminer读取出的数据实体
  */
 public class RecordLog {
 
+    /**
+     * 偏移量
+     */
     private BigInteger scn;
     /** undo语句* */
     private String sqlUndo;
@@ -42,6 +44,9 @@ public class RecordLog {
     /** rowId* */
     private String rowId;
 
+    /**
+     * 表名
+     */
     private String tableName;
     /** 是否发生了日志切割* */
     private boolean hasMultiSql;

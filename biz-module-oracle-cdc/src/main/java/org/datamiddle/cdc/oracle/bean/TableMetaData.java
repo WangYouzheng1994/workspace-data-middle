@@ -21,14 +21,23 @@ package org.datamiddle.cdc.oracle.bean;
 import java.util.List;
 
 /**
- * Date: 2021/05/20 Company: www.dtstack.com
+ * 表元数据
  *
  * @author dujie
  */
 public class TableMetaData {
 
+    /**
+     * schema名称 可以认为是库名
+     */
     private final String SchemaName;
+    /**
+     * 表名
+     */
     private final String tableName;
+    /**
+     * 列
+     */
     private final List<String> fieldList;
     /** field type * */
     private final List<String> typeList;

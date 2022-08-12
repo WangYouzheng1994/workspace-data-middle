@@ -23,8 +23,7 @@ import org.apache.flink.table.data.RowData;
 import java.math.BigInteger;
 
 /**
- * Date: 2020/06/01 Company: www.dtstack.com
- *
+ * 队列中的数据 scn表示此数据的偏移量， rowdata为行数据，后续需要进行去flink化
  * @author dujie
  */
 public class QueueData {

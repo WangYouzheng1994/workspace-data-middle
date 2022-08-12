@@ -21,15 +21,26 @@ import java.math.BigInteger;
 import java.util.Objects;
 
 /**
+ * 每个日志(归档和重做)的信息
+ *
  * @author jiangbo
  * @date 2020/3/31
  */
 public class LogFile {
 
+    /**
+     * 日志名称
+     */
     private String fileName;
 
+    /**
+     * 起始偏移量
+     */
     private BigInteger firstChange;
 
+    /**
+     * 下一个偏移量
+     */
     private BigInteger nextChange;
 
     private Long thread;
