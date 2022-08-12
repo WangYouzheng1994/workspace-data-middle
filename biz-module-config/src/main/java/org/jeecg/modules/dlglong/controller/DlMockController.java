@@ -162,7 +162,7 @@ public class DlMockController {
         //    只传新增的数据给后台insert即可，否者将会造成性能上的浪费。
         // 3、新增的行是没有id的，通过这一点，就可以判断是否是新增的数据
 
-        System.out.println("即时保存.tableData：" + tableData.toJSONString());
+        System.out.println("即时保存.tableData：" + tableData.toString());
         // 延时1.5秒，模拟网慢堵塞真实感
         Thread.sleep(1000);
         return Result.ok();
