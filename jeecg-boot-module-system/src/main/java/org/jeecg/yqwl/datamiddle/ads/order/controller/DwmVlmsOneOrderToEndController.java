@@ -1,12 +1,14 @@
 package org.jeecg.yqwl.datamiddle.ads.order.controller;
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.alibaba.fastjson.JSONObject;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -148,6 +150,51 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
     @ApiOperation(value = "导出", notes = "导出")
     @PostMapping(value = "/exportXls")
     public void exportXls(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
+
+        String vin = queryCriteria.getVin();
+        if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
+            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
+        } else if (StringUtils.length(vin) > 2 && StringUtils.contains(vin, "\n")) {
+            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
+        }
+
+        // 获取一单到底的运输方式
+        String trafficType = queryCriteria.getTrafficType();
+        if ( StringUtils.isNotBlank(trafficType) ) {
+            if (StringUtils.contains(trafficType,"typeG") ) {
+                queryCriteria.setTypeG(1);
+            }else{
+                queryCriteria.setTypeG(0);
+            }
+            if (StringUtils.contains(trafficType,"typeT") ) {
+                queryCriteria.setTypeT(1);
+            }else{
+                queryCriteria.setTypeT(0);
+            }
+            if (StringUtils.contains(trafficType,"typeS") ) {
+                queryCriteria.setTypeS(1);
+            }else{
+                queryCriteria.setTypeS(0);
+            }
+        }
+
+        // 过滤选中的数据
+        String selections = queryCriteria.getSelections();
+        if (StringUtil.length(selections) > 2) {
+            queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections, ",")));
+        }
+//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+        Integer pageNo = 1;
+        Integer pageSize = 5000;
+
+        boolean intervalFlag = true;
+        queryCriteria.setPageSize(pageSize);
+
+        Integer integer = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
+        if (integer > 150000) {
+            this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
+        }
+
         // 创建工作簿
         SXSSFWorkbook wb = new SXSSFWorkbook();
         // 在工作簿中创建sheet页
@@ -174,7 +221,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 "指派承运商名称", "出库日期", "起运日期-公路", "运输车号", "同板数量", "轿运车车位数",
                 "始发站名称","到达始发站时间/入站时间","始发站台铁路离站时间","目的站名称","到达目的站时间","卸车时间（铁路到目的站）",
                 "始发港名称", "到达始发港口时间/入港时间", "始发港口水运离港时间", "目的港名称", "到达目的港时间","卸船时间（水路到目的站）",
-                 "末端分拨中心入库时间", "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号",
+                "末端分拨中心入库时间", "末端分拨中心指派时间", "末端分拨承运商", "分拨承运轿运车车牌号",
                 "港/站分拨承运轿运车车位数", "分拨出库时间", "分拨起运时间", "送达时间-DCS到货时间", "经销商确认到货时间","位置信息","是否同城异地"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
@@ -189,52 +236,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             cellstyle.setFont(font);*/
         }
 
-        String vin = queryCriteria.getVin();
-        if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
-            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
-        } else if (StringUtils.length(vin) > 2 && StringUtils.contains(vin, "\n")) {
-            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
-        }
-
-        // 获取一单到底的运输方式
-        String trafficType = queryCriteria.getTrafficType();
-        if ( StringUtils.isNotBlank(trafficType) ) {
-            if ( StringUtils.contains(trafficType,"typeG") ) {
-                queryCriteria.setTypeG(1);
-            }else{
-                queryCriteria.setTypeG(0);
-            }
-            if ( StringUtils.contains(trafficType,"typeT") ) {
-                queryCriteria.setTypeT(1);
-            }else{
-                queryCriteria.setTypeT(0);
-            }
-            if ( StringUtils.contains(trafficType,"typeS") ) {
-                queryCriteria.setTypeS(1);
-            }else{
-                queryCriteria.setTypeS(0);
-            }
-        }
-
-        // 过滤选中的数据
-        String selections = queryCriteria.getSelections();
-        if (StringUtil.length(selections) > 2) {
-            queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections, ",")));
-        }
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
-        Integer pageNo = 1;
-        Integer pageSize = 5000;
-
-        boolean intervalFlag = true;
-        queryCriteria.setPageSize(pageSize);
-
         List<DwmVlmsOneOrderToEnd> pageList = null;
 
         // 转换时间格式,将Long类型转换成date类型
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         // 设置新增数据行,从第一行开始
         int rowNum = 1;
-
         Integer maxSize = 150000;
 
         SXSSFRow row1 = null;
@@ -621,6 +628,39 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         wb.write(outputStream);
         outputStream.flush();
         outputStream.close();
+    }
+
+    /**
+     *json 格式样例
+     *
+     * @param response
+     * @param jsonString
+     */
+    public void responseJsonString(HttpServletResponse response, String jsonString) {
+        response.setContentType("application/json; charset=utf-8");
+        byte[] bytes;
+        try {
+            bytes = jsonString.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        response.setContentLength(bytes.length);
+        OutputStream os = null;
+        try {
+            os = response.getOutputStream();
+            os.write(bytes);
+            os.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }finally {
+            if (os!= null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     /**
