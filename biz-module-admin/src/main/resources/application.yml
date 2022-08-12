@@ -1,5 +1,0 @@
-server:
-  port: 7040
-spring:
-  application:
-    name: biz-admin
