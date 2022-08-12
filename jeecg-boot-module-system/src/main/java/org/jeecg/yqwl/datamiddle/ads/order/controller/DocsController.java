@@ -60,16 +60,16 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 在工作簿中创建sheet页
         SXSSFSheet sheet = wb.createSheet("sheet1");
         // 设置字体和样式
-        Font font = wb.createFont();
+        // Font font = wb.createFont();
         // 字体名称
-        font.setFontName("宋体");
+        // font.setFontName("宋体");
         // 字体大小
-        font.setFontHeightInPoints((short)12);
+        // font.setFontHeightInPoints((short)12);
         // 设置字体加粗
 //        font.setBold(true);
         // 设置格式居中显示
-        CellStyle cellstyle = wb.createCellStyle();
-        cellstyle.setAlignment(HorizontalAlignment.CENTER);
+        /*CellStyle cellstyle = wb.createCellStyle();
+        cellstyle.setAlignment(HorizontalAlignment.CENTER);*/
         // 创建行,从0开始
         SXSSFRow row = sheet.createRow(0);
         // 设置表头行高
@@ -86,9 +86,9 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             // 为单元格赋值
             cell.setCellValue(header);
             // 设置表头居中显示
-            cell.setCellStyle(cellstyle);
+            // cell.setCellStyle(cellstyle);
             // 设置表头字体
-            cellstyle.setFont(font);
+            // cellstyle.setFont(font);
         }
 
         String vvin = queryCriteria.getVvin();
@@ -135,114 +135,114 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 int j = 0;
                 // VVIN  底盘号
                 SXSSFCell cell = row1.createCell(j++);
-                cell.setCellStyle(cellstyle);
+                // cell.setCellStyle(cellstyle);
                 cell.setCellValue(item.getVvin());
                 // HostComCode  品牌
                 SXSSFCell cell1 = row1.createCell(j++);
-                cell1.setCellStyle(cellstyle);
+                // cell1.setCellStyle(cellstyle);
                 cell1.setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getHostComCode()));
                 // baseName  基地
                 SXSSFCell cell2 = row1.createCell(j++);
-                cell2.setCellStyle(cellstyle);
+                // cell2.setCellStyle(cellstyle);
                 cell2.setCellValue(item.getBaseName());
                 // vehicleName  车型
                 SXSSFCell cell3 = row1.createCell(j++);
-                cell3.setCellStyle(cellstyle);
+                // cell3.setCellStyle(cellstyle);
                 cell3.setCellValue(item.getVehicleName());
                 // startCityName  始发城市
                 SXSSFCell cell4 = row1.createCell(j++);
-                cell4.setCellStyle(cellstyle);
+                // cell4.setCellStyle(cellstyle);
                 cell4.setCellValue(item.getStartCityName());
                 // endCityName   经销商目标城市
                 SXSSFCell cell5 = row1.createCell(j++);
-                cell5.setCellStyle(cellstyle);
+                // cell5.setCellStyle(cellstyle);
                 cell5.setCellValue(item.getEndCityName());
                 // vdwdm  经销商代码
                 SXSSFCell cell6 = row1.createCell(j++);
-                cell6.setCellStyle(cellstyle);
+                // cell6.setCellStyle(cellstyle);
                 cell6.setCellValue(item.getVdwdm());
                 //  DEALER_NAME   经销商名称
                 SXSSFCell cell7 = row1.createCell(j++);
-                cell7.setCellStyle(cellstyle);
+                // cell7.setCellStyle(cellstyle);
                 cell7.setCellValue(item.getDealerName());
                 // ddjrq 计划下达日期
                 if (item.getDdjrq() != 0 ) {
                     SXSSFCell cell8 = row1.createCell(j++);
-                    cell8.setCellStyle(cellstyle);
+                    // cell8.setCellStyle(cellstyle);
                     cell8.setCellValue(sdf.format(item.getDdjrq()));
                 }else{
                     SXSSFCell cell8 = row1.createCell(j++);
-                    cell8.setCellStyle(cellstyle);
+                    // cell8.setCellStyle(cellstyle);
                     cell8.setCellValue("");
                 }
                 // Cpzdbh  配板单号
                 SXSSFCell cell9 = row1.createCell(j++);
-                cell9.setCellStyle(cellstyle);
+                // cell9.setCellStyle(cellstyle);
                 cell9.setCellValue(item.getCpzdbh());
                 // assignTime  指派日期
                 if (item.getAssignTime() != 0) {
                     SXSSFCell cell10 = row1.createCell(j++);
-                    cell10.setCellStyle(cellstyle);
+                    // cell10.setCellStyle(cellstyle);
                     cell10.setCellValue(sdf.format(item.getAssignTime()));
-                }else{
+                } else {
                     SXSSFCell cell10 = row1.createCell(j++);
-                    cell10.setCellStyle(cellstyle);
+                    // cell10.setCellStyle(cellstyle);
                     cell10.setCellValue("");
                 }
                 // TRANSPORT_NAME 指派承运商名称
                 SXSSFCell cell11 = row1.createCell(j++);
-                cell11.setCellStyle(cellstyle);
+                // cell11.setCellStyle(cellstyle);
                 cell11.setCellValue(item.getTransportName());
                 // actualOutTime  出库日期
                 if (item.getActualOutTime() != 0) {
                     SXSSFCell cell12 = row1.createCell(j++);
-                    cell12.setCellStyle(cellstyle);
+                    // cell12.setCellStyle(cellstyle);
                     cell12.setCellValue(sdf.format(item.getActualOutTime()));
                 }else{
                     SXSSFCell cell12 = row1.createCell(j++);
-                    cell12.setCellStyle(cellstyle);
+                    // cell12.setCellStyle(cellstyle);
                     cell12.setCellValue("");
                 }
                 // shipmentTime  起运日期
                 if (item.getShipmentTime() != 0) {
                     SXSSFCell cell13 = row1.createCell(j++);
-                    cell13.setCellStyle(cellstyle);
+                    // cell13.setCellStyle(cellstyle);
                     cell13.setCellValue(sdf.format(item.getShipmentTime()));
                 }else{
                     SXSSFCell cell13 = row1.createCell(j++);
-                    cell13.setCellStyle(cellstyle);
+                    // cell13.setCellStyle(cellstyle);
                     cell13.setCellValue("");
                 }
                 // VJSYDM 运输车号
                 SXSSFCell cell14 = row1.createCell(j++);
-                cell14.setCellStyle(cellstyle);
+                // cell14.setCellStyle(cellstyle);
                 cell14.setCellValue(item.getVjsydm());
                 //  samePlateNum 同板数量
                 SXSSFCell cell15 = row1.createCell(j++);
-                cell15.setCellStyle(cellstyle);
+                // cell15.setCellStyle(cellstyle);
                 cell15.setCellValue(item.getSamePlateNum());
                 // Dtvsdhsj  DCS到货时间
                 if (item.getDtvsdhsj() != 0) {
                     SXSSFCell cell16 = row1.createCell(j++);
-                    cell16.setCellStyle(cellstyle);
+                    // cell16.setCellStyle(cellstyle);
                     cell16.setCellValue(sdf.format(item.getDtvsdhsj()));
                 }else{
                     SXSSFCell cell16 = row1.createCell(j++);
-                    cell16.setCellStyle(cellstyle);
+                    // cell16.setCellStyle(cellstyle);
                     cell16.setCellValue("");
                 }
                 // finalSiteTime   经销商确认到货时间
                 if (item.getFinalSiteTime() != 0) {
                     SXSSFCell cell17 = row1.createCell(j++);
-                    cell17.setCellStyle(cellstyle);
+                    // cell17.setCellStyle(cellstyle);
                     cell17.setCellValue(sdf.format(item.getFinalSiteTime()));
                 }else{
                     SXSSFCell cell17 = row1.createCell(j++);
-                    cell17.setCellStyle(cellstyle);
+                    // cell17.setCellStyle(cellstyle);
                     cell17.setCellValue("");
                 }
 
-                // 设置数据的行高
+                /*// 设置数据的行高
                 row1.setHeight((short) (16.5 * 20));
                 // 设置自适应列宽
                 for ( int m = 0; m < headers.length; m++ ) {
@@ -253,7 +253,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                     // 设置宽度的取值
                     int width = Math.max(15 * 256, Math.min(256 * 256, sheet.getColumnWidth(m) * 12 / 10));
                     sheet.setColumnWidth(m, width);
-                }
+                }*/
                 rowNum++;
             }
 
