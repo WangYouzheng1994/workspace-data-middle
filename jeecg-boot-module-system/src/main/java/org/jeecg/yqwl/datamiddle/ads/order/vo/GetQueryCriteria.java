@@ -5,11 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description   全节点查询从前端传过来的数据
+ * @Description 全节点查询从前端传过来的数据
  * @ClassName GetQueryCriteria
  * @Author YULUO
  * @Date 2022/6/6
- * * @version 1.0
+ * @version 1.0
  */
 @Data
 public class GetQueryCriteria {
