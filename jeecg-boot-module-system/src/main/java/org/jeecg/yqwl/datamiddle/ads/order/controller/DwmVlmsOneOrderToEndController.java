@@ -631,39 +631,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
     }
 
     /**
-     *json 格式样例
-     *
-     * @param response
-     * @param jsonString
-     */
-    public void responseJsonString(HttpServletResponse response, String jsonString) {
-        response.setContentType("application/json; charset=utf-8");
-        byte[] bytes;
-        try {
-            bytes = jsonString.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-        response.setContentLength(bytes.length);
-        OutputStream os = null;
-        try {
-            os = response.getOutputStream();
-            os.write(bytes);
-            os.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }finally {
-            if (os!= null) {
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /**
      * 通过excel导入数据
      *
      * @param request
