@@ -8,6 +8,7 @@ import java.util.SortedMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.alibaba.fastjson.support.springfox.SwaggerJsonSerializer;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.common.util.PathMatcherUtil;
@@ -33,7 +34,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.alibaba.fastjson.support.springfox.SwaggerJsonSerializer;
 
 import feign.Feign;
 import feign.Logger;

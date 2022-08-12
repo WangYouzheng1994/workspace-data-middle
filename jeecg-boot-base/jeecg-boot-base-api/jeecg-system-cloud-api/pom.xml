@@ -17,5 +17,12 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
+    <!--    不跟着parent层级做fastjson的版本统一，1.2.68有jeecg需要的 swagger bug fix    -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.68</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

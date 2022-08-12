@@ -50,6 +50,8 @@
 		<dom4j.version>1.6.1</dom4j.version>
 		<qiniu-java-sdk.version>7.4.0</qiniu-java-sdk.version>
 		<clickhouse-java-version>0.3.2</clickhouse-java-version>
+		<fastjson2.version>2.0.7</fastjson2.version>
+		<fastjson.version>2.0.7</fastjson.version>
 	</properties>
 
 	<modules>

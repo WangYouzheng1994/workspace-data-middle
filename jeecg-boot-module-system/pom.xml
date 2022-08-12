@@ -33,6 +33,12 @@
 		<dependency>
 			<groupId>org.jeecgframework.boot</groupId>
 			<artifactId>jeecg-system-local-api</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>ojdbc6</artifactId>
+					<groupId>com.oracle</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- jeewx api -->
 		<dependency>
