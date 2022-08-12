@@ -1,9 +1,12 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.time.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Pipeline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,7 @@ import java.util.List;
  * Date: 2021/2/5
  * Desc: 通过JedisPool连接池获取Jedis连接
  */
+@Slf4j
 public class RedisUtil {
     private static volatile JedisPool jedisPool;
 
@@ -84,7 +88,27 @@ public class RedisUtil {
 
 
     public static void main(String[] args) {
+        StopWatch watch = new StopWatch();
         Jedis jedis = getJedis();
-        System.out.println(jedis.ping());
+        log.info(jedis.ping());
+
+        watch.start();
+        log.info(watch.toString());
+
+        int startSCN = 0;
+        int lastSCN = 10000000;
+        // 6千万数据测试
+        for (int i = 0; i < 1 ; i++) {
+            Pipeline pipelined = jedis.pipelined();
+            for (int ii = startSCN; ii < lastSCN; ii++) {
+                pipelined.setex(ii + "", 35, ii + "");
+            }
+            startSCN = lastSCN;
+            lastSCN += lastSCN;
+
+            pipelined.sync();;
+        }
+        watch.stop();
+        log.info(watch.toString());
     }
 }
