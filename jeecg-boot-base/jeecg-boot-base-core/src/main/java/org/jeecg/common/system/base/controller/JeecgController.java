@@ -26,6 +26,8 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -190,5 +192,38 @@ public class JeecgController<T, S extends IService<T>> {
             }
         }
         return Result.error("文件导入失败！");
+    }
+
+    /**
+     *json 格式样例
+     *
+     * @param response
+     * @param jsonString
+     */
+    public void responseJsonString(HttpServletResponse response, String jsonString) {
+        response.setContentType("application/json; charset=utf-8");
+        byte[] bytes;
+        try {
+            bytes = jsonString.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        response.setContentLength(bytes.length);
+        OutputStream os = null;
+        try {
+            os = response.getOutputStream();
+            os.write(bytes);
+            os.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }finally {
+            if (os!= null) {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
