@@ -193,6 +193,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         Integer integer = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
+            return;
         }
 
         // 创建工作簿

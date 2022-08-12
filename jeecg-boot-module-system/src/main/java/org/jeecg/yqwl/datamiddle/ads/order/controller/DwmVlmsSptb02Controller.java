@@ -129,7 +129,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
             arrivalValue = arriveOnTime.divide(arrivalRate, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
-
         // TODO: 合并出返回对象。
        TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
         timelinessRatioVO.setStartPercent(shipmentValue);//起运及时率

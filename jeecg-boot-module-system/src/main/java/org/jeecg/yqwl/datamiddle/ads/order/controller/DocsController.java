@@ -101,6 +101,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
+            return;
         }
 
         Integer pageNo = 1;
@@ -295,8 +296,9 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 转换时间格式,将Long类型转换成date类型
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
-        if (integer > 150000) {
+        if (integer > 1) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
+            return;
         }
 
         // 设置新增数据行,从第一行开始
@@ -482,13 +484,13 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
     }
 
     /**
-     * DOCS车型检索列表页查询
+     * DOCS ID车型检索列表页查询
      *
      * @param queryCriteria
      * @return
      */
-    @AutoLog(value = "一单到底-DOCS查询")
-    @ApiOperation(value = "一单到底-DOCS查询", notes = "一单到底-DOCS查询")
+    @AutoLog(value = "一单到底-DOCS ID车型")
+    @ApiOperation(value = "一单到底-DOCS ID车型", notes = "一单到底-DOCS ID车型")
     @PostMapping("/selectDocsCcxdlList")
     public Result<Page<DwmVlmsDocs>> selectDocsCcxdlList(@RequestBody GetQueryCriteria queryCriteria) {
         // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
@@ -504,11 +506,11 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
             }
         }
+        // id车型条件
         String ccxdl = queryCriteria.getCcxdl();
         if ( StringUtil.length(ccxdl) > 2 && StringUtils.contains(ccxdl,",")) {
             queryCriteria.setCcxdlList(Arrays.asList(StringUtils.split(ccxdl,",")));
         }
-
 //        formatQueryTime(queryCriteria);
 
         Integer total = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
