@@ -1,4 +1,4 @@
-package org.datamiddle;
+package org.datamiddle.cdc.debezium;
 
 import io.debezium.connector.oracle.OracleConnector;
 import io.debezium.embedded.Connect;

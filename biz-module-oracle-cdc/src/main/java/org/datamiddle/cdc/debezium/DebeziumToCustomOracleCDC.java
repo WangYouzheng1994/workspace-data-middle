@@ -1,4 +1,4 @@
-package org.datamiddle;
+package org.datamiddle.cdc.debezium;
 
 import io.debezium.engine.ChangeEvent;
 import io.debezium.engine.DebeziumEngine;
