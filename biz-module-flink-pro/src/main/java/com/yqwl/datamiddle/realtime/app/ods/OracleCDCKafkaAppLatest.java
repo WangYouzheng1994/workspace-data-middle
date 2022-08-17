@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 将oracle中其中相关的源表数据cdc同步到kafka的同一个topic中, 名称为:cdc_vlms_unite_oracle
- *               此版本 增量任务,且uid与增量的有区分,避免两个在同时启动时出现问题
+ *               此版本 增量任务,且uid与全量的有区分,避免两个在同时启动时出现问题
  * @Author: XiaoFEng
  * @Date: 2022/08/15
  * @Version: V1.0
