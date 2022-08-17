@@ -3,6 +3,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.Lists;
 import io.netty.util.internal.StringUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +34,7 @@ import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Api(tags = "一单到底")
@@ -165,7 +167,67 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         outputStream.flush();
         outputStream.close();
     }
+    /**
+     * 通过excel导入数据
+     * 查询Oracle专用的且为BatchIn的版本
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/importExcelOfClickhouseBatchIn", method = RequestMethod.POST)
+    public void importExcelClickhouseBatchIn(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+        // 读取表格数据
+        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
+        List dataList = excelLoadResult.getDataList();
 
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 设置字体和样式
+        Font font = wb.createFont();
+        // 字体名称
+        font.setFontName("宋体");
+        // 字体大小
+        font.setFontHeightInPoints((short) 12);
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+        List<String> totalListStr = new ArrayList<String>();
+        List<String> resultVinLists = new ArrayList<>();
+        int line = 0;
+        SXSSFRow row1 = null;
+        for (int i = 0; i < dataList.size(); i++) {
+            HashMap dataMap = (HashMap) dataList.get(i);
+            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
+            //  1.新建一个List<string> Vin的 把导入的表的所有Vin收集起来
+            //  2.再去用Vin的集合组成的in去Clickhosue查寻所有的Vin,把查到的Vin的List和List<Vin>进行比对,取交集
+
+            totalListStr.add(vinStr);
+        }
+        // 用谷歌的插件把List分成多个List
+        List<List<String>> listsParts = Lists.partition(totalListStr, 999);
+        for (List<String> listsPart : listsParts) {
+            List<String> oneOrderToEndVin = dwmVlmsOneOrderToEndService.getOneOrderToEndVin(listsPart);
+            totalListStr = totalListStr.stream().filter(item -> !oneOrderToEndVin.contains(item)).collect(Collectors.toList());
+        }
+        // 单元格赋值
+        for (String resultOfVin : totalListStr) {
+            // row 行
+            row1= sheet.createRow(line);
+            // 这个地方是设置第几列的
+            SXSSFCell cell = row1.createCell(0);
+            cell.setCellValue(resultOfVin);
+            line++;
+        }
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
+        OutputStream outputStream = response.getOutputStream();
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
+    }
 
     /**
      *docs页面导出

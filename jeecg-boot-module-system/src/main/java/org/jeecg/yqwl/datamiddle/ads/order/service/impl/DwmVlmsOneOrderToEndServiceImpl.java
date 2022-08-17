@@ -198,10 +198,21 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return dwmVlmsDocs;
     }
 
+    /**
+     * 按照Vin码去查询总数
+     * @param vvin
+     * @return
+     */
     @Override
     public Integer countClickhouseVin(String vvin) {
         Integer integer = dwmVlmsOneOrderToEndMapper.countClickhouseVin(vvin);
         return integer;
+    }
+
+    @Override
+    public List<String> getOneOrderToEndVin(List<String> vvin) {
+        List<String> oneOrderToEndVin = dwmVlmsOneOrderToEndMapper.getOneOrderToEndVin(vvin);
+        return oneOrderToEndVin;
     }
 
     /**

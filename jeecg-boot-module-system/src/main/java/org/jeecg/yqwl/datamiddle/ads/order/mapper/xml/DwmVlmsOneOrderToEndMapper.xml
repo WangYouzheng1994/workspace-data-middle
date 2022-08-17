@@ -129,4 +129,17 @@
         </where>
     </select>
 
+    <!-- 按照Vin码去查询有Vin码的值并返回 -->
+    <select id="getOneOrderToEndVin" resultType="string">
+        SELECT
+        VIN
+        FROM
+        dwm_vlms_one_order_to_end
+        where VIN in
+        <foreach collection="vvins" item="vvin"  index="index" open="(" close=")" separator=",">
+            #{vvin}
+        </foreach>
+
+    </select>
+
 </mapper>

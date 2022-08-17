@@ -39,4 +39,11 @@ public interface DwmVlmsOneOrderToEndMapper extends BaseMapper<DwmVlmsOneOrderTo
      */
     Integer countClickhouseVin(@Param("vvin") String vvin);
 
+    /**
+     * 按照Vin码去查询有Vin码的值并返回
+     * @param vvin
+     * @return
+     */
+    List<String> getOneOrderToEndVin(@Param("vvins") List<String> vvin);
+
 }
