@@ -22,8 +22,8 @@ management:
 spring:
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 100MB
+      max-request-size: 100MB
   mail:
     host: smtp.163.com
     username: jeecgos@163.com
@@ -118,7 +118,8 @@ spring:
         timeBetweenEvictionRunsMillis: 60000
         # 配置一个连接在池中最小生存的时间，单位是毫秒
         minEvictableIdleTimeMillis: 300000
-        validationQuery: SELECT 1
+        # 介于当前数据源新增Oracle,当前validationQuery的语句无法适用所有,故改为单独数据源单独设置
+        # validationQuery: SELECT 1
         testWhileIdle: true
         testOnBorrow: false
         testOnReturn: false
@@ -135,16 +136,18 @@ spring:
           username: fengqiwulian
           password: fengqiwulian
           driver-class-name: com.mysql.cj.jdbc.Driver
-#        dataWareHouse:
-#          url: jdbc:clickhouse://192.168.3.95:8123/default
-#          username:
-#          password:
-#          initialSize: 10
-#          maxActive: 100
-#          minIdle: 10
-#          maxWait: 6000
-#          driverClassName: ru.yandex.clickhouse.ClickHouseDriver
-#        # 多数据源配置
+          druid:
+            validationQuery: SELECT 1
+        oracle-vts:
+          url: jdbc:oracle:thin:@192.168.3.95:1521:orcl
+          username: flinkuser
+          password: flinkpw
+          #username: AIOT_VTS_DEV
+          #password: 123
+          driver-class-name: oracle.jdbc.OracleDriver
+          druid:
+            validationQuery: SELECT 1 FROM DUAL
+        # 多数据源配置
         slave_0:
           url: jdbc:clickhouse://192.168.3.95:8123/default
           username:
@@ -154,6 +157,8 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
+          druid:
+            validationQuery: SELECT 1
         slave_1:
           url: jdbc:clickhouse://192.168.3.96:8123/default
           username:
@@ -163,6 +168,8 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
+          druid:
+            validationQuery: SELECT 1
         slave_2:
           url: jdbc:clickhouse://192.168.3.97:8123/default
           username:
@@ -172,11 +179,16 @@ spring:
           maxActive: 100
           minIdle: 10
           maxWait: 6000
+          druid:
+            validationQuery: SELECT 1
         wareHouse:
             url: jdbc:mysql://192.168.3.4:3306/data_middle_flink?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
             username: fengqiwulian
             password: fengqiwulian
             driver-class-name: com.mysql.cj.jdbc.Driver
+            druid:
+              validationQuery: SELECT 1
+
   #redis 配置
   redis:
     database: 11
