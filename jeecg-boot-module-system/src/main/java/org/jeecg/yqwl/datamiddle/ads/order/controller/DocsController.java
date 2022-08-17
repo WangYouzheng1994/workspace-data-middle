@@ -48,13 +48,13 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
     /**
      * 通过excel导入数据
-     *
+     * 查询Oracle专用的
      * @param request
      * @param response
      * @return
      */
-    @RequestMapping(value = "/importExcel1", method = RequestMethod.POST)
-    public void importExcel1(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+    @RequestMapping(value = "/importExcelOfOracle", method = RequestMethod.POST)
+    public void importExcelOracle(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
         // 读取表格数据
         ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
         List dataList = excelLoadResult.getDataList();
@@ -106,6 +106,65 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         outputStream.close();
     }
 
+    /**
+     * 通过excel导入数据
+     * 查询Oracle专用的
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/importExcelOfClickhouse", method = RequestMethod.POST)
+    public void importExcelClickhouse(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+        // 读取表格数据
+        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
+        List dataList = excelLoadResult.getDataList();
+
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 设置字体和样式
+        Font font = wb.createFont();
+        // 字体名称
+        font.setFontName("宋体");
+        // 字体大小
+        font.setFontHeightInPoints((short) 12);
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+
+        int line = 0;
+        SXSSFRow row1 = null;
+        for (int i = 0; i < dataList.size(); i++) {
+            HashMap dataMap = (HashMap) dataList.get(i);
+            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
+            // 3.构建SQL语句
+            // SELECT COUNT(*)  FROM SPTB02 d1 JOIN SPTB02D1 d2 on d1.CJSDBH = d2.CJSDBH WHERE D2.VVIN='LFV3B2FY3N3056545';
+            Integer integer = dwmVlmsOneOrderToEndService.countClickhouseVin(vinStr);
+            System.out.println("展示:::::::::::::::::::::"+integer);
+            // 4.执行SQL语句
+            boolean oracleHas = true;
+            if (integer >= 1) {
+                oracleHas = false;
+            }
+            if (oracleHas) {
+                // row 行
+                row1= sheet.createRow(line);
+                // 这个地方是设置第几列的
+                SXSSFCell cell = row1.createCell(0);
+                cell.setCellValue(vinStr);
+                line++;
+            }
+
+        }
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
+        OutputStream outputStream = response.getOutputStream();
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
+    }
 
 
     /**

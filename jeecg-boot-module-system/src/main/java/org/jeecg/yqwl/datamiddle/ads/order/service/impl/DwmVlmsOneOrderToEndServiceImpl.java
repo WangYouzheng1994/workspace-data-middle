@@ -198,6 +198,12 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return dwmVlmsDocs;
     }
 
+    @Override
+    public Integer countClickhouseVin(String vvin) {
+        Integer integer = dwmVlmsOneOrderToEndMapper.countClickhouseVin(vvin);
+        return integer;
+    }
+
     /**
      * 英文运输方式
      *

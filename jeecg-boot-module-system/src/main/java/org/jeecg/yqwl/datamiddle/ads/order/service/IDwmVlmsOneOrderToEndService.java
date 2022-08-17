@@ -65,4 +65,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @return
      */
     List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria);
+
+    Integer countClickhouseVin(String vvin);
 }
