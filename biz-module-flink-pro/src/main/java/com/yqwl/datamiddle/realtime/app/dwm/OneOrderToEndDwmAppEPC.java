@@ -81,8 +81,9 @@ public class OneOrderToEndDwmAppEPC {
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpcFilterTime = mapBsdEpc.process(new ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>() {
             @Override
             public void processElement(DwdBaseStationDataEpc value, ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>.Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
-                if (value.getCP9_OFFLINE_TIME() >= START && value.getCP9_OFFLINE_TIME() <= END) {
-                    out.collect(value);
+                Long cp9_offline_time = value.getCP9_OFFLINE_TIME();
+                if (cp9_offline_time !=null && value.getCP9_OFFLINE_TIME() >= START && value.getCP9_OFFLINE_TIME() <= END){
+                        out.collect(value);
                 }
             }
         }).uid("OneOrderToEndDwmAppEpcFilter2022Time").name("OneOrderToEndDwmAppEpcFilter2022Time");
