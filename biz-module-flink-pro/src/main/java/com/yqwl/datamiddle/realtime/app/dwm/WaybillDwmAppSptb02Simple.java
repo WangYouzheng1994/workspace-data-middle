@@ -553,7 +553,22 @@ public class WaybillDwmAppSptb02Simple {
 //
 //                                }
 //                            }
-
+                            //---------------新增R3的DDJRQ字段:DDJRQ_R3  此表是在sptb01c中取的,与sptb02以CPCDBH关联 _禅道891-------------------------------------------------------------------------------------------//
+                            /** 配车单编号
+                             *  String jhxdSql = "select count(*)\n" +
+                             *                 "  from sptb01c a\n" +
+                             *                 "  left join sptb02 b\n" +
+                             *                 "    on a.cpcdbh = b.cpcdbh\n" +
+                             */
+                            String cpcdbh = dwmSptb02.getCPCDBH();
+                            if (StringUtils.isNotBlank(cpcdbh)){
+                                String sptb01cDDJRQSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C + " where CPCDBH = '" + cpcdbh + "' limit 1 ";
+                                JSONObject odsVlmsSptb01cDDJRQ = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptb01cDDJRQSql, cpcdbh);
+                                if (odsVlmsSptb01cDDJRQ != null){
+                                    Long ddjrqR3 = odsVlmsSptb01cDDJRQ.getLong("DDJRQ");
+                                    dwmSptb02.setDDJRQ_R3(ddjrqR3);
+                                }
+                            }
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
                             //实体类中null值进行默认值赋值
