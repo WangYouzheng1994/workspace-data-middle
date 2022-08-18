@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.util.BackStationUtilCp9;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
@@ -13,12 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.common.state.MapState;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
@@ -133,8 +130,8 @@ public class BaseStationDataAndEpcDwdAppEpc {
         }).uid("BaseStationDataAndEpcDwdAppEpcepcProcess").name("BaseStationDataAndEpcDwdAppEpcepcProcess");
 
         // 5.分组指定关联key,base_station_data_epc 处理CP9下线接车日期
-        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapEpc = epcProcess.keyBy(DwdBaseStationDataEpc::getVIN).map(new CP9Station())
-                .uid("BaseStationDataAndEpcDwdAppEpcmapEpc").name("BaseStationDataAndEpcDwdAppEpcmapEpc");
+        SingleOutputStreamOperator<DwdBaseStationDataEpc> mapEpc = epcProcess.keyBy(DwdBaseStationDataEpc::getVIN).map(new BackStationUtilCp9())
+                .uid("BaseStationDataAndEpcDwdAppUpdateCp9WithStationBackends").name("BaseStationDataAndEpcDwdAppUpdateCp9WithStationBackends");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> mapEpcJson = mapEpc.map(new MapFunction<DwdBaseStationDataEpc, String>() {
@@ -144,7 +141,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
             }
         }).uid("BaseStationDataAndEpcDwdAppEpcmapEpcJson").name("BaseStationDataAndEpcDwdAppEpcmapEpcJson");
 
-        //获取kafka生产者
+        // 获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
                 KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC,
@@ -152,55 +149,11 @@ public class BaseStationDataAndEpcDwdAppEpc {
         mapEpcJson.addSink(sinkKafka).uid("BaseStationDataAndEpcDwdAppEpcsinkKafkaDwdEpc").name("BaseStationDataAndEpcDwdAppEpcsinkKafkaDwdEpc");
 
         //===================================sink mysql=======================================================//
-        //组装sql
+        // 组装sql
         String sql = MysqlUtil.getSql(DwdBaseStationDataEpc.class);
         mapEpc.addSink(JdbcSink.<DwdBaseStationDataEpc>getSink(sql)).setParallelism(1).uid("BaseStationDataAndEpcDwdAppEpcOracle-cdc-mysql").name("BaseStationDataAndEpcDwdAppEpcOracle-cdc-mysql");
         env.execute("拉宽bsdEpc表进入dwdBsdEpc");
     }
 
-    /**
-     * 状态后端
-     */
-    public static class CP9Station extends RichMapFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc> {
-        // 声明Map类型的状态后端
-        private transient MapState<String, Long> myMapState;
 
-        @Override
-        public void open(Configuration parameters) throws Exception {
-            MapStateDescriptor<String, Long> mapStateDescriptor = new MapStateDescriptor<>("vin码和操作时间", String.class, Long.class);
-            myMapState = getRuntimeContext().getMapState(mapStateDescriptor);
-        }
-
-        @Override
-        public DwdBaseStationDataEpc map(DwdBaseStationDataEpc dwdBaseStationDataEpc) throws Exception {
-            /**
-             * 1.当前状态后端的状态为Map类型,key为String,也就是汽车的Vin码,value为vin码所对应的数据,vin所对应的操作时间
-             * 2.每次流到了到了这里,就会调用这里的map:
-             */
-            String vin = dwdBaseStationDataEpc.getVIN();                    //车架号
-            Long nowOperatetime = dwdBaseStationDataEpc.getOPERATETIME();   //操作时间
-            // 1):判断状态后端有无当前数据的vin码的key所对应的对象,没有就添加上
-            if (myMapState.get(vin) == null) {
-                myMapState.put(vin, nowOperatetime);
-                dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
-                return dwdBaseStationDataEpc;
-            } else {
-                // 2):当前'状态后端'有vin码对应的value就会判断操作时间,
-                //    如果'状态后端'已有的操作时间大于'当前流数据'的操作时间则删除'状态后端'中的key(因为取的是第一条下线时间的数据).
-                //    然后再把更早的下线时间存到'状态后端'中.
-                Long oldOperatetime = myMapState.get(vin);
-                //  Long oldOperatetime = oldDataEpc.getOPERATETIME();
-                if (oldOperatetime > nowOperatetime) {
-                    myMapState.remove(vin);
-                    myMapState.put(vin, nowOperatetime);
-                    dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(nowOperatetime);
-                    return dwdBaseStationDataEpc;
-                } else {
-                    // 3):如果'状态后端'已有的操作时间小于当前流的操作时间,就会保留当前状态后端的操作时间,且设置为DwdBaseStationDataEpc的第一次下线时间.
-                    dwdBaseStationDataEpc.setCP9_OFFLINE_TIME(oldOperatetime);
-                    return dwdBaseStationDataEpc;
-                }
-            }
-        }
-    }
 }
