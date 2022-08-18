@@ -45,11 +45,18 @@
             <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0">
                 AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <if test="params.vehicleReceivingTimeStart != null   and params.vehicleReceivingTimeStart != 0  ">
-                AND VEHICLE_RECEIVING_TIME <![CDATA[ >= ]]> #{params.vehicleReceivingTimeStart}
+            <!--<if test="params.vehicleReceivingTimeStart != null   and params.vehicleReceivingTimeStart != 0  ">-->
+            <!--    AND VEHICLE_RECEIVING_TIME <![CDATA[ >= ]]> #{params.vehicleReceivingTimeStart}-->
+            <!--</if>-->
+            <!--<if test="params.vehicleReceivingTimeEnd != null   and params.vehicleReceivingTimeEnd != 0 ">-->
+            <!--    AND VEHICLE_RECEIVING_TIME <![CDATA[ <= ]]>  #{params.vehicleReceivingTimeEnd}-->
+            <!--</if>-->
+            <!-- 当前更改为取R3的DDJRQ 也就是sptb01c -->
+            <if test="params.vehiclePlateIssuedTimeStart != null   and params.vehiclePlateIssuedTimeStart != 0  ">
+                AND VEHICLE_PLATE_ISSUED_TIME_R3 <![CDATA[ >= ]]> #{params.vehiclePlateIssuedTimeStart}
             </if>
-            <if test="params.vehicleReceivingTimeEnd != null   and params.vehicleReceivingTimeEnd != 0 ">
-                AND VEHICLE_RECEIVING_TIME <![CDATA[ <= ]]>  #{params.vehicleReceivingTimeEnd}
+            <if test="params.vehiclePlateIssuedTimeEnd != null   and params.vehiclePlateIssuedTimeEnd != 0 ">
+                AND VEHICLE_PLATE_ISSUED_TIME_R3 <![CDATA[ <= ]]>  #{params.vehiclePlateIssuedTimeEnd}
             </if>
             <if test="params.actualOutTimeStart != null   and params.actualOutTimeStart != 0  ">
                 AND ACTUAL_OUT_TIME <![CDATA[ >= ]]> #{params.actualOutTimeStart}
@@ -92,7 +99,7 @@
         SELECT
             case when CPZDBH != '' then A.numbeT  else 0 end as SAME_PLATE_NUM,
             VIN,BRAND,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,CPZDBH,
-            CP9_OFFLINE_TIME,LEAVE_FACTORY_TIME,IN_SITE_TIME,IN_WAREHOUSE_NAME,TASK_NO,VEHICLE_RECEIVING_TIME,
+            CP9_OFFLINE_TIME,LEAVE_FACTORY_TIME,IN_SITE_TIME,IN_WAREHOUSE_NAME,TASK_NO,VEHICLE_PLATE_ISSUED_TIME_R3,
             STOWAGE_NOTE_NO,TRAFFIC_TYPE,ASSIGN_TIME,CARRIER_NAME,ACTUAL_OUT_TIME,SHIPMENT_G_TIME,TRANSPORT_VEHICLE_NO,
             SAME_PLATE_NUM,VEHICLE_NUM,START_WATERWAY_NAME,IN_START_WATERWAY_TIME,END_START_WATERWAY_TIME,
             END_WATERWAY_NAME,IN_END_WATERWAY_TIME,START_PLATFORM_NAME,IN_START_PLATFORM_TIME,OUT_START_PLATFORM_TIME,
@@ -103,7 +110,7 @@
             dwm_vlms_one_order_to_end TOEND
         left join A on TOEND.CPZDBH = A.CPZDBH
         <include refid="where_count_one_to_end" />
-        order by TOEND.VEHICLE_RECEIVING_TIME desc
+        order by TOEND.VEHICLE_PLATE_ISSUED_TIME_R3 desc
 
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}

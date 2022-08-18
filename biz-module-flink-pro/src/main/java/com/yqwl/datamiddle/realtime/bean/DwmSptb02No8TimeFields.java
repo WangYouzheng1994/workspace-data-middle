@@ -1359,4 +1359,9 @@ public class DwmSptb02No8TimeFields implements Serializable {
      */
     private String HIGHWAY_WAREHOUSE_TYPE;
 
+    /**
+     * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long DDJRQ_R3;
+
 }

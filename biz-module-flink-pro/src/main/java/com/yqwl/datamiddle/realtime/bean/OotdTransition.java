@@ -336,4 +336,9 @@ public class OotdTransition {
      *收车站台的市县代码
      */
     private String VSCZT_CITY_CODE;
+
+    /**
+     * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long VEHICLE_PLATE_ISSUED_TIME_R3;
 }
