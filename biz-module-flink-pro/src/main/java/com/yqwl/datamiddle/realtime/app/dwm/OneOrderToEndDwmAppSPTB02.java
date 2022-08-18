@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.dwm;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
@@ -74,6 +75,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
+                .startupOptions(StartupOptions.latest())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
