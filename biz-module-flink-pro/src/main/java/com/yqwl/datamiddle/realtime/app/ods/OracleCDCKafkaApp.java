@@ -94,8 +94,6 @@ public class OracleCDCKafkaApp {
         properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
         properties.put("converters", "aaa");
         properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.TimestampConverter");
-        //properties.put("database.serverTimezone", "UTC");
-        //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
                 props.getStr("cdc.oracle.hostname") + ")(PORT=" +
                 props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" +
