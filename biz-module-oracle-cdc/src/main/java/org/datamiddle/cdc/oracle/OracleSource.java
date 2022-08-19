@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
+import org.datamiddle.cdc.oracle.converter.oracle.LogMinerColumnConverter;
 import org.datamiddle.cdc.oracle.converter.oracle.LogMinerRowConverter;
 
 import java.math.BigInteger;
@@ -55,9 +56,14 @@ public class OracleSource {
     private Boolean loadRedo = false;
 
     /**
-     * 最后一条数据的位点
+     * 最后一条数据的位点 这个位点是摄取转换后的位置
      */
     private BigInteger currentSinkPosition;
+
+    /**
+     * 挖掘点位， 这个是logminer的一次摄取后的点位，因为在循环读取，需要有中间值
+     */
+    private BigInteger currentLogReadEnd;
 
     /**
      * 缓存控制器，放在这一层 你可以认为任务后续会管控多线程模式下的抽取动作
@@ -67,10 +73,14 @@ public class OracleSource {
     /**
      * 针对挖掘到的 logminer log数据进行处理
      */
-    private LogminerHandler logminerHandler;
+    // private LogminerHandler logminerHandler;
 
-    // private LogMinerRowConverter logMinerRowConverter = new LogMinerRowConverter();
+    private LogMinerColumnConverter logMinerRowConverter = new LogMinerColumnConverter(false, true);
 
+    /**
+     * 控制任务的运转状态，此状态应该迁移到DB
+     */
+    private boolean runningFlag = true;
 
     /**
      * 概要设计：
@@ -91,14 +101,34 @@ public class OracleSource {
         this.endScn = new BigInteger("0");
         this.logminerStep = new BigInteger("2000");
         // 初始化连接
-        OracleCDCConnection oracleCDCConnecUtil = init(oracleCDCConfig);
+        OracleCDCConnection oracleCDCConnect = init(oracleCDCConfig);
         // 获取开始偏移量 根据模式判定
-        startScn = getStartSCN(oracleCDCConnecUtil, startScn);
+        startScn = getStartSCN(oracleCDCConnect, startScn);
+        // 读取的位置 从startSCN偏移量开始
+        this.currentSinkPosition = startScn;
         // 初始化Logminer
 
-        payLoad(oracleCDCConnecUtil);
+
+        payLoad(oracleCDCConnect);
         // 读取Log日志
 
+        // 一直沿用这个流程去处理
+        while (runningFlag) {
+            running(oracleCDCConnect);
+        }
+    }
+
+    /**
+     * 运转
+     *
+     * @param oracleCDCConnect
+     */
+    public void running(OracleCDCConnection oracleCDCConnect) {
+        // 设置任務持续运转状态下的偏移量~
+        this.endScn = oracleCDCConnect.getEndScn();
+        payLoad(oracleCDCConnect);
+
+        log.info("current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
     }
 
     /**
@@ -146,13 +176,14 @@ public class OracleSource {
                 log.error(e.getMessage(), e);
                 // e.printStackTrace();
             }
+            // 开始日志挖掘
             connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
             // 读取v$logmnr_contents 数据由线程池加载
             String logMinerSelectSql = ""; // 这个地方需要根据指定的表名
             // 动态组装SQL，摄取update insert delete
             logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
 
-            // 请求logmnr_contents查看结果。 因为这个操作很慢，所以需要用多线程获取结果。 结果会放到 connection的logminerData中。
+            // 请求日志挖掘结果logmnr_contents查看。 结果会放到 connection的logminerData中 (ResultSet)。 TODO：此操作响应快慢与数据量反比，需要用多线程异步获取结果。
             boolean selectResult = connecUtil.queryData(logMinerSelectSql);
             if (selectResult) {
                 // jdbc请求成功
@@ -162,19 +193,19 @@ public class OracleSource {
                         // 获取解析结果
                         QueueData result = connecUtil.getResult();
                         // 格式化数据 after before
+                        if (result != null) {
+                            System.out.println("啦啦啦啦 我查到数据了哈~");
+                            LogminerHandler.parse(result, logMinerRowConverter);
+                        }
                     }
                 } catch(Exception e) {
                     log.error(e.getMessage(), e);
                 }
 
-
-
-
                 // 格式化数据
                 //logminerHandler.parse(result, );
 
                 // TODO: 格式化完了以后，更新任务的开始和结束
-
             }
 
             this.endScn = endScn.getLeft();

@@ -208,7 +208,7 @@ public class LogminerHandler {
         return value;
     }
 
-    public LinkedList<RowData> parse(QueueData pair, AbstractCDCRowConverter rowConverter)
+    public static LinkedList<RowData> parse(QueueData pair, AbstractCDCRowConverter rowConverter)
             throws Exception {
         ColumnRowData logData = (ColumnRowData) pair.getData();
 
@@ -240,9 +240,9 @@ public class LogminerHandler {
 
         Long ts = idWorker.nextId();
 
-        if (log.isDebugEnabled()) {
+        /*if (log.isDebugEnabled()) {
             printDelay(pair.getScn(), ts, timestamp);
-        }
+        }*/
 
         EventRow eventRow =
                 new EventRow(
@@ -254,8 +254,9 @@ public class LogminerHandler {
                         tableName,
                         ts,
                         timestamp);
-
-        return rowConverter.toInternal(eventRow);
+        rowConverter.toInternal(eventRow);
+        // return
+        return null;
     }
 
     private void printDelay(BigInteger scn, long ts, Timestamp timestamp) {
