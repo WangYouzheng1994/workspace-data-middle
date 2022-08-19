@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 主要是执行mysql 查询
@@ -225,6 +226,32 @@ public class MysqlUtil {
         }
         return dimJsonObj;
     }
-
-
+    static List<Long> timeLists = new ArrayList<>();
+    public static JSONObject queryNoRedis(String sql) {
+        Long startTime = System.currentTimeMillis();
+        //维度数据的json对象形式
+        JSONObject dimJsonObj = null;
+                //维度数据的json字符串形式
+                String dimJsonStr = null;
+                List<JSONObject> dimList = DbUtil.queryList(sql, JSONObject.class, false);
+                //对于维度查询来讲，一般都是根据主键进行查询，不可能返回多条记录，只会有一条
+                if (dimList.size() > 0) {
+                    dimJsonObj = dimList.get(0);
+                }
+                dimList = null;
+        Long endTime = System.currentTimeMillis();
+        Long resultTime = endTime - startTime;
+        /*    采样算法
+        timeLists.add(resultTime);
+        if (timeLists.size() >= 50) {
+            log.info("平均值是:{}", timeLists.stream().mapToLong(Long::longValue).average().getAsDouble());
+            log.info("平均值下面:{}", resultTime);
+            timeLists.clear();
+        }*/
+        if (resultTime > 15) {
+            log.error("出现了慢sql:{}" + sql);
+            log.error("花费的时间为:{}", resultTime);
+        }
+        return dimJsonObj;
+    }
 }

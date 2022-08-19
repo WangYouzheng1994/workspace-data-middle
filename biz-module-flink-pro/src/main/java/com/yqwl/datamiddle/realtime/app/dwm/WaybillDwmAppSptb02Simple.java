@@ -85,7 +85,7 @@ public class WaybillDwmAppSptb02Simple {
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {
                     String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbhSource + "' limit 1 ";
-                    JSONObject sptb02d1 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, sptb02d1Sql, cjsdbhSource);
+                    JSONObject sptb02d1 = MysqlUtil.queryNoRedis(sptb02d1Sql);
                     if (sptb02d1 != null) {
                         String vvin = sptb02d1.getString("VVIN");
                         //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
@@ -563,7 +563,7 @@ public class WaybillDwmAppSptb02Simple {
                             String cpcdbh = dwmSptb02.getCPCDBH();
                             if (StringUtils.isNotBlank(cpcdbh)){
                                 String sptb01cDDJRQSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C + " where CPCDBH = '" + cpcdbh + "' limit 1 ";
-                                JSONObject odsVlmsSptb01cDDJRQ = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptb01cDDJRQSql, cpcdbh);
+                                JSONObject odsVlmsSptb01cDDJRQ = MysqlUtil.queryNoRedis(sptb01cDDJRQSql);
                                 if (odsVlmsSptb01cDDJRQ != null){
                                     Long ddjrqR3 = odsVlmsSptb01cDDJRQ.getLong("DDJRQ");
                                     dwmSptb02.setDDJRQ_R3(ddjrqR3);
@@ -577,9 +577,9 @@ public class WaybillDwmAppSptb02Simple {
                         }
                     }
                 }
+            }                                                                                                                 // 算子不合并
             }
-            }
-        }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
+        }).setParallelism(1).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process").disableChaining();
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);
