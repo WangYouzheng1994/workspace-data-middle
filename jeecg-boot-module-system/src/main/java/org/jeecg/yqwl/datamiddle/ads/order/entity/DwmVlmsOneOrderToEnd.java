@@ -339,6 +339,13 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "同城异地")
 	private Integer typeTc;
 
+	/**
+	 * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+	 */
+	@Excel(name = "R3的配板下发日期", width = 15)
+	@ApiModelProperty(value = "R3的配板下发日期")
+	private Long vehiclePlateIssuedTimeR3;
+
 	public String setTrafficType(String trafficType) {
 		this.trafficType = trafficType;
 		return trafficType;

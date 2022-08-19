@@ -5,7 +5,6 @@ import com.ververica.cdc.connectors.oracle.OracleSource;
 import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
-import io.debezium.connector.oracle.OracleConnectorConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -24,12 +23,13 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 将oracle中其中相关的源表数据cdc同步到kafka的同一个topic中, 名称为:cdc_vlms_unite_oracle
- * @Author: muqing
- * @Date: 2022/05/06
+ *               此版本 增量任务,且uid与全量的有区分,避免两个在同时启动时出现问题
+ * @Author: XiaoFEng
+ * @Date: 2022/08/15
  * @Version: V1.0
  */
 @Slf4j
-public class OracleCDCKafkaApp {
+public class OracleCDCKafkaAppLatest {
 
     /**
      * 获取当前上下文环境下 数仓中的分流到clickhouse的表名，用以MySqlCDC抽取。
@@ -94,6 +94,8 @@ public class OracleCDCKafkaApp {
         properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
         properties.put("converters", "aaa");
         properties.put("aaa.type", "com.yqwl.datamiddle.realtime.util.TimestampConverter");
+        //properties.put("database.serverTimezone", "UTC");
+        //properties.put("database.serverTimezone", "Asia/Shanghai");
         properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
                 props.getStr("cdc.oracle.hostname") + ")(PORT=" +
                 props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" +
@@ -109,13 +111,13 @@ public class OracleCDCKafkaApp {
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
-                .startupOptions(StartupOptions.initial())
+                .startupOptions(StartupOptions.latest())
                 .debeziumProperties(properties)
                 .build();
 
 
         log.info("checkpoint设置完成");
-        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCDCKafkaApporacleSourceStream").name("OracleCDCKafkaApporacleSourceStream");
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("OracleCDCKafkaApporacleSourceStreamLatest").name("OracleCDCKafkaApporacleSourceStreamLatest");
 
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
@@ -124,7 +126,7 @@ public class OracleCDCKafkaApp {
                 KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804));
 
         // 输出到kafka
-        oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
+        oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracleLatest").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracleLatest");
         log.info("add sink kafka设置完成");
         env.execute("oracle-cdc-kafka");
         log.info("oracle-cdc-kafka job开始执行");

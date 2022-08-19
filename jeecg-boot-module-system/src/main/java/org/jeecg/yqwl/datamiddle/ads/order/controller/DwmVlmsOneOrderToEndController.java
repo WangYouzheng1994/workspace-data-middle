@@ -315,11 +315,11 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 SXSSFCell cell11 = row1.createCell(j++);
                 // cell11.setCellStyle(cellstyle);
                 cell11.setCellValue(item.getTaskNo());
-                // vehicleReceivingTime  计划下达日期  11
-                if (item.getVehicleReceivingTime() != 0) {
+                // vehiclePlateIssuedTimeR3  计划下达日期  修改为R3.DDJRQ的时间
+                if (item.getVehiclePlateIssuedTimeR3() != 0) {
                     SXSSFCell cell12 = row1.createCell(j++);
                     // cell12.setCellStyle(cellstyle);
-                    cell12.setCellValue(sdf.format(item.getVehicleReceivingTime()));
+                    cell12.setCellValue(sdf.format(item.getVehiclePlateIssuedTimeR3()));
                 }else{
                     SXSSFCell cell12 = row1.createCell(j++);
                     // cell12.setCellStyle(cellstyle);

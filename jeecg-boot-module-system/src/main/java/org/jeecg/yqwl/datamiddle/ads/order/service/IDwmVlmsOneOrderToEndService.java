@@ -65,4 +65,18 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @return
      */
     List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria);
+
+    /**
+     * 按照Vin码去查询总数
+     * @param vvin
+     * @return
+     */
+    Integer countClickhouseVin(String vvin);
+
+    /**
+     * 按照Vin码去查询有Vin码的值并返回
+     * @param vvin
+     * @return
+     */
+    List<String> getOneOrderToEndVin(List<String> vvin);
 }

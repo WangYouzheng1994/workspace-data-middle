@@ -457,5 +457,8 @@ public class DwmOneOrderToEnd implements Serializable {
      */
     private String SETTLEMENT_LAST;
 
-
+    /**
+     * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long VEHICLE_PLATE_ISSUED_TIME_R3;
 }

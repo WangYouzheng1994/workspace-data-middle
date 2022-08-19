@@ -1310,4 +1310,9 @@ public class DwmVlmsSptb02 {
      * 运单在途位置信息
      */
     private String VWZ;
+
+    /**
+     * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long DDJRQ_R3;
 }

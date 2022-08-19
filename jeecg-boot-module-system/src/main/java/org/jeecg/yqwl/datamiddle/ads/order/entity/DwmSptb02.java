@@ -1406,8 +1406,10 @@ public class DwmSptb02 implements Serializable {
      */
     private String VSCZT_CITY_CODE;
 
-
-
+    /**
+     * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long DDJRQ_R3;
 
 
 

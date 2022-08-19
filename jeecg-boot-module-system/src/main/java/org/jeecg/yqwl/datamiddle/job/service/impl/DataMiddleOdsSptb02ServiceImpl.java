@@ -31,6 +31,7 @@ import java.util.*;
  * @Date: 2022/6/13 15:40
  * @Version: V1.0
  */
+@DS("oracle-vts")
 @Slf4j
 @Service
 public class DataMiddleOdsSptb02ServiceImpl extends ServiceImpl<DataMiddleOdsSptb02Mapper, DwdSptb02> implements DataMiddleOdsSptb02Service {

@@ -124,6 +124,16 @@ public class GetQueryCriteria {
     private Long vehicleReceivingTimeEnd;
 
     /**
+     * R3的配板下发日期开始时间 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long vehiclePlateIssuedTimeStart;
+
+    /**
+     * R3的配板下发日期结束时间 取自SPTB01C.DDJRQ 20220818新增
+     */
+    private Long vehiclePlateIssuedTimeEnd;
+
+    /**
      * 计划下达日期开始  sptb02
      */
     private Long ddjrqStart;
