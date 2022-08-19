@@ -579,7 +579,7 @@ public class WaybillDwmAppSptb02Simple {
                 }
             }
             }
-        }).setParallelism(4).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
+        }).setParallelism(1).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);

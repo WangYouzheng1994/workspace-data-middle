@@ -177,6 +177,7 @@ public class MysqlUtil {
 
 
     public static JSONObject querySingle(String tableName, String sql, Object... value) {
+        Long startTime = System.currentTimeMillis();
         String redisKey = "dwm:vlms:" + tableName.toLowerCase() + ":";
         for (int i = 0; i < value.length; i++) {
             Object fieldValue = value[i];
@@ -223,6 +224,12 @@ public class MysqlUtil {
                 jedis.close();
             }
         }
+        Long endTime = System.currentTimeMillis();
+        Long resultTime = endTime - startTime;
+            if (resultTime > 10) {
+                log.error("出现了慢sql:{}" + sql);
+                log.error("花费的时间为:{}", resultTime);
+            }
         return dimJsonObj;
     }
 
