@@ -648,10 +648,10 @@
                 AND ACTUAL_OUT_TIME <![CDATA[ <= ]]>  #{params.actualOutTimeEnd}
             </if>
             <if test="params.ddjrqStart != null   and params.ddjrqStart != 0  ">
-                AND DDJRQ <![CDATA[ >= ]]> #{params.ddjrqStart}
+                AND DDJRQ_R3 <![CDATA[ >= ]]> #{params.ddjrqStart}
             </if>
             <if test="params.ddjrqEnd != null   and params.ddjrqEnd != 0 ">
-                AND DDJRQ <![CDATA[ <= ]]>  #{params.ddjrqEnd}
+                AND DDJRQ_R3 <![CDATA[ <= ]]>  #{params.ddjrqEnd}
             </if>
             <if test="params.startCityName != null and params.startCityName != '' ">
                 AND START_CITY_NAME = #{params.startCityName}
@@ -694,13 +694,13 @@
         SELECT
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
            VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
-           DDJRQ,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+           DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
            DTVSDHSJ,FINAL_SITE_TIME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
         <include refid="where_count_one_to_end" />
-        ORDER BY SPTB02.DDJRQ DESC
+        ORDER BY SPTB02.DDJRQ_R3 DESC
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
         </if>
@@ -724,13 +724,13 @@
         SELECT
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
             VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
-            DDJRQ,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+            DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
             DTVSDHSJ,FINAL_SITE_TIME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
         <include refid="where_count_one_to_end" />
-        ORDER BY SPTB02.DDJRQ DESC
+        ORDER BY SPTB02.DDJRQ_R3 DESC
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
         </if>

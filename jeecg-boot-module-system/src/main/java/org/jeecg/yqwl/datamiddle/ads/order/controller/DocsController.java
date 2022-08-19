@@ -337,9 +337,9 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 SXSSFCell cell7 = row1.createCell(j++);
                 cell7.setCellValue(item.getDealerName());
                 // ddjrq 计划下达日期
-                if (item.getDdjrq() != 0 ) {
+                if (item.getDdjrqR3() != 0 ) {
                     SXSSFCell cell8 = row1.createCell(j++);
-                    cell8.setCellValue(sdf.format(item.getDdjrq()));
+                    cell8.setCellValue(sdf.format(item.getDdjrqR3()));
                 }else{
                     SXSSFCell cell8 = row1.createCell(j++);
                     cell8.setCellValue("");
@@ -486,7 +486,6 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
         // 设置新增数据行,从第一行开始
         int rowNum = 1;
-
         Integer maxSize = 150000;
 
         SXSSFRow row1 = null;
@@ -532,10 +531,10 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 // cell7.setCellStyle(cellstyle);
                 cell7.setCellValue(item.getDealerName());
                 // ddjrq 计划下达日期
-                if (item.getDdjrq() != 0 ) {
+                if (item.getDdjrqR3() != 0 ) {
                     SXSSFCell cell8 = row1.createCell(j++);
                     // cell8.setCellStyle(cellstyle);
-                    cell8.setCellValue(sdf.format(item.getDdjrq()));
+                    cell8.setCellValue(sdf.format(item.getDdjrqR3()));
                 }else{
                     SXSSFCell cell8 = row1.createCell(j++);
                     // cell8.setCellStyle(cellstyle);
