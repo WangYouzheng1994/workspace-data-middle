@@ -33,7 +33,13 @@ public class OracleCDCConnection {
 
     // -------- JDBC Start
     private Connection connection;
+    /**
+     * 发起数据挖掘结果
+     */
     private CallableStatement logMinerStartStmt;
+    /**
+     * 获取数据挖掘结果
+     */
     private PreparedStatement logMinerSelectStmt;
     private ResultSet logMinerData;
     // --------JDBC END
@@ -95,10 +101,14 @@ public class OracleCDCConnection {
 
         interval = 1;
         // 设置编码和日期类型
+
+        // 获取当前Oracle的字符集。
+
         do {
-            try {
-                connection.prepareStatement(SqlUtil.SQL_ALTER_NLS_SESSION_PARAMETERS);
-                logMinerSelectStmt.execute();
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SqlUtil.SQL_ALTER_NLS_SESSION_PARAMETERS)) {
+                // preparedStatement.setQueryTimeout(logMinerConfig.getQueryTimeout().intValue());
+                preparedStatement.execute();
                 interval = 5;
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -250,7 +260,13 @@ public class OracleCDCConnection {
     }
 
     /**
-     *  根据leftScn 以及加载的日志大小限制 获取可加载的scn范围 以及此范围对应的日志文件
+     * 根据leftScn 以及加载的日志大小限制 获取可加载的scn范围 以及此范围对应的日志文件
+     *
+     * @param connection
+     * @param startScn
+     * @param logFiles
+     * @return
+     * @throws SQLException
      */
     public Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
             throws SQLException {
@@ -274,8 +290,10 @@ public class OracleCDCConnection {
         try {
             String sql;
             if (addRedoLog) {
+                // 同时查询redo与archivev
                 sql = SqlUtil.SQL_QUERY_LOG_FILE;
             } else {
+                // 只查询归档
                 sql = SqlUtil.SQL_QUERY_ARCHIVE_LOG_FILE;
             }
             statement = connection.prepareStatement(sql);
@@ -296,10 +314,11 @@ public class OracleCDCConnection {
             closeResources(rs, statement, null);
         }
 
+        // 根据线程组分组
         Map<Long, List<LogFile>> map =
                 logFileLists.stream().collect(Collectors.groupingBy(LogFile::getThread));
 
-        // 对每一个thread的文件进行排序
+        // 对每一个线程组的文件按照起始偏移量进行升序排序
         map.forEach(
                 (k, v) ->
                         map.put(
@@ -330,7 +349,7 @@ public class OracleCDCConnection {
             if (CollectionUtils.isEmpty(tempList)) {
                 // break;
             } else {
-                // 找到最小的nextSCN
+                // 找到最小的nextSCN 结束偏移量
                 BigInteger minNextScn =
                         tempList.stream()
                                 .sorted(Comparator.comparing(LogFile::getNextChange))
@@ -351,6 +370,7 @@ public class OracleCDCConnection {
             }
         // }
 
+        // 如果加载到了重做日志，需要把currentSCN 作为当前连接的 endSCN 因为此scn只能去数据库的当前状态获取，无法通过log list获取到。原因是还在增量走。
         if (loadRedoLog) {
             // 解决logminer偶尔丢失数据问题，读取online日志的时候，需要将rightScn置为当前SCN
             endScn = getCurrentScn(connection);
@@ -492,12 +512,20 @@ public class OracleCDCConnection {
                 StringUtils.join(standardOperations, ConstantValue.COMMA_SYMBOL));
     }
 
-    /** 启动LogMiner */
+    /**
+     * 启动logminer 挖掘，并且把任务上的开始与结束scn 传递给当前 jdbc连接。
+     * @param connection
+     * @param startScn
+     * @param endScn
+     * @param autoaddLog
+     */
     public void startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog) {
 
         String startSql;
         try {
-
+            // 任务偏移量赋值
+            this.startScn = startScn;
+            this.endScn = endScn;
             // TODO：防止没有数据更新的时候频繁查询数据库，限定查询的最小时间间隔 QUERY_LOG_INTERVAL
 
             if (autoaddLog) {
@@ -505,8 +533,6 @@ public class OracleCDCConnection {
             } else {
                 startSql = SqlUtil.SQL_START_LOGMINER;
             }
-
-            connection.getConnection();
 
             // 重置，清空preparestatement，重新简历logminer连接
             connection.resetLogminerStmt(startSql);
@@ -579,7 +605,7 @@ public class OracleCDCConnection {
             logMinerData = logMinerSelectStmt.executeQuery();
 
             // this.CURRENT_STATE.set(STATE.READABLE);
-            long timeConsuming = (System.currentTimeMillis() - before) / 1000;
+            // long timeConsuming = (System.currentTimeMillis() - before) / 1000;
             // LOG.info(
             //         "query LogMiner data, startScn:{},endScn:{},timeConsuming {}",
             //         startScn,
@@ -593,8 +619,8 @@ public class OracleCDCConnection {
             //         String.format(
             //                 "query logMiner data failed, sql:[%s], e: %s",
             //                 logMinerSelectSql, ExceptionUtil.getErrorMessage(e));
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
-
         }
     }
 
@@ -656,7 +682,7 @@ public class OracleCDCConnection {
             // 是否存在多条SQL
             hasMultiSql = isSqlNotEnd;
 
-            // 如果出现了多行sql。那么就继续迭代。
+            // 如果出现了多行sql。那么就继续向后面迭代。
             while (isSqlNotEnd) {
                 logMinerData.next();
                 // redoLog 实际上不需要发生切割  但是sqlUndo发生了切割，导致redolog值为null

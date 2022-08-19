@@ -17,9 +17,17 @@
  */
 package org.datamiddle.cdc.oracle.converter;
 
+import org.apache.flink.table.data.RowData;
 
 import java.io.Serializable;
 
+/**
+ * 转换成flink type的解析转换器顶级接口，因为只有一个方法，所以这也是一个函数式接口，flinkx中 使用此接口通过lambda进行实现。
+ *
+ *
+ * @param <T>
+ * @param <E>
+ */
 public interface IDeserializationConverter<T, E> extends Serializable {
 
     /**

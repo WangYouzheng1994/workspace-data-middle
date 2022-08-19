@@ -1,5 +1,6 @@
 package org.datamiddle.cdc.oracle;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
@@ -11,9 +12,10 @@ import java.util.List;
  * @Version: V1.0
  */
 @Data
+@Builder
 public class OracleCDCConfig {
     // 默认是增量抽取：除此以外的模式为：all， time, scn
-    private String readPosition = "current";
+    private String readPosition = "all";
 
     // 指定时间抽取  time模式
     private Long startTime;

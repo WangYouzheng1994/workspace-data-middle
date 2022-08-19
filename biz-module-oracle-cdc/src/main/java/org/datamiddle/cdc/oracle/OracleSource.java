@@ -4,16 +4,17 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
+import org.datamiddle.cdc.oracle.converter.oracle.LogMinerRowConverter;
 
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 
 /**
  * @Description: Oracle Logminer CDC  一个CDC的任务
@@ -29,6 +30,7 @@ public class OracleSource {
     private ExecutorService executor;
 
     private ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("debezium-engine").build();
+    private ExecutorService connectionExecutor;
     /**
      * 启动该任务的配置
      */
@@ -62,6 +64,13 @@ public class OracleSource {
      */
     private TransactionManager transactionManager;
 
+    /**
+     * 针对挖掘到的 logminer log数据进行处理
+     */
+    private LogminerHandler logminerHandler;
+
+    // private LogMinerRowConverter logMinerRowConverter = new LogMinerRowConverter();
+
 
     /**
      * 概要设计：
@@ -71,17 +80,39 @@ public class OracleSource {
      * 4. 循环取值 幂等过滤 把信息 推给传入的handler
      */
     public void start(OracleCDCConfig oracleCDCConfig) {
+        // 初始化连接池
+        connectionExecutor = new ThreadPoolExecutor(
+                20, 20, 300, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(Integer.MAX_VALUE));
+        // 初始化日志缓存器， 底层是google的 lru缓存架构
+        transactionManager = new TransactionManager(1000L, 20);
 
-
+        this.oracleCDCConfig = oracleCDCConfig;
+        this.startScn = new BigInteger("0");
+        this.endScn = new BigInteger("0");
+        this.logminerStep = new BigInteger("2000");
         // 初始化连接
         OracleCDCConnection oracleCDCConnecUtil = init(oracleCDCConfig);
         // 获取开始偏移量 根据模式判定
-        startScn = getStartSCN(oracleCDCConnecUtil, new BigInteger("0"));
+        startScn = getStartSCN(oracleCDCConnecUtil, startScn);
         // 初始化Logminer
+
         payLoad(oracleCDCConnecUtil);
         // 读取Log日志
 
     }
+
+    /**
+     * 多线程提交读取信息的任务
+     * @param connection
+     * @param sql
+     */
+    public void loadData(OracleCDCConnection connection, String sql) {
+        connectionExecutor.submit( () -> {
+            connection.queryData(sql);
+        });
+    }
+
+
 
     /**
      * 初始化connection的初始化加载 logminer
@@ -108,20 +139,43 @@ public class OracleSource {
                 currentStartScn = currentSinkPosition.add(BigInteger.ONE);
             }
 
-            Pair<BigInteger, Boolean> endScn =
-                    null;
+            Pair<BigInteger, Boolean> endScn = null;
             try {
                 endScn = connecUtil.getEndScn(connection, currentStartScn, new ArrayList<>(32));
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
+                // e.printStackTrace();
             }
             connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
             // 读取v$logmnr_contents 数据由线程池加载
-            String logMinerSelectSql = ""; // 这个地方需要根据指定的表名 动态组装SQL
+            String logMinerSelectSql = ""; // 这个地方需要根据指定的表名
+            // 动态组装SQL，摄取update insert delete
             logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
 
-            // 请求logmnr_contents查看结果。 因为这个操作很慢，所以需要用多线程获取结果。
-            connecUtil.queryData(logMinerSelectSql);
+            // 请求logmnr_contents查看结果。 因为这个操作很慢，所以需要用多线程获取结果。 结果会放到 connection的logminerData中。
+            boolean selectResult = connecUtil.queryData(logMinerSelectSql);
+            if (selectResult) {
+                // jdbc请求成功
+                try {
+                    // 解析
+                    if (connecUtil.hasNext()) {
+                        // 获取解析结果
+                        QueueData result = connecUtil.getResult();
+                        // 格式化数据 after before
+                    }
+                } catch(Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+
+
+
+
+                // 格式化数据
+                //logminerHandler.parse(result, );
+
+                // TODO: 格式化完了以后，更新任务的开始和结束
+
+            }
 
             this.endScn = endScn.getLeft();
             this.loadRedo = endScn.getRight();
@@ -130,10 +184,10 @@ public class OracleSource {
             // }
             // 如果已经加载了redoLog就不需要多线程加载了
             if (endScn.getRight()) {
-                // break;
+                // break
             }
         }
-/*
+/* 多线程处理 屏蔽，目前用单线程执行。
         for (LogMinerConnection logMinerConnection : needLoadList) {
             logMinerConnection.checkAndResetConnection();
             if (Objects.isNull(currentMaxScn)) {
@@ -174,9 +228,20 @@ public class OracleSource {
     }
     private static BigInteger a;
     public static void main(String[] args) {
-        BigInteger bigInteger = new BigInteger("1");
+        /*BigInteger bigInteger = new BigInteger("1");
         System.out.println(bigInteger.subtract(a));
-        System.out.println(a);
+        System.out.println(a);*/
+        // new OracleCDCConfig();
+        OracleCDCConfig build = OracleCDCConfig.builder()
+                .readPosition("ALL")
+                .driverClass("oracle.jdbc.OracleDriver")
+                .table(Arrays.asList("TDS_LJ.SPTB02"))
+                .username("flinkuser")
+                .password("flinkpw").jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
+                        "192.168.3.95" + ")(PORT=" +
+                        "1521" + ")))(CONNECT_DATA=(SID=" +
+                        "ORCL" + ")))").build();
+        new OracleSource().start(build);
     }
 
     /**

@@ -36,6 +36,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * flink sql 模式下数据抽取转换的抽象类
+ * 提供了
+ *
  * Date: 2021/04/29 Company: www.dtstack.com
  *
  * @author tudou

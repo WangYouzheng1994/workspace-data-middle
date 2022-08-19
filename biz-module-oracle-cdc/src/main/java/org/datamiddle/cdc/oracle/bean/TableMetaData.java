@@ -21,7 +21,7 @@ package org.datamiddle.cdc.oracle.bean;
 import java.util.List;
 
 /**
- * 表元数据
+ * 表元数据，通过jdbc查询后，用于log日志的明文转换
  *
  * @author dujie
  */
