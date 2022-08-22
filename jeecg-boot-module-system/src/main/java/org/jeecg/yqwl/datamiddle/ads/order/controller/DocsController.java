@@ -479,7 +479,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 转换时间格式,将Long类型转换成date类型
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
-        if (integer > 1) {
+        if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;
         }
