@@ -647,11 +647,11 @@
             <if test="params.actualOutTimeEnd != null   and params.actualOutTimeEnd != 0 ">
                 AND ACTUAL_OUT_TIME <![CDATA[ <= ]]>  #{params.actualOutTimeEnd}
             </if>
-            <if test="params.ddjrqStart != null   and params.ddjrqStart != 0  ">
-                AND DDJRQ_R3 <![CDATA[ >= ]]> #{params.ddjrqStart}
+            <if test="params.vehiclePlateIssuedTimeStart != null   and params.vehiclePlateIssuedTimeStart != 0  ">
+                AND DDJRQ_R3 <![CDATA[ >= ]]> #{params.vehiclePlateIssuedTimeStart}
             </if>
-            <if test="params.ddjrqEnd != null   and params.ddjrqEnd != 0 ">
-                AND DDJRQ_R3 <![CDATA[ <= ]]>  #{params.ddjrqEnd}
+            <if test="params.vehiclePlateIssuedTimeEnd != null   and params.vehiclePlateIssuedTimeEnd != 0 ">
+                AND DDJRQ_R3 <![CDATA[ <= ]]>  #{params.vehiclePlateIssuedTimeEnd}
             </if>
             <if test="params.startCityName != null and params.startCityName != '' ">
                 AND START_CITY_NAME = #{params.startCityName}
