@@ -299,10 +299,10 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     private void docsFormatTime(DwmVlmsDocs params){
         // ddjrq
-        if (params.getDdjrq() != 0) {
-            Long ddjrq = params.getDdjrq() - 28800000L;
-            params.setDdjrq(ddjrq);
-        }
+        //if (params.getDdjrq() != 0) {
+        //    Long ddjrq = params.getDdjrq() - 28800000L;
+        //    params.setDdjrq(ddjrq);
+        //}
         // assignTime
         if (params.getAssignTime() != 0) {
             Long assignTime = params.getAssignTime() - 28800000L;

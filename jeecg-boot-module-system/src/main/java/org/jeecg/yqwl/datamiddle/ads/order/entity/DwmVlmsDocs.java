@@ -64,7 +64,7 @@ public class DwmVlmsDocs {
 	/**计划下达日期*/
 	@Excel(name = "计划下达日期", width = 15)
 	@ApiModelProperty(value = "计划下达日期")
-	private Long ddjrq;
+	private Long ddjrqR3;
 
 	/**配板单号*/
 	@Excel(name = "配板单号", width = 15)
