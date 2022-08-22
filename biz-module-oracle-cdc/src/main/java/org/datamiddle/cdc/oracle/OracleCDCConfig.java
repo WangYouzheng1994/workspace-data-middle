@@ -41,17 +41,17 @@ public class OracleCDCConfig {
     private String jdbcUrl;
 
     /**
-     * username
+     * jdbc username
      */
     private String username;
 
     /**
-     * password
+     * jdbc password
      */
     private String password;
 
     /**
-     * 驱动类名
+     * jdbc 驱动类class
      */
     private String driverClass;
 }

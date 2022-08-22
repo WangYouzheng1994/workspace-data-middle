@@ -11,6 +11,7 @@ import org.datamiddle.cdc.oracle.converter.oracle.LogMinerRowConverter;
 
 import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,9 +107,30 @@ public class OracleSource {
         startScn = getStartSCN(oracleCDCConnect, startScn);
         // 读取的位置 从startSCN偏移量开始
         this.currentSinkPosition = startScn;
+
+        // 设置内部转换器
+        // LogMinerColumnConverter 需要connection获取元数据
+        if (logMinerRowConverter instanceof LogMinerColumnConverter) {
+            String jdbcUrl = oracleCDCConfig.getJdbcUrl();
+            String username = oracleCDCConfig.getUsername();
+            String password = oracleCDCConfig.getPassword();
+            String driverClass = oracleCDCConfig.getDriverClass();
+
+            Connection connection = null;
+            try {
+                connection = DriverManager.getConnection(
+                        jdbcUrl,
+                        username,
+                        password);
+                ((LogMinerColumnConverter) logMinerRowConverter)
+                        .setConnection(connection);
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+        }
+
         // 初始化Logminer
-
-
         payLoad(oracleCDCConnect);
         // 读取Log日志
 
