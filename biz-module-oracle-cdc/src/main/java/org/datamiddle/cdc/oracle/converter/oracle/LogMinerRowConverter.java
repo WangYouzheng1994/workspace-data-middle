@@ -46,10 +46,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 元数据变动数据流处理器，对于Oracle CDC没有什么用，废弃。
+ *
  * Date: 2021/04/29 Company: www.dtstack.com
  *
  * @author tudou
  */
+@Deprecated
 public class LogMinerRowConverter extends AbstractCDCRowConverter<EventRow, LogicalType> {
 
     public LogMinerRowConverter(RowType rowType) {
