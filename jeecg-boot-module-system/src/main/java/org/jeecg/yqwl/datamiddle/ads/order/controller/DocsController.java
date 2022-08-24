@@ -656,13 +656,14 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
 //        formatQueryTime(queryCriteria);
 
-        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
-        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+//        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
+//        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+//        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+//
+//        page.setRecords(pageList);
+//        page.setTotal(total);
 
-        page.setRecords(pageList);
-        page.setTotal(total);
-        return Result.OK(page);
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
@@ -79,4 +80,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @return
      */
     List<String> getOneOrderToEndVin(List<String> vvin);
+
+    Page<DwmVlmsDocs> selectDocsPage(GetQueryCriteria queryCriteria);
 }
