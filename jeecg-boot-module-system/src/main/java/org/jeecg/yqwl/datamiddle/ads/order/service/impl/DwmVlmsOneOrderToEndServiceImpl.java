@@ -178,6 +178,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     /**
      * 列表查询优化
+     *
      * @param queryCriteria
      * @return
      */
@@ -196,7 +197,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             //去重后的总数
             vvinSize = distinctVvin.size();
         }
-        if (vvinSize > shardsNumber){
+        if (vvinSize > shardsNumber) {
             List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
             List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
             return vlmsDocs;
@@ -225,11 +226,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             vvinSize = distinctVvin.size();
         }
         if (vvinSize > shardsNumber) {
-            //计算需要分几组
-            BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);
-            BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
-            //结果要向上取整
-            int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
             //存放分组返回数量以及分组查询的vin
             List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
 
@@ -251,6 +247,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     /**
      * 将vvin分组，并查出分组的 vvin对应的数据量
+     *
      * @param queryCriteria 查询条件
      * @return
      */
@@ -258,41 +255,39 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         List<String> vvinList = queryCriteria.getVvinList();
         int vvinSize = vvinList.size();
         List<VvinGroupQuery> vvinGroup = new ArrayList<>();
-        if (vvinSize > shardsNumber) {
-            //计算需要分几组
-            BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);
-            BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
-            //结果要向上取整
-            int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
-            //存放分组返回数量以及分组查询的vin
+        //计算需要分几组
+        BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);
+        BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
+        //结果要向上取整
+        int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
+        //存放分组返回数量以及分组查询的vin
 
-            //开始处理
-            for (int i = 1; i <= count; i++) {
-                //数组截取开始下标
-                int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
-                //数组截取结束下标
-                int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
-                if (endIndex > vvinSize) {
-                    endIndex = vvinSize;
-                }
-                //截取数组
-                List<String> newVinList = vvinList.subList(startIndex, endIndex);
-                //创建新的查询
-                queryCriteria.setVvinList(newVinList);
-                //查询数据
-                Integer total = countDocsList(queryCriteria);
-                //将本次查询数据存入到list
-                VvinGroupQuery vvinGroupQuery = new VvinGroupQuery();
-                vvinGroupQuery.setDataCount(total);
-                vvinGroupQuery.setVvinList(newVinList);
-                //计算当前总数
-                if (i == 1){
-                    vvinGroupQuery.setCurrentTotal(total);
-                }else {
-                    vvinGroupQuery.setCurrentTotal(vvinGroup.get(i - 2).getCurrentTotal() + total);
-                }
-                vvinGroup.add(vvinGroupQuery);
+        //开始处理
+        for (int i = 1; i <= count; i++) {
+            //数组截取开始下标
+            int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
+            //数组截取结束下标
+            int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
+            if (endIndex > vvinSize) {
+                endIndex = vvinSize;
             }
+            //截取数组
+            List<String> newVinList = vvinList.subList(startIndex, endIndex);
+            //创建新的查询
+            queryCriteria.setVvinList(newVinList);
+            //查询数据
+            Integer total = countDocsList(queryCriteria);
+            //将本次查询数据存入到list
+            VvinGroupQuery vvinGroupQuery = new VvinGroupQuery();
+            vvinGroupQuery.setDataCount(total);
+            vvinGroupQuery.setVvinList(newVinList);
+            //计算当前总数
+            if (i == 1) {
+                vvinGroupQuery.setCurrentTotal(total);
+            } else {
+                vvinGroupQuery.setCurrentTotal(vvinGroup.get(i - 2).getCurrentTotal() + total);
+            }
+            vvinGroup.add(vvinGroupQuery);
         }
         return vvinGroup;
     }
@@ -300,10 +295,9 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     /**
      * 构建新的查询，返回最终所需结果
      *
-     * @param queryCriteria 查询条件
+     * @param queryCriteria    查询条件
      * @param vvinGroupQueries vvin分组数据
      * @return List<DwmVlmsDocs> 最总结果
-     *
      */
     private List<DwmVlmsDocs> buildNewQuery(GetQueryCriteria queryCriteria, List<VvinGroupQuery> vvinGroupQueries) {
         List<DwmVlmsDocs> dwmVlmsDocsList = new ArrayList<>();
@@ -316,7 +310,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
         for (VvinGroupQuery item : vvinGroupQueries) {
             //如果总数都不在分页数据区间内，进行下一次
-            if (startCount.intValue() > item.getCurrentTotal()){
+            if (startCount.intValue() > item.getCurrentTotal()) {
                 continue;
             }
             //所查询数据的开始值
@@ -326,7 +320,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             //计算limit结束值
             int limitEnd = pageSize.intValue() - dwmVlmsDocsList.size();
             //判断是不是第一次来取值
-            if (limitStart < 0){
+            if (limitStart < 0) {
                 //如果不是第一次来取值，那么就从头开始取
                 limitStart = 0;
             }
@@ -336,7 +330,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
             dwmVlmsDocsList.addAll(dwmVlmsDocs);
             //判断数据是否取够
-            if (dwmVlmsDocsList.size() >= pageSize.intValue()){
+            if (dwmVlmsDocsList.size() >= pageSize.intValue()) {
                 return dwmVlmsDocsList;
             }
         }
