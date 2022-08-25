@@ -140,6 +140,114 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return oneOrderToEndList;
     }
 
+
+    @Override
+    public Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndPage(GetQueryCriteria queryCriteria) {
+        Page<DwmVlmsOneOrderToEnd> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+        //存放总数量
+        Integer finalTotal = 0;
+        int vinSize = 0;
+        //判断vin码的数量如果超过一定数量，分批查询
+        if (CollectionUtils.isNotEmpty(queryCriteria.getVinList())) {
+            //去重
+            List<String> distinctVin = queryCriteria.getVinList().stream().distinct().collect(Collectors.toList());
+            queryCriteria.setVinList(distinctVin);
+            //去重后的总数
+            vinSize = distinctVin.size();
+        }
+        if (vinSize > shardsNumber) {
+            //存放分组返回数量以及分组查询的vin
+            List<VvinGroupQuery> vinGroup = buildVinGroupOneOrderToEnd(queryCriteria);
+
+            List<DwmVlmsOneOrderToEnd> vlmsDocs = buildNewQueryOneOrderToEnd(queryCriteria, vinGroup);
+            //总数
+            finalTotal = vinGroup.stream().map(VvinGroupQuery::getDataCount).reduce(0, (n1, n2) -> n1 + n2);
+            page.setRecords(vlmsDocs);
+            page.setTotal(finalTotal);
+            return page;
+        }
+
+        return page;
+    }
+
+    private List<DwmVlmsOneOrderToEnd> buildNewQueryOneOrderToEnd(GetQueryCriteria queryCriteria, List<VvinGroupQuery> vinGroup) {
+        List<DwmVlmsOneOrderToEnd> dwmVlmsOneOrderToEnds = new ArrayList<>();
+        //页码
+        BigDecimal pageNo = BigDecimal.valueOf(queryCriteria.getPageNo());
+        //每页条数
+        BigDecimal pageSize = BigDecimal.valueOf(queryCriteria.getPageSize());
+        //开始数量
+        BigDecimal startCount = pageNo.subtract(BigDecimal.ONE).multiply(pageSize).add(BigDecimal.ONE).setScale(0, BigDecimal.ROUND_HALF_UP);
+
+        for (VvinGroupQuery item : vinGroup) {
+            //如果总数都不在分页数据区间内，进行下一次
+            if (startCount.intValue() > item.getCurrentTotal()) {
+                continue;
+            }
+            //所查询数据的开始值
+            int preTotal = item.getCurrentTotal() - item.getDataCount();
+            //计算limit开始值
+            int limitStart = startCount.intValue() - preTotal - 1;
+            //计算limit结束值
+            int limitEnd = pageSize.intValue() - dwmVlmsOneOrderToEnds.size();
+            //判断是不是第一次来取值
+            if (limitStart < 0) {
+                //如果不是第一次来取值，那么就从头开始取
+                limitStart = 0;
+            }
+            queryCriteria.setLimitStart(limitStart);
+            queryCriteria.setLimitEnd(limitEnd);
+            queryCriteria.setVinList(item.getVinList());
+            List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
+            dwmVlmsOneOrderToEnds.addAll(oneOrderToEndList);
+            //判断数据是否取够
+            if (dwmVlmsOneOrderToEnds.size() >= pageSize.intValue()) {
+                return dwmVlmsOneOrderToEnds;
+            }
+        }
+        return dwmVlmsOneOrderToEnds;
+    }
+
+    private List<VvinGroupQuery> buildVinGroupOneOrderToEnd(GetQueryCriteria queryCriteria) {
+        List<String> vinList = queryCriteria.getVinList();
+        int vinSize = vinList.size();
+        List<VvinGroupQuery> vinGroup = new ArrayList<>();
+        //计算需要分几组
+        BigDecimal vinDecimal = BigDecimal.valueOf(vinSize);
+        BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
+        //结果要向上取整
+        int count = vinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
+
+        //开始处理
+        for (int i = 1; i <= count; i++) {
+            //数组截取开始下标
+            int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
+            //数组截取结束下标
+            int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
+            if (endIndex > vinSize) {
+                endIndex = vinSize;
+            }
+            //截取数组
+            List<String> newVinList = vinList.subList(startIndex, endIndex);
+            //创建新的查询
+            queryCriteria.setVvinList(newVinList);
+            //查询数据
+            Integer total = countOneOrderToEndList(queryCriteria);
+            //将本次查询数据存入到list
+            VvinGroupQuery vvinGroupQuery = new VvinGroupQuery();
+            vvinGroupQuery.setDataCount(total);
+            vvinGroupQuery.setVinList(newVinList);
+            //计算当前总数
+            if (i == 1) {
+                vvinGroupQuery.setCurrentTotal(total);
+            } else {
+                vvinGroupQuery.setCurrentTotal(vinGroup.get(i - 2).getCurrentTotal() + total);
+            }
+            vinGroup.add(vvinGroupQuery);
+        }
+        return vinGroup;
+    }
+
     /**
      * DOCS count计数
      *

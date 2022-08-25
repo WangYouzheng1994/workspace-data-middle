@@ -26,4 +26,7 @@ public class VvinGroupQuery {
      * 分组的vvin
      */
     private List<String> vvinList;
+
+    private List<String> vinList;
+
 }

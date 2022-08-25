@@ -697,6 +697,8 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
         page.setRecords(pageList);
         page.setTotal(total);
+
+        Page<DwmVlmsOneOrderToEnd> page1 = dwmVlmsOneOrderToEndService.selectOneOrderToEndPage(queryCriteria);
         return Result.OK(page);
     }
 }
