@@ -49,6 +49,13 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria);
 
+    /**
+     *  优化查询
+     * @param queryCriteria  查询参数
+     * @author dabao
+     * @date 2022/8/25
+     * @return {@link List< DwmVlmsDocs>}
+     */
     List<DwmVlmsDocs> selectDocsList2(GetQueryCriteria queryCriteria);
 
 
@@ -84,9 +91,11 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
     List<String> getOneOrderToEndVin(List<String> vvin);
 
     /**
-     * 分页查询docs
-     * @param queryCriteria
-     * @return
+     * 分页查询DOCS
+     * @param queryCriteria 查询参数
+     * @author dabao
+     * @date 2022/8/25
+     * @return {@link Page<DwmVlmsDocs>}
      */
     Page<DwmVlmsDocs> selectDocsPage(GetQueryCriteria queryCriteria);
 }

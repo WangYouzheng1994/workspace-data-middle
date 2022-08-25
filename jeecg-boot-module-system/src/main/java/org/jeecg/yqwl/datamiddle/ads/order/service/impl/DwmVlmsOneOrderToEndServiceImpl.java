@@ -206,7 +206,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return dwmVlmsDocs;
     }
 
-
+    /**
+     * docs 分页
+     * @param queryCriteria 查询参数
+     * @return Page<DwmVlmsDocs>
+     */
     @Override
     public Page<DwmVlmsDocs> selectDocsPage(GetQueryCriteria queryCriteria) {
         if (queryCriteria.getPageNo() != null) {
@@ -260,7 +264,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
         //结果要向上取整
         int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
-        //存放分组返回数量以及分组查询的vin
 
         //开始处理
         for (int i = 1; i <= count; i++) {
