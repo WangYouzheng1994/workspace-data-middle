@@ -283,4 +283,6 @@ public class DimMdac1210 implements Serializable {
      */
     private Long WAREHOUSEUPDATETIME;
 
+
+
 }
