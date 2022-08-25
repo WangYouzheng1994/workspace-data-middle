@@ -1412,5 +1412,14 @@ public class DwmSptb02 implements Serializable {
     private Long DDJRQ_R3;
 
 
+    /**
+     * 产品代码 取自SPTB02D1.CCPDM 20220825新增
+     */
+    private String CCPDM;
+
+    /**
+     * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
+     */
+    private String BRAND_NAME;
 
 }
