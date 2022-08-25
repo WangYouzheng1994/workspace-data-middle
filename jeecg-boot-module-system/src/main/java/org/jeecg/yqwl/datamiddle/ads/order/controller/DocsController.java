@@ -307,7 +307,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             queryCriteria.setPageNo(pageNo);
 
             // 获取查询数据
-            pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+            pageList = dwmVlmsOneOrderToEndService.selectDocsList2(queryCriteria);
             for (DwmVlmsDocs item : pageList) {
                 // 时间字段转换成年月日时分秒类型
                 row1 = sheet.createRow(rowNum);

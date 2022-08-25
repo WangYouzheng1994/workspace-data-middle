@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -175,6 +176,34 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return dwmVlmsDocs;
     }
 
+    /**
+     * 列表查询优化
+     * @param queryCriteria
+     * @return
+     */
+    @Override
+    public List<DwmVlmsDocs> selectDocsList2(GetQueryCriteria queryCriteria) {
+        if (queryCriteria.getPageNo() != null) {
+            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
+            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
+        }
+        int vvinSize = 0;
+        //判断vin码的数量如果超过一定数量，分批查询
+        if (CollectionUtils.isNotEmpty(queryCriteria.getVvinList())) {
+            //去重
+            List<String> distinctVvin = queryCriteria.getVvinList().stream().distinct().collect(Collectors.toList());
+            queryCriteria.setVvinList(distinctVvin);
+            //去重后的总数
+            vvinSize = distinctVvin.size();
+        }
+        if (vvinSize > shardsNumber){
+            List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
+            List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
+            return vlmsDocs;
+        }
+        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+        return dwmVlmsDocs;
+    }
 
 
     @Override
@@ -189,7 +218,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         int vvinSize = 0;
         //判断vin码的数量如果超过一定数量，分批查询
         if (CollectionUtils.isNotEmpty(queryCriteria.getVvinList())) {
-            vvinSize = queryCriteria.getVvinList().size();
+            //去重
+            List<String> distinctVvin = queryCriteria.getVvinList().stream().distinct().collect(Collectors.toList());
+            queryCriteria.setVvinList(distinctVvin);
+            //去重后的总数
+            vvinSize = distinctVvin.size();
         }
         if (vvinSize > shardsNumber) {
             //计算需要分几组
@@ -198,28 +231,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             //结果要向上取整
             int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
             //存放分组返回数量以及分组查询的vin
-            List<VvinGroupQuery> vvinGroup = new ArrayList<>();
-            //开始处理
-            for (int i = 1; i <= count; i++) {
-                //数组截取开始下标
-                int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
-                //数组截取结束下标
-                int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
-                if (endIndex > vvinSize) {
-                    endIndex = vvinSize;
-                }
-                List<String> newVinList = queryCriteria.getVvinList().subList(startIndex, endIndex);
-                GetQueryCriteria newQuery = new GetQueryCriteria();
-                BeanUtils.copyProperties(queryCriteria, newQuery);
-                newQuery.setVvinList(newVinList);
-                Integer total = countDocsList(newQuery);
-                //将本次查询数据存入到list
-                VvinGroupQuery vvinGroupQuery = new VvinGroupQuery();
-                vvinGroupQuery.setDataCount(total);
-                vvinGroupQuery.setVvinList(newVinList);
-                vvinGroup.add(vvinGroupQuery);
-            }
-            //重新构造查询
+            List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
+
             List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
             //总数
             finalTotal = vvinGroup.stream().map(VvinGroupQuery::getDataCount).reduce(0, (n1, n2) -> n1 + n2);
@@ -236,64 +249,97 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return page;
     }
 
+    /**
+     * 将vvin分组，并查出分组的 vvin对应的数据量
+     * @param queryCriteria 查询条件
+     * @return
+     */
+    private List<VvinGroupQuery> buildVvinGroup(GetQueryCriteria queryCriteria) {
+        List<String> vvinList = queryCriteria.getVvinList();
+        int vvinSize = vvinList.size();
+        List<VvinGroupQuery> vvinGroup = new ArrayList<>();
+        if (vvinSize > shardsNumber) {
+            //计算需要分几组
+            BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);
+            BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
+            //结果要向上取整
+            int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
+            //存放分组返回数量以及分组查询的vin
+
+            //开始处理
+            for (int i = 1; i <= count; i++) {
+                //数组截取开始下标
+                int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
+                //数组截取结束下标
+                int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
+                if (endIndex > vvinSize) {
+                    endIndex = vvinSize;
+                }
+                //截取数组
+                List<String> newVinList = vvinList.subList(startIndex, endIndex);
+                //创建新的查询
+                queryCriteria.setVvinList(newVinList);
+                //查询数据
+                Integer total = countDocsList(queryCriteria);
+                //将本次查询数据存入到list
+                VvinGroupQuery vvinGroupQuery = new VvinGroupQuery();
+                vvinGroupQuery.setDataCount(total);
+                vvinGroupQuery.setVvinList(newVinList);
+                //计算当前总数
+                if (i == 1){
+                    vvinGroupQuery.setCurrentTotal(total);
+                }else {
+                    vvinGroupQuery.setCurrentTotal(vvinGroup.get(i - 2).getCurrentTotal() + total);
+                }
+                vvinGroup.add(vvinGroupQuery);
+            }
+        }
+        return vvinGroup;
+    }
+
+    /**
+     * 构建新的查询，返回最终所需结果
+     *
+     * @param queryCriteria 查询条件
+     * @param vvinGroupQueries vvin分组数据
+     * @return List<DwmVlmsDocs> 最总结果
+     *
+     */
     private List<DwmVlmsDocs> buildNewQuery(GetQueryCriteria queryCriteria, List<VvinGroupQuery> vvinGroupQueries) {
         List<DwmVlmsDocs> dwmVlmsDocsList = new ArrayList<>();
-        //计算所需要的数据位置
+        //页码
         BigDecimal pageNo = BigDecimal.valueOf(queryCriteria.getPageNo());
+        //每页条数
         BigDecimal pageSize = BigDecimal.valueOf(queryCriteria.getPageSize());
-        BigDecimal startCount = pageNo.subtract(BigDecimal.ONE).multiply(pageSize).setScale(0, BigDecimal.ROUND_HALF_UP);
-        BigDecimal endCount = startCount.add(pageSize);
-        //设置数组的基数
-        AtomicInteger cardinality = new AtomicInteger(0);
+        //开始数量
+        BigDecimal startCount = pageNo.subtract(BigDecimal.ONE).multiply(pageSize).add(BigDecimal.ONE).setScale(0, BigDecimal.ROUND_HALF_UP);
+
         for (VvinGroupQuery item : vvinGroupQueries) {
-            //列表内最后一个数据的总量
-            int dataCount = cardinality.get() + item.getDataCount();
-            //判断是否符合条件的数据
-            if (startCount.intValue() >= cardinality.get() && startCount.intValue() <= dataCount) {
-                //计算开始
-                int limitStart = startCount.intValue() - cardinality.get();
-
-                GetQueryCriteria newQuery = new GetQueryCriteria();
-                BeanUtils.copyProperties(queryCriteria, newQuery);
-                newQuery.setVvinList(item.getVvinList());
-                newQuery.setLimitStart(limitStart);
-                //判断数组末尾数据大小是否大于所需数据末尾大小
-                int margin = dataCount - startCount.intValue();
-                if (margin < queryCriteria.getPageSize()) {
-                    newQuery.setLimitEnd(margin);
-                    dwmVlmsDocsList.addAll(dwmVlmsSptb02Mapper.selectDocsList(newQuery));
-
-                    cardinality.addAndGet(item.getDataCount());
-                    continue;
-                } else {
-                    dwmVlmsDocsList.addAll(dwmVlmsSptb02Mapper.selectDocsList(newQuery));
-                    return dwmVlmsDocsList;
-                }
-            }
-            if (startCount.intValue() < cardinality.get() && dataCount < endCount.intValue()) {
-                GetQueryCriteria newQuery = new GetQueryCriteria();
-                BeanUtils.copyProperties(queryCriteria, newQuery);
-                newQuery.setVvinList(item.getVvinList());
-                newQuery.setLimitStart(cardinality.get());
-                newQuery.setLimitEnd(dataCount);
-                dwmVlmsDocsList.addAll(dwmVlmsSptb02Mapper.selectDocsList(newQuery));
-
-                cardinality.addAndGet(item.getDataCount());
+            //如果总数都不在分页数据区间内，进行下一次
+            if (startCount.intValue() > item.getCurrentTotal()){
                 continue;
             }
-            if (endCount.intValue() >= cardinality.get() && endCount.intValue() <= dataCount) {
-                //处理上次循环中遗留的数据
-                GetQueryCriteria newQuery = new GetQueryCriteria();
-                BeanUtils.copyProperties(queryCriteria, newQuery);
-                newQuery.setVvinList(item.getVvinList());
-                newQuery.setLimitStart(0);
-                newQuery.setLimitEnd(endCount.intValue() - cardinality.get());
-                dwmVlmsDocsList.addAll(dwmVlmsSptb02Mapper.selectDocsList(newQuery));
+            //所查询数据的开始值
+            int preTotal = item.getCurrentTotal() - item.getDataCount();
+            //计算limit开始值             
+            int limitStart = startCount.intValue() - preTotal - 1;
+            //计算limit结束值
+            int limitEnd = pageSize.intValue() - dwmVlmsDocsList.size();
+            //判断是不是第一次来取值
+            if (limitStart < 0){
+                //如果不是第一次来取值，那么就从头开始取
+                limitStart = 0;
+            }
+            queryCriteria.setLimitStart(limitStart);
+            queryCriteria.setLimitEnd(limitEnd);
+            queryCriteria.setVvinList(item.getVvinList());
+            List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+            dwmVlmsDocsList.addAll(dwmVlmsDocs);
+            //判断数据是否取够
+            if (dwmVlmsDocsList.size() >= pageSize.intValue()){
                 return dwmVlmsDocsList;
             }
-            cardinality.addAndGet(item.getDataCount());
         }
-
         return dwmVlmsDocsList;
     }
 
