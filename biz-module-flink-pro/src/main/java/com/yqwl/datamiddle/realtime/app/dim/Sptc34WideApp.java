@@ -71,7 +71,6 @@ public class Sptc34WideApp {
 
         DataStreamSource<String> kafkaStream = env.fromSource(kafkasource, WatermarkStrategy.noWatermarks(), "odssptc34kafka-source");
         // kafkaStream.print(System.currentTimeMillis()+"");
-//        kafkaStream.print();
 
         // sptc34Wide表转换成实体类(sptc34表的数据传到sptc34Wide中)    sptc34表里面有176条数据省区市县代码是空值  已经使用空串代替
         SingleOutputStreamOperator<Sptc34Wide> Sptc34MapSteeam = kafkaStream.map(new MapFunction<String, Sptc34Wide>() {
@@ -83,7 +82,7 @@ public class Sptc34WideApp {
                 String vsqsxdm = StringUtils.join(sptc34Wide.getVSQDM(), sptc34Wide.getVSXDM());
                 // 将合并的省区市县添加到sptc34Wide表的vsqsxdm 中
                 sptc34Wide.setVSQSXDM(vsqsxdm);
-//                sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
+                // sptc34Wide.setWarehouseCreatetime(System.currentTimeMillis());
                 // 获取kafka的时间戳作为创建时间和更新时间
                 String tsStr = JsonPartUtil.getTsStr(value);
                 // 将String类型的时间戳转换成Long类型
@@ -103,7 +102,7 @@ public class Sptc34WideApp {
         }).uid("odsSptc34").name("odsSptc34");
 
         // 这里需要搞成 有超时时间的计数窗口。
-/*        Sptc34MapSteeam.countWindowAll(3124).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, GlobalWindow>() {
+        /*        Sptc34MapSteeam.countWindowAll(3124).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, GlobalWindow>() {
             @Override
             public void apply(GlobalWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {
                 ArrayList<Sptc34Wide> skuInfos = Lists.newArrayList(iterable);
@@ -126,7 +125,7 @@ public class Sptc34WideApp {
                 }
             }
         }).addSink(JdbcSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");;
-    /*timeWindowAll(Time.seconds(5)).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
+        /*timeWindowAll(Time.seconds(5)).apply(new AllWindowFunction<Sptc34Wide, List<Sptc34Wide>, TimeWindow>() {
             @Override
             public void apply(TimeWindow window, Iterable<Sptc34Wide> iterable, Collector<List<Sptc34Wide>> collector) throws Exception {
                 ArrayList<Sptc34Wide> skuInfos = Lists.newArrayList(iterable);
@@ -135,7 +134,7 @@ public class Sptc34WideApp {
                 }
             }
         }).addSink(JDBCSink.<Sptc34Wide>getBatchSink()).uid("sptc34sinkMysql").name("sptc34sinkMysql");
-*/
+        */
         // 连接mysql数据库,将数据存到mysql中
         /*Sptc34MapSteeam.addSink(JDBCSink.<Sptc34Wide>getSink("REPLACE INTO dim_vlms_sptc34  (IDNUM,  VWLCKDM,  VWLCKMC,  CZT," +
                         "   NKR, VSQDM, VSXDM, VLXR, VDH, VCZ, VEMAIL,  VYDDH,  VYB,  VDZ,  CTYBS,  DTYRQ,  VBZ,  CCKSX, " +
