@@ -110,7 +110,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String end_city_name = dwmSptb02.getEND_CITY_NAME();                    // 目的城市
                         String vdwdm = dwmSptb02.getVDWDM();                                    // 经销商代码
                         String dealer_name = dwmSptb02.getDEALER_NAME();                        // 经销商名称
-                        // String vysfs = dwmSptb02.getVYSFS();                                  // 原始的运输方式
+                        // String vysfs = dwmSptb02.getVYSFS();                                 // 原始的运输方式
                         String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      // dwm的合出来的运输方式
                         String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      // 开始站台/港口仓库名称
                         String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          // 到达站台/港口仓库名称
@@ -141,6 +141,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         Long dgpsdhsj = dwmSptb02.getDGPSDHSJ();                                // 目的站台,港口 到港/到站时间
                         Integer type_tc = dwmSptb02.getTYPE_TC();                               // 同城异地标识 1为同城 2为异地 0为默认无
                         Long ddjrq_r3 = dwmSptb02.getDDJRQ_R3();                                // 配板下发日期 R3 sptb01c.ddjrq
+                        String brand_name = dwmSptb02.getBRAND_NAME();                          // 汽车品牌名字 mdac10.vppsm 20220826
 
                         if (StringUtils.isNotBlank(cjsdbh)) {
                             ootdTransition.setCJSDBH(cjsdbh);
@@ -154,6 +155,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                             // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
                             if (StringUtils.isNotBlank(vehicle_name)){
                                 ootdTransition.setVEHICLE_NAME(vehicle_name);
+                            }
+                            if (StringUtils.isNotBlank(brand_name)){
+                                ootdTransition.setBRAND_NAME(brand_name);
                             }
                             if (StringUtils.isNotBlank(base_code)) {
                                 ootdTransition.setBASE_CODE(base_code);
@@ -364,7 +368,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         }).uid("OneOrderToEndDwmAppSPTB02FilterG").name("OneOrderToEndDwmAppSPTB02FilterG");
         oneOrderToEndDwmAppSPTB02FilterG.addSink( JdbcSink.sink(
                 "INSERT INTO dwm_vlms_one_order_to_end (" +
-                        " VIN, VEHICLE_CODE, VEHICLE_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
+                        " VIN, VEHICLE_CODE, VEHICLE_NAME, BRAND_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
                         " STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, VDWDM, DEALER_NAME,SETTLEMENT_Y1," +
                         " START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, " +
                         " IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
@@ -372,9 +376,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
                         " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM, DISTRIBUTE_VEHICLE_NUM ,CPZDBH , SHIPMENT_G_TIME, DTVSDHSJ, TYPE_G, SETTLEMENT_LAST, TYPE_TC)\n" +
                         " VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
+                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), BRAND_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND_NAME), BRAND_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
                         " STOWAGE_NOTE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(STOWAGE_NOTE_NO), STOWAGE_NOTE_NO), ASSIGN_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ASSIGN_TIME), ASSIGN_TIME), CARRIER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CARRIER_NAME), CARRIER_NAME), ACTUAL_OUT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), SHIPMENT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ," +
                         " TRANSPORT_VEHICLE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), START_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), END_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), VDWDM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), DEALER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
@@ -385,6 +389,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
+                    String brand_name = ootd.getBRAND_NAME();                            // 汽车品牌名字 mdac10.vppsm 20220826
                     Long ddjrq = ootd.getDDJRQ();                                        // 整车物流接收STD日
                     Long ddjrq_r3 = ootd.getVEHICLE_PLATE_ISSUED_TIME_R3();              // 配板下发日期 R3 sptb01c.ddjrq
                     String cjhdh = ootd.getCJHDH();                                      // 任务单号
@@ -425,6 +430,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, vvin);                                             // 底盘号
                     ps.setString(i++, vehicle_code);                                     // 车型
                     ps.setString(i++, vehicle_name);                                     // 车型名称
+                    ps.setString(i++, brand_name);                                       // 汽车品牌名字 mdac10.vppsm 20220826
                     ps.setLong  (i++, ddjrq);                                            // 整车物流接收STD日
                     ps.setLong  (i++, ddjrq_r3);                                         // 配板下发日期 R3 sptb01c.ddjrq
                     ps.setString(i++, cjhdh);                                            // 任务单号
@@ -506,7 +512,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         }).uid("OneOrderToEndDwmAppSPTB02FilterT").name("OneOrderToEndDwmAppSPTB02FilterT");
         oneOrderToEndDwmAppSPTB02FilterT.addSink(JdbcSink.sink(
                 "INSERT INTO dwm_vlms_one_order_to_end (" +
-                        " VIN, VEHICLE_CODE, VEHICLE_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
+                        " VIN, VEHICLE_CODE, VEHICLE_NAME, BRAND_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
                         " STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, VDWDM, DEALER_NAME,SETTLEMENT_Y1," +
                         " START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, " +
                         " IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
@@ -514,9 +520,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
                         " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM, DISTRIBUTE_VEHICLE_NUM ,CPZDBH , SHIPMENT_G_TIME, DTVSDHSJ, TYPE_T, SETTLEMENT_LAST, TYPE_TC)\n" +
                         " VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? , ?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? , ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
+                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), BRAND_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND_NAME), BRAND_NAME),  VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
                         " STOWAGE_NOTE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(STOWAGE_NOTE_NO), STOWAGE_NOTE_NO), ASSIGN_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ASSIGN_TIME), ASSIGN_TIME), CARRIER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CARRIER_NAME), CARRIER_NAME), ACTUAL_OUT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), SHIPMENT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ,TRANSPORT_VEHICLE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), START_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), END_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), VDWDM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), DEALER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
@@ -527,6 +533,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
+                    String brand_name = ootd.getBRAND_NAME();                            // 汽车品牌名字 mdac10.vppsm 20220826
                     Long ddjrq = ootd.getDDJRQ();                                        // 整车物流接收STD日
                     String cjhdh = ootd.getCJHDH();                                      // 任务单号
                     Long dpzrq = ootd.getDPZRQ();                                        // 配板日期
@@ -567,13 +574,14 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, vvin);                                             // 底盘号
                     ps.setString(i++, vehicle_code);                                     // 车型
                     ps.setString(i++, vehicle_name);                                     // 车型名称
-                    ps.setLong  (i++, ddjrq);                                              // 整车物流接收STD日
+                    ps.setString(i++, brand_name);                                       // 汽车品牌名字 mdac10.vppsm 20220826
+                    ps.setLong  (i++, ddjrq);                                            // 整车物流接收STD日
                     ps.setLong  (i++, ddjrq_r3);                                         // 配板下发日期 R3 sptb01c.ddjrq
-                    ps.setString(i++, cjhdh);                                           // 任务单号
-                    ps.setLong  (i++, dpzrq);                                           // 配板日期
-                    ps.setString(i++, vph);                                             // 新P号,二次配板
-                    ps.setLong  (i++, assign_time);                                     // 指派运输商日期
-                    ps.setString(i++, assign_name);                                     // 指派承运商名称
+                    ps.setString(i++, cjhdh);                                            // 任务单号
+                    ps.setLong  (i++, dpzrq);                                            // 配板日期
+                    ps.setString(i++, vph);                                              // 新P号,二次配板
+                    ps.setLong  (i++, assign_time);                                      // 指派运输商日期
+                    ps.setString(i++, assign_name);                                      // 指派承运商名称
                     ps.setLong  (i++, actual_out_time);                                  // 出库日期
                     ps.setLong  (i++, shipment_time);                                    // 起运日期 公路/铁路
                     ps.setString(i++, vjsydm);                                           // 运输车号
@@ -650,7 +658,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         // 插入mysql  VEHICLE_PLATE_ISSUED_DATE_R3
         oneOrderToEndDwmAppSPTB02FilterS.addSink(JdbcSink.sink(
                 "INSERT INTO dwm_vlms_one_order_to_end (" +
-                        " VIN, VEHICLE_CODE, VEHICLE_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
+                        " VIN, VEHICLE_CODE, VEHICLE_NAME, BRAND_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
                         " STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, VDWDM, DEALER_NAME,SETTLEMENT_Y1," +
                         " START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, " +
                         " IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
@@ -658,9 +666,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
                         " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM, DISTRIBUTE_VEHICLE_NUM ,CPZDBH ,SHIPMENT_G_TIME, DTVSDHSJ, TYPE_S, SETTLEMENT_LAST, TYPE_TC)\n" +
                         " VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ? ,?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ?, ? ,?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
+                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), BRAND_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND_NAME), BRAND_NAME),  VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
                         " STOWAGE_NOTE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(STOWAGE_NOTE_NO), STOWAGE_NOTE_NO), ASSIGN_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ASSIGN_TIME), ASSIGN_TIME), CARRIER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CARRIER_NAME), CARRIER_NAME), ACTUAL_OUT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), SHIPMENT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ,TRANSPORT_VEHICLE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), START_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), END_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), VDWDM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), DEALER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " START_WATERWAY_NAME = VALUES(START_WATERWAY_NAME), END_WATERWAY_NAME = VALUES(END_WATERWAY_NAME), IN_START_WATERWAY_TIME = VALUES(IN_START_WATERWAY_TIME), END_START_WATERWAY_TIME = VALUES(END_START_WATERWAY_TIME), IN_END_WATERWAY_TIME = VALUES(IN_END_WATERWAY_TIME), UNLOAD_SHIP_TIME = VALUES(UNLOAD_SHIP_TIME) ,  BRAND = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
@@ -670,6 +678,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
+                    String brand_name = ootd.getBRAND_NAME();                            // 汽车品牌名字 mdac10.vppsm 20220826
                     Long ddjrq = ootd.getDDJRQ();                                        // 整车物流接收STD日
                     String cjhdh = ootd.getCJHDH();                                      // 任务单号
                     Long dpzrq = ootd.getDPZRQ();                                        // 配板日期
@@ -709,6 +718,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, vvin);                                             // 底盘号
                     ps.setString(i++, vehicle_code);                                     // 车型
                     ps.setString(i++, vehicle_name);                                     // 车型名称
+                    ps.setString(i++, brand_name);                                       // 汽车品牌名字 mdac10.vppsm 20220826
                     ps.setLong  (i++, ddjrq);                                            // 整车物流接收STD日
                     ps.setLong  (i++, ddjrq_r3);                                         // 配板下发日期 R3 sptb01c.ddjrq
                     ps.setString(i++, cjhdh);                                            // 任务单号
@@ -788,7 +798,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         }).uid("OneOrderToEndDwmAppSPTB02FilterEndG").name("OneOrderToEndDwmAppSPTB02FilterEndG");
         oneOrderToEndDwmAppSPTB02FilterEndG.addSink(JdbcSink.sink(
                 "INSERT INTO dwm_vlms_one_order_to_end (" +
-                        " VIN, VEHICLE_CODE, VEHICLE_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
+                        " VIN, VEHICLE_CODE, VEHICLE_NAME, BRAND_NAME, VEHICLE_RECEIVING_TIME, VEHICLE_PLATE_ISSUED_TIME_R3, TASK_NO, PLAN_RELEASE_TIME, " +
                         " STOWAGE_NOTE_NO, ASSIGN_TIME, CARRIER_NAME, ACTUAL_OUT_TIME, SHIPMENT_TIME ,TRANSPORT_VEHICLE_NO, START_CITY_NAME, END_CITY_NAME, VDWDM, DEALER_NAME,SETTLEMENT_Y1," +
                         " START_PLATFORM_NAME, END_PLATFORM_NAME, IN_START_PLATFORM_TIME, OUT_START_PLATFORM_TIME, IN_END_PLATFORM_TIME, UNLOAD_RAILWAY_TIME, START_WATERWAY_NAME, END_WATERWAY_NAME, " +
                         " IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
@@ -796,9 +806,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
                         " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM, DISTRIBUTE_VEHICLE_NUM ,CPZDBH ,SHIPMENT_G_TIME ,DTVSDHSJ, TYPE_G, SETTLEMENT_LAST, TYPE_TC)\n" +
                         " VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? ,?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? ,?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3),  TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
+                        "       VEHICLE_CODE=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ,VEHICLE_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), BRAND_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND_NAME), BRAND_NAME), VEHICLE_RECEIVING_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), VEHICLE_PLATE_ISSUED_TIME_R3=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3),  TASK_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), PLAN_RELEASE_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
                         " STOWAGE_NOTE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(STOWAGE_NOTE_NO), STOWAGE_NOTE_NO), ASSIGN_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ASSIGN_TIME), ASSIGN_TIME), CARRIER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CARRIER_NAME), CARRIER_NAME), ACTUAL_OUT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), SHIPMENT_TIME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ,TRANSPORT_VEHICLE_NO=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), START_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), END_CITY_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), VDWDM=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), DEALER_NAME=if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
                         " SETTLEMENT_Y1= if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " DISTRIBUTE_BOARD_TIME = VALUES(DISTRIBUTE_BOARD_TIME), OUT_DISTRIBUTE_TIME = VALUES(OUT_DISTRIBUTE_TIME), DISTRIBUTE_ASSIGN_TIME = VALUES(DISTRIBUTE_ASSIGN_TIME), DISTRIBUTE_CARRIER_NAME = VALUES(DISTRIBUTE_CARRIER_NAME), DISTRIBUTE_VEHICLE_NO = VALUES(DISTRIBUTE_VEHICLE_NO) , DISTRIBUTE_SHIPMENT_TIME = VALUES(DISTRIBUTE_SHIPMENT_TIME) , DISTRIBUTE_VEHICLE_NUM= VALUES(DISTRIBUTE_VEHICLE_NUM)," +
@@ -810,6 +820,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
+                    String brand_name = ootd.getBRAND_NAME();                            // 汽车品牌名字 mdac10.vppsm 20220826
                     Long ddjrq = ootd.getDDJRQ();                                        // 整车物流接收STD日
                     String cjhdh = ootd.getCJHDH();                                      // 任务单号
                     Long dpzrq = ootd.getDPZRQ();                                        // 配板日期
@@ -850,13 +861,14 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++, vvin);                                             // 底盘号
                     ps.setString(i++, vehicle_code);                                     // 车型
                     ps.setString(i++, vehicle_name);                                     // 车型名称
-                    ps.setLong  (i++, ddjrq);                                              // 整车物流接收STD日
+                    ps.setString(i++, brand_name);                                       // 汽车品牌名字 mdac10.vppsm 20220826
+                    ps.setLong  (i++, ddjrq);                                            // 整车物流接收STD日
                     ps.setLong  (i++, ddjrq_r3);                                         // 配板下发日期 R3 sptb01c.ddjrq
-                    ps.setString(i++, cjhdh);                                           // 任务单号
-                    ps.setLong  (i++, dpzrq);                                           // 配板日期
-                    ps.setString(i++, vph);                                             //新P号,二次配板
-                    ps.setLong  (i++, assign_time);                                     // 指派运输商日期
-                    ps.setString(i++, assign_name);                                     // 指派承运商名称
+                    ps.setString(i++, cjhdh);                                            // 任务单号
+                    ps.setLong  (i++, dpzrq);                                            // 配板日期
+                    ps.setString(i++, vph);                                              //新P号,二次配板
+                    ps.setLong  (i++, assign_time);                                      // 指派运输商日期
+                    ps.setString(i++, assign_name);                                      // 指派承运商名称
                     ps.setLong  (i++, actual_out_time);                                  // 出库日期
                     ps.setLong  (i++, shipment_time);                                    // 起运日期 公路/铁路
                     ps.setString(i++, vjsydm);                                           // 运输车号

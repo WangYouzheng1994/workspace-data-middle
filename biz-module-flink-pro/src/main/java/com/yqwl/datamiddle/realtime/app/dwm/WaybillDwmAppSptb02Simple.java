@@ -101,7 +101,7 @@ public class WaybillDwmAppSptb02Simple {
                             dwmSptb02.setVEHICLE_CODE(vehicle_code);
                             if (StringUtils.isNotBlank(vehicle_code)) {
                                 /**
-                                 * 按照车型代码获取车型名称
+                                 * 1.按照车型代码获取车型名称
                                  * 按照车型代码去关联mdac12 获得 CCXDL
                                  *  SELECT CCXDL FROM ods_vlms_mdac12 WHERE CCPDM = '4F80NL 4Z4ZMC 1909';
                                  */
@@ -110,6 +110,19 @@ public class WaybillDwmAppSptb02Simple {
                                 if (mdac12 != null) {
                                     dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
                                     dwmSptb02.setCCXDL(mdac12.getString("CCXDL"));
+                                }
+                                /**
+                                 * select b.vvin,d.vppsm
+                                 * from sptb02 a
+                                 * inner join sptb02d1 b on a.cjsdbh=b.cjsdbh
+                                 * inner join mdac12 v on b.ccpdm = v.ccpdm
+                                 * inner  join mdac10 d on v.cpp = d.cpp
+                                 * where b.vvin = 'LFVVB9G35N5130282';
+                                 */
+                                String mdac1210Sql = "SELECT VPPSM FROM "+ KafkaTopicConst.DIM_VLMS_MDAC1210 +" dim_vlms_mdac1210 WHERE CCPDM='" + vehicle_code +"' limit 1";
+                                JSONObject mdac1210 = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_MDAC1210, mdac1210Sql, vehicle_code);
+                                if (StringUtils.isNotBlank(mdac1210.getString("VPPSM"))){
+                                    dwmSptb02.setBRAND_NAME(mdac1210.getString("VPPSM"));
                                 }
                             }
 
