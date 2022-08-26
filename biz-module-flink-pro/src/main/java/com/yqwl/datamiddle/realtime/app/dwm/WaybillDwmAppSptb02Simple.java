@@ -122,7 +122,10 @@ public class WaybillDwmAppSptb02Simple {
                                 String mdac1210Sql = "SELECT VPPSM FROM "+ KafkaTopicConst.DIM_VLMS_MDAC1210 +" dim_vlms_mdac1210 WHERE CCPDM='" + vehicle_code +"' limit 1";
                                 JSONObject mdac1210 = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_MDAC1210, mdac1210Sql, vehicle_code);
                                 if (StringUtils.isNotBlank(mdac1210.getString("VPPSM"))){
-                                    dwmSptb02.setBRAND_NAME(mdac1210.getString("VPPSM"));
+                                    String vppsm = mdac1210.getString("VPPSM");
+                                    if (StringUtils.isNotBlank(vppsm)){
+                                        dwmSptb02.setBRAND_NAME(vppsm);
+                                    }
                                 }
                             }
 
