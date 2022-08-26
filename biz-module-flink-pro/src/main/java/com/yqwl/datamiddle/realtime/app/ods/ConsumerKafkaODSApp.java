@@ -96,7 +96,7 @@ public class ConsumerKafkaODSApp {
                 .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
-                .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
+                //.setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 // .setBounded(OffsetsInitializer.offsets(offsetMap)) // 终止 60 6-1
                 .build();
         // 将kafka中源数据转化成DataStream
