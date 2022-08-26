@@ -17,7 +17,9 @@
  */
 package org.datamiddle.cdc.oracle.converter.oracle;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,20 +27,21 @@ import org.apache.flink.table.data.RowData;
 import org.apache.flink.types.RowKind;
 import org.datamiddle.cdc.oracle.LogminerHandler;
 import org.datamiddle.cdc.oracle.OracleCDCConnection;
-import org.datamiddle.cdc.oracle.bean.TableMetaData;
-import org.datamiddle.cdc.oracle.constants.CDCConstantValue;
-import org.datamiddle.cdc.oracle.converter.AbstractCDCRowConverter;
-import org.datamiddle.cdc.oracle.converter.IDeserializationConverter;
-import org.jeecgframework.boot.DateUtil;
 import org.datamiddle.cdc.oracle.bean.EventRow;
 import org.datamiddle.cdc.oracle.bean.EventRowData;
+import org.datamiddle.cdc.oracle.bean.LogData;
+import org.datamiddle.cdc.oracle.bean.TableMetaData;
 import org.datamiddle.cdc.oracle.bean.element.AbstractBaseColumn;
 import org.datamiddle.cdc.oracle.bean.element.ColumnRowData;
 import org.datamiddle.cdc.oracle.bean.element.column.BigDecimalColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.MapColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.StringColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.TimestampColumn;
+import org.datamiddle.cdc.oracle.constants.CDCConstantValue;
 import org.datamiddle.cdc.oracle.constants.ConstantValue;
+import org.datamiddle.cdc.oracle.converter.AbstractCDCRowConverter;
+import org.datamiddle.cdc.oracle.converter.IDeserializationConverter;
+import org.jeecgframework.boot.DateUtil;
 
 import java.sql.Connection;
 import java.sql.Timestamp;
@@ -52,21 +55,31 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Date: 2021/04/29 Company: www.dtstack.com
+ * 日志信息转换器
  *
- * @author tudou
+ * @author WangYouzheng
  */
-public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, String> {
+public class LogminerConverter extends AbstractCDCRowConverter<EventRow, String> {
+
+    protected final Map<String, List<IDeserializationConverter>> cdcConverterCacheMap =
+            new ConcurrentHashMap<>(32);
 
     // 存储表字段
     protected final Map<String, TableMetaData> tableMetaDataCacheMap = new ConcurrentHashMap<>(32);
     protected Connection connection;
 
-    public LogMinerColumnConverter(boolean pavingData, boolean splitUpdate) {
+    public LogminerConverter(boolean pavingData, boolean splitUpdate) {
         super.pavingData = pavingData;
         super.split = splitUpdate;
     }
 
+    /**
+     * 转换为内部RowData结果
+     *
+     * @param eventRow
+     * @return org.apache.flink.table.data.RowData
+     * @throws Exception
+     */
     @Override
     @SuppressWarnings("unchecked")
     public LinkedList<RowData> toInternal(EventRow eventRow) throws Exception {
@@ -100,6 +113,7 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
         }
 
         ColumnRowData columnRowData = new ColumnRowData(size);
+        // 填充标准数据字段
         fillColumnMetaData(columnRowData, eventRow, schema, table);
 
         List<EventRowData> beforeList = eventRow.getBeforeColumnList();
@@ -132,6 +146,7 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
             afterHeaderList.add(CDCConstantValue.AFTER);
         }
 
+        // 如果是需要切分update语义为两条数据的话。
         if (split) {
             dealEventRowSplit(columnRowData, metadata, eventRow, result);
         } else {
@@ -149,6 +164,93 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
         return result;
     }
 
+    /**
+     * 把抽取到的日志流数据进行转换成可以供ETL使用的Kafka数据
+     *
+     * @since 2022年8月24日
+     * @author WangYouzheng
+     * @param eventRow
+     * @return @See {@link org.datamiddle.cdc.oracle.bean.LogData}
+     * @throws Exception
+     */
+    public LogData toLogData(EventRow eventRow) throws Exception {
+        // 1. 获取数据流的类型等基础信息。
+        // 事件类型
+        String eventType = eventRow.getType();
+        // database名称
+        String schema = eventRow.getSchema();
+        // 表名
+        String table = eventRow.getTable();
+        // 组装成键值对
+        String key = schema + ConstantValue.POINT_SYMBOL + table;
+
+        // 获取该表的所有的数据类型转换器
+        List<IDeserializationConverter> converters = this.cdcConverterCacheMap.get(key);
+        // 获取变更数据后的字段列表
+        List<EventRowData> beforeColumnList = eventRow.getBeforeColumnList();
+
+        // 初始化，类型Converters
+        if (CollectionUtils.isEmpty(converters)) {
+            updateCache(schema, table, key, tableMetaDataCacheMap, beforeColumnList, converters);
+            converters = this.cdcConverterCacheMap.get(key);
+            if (CollectionUtils.isEmpty(converters)) {
+                throw new RuntimeException("get converters is null key is " + key);
+            }
+        }
+        // 2. 获取元数据缓存。
+        TableMetaData metadata = tableMetaDataCacheMap.get(key);
+        int size = 8; // 7: scn, type, schema, table, ts, opTime, before, after
+        LogData logData = new LogData();
+        logData.setDatabase(schema);
+        logData.setTableName(table);
+        logData.setType(eventType);
+        logData.setOpTs(eventRow.getOpTime().getTime());
+        logData.setTs(eventRow.getTs());
+        logData.setScn(eventRow.getScn());
+        // 3. 通过元数据类型进行转换。
+        // parseColumnList();
+        logData.setBefore(this.eventRowDatasToJSONOBJ(beforeColumnList));
+        logData.setAfter(this.eventRowDatasToJSONOBJ(eventRow.getAfterColumnList()));
+
+        return logData;
+    }
+
+    /**
+     * 行数据转JSONObject
+     *
+     * @param rowDatas
+     * @return
+     */
+    private JSONObject eventRowDatasToJSONOBJ(List<EventRowData> rowDatas) {
+        com.alibaba.fastjson2.JSONObject jsonResult = new com.alibaba.fastjson2.JSONObject();
+        for (EventRowData eventRowData : rowDatas) {
+            jsonResult.put(eventRowData.getName(), eventRowData.getData());
+        }
+        return jsonResult;
+    }
+
+    public static void main(String[] args) {
+
+        List<EventRowData> list = new ArrayList<>();
+        EventRowData eventRowData = new EventRowData("name", "value", true);
+        list.add(eventRowData);
+        com.alibaba.fastjson2.JSONObject jsonObject = new com.alibaba.fastjson2.JSONObject();
+        JSONArray.of(list);
+        JSON.toJSONString(list);
+
+
+    }
+
+    /**
+     * 更新元数据缓存信息，此方法触发逻辑根据log日志的字段比较决定。
+     * 更新设置元数据与转换器的对应关系
+     * @param schema 数据库
+     * @param table 表名
+     * @param key 数据库.表名
+     * @param tableMetaDataCacheMap 元数据缓存集合
+     * @param beforeColumnList 更新前列
+     * @param converters 转换器
+     */
     public void updateCache(
             String schema,
             String table,
@@ -166,25 +268,23 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
                         .containsAll(metadata.getFieldList())) {
             Pair<List<String>, List<String>> latestMetaData =
                     // JdbcUtil.getTableMetaData(null, schema, table, connection);
+                    // 查询指定表的元数据信息：<列名称，列类型>
                     OracleCDCConnection.getTableMetaData(null, schema, table, connection);
             this.converters =
                     Arrays.asList(
                             latestMetaData.getRight().stream()
-                                    .map(
-                                            x ->
-                                                    wrapIntoNullableInternalConverter(
-                                                            createInternalConverter(x)))
+                                    .map(x -> wrapIntoNullableInternalConverter(createInternalConverter(x)))
                                     .toArray(IDeserializationConverter[]::new));
             metadata =
                     new TableMetaData(
                             schema, table, latestMetaData.getLeft(), latestMetaData.getRight());
-            super.cdcConverterCacheMap.put(key, this.converters);
+            this.cdcConverterCacheMap.put(key, this.converters);
             tableMetaDataCacheMap.put(key, metadata);
         }
     }
 
     /**
-     * 将eventRowData 拆分 成多条数据并且附带RowKind
+     * 将eventRowData 拆分 成多条数据并且附带RowKind，因为insert update 等操作可能会出现前后不一致情况。
      *
      * @param columnRowData
      * @param metadata
@@ -235,6 +335,16 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
         }
     }
 
+    /**
+     * 处理日志数据进行组装
+     *
+     * @param columnRowData
+     * @param metadata
+     * @param entryColumnList
+     * @param rowKind
+     * @param result
+     * @throws Exception
+     */
     public void dealOneEventRowData(
             ColumnRowData columnRowData,
             TableMetaData metadata,
@@ -255,6 +365,11 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
 
     /**
      * 填充column 元数据信息
+     * 偏移量
+     * schema
+     * table
+     * 时间戳
+     * 数据抽取时间
      *
      * @param columnRowData
      * @param eventRow
@@ -281,6 +396,8 @@ public class LogMinerColumnConverter extends AbstractCDCRowConverter<EventRow, S
     }
 
     /**
+     * 格式化
+     *
      * @param converters converters
      * @param fieldList fieldsOftTable
      * @param entryColumnList analyzeData

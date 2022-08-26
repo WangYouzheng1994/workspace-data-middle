@@ -14,7 +14,9 @@ import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.update.Update;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.flink.table.data.RowData;
+import org.datamiddle.cdc.oracle.bean.LogData;
 import org.datamiddle.cdc.oracle.converter.AbstractCDCRowConverter;
+import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
 import org.jeecgframework.boot.IdWorker;
 import org.datamiddle.cdc.oracle.bean.EventRow;
 import org.datamiddle.cdc.oracle.bean.EventRowData;
@@ -208,7 +210,7 @@ public class LogminerHandler {
         return value;
     }
 
-    public static LinkedList<RowData> parse(QueueData pair, AbstractCDCRowConverter rowConverter)
+    public static LogData parse(QueueData pair, AbstractCDCRowConverter rowConverter)
             throws Exception {
         ColumnRowData logData = (ColumnRowData) pair.getData();
 
@@ -254,9 +256,7 @@ public class LogminerHandler {
                         tableName,
                         ts,
                         timestamp);
-        rowConverter.toInternal(eventRow);
-        // return
-        return null;
+        return ((LogminerConverter)rowConverter).toLogData(eventRow);
     }
 
     private void printDelay(BigInteger scn, long ts, Timestamp timestamp) {

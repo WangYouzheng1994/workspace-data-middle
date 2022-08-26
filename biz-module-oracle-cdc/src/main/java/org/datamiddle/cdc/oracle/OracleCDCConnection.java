@@ -955,7 +955,7 @@ public class OracleCDCConnection {
      * @param schema
      * @param tableName
      * @param dbConn
-     * @return
+     * @return 列名称集合， 列类型结合
      */
     public static Pair<List<String>, List<String>> getTableMetaData(
             String cataLog, String schema, String tableName, Connection dbConn) {

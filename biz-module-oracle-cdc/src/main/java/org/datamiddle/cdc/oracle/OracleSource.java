@@ -1,13 +1,13 @@
 package org.datamiddle.cdc.oracle;
 
+import com.alibaba.fastjson2.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
-import org.datamiddle.cdc.oracle.converter.oracle.LogMinerColumnConverter;
-import org.datamiddle.cdc.oracle.converter.oracle.LogMinerRowConverter;
+import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
 
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -76,7 +76,10 @@ public class OracleSource {
      */
     // private LogminerHandler logminerHandler;
 
-    private LogMinerColumnConverter logMinerRowConverter = new LogMinerColumnConverter(false, true);
+    /**
+     * 设置转换器，转换器用于把日志转换成可用的 flink 流数据。
+     */
+    private LogminerConverter logminerConverter = new LogminerConverter(false, true);
 
     /**
      * 控制任务的运转状态，此状态应该迁移到DB
@@ -88,7 +91,7 @@ public class OracleSource {
      * 1. 建立连接测试
      * 2. 读取日志 获取每个日志的范围
      * 3. 过滤指定的表
-     * 4. 循环取值 幂等过滤 把信息 推给传入的handler
+     * 4. 循环取值 幂等过滤 把信息 推给传入的handler，经由LogminerConverter对日志数据进行转换。
      */
     public void start(OracleCDCConfig oracleCDCConfig) {
         // 初始化连接池
@@ -108,26 +111,21 @@ public class OracleSource {
         // 读取的位置 从startSCN偏移量开始
         this.currentSinkPosition = startScn;
 
-        // 设置内部转换器
-        // LogMinerColumnConverter 需要connection获取元数据
-        if (logMinerRowConverter instanceof LogMinerColumnConverter) {
-            String jdbcUrl = oracleCDCConfig.getJdbcUrl();
-            String username = oracleCDCConfig.getUsername();
-            String password = oracleCDCConfig.getPassword();
-            String driverClass = oracleCDCConfig.getDriverClass();
-
-            Connection connection = null;
-            try {
-                connection = DriverManager.getConnection(
-                        jdbcUrl,
-                        username,
-                        password);
-                ((LogMinerColumnConverter) logMinerRowConverter)
-                        .setConnection(connection);
-            } catch (SQLException e) {
-                log.error(e.getMessage(), e);
-                throw new RuntimeException(e);
-            }
+        // 给转换器设置一个Connection，查询metaData信息。
+        String jdbcUrl = oracleCDCConfig.getJdbcUrl();
+        String username = oracleCDCConfig.getUsername();
+        String password = oracleCDCConfig.getPassword();
+        // String driverClass = oracleCDCConfig.getDriverClass();
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(
+                    jdbcUrl,
+                    username,
+                    password);
+            logminerConverter.setConnection(connection);
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
         // 初始化Logminer
@@ -155,16 +153,15 @@ public class OracleSource {
 
     /**
      * 多线程提交读取信息的任务
+     *
      * @param connection
      * @param sql
      */
     public void loadData(OracleCDCConnection connection, String sql) {
-        connectionExecutor.submit( () -> {
+        connectionExecutor.submit(() -> {
             connection.queryData(sql);
         });
     }
-
-
 
     /**
      * 初始化connection的初始化加载 logminer
@@ -216,11 +213,11 @@ public class OracleSource {
                         QueueData result = connecUtil.getResult();
                         // 格式化数据 after before
                         if (result != null) {
-                            System.out.println("啦啦啦啦 我查到数据了哈~");
-                            LogminerHandler.parse(result, logMinerRowConverter);
+                            System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
+                            // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
                         }
                     }
-                } catch(Exception e) {
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
 
@@ -279,7 +276,9 @@ public class OracleSource {
             }
         }*/
     }
+
     private static BigInteger a;
+
     public static void main(String[] args) {
         /*BigInteger bigInteger = new BigInteger("1");
         System.out.println(bigInteger.subtract(a));
