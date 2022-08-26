@@ -106,6 +106,7 @@ public class OracleCDCKafkaApp {
                 .database(props.getStr("cdc.oracle.database"))
                 .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
                 .tableList(sourceTableList.toArray(new String[sourceTableList.size()]))
+                //.tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())

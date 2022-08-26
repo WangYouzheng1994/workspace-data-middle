@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -160,5 +161,9 @@ public class Mdac12 implements Serializable {
 
     private Long WAREHOUSE_UPDATETIME;
 
-
+    /**
+     * 数据进来的时间
+     */
+    @JSONField(serialize = false)
+    private Long ts;
 }

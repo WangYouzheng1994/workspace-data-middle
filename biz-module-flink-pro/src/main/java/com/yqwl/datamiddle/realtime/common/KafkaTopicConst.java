@@ -52,7 +52,9 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SPTI32 = "ods_vlms_spti32";
     public static final String ODS_VLMS_MDAC01 = "ods_vlms_mdac01";
     public static final String ODS_VLMS_MDAC12 = "ods_vlms_mdac12";
+    public static final String ODS_VLMS_MDAC12_GROUP = "ods_vlms_mdac12_group";
     public static final String ODS_VLMS_MDAC10 = "ods_vlms_mdac10";
+    public static final String ODS_VLMS_MDAC10_GROUP = "ods_vlms_mdac10_group";
     public static final String ODS_VLMS_MDAC11 = "ods_vlms_mdac11";
     public static final String ODS_VLMS_MDAC14 = "ods_vlms_mdac14";
     public static final String ODS_VLMS_MDAC22 = "ods_vlms_mdac22";

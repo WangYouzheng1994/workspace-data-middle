@@ -75,7 +75,7 @@ public class WaybillDwdAppSptb02Simple {
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
-        // 1.将mysql中的源数据转化成 DataStream
+        // 1.将kafka中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwdAppSptb02SimpleMysqlSource").uid("WaybillDwdAppSptb02SimpleMysqlSourceStream").name("WaybillDwdAppSptb02SimpleMysqlSourceStream");
 
         // 对一些时间字段进行单独字段处理保存
@@ -172,7 +172,7 @@ public class WaybillDwdAppSptb02Simple {
                          *   3  一汽马自达
                          */
                         // 获取主机公司代码
-                        // sptb02中原字段值含义： '大众','1','红旗','17','奔腾','2','马自达','29'
+                        // sptb02中原字段值含义： 1 大众  2 奔腾 3解放  17 红旗  29 马自达
                         // 主机公司代码          1 大众  2 奔腾 3解放  17 红旗  29 马自达
                         String czjgsdm = sptb02.getCZJGSDM();
                         if (StringUtils.isNotEmpty(czjgsdm)) {
