@@ -158,6 +158,10 @@ public class DimMdac1210WideApp {
         KeyedStream<Mdac10, String> mdac10ObjectKeyedStream = mdac10WithTs.keyBy(Mdac10::getCPP);
 
         // 6.进行表拓宽 Mdac12与Mdac10用CPP字段进行关联
+        /*
+         * 注: 经由此intervalJoin后的对象,只有双方CPP都能匹配时才会赋值,否则如若匹配不上则数据库没此条数据.
+         *    故只能用作当前合并维表的用途,不能完全当做单一维表的代替品
+         */
         SingleOutputStreamOperator<DimMdac1210> dimMdac1210Wide = mdac12ObjectKeyedStream
                 .intervalJoin(mdac10ObjectKeyedStream)
                 .between(Time.minutes(-10), Time.minutes(10))

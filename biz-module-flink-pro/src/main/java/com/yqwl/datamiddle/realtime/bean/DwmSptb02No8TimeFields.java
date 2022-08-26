@@ -1364,4 +1364,9 @@ public class DwmSptb02No8TimeFields implements Serializable {
      */
     private Long DDJRQ_R3;
 
+    /**
+     * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
+     */
+    private String BRAND_NAME;
+
 }
