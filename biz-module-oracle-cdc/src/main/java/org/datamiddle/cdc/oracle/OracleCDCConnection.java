@@ -596,7 +596,7 @@ public class OracleCDCConnection {
             // configStatement(logMinerSelectStmt);
 
             // 3000一批次。
-            logMinerSelectStmt.setFetchSize(3000);
+            logMinerSelectStmt.setFetchSize(10000);
             logMinerSelectStmt.setString(1, startScn.toString());
             logMinerSelectStmt.setString(2, endScn.toString());
             long before = System.currentTimeMillis();
@@ -709,7 +709,7 @@ public class OracleCDCConnection {
                                 xidUsn, xidSLt, xidSqn, rowId, scn);
 
                 if (Objects.isNull(recordLog)) {
-                    // 如果DML语句不在缓存 或者 和rollback不再同一个日志文件里 会递归从日志文件里查找
+                    // 如果DML语句不在缓存 或者 和rollback不再同一个日志文件里 会递归从日志文件里查找，这个步骤其实就是一种兜底，万一任务重启了 缓存肯定是没有数据的。
                     recordLog =
                             recursionQueryDataForRollback(
                                     new RecordLog(

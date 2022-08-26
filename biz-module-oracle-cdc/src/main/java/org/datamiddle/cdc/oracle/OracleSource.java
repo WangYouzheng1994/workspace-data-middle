@@ -5,9 +5,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
 import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
+import org.datamiddle.cdc.util.KafkaProduceUtil;
 
 import java.math.BigInteger;
 import java.sql.Connection;
@@ -87,6 +90,11 @@ public class OracleSource {
     private boolean runningFlag = true;
 
     /**
+     * 转换日志生产
+     */
+    KafkaProducer<Object, Object> producer = KafkaProduceUtil.getKafkaProductBySchema("test_oracle_cdc_custom");
+
+    /**
      * 概要设计：
      * 1. 建立连接测试
      * 2. 读取日志 获取每个日志的范围
@@ -144,11 +152,12 @@ public class OracleSource {
      * @param oracleCDCConnect
      */
     public void running(OracleCDCConnection oracleCDCConnect) {
+        log.info("Running Current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
         // 设置任務持续运转状态下的偏移量~
         this.endScn = oracleCDCConnect.getEndScn();
         payLoad(oracleCDCConnect);
 
-        log.info("current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
+        log.info("Running Current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
     }
 
     /**
@@ -213,7 +222,8 @@ public class OracleSource {
                         QueueData result = connecUtil.getResult();
                         // 格式化数据 after before
                         if (result != null) {
-                            System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
+                            producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
+                            // System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
                             // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
                         }
                     }
@@ -287,7 +297,7 @@ public class OracleSource {
         OracleCDCConfig build = OracleCDCConfig.builder()
                 .readPosition("ALL")
                 .driverClass("oracle.jdbc.OracleDriver")
-                .table(Arrays.asList("TDS_LJ.SPTB02"))
+                .table(Arrays.asList("TDS_LJ.TEST_SCN"))
                 .username("flinkuser")
                 .password("flinkpw").jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
                         "192.168.3.95" + ")(PORT=" +
