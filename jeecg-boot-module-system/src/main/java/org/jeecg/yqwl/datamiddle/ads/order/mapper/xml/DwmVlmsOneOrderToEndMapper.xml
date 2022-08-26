@@ -3,7 +3,7 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
     <sql id="where_count_one_to_end">
         <where>
-            BRAND = '1'
+            BRAND_NAME = '大众'
 
             <choose>
                 <when test="params.vinList != null or params.selections != null ">
@@ -105,7 +105,7 @@
             END_WATERWAY_NAME,IN_END_WATERWAY_TIME,START_PLATFORM_NAME,IN_START_PLATFORM_TIME,OUT_START_PLATFORM_TIME,
             END_PLATFORM_NAME,IN_END_PLATFORM_TIME,UNLOAD_SHIP_TIME,UNLOAD_RAILWAY_TIME,IN_DISTRIBUTE_TIME,
             DISTRIBUTE_ASSIGN_TIME,DISTRIBUTE_CARRIER_NAME,DISTRIBUTE_VEHICLE_NO,DISTRIBUTE_VEHICLE_NUM,
-            OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DTVSDHSJ,FINAL_SITE_TIME,TYPE_G,TYPE_T,TYPE_S,TYPE_TC
+            OUT_DISTRIBUTE_TIME,DISTRIBUTE_SHIPMENT_TIME,DTVSDHSJ,FINAL_SITE_TIME,TYPE_G,TYPE_T,TYPE_S,TYPE_TC,BRAND_NAME
         FROM
             dwm_vlms_one_order_to_end TOEND
         left join A on TOEND.CPZDBH = A.CPZDBH

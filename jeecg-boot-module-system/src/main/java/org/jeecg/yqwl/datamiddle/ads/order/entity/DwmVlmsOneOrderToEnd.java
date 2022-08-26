@@ -351,7 +351,7 @@ public class DwmVlmsOneOrderToEnd {
 	 */
 	@Excel(name = "汽车品牌名", width = 15)
 	@ApiModelProperty(value = "汽车品牌名")
-	private String BRAND_NAME;
+	private String brandName;
 
 	public String setTrafficType(String trafficType) {
 		this.trafficType = trafficType;

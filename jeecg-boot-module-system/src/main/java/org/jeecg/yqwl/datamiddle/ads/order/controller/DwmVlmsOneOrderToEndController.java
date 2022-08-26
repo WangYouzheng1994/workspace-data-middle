@@ -262,7 +262,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // brand 品牌
                 SXSSFCell cell1 = row1.createCell(j++);
                 // cell1.setCellStyle(cellstyle);
-                cell1.setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getBrand()));
+                cell1.setCellValue(item.getBrandName());
                 // baseName 基地
                 SXSSFCell cell2 = row1.createCell(j++);
                 // cell2.setCellStyle(cellstyle);

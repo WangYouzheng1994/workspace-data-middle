@@ -623,7 +623,7 @@
     </select>
     <sql id="where_count_one_to_end">
         <where>
-            HOST_COM_CODE = '1'
+            BRAND_NAME = '大众'
 
             <choose>
                 <when test="params.vvinList != null or params.selections != null ">
@@ -695,7 +695,7 @@
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
            VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
            DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-           DTVSDHSJ,FINAL_SITE_TIME
+           DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
@@ -725,7 +725,7 @@
             CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
             VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
             DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-            DTVSDHSJ,FINAL_SITE_TIME
+            DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
         FROM
             dwm_vlms_sptb02  SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH

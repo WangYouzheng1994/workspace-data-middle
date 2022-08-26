@@ -317,7 +317,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 cell.setCellValue(item.getVvin());
                 // HostComCode  品牌
                 SXSSFCell cell1 = row1.createCell(j++);
-                cell1.setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getHostComCode()));
+                cell1.setCellValue(item.getBrandName());
                 // baseName  基地
                 SXSSFCell cell2 = row1.createCell(j++);
                 cell2.setCellValue(item.getBaseName());
@@ -505,7 +505,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 // HostComCode  品牌
                 SXSSFCell cell1 = row1.createCell(j++);
                 // cell1.setCellStyle(cellstyle);
-                cell1.setCellValue(DwmVlmsFormatUtil.formatBrandToChinese(item.getHostComCode()));
+                cell1.setCellValue(item.getBrandName());
                 // baseName  基地
                 SXSSFCell cell2 = row1.createCell(j++);
                 // cell2.setCellStyle(cellstyle);

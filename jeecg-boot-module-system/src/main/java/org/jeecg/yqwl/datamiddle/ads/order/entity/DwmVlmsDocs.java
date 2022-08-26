@@ -118,5 +118,12 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "位置信息")
 	private String vwz;
 
+	/**
+	 * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
+	 */
+	@Excel(name = "品牌", width = 15)
+	@ApiModelProperty(value = "汽车品牌名")
+	private String brandName;
+
 
 }
