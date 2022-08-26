@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.dim;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.yqwl.datamiddle.realtime.bean.DimMdac1210;
 import com.yqwl.datamiddle.realtime.bean.Mdac10;
 import com.yqwl.datamiddle.realtime.bean.Mdac12;
 import com.yqwl.datamiddle.realtime.bean.SiteWarehouse;
@@ -23,6 +24,9 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
+import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -151,6 +155,14 @@ public class DimMdac1210WideApp {
         KeyedStream<Mdac10, Object> mdac10ObjectKeyedStream = mdac10WithTs.keyBy(Mdac10::getCPP);
 
         // 6.进行表拓宽 Mdac12与Mdac10用CPP字段进行关联
-
+        mdac12ObjectKeyedStream
+                .intervalJoin(mdac10ObjectKeyedStream)
+                .between(Time.minutes(-10),Time.minutes(10))
+                .process(new ProcessJoinFunction<Mdac12, Mdac10, DimMdac1210>() {
+                    @Override
+                    public void processElement(Mdac12 mdac12, Mdac10 mdac10, ProcessJoinFunction<Mdac12, Mdac10, DimMdac1210>.Context ctx, Collector<DimMdac1210> out) throws Exception {
+                        out.collect(new DimMdac1210(mdac12, mdac10));
+                    }
+                });
     }
 }

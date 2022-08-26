@@ -4,6 +4,7 @@ import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
 import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -246,43 +247,157 @@ public class DimMdac1210 implements Serializable {
     /**
      * 审批标识：0  未审批  1：已审批（来自于mdac12）
      */
-    private String APPROVALFLAG12;
+    private String APPROVAL_FLAG_12;
 
     /**
      * 审批人（来自于mdac12）
      */
-    private String approvaluser12;
+    private String APPROVAL_USER_12;
 
     /**
      * 审批日期（来自于mdac12）
      */
-    private Long APPROVALDATE12;
+    private Long APPROVAL_DATE_12;
 
     /**
      * 来自于mdac12
      */
-    private String FINALAPPROVALFLAG12;
+    private String FINAL_APPROVAL_FLAG_12;
 
     /**
      * 来自于mdac12
      */
-    private String FINALAPPROVALUSER12;
+    private String FINAL_APPROVAL_USER_12;
 
     /**
      * 来自于mdac12
      */
-    private Long FINALAPPROVALDATE12;
+    private Long FINAL_APPROVAL_DATE_12;
 
     /**
      * 创建时间
      */
-    private Long WAREHOUSECREATETIME;
+    private Long WAREHOUSE_CREATETIME;
 
     /**
      * 更新时间
      */
-    private Long WAREHOUSEUPDATETIME;
+    private Long WAREHOUSE_UPDATETIME;
 
+    public DimMdac1210(Mdac12 mdac12, Mdac10 mdac10){
+        mergeMdac12(mdac12);
+        mergeMdac10(mdac10);
+    }
 
+    public void mergeMdac12(Mdac12 mdac12){
+        if (mdac12 != null){
+            if (StringUtils.isNotBlank(mdac12.getCCPDM())){
+                this.CCPDM = mdac12.getCCPDM();
+            }
+            if (StringUtils.isNotBlank(mdac12.getVCPMC())){
+                this.VCPMC = mdac12.getVCPMC();
+            }
+            if (StringUtils.isNotBlank(mdac12.getVCPJC())){
+                this.VCPJC = mdac12.getVCPJC();
+            }
+            if (mdac12.getNAQKC() != null){
+                this.NAQKC=mdac12.getNAQKC();
+            }
+            if (mdac12.getNPL() != null){
+                this.NPL=mdac12.getNPL();
+            }
+            if (mdac12.getNPLZL() != null){
+                this.NPLZL=mdac12.getNPLZL();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCTYBS())){
+                this.CTYBS12 = mdac12.getCTYBS();
+            }
+            if (mdac12.getDTYRQ() != null){
+                this.DTYRQ12=mdac12.getDTYRQ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCPP())){
+                this.CPP = mdac12.getCPP();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCCXDL())){
+                this.CCXDL = mdac12.getCCXDL();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCCXDM())){
+                this.CCXDM = mdac12.getCCXDM();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCJHTY())){
+                this.CJHTY = mdac12.getCJHTY();
+            }
+            if (mdac12.getDJHTYRQ() != null){
+                this.DJHTYRQ=mdac12.getDJHTYRQ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCDDTY())){
+                this.CDDTY = mdac12.getCDDTY();
+            }
+            if (mdac12.getDDDTYRQ() != null){
+                this.DDDTYRQ=mdac12.getDDDTYRQ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCLSTY())){
+                this.CLSTY = mdac12.getCLSTY();
+            }
+            if (mdac12.getDLSTYRQ() != null){
+                this.DLSTYRQ=mdac12.getDLSTYRQ();
+            }
+            if (mdac12.getNCCFDJ() != null){
+                this.NCCFDJ=mdac12.getNCCFDJ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCPHBS())){
+                this.CPHBS = mdac12.getCPHBS();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCJHDBBS())){
+                this.CJHDBBS = mdac12.getCJHDBBS();
+            }
+            if (StringUtils.isNotBlank(mdac12.getVBZ())){
+                this.VBZ = mdac12.getVBZ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCJKBS())){
+                this.CJKBS = mdac12.getCJKBS();
+            }
+            if (mdac12.getID() != null){
+                this.ID12=mdac12.getID();
+            }
+            if (StringUtils.isNotBlank(mdac12.getVMS())){
+                this.VMS = mdac12.getVMS();
+            }
+            if (mdac12.getNFWFDJ() != null){
+                this.NFWFDJ=mdac12.getNFWFDJ();
+            }
+            if (mdac12.getNKLSZ() != null){
+                this.NKLSZ=mdac12.getNKLSZ();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCXSTY())){
+                this.CXSTY = mdac12.getCXSTY();
+            }
+            if (StringUtils.isNotBlank(mdac12.getCGS())){
+                this.CGS12 = mdac12.getCGS();
+            }
+            if (StringUtils.isNotBlank(mdac12.getAPPROVAL_FLAG())){
+                this.APPROVAL_FLAG_12 = mdac12.getAPPROVAL_FLAG();
+            }
+            if (StringUtils.isNotBlank(mdac12.getAPPROVAL_USER())){
+                this.APPROVAL_USER_12 = mdac12.getAPPROVAL_FLAG();
+            }
+            if (mdac12.getAPPROVAL_DATE() != null){
+                this.APPROVAL_DATE_12=mdac12.getAPPROVAL_DATE();
+            }
+            if (StringUtils.isNotBlank(mdac12.getFINAL_APPROVAL_FLAG())){
+                this.FINAL_APPROVAL_FLAG_12 = mdac12.getFINAL_APPROVAL_FLAG();
+            }
+            if (StringUtils.isNotBlank(mdac12.getFINAL_APPROVAL_USER())){
+                this.FINAL_APPROVAL_USER_12 = mdac12.getFINAL_APPROVAL_USER();
+            }
+            if (mdac12.getFINAL_APPROVAL_DATE() != null){
+                this.FINAL_APPROVAL_DATE_12=mdac12.getFINAL_APPROVAL_DATE();
+            }
+        }
+    }
+
+    public void mergeMdac10(Mdac10 mdac10){
+
+    }
 
 }
