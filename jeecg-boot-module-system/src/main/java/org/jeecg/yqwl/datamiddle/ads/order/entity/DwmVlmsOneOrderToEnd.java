@@ -346,6 +346,13 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "R3的配板下发日期")
 	private Long vehiclePlateIssuedTimeR3;
 
+	/**
+	 * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
+	 */
+	@Excel(name = "汽车品牌名", width = 15)
+	@ApiModelProperty(value = "汽车品牌名")
+	private String BRAND_NAME;
+
 	public String setTrafficType(String trafficType) {
 		this.trafficType = trafficType;
 		return trafficType;

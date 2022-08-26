@@ -461,4 +461,9 @@ public class DwmOneOrderToEnd implements Serializable {
      * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
      */
     private Long VEHICLE_PLATE_ISSUED_TIME_R3;
+
+    /**
+     * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
+     */
+    private String BRAND_NAME;
 }
