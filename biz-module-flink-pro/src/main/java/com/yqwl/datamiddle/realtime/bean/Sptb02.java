@@ -232,25 +232,21 @@ public class Sptb02 implements Serializable {
     /**
      * 出库日期    date 统一时间戳 bigint
      */
-
     private Long DCKRQ;
 
     /**
      * 支付表号。SPTB7.CZFBH
      */
-
     private String CZFBH;
 
     /**
      * 返单确认时间   date 统一时间戳 bigint
      */
-
     private Long DBCSJ;
 
     /**
      * 暂不用
      */
-
     private String VCKKGYDM;
 
     /**

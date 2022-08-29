@@ -1082,8 +1082,11 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * dwd新增-起运时间 公路-取DTVSCFSJ(TVS出发时间)的值;铁水-取DSJCFSJ(实际离长时间)的值
+     * 公路取sptb02.dtvscfsj : 
+     * {@link Sptb02#DYSSZPSJ}
+     * 铁水取sptb02取DSJCFSJ(实际离长时间)的值
+     * {@link Sptb02#DSJCFSJ}
      */
-
     private Long SHIPMENT_TIME;
 
     /**
