@@ -660,8 +660,8 @@ public class DwmSptb02No8TimeFields implements Serializable {
 
     /**
      * TVS到货时间    date 统一时间戳 bigint
+     * {@link Sptb02#DTVSDHSJ}
      */
-
     private Long DTVSDHSJ;
 
     /**
@@ -1080,8 +1080,11 @@ public class DwmSptb02No8TimeFields implements Serializable {
 
     /**
      * dwd新增-起运时间 公路-取DTVSCFSJ(TVS出发时间)的值;铁水-取DSJCFSJ(实际离长时间)的值
+     * 公路取sptb02.dtvscfsj :
+     * {@link Sptb02#DYSSZPSJ}
+     * 铁水取sptb02取DSJCFSJ(实际离长时间)的值
+     * {@link Sptb02#DSJCFSJ}
      */
-
     private Long SHIPMENT_TIME;
 
     /**
@@ -1091,21 +1094,21 @@ public class DwmSptb02No8TimeFields implements Serializable {
     private Long PLAN_RELEASE_TIME;
 
     /**
-     * dwd新增-运单指派时间
+     * dwd新增-运单指派时间 原字段
+     * {@link Sptb02#DYSSZPSJ}
      */
-
     private Long ASSIGN_TIME;
 
     /**
-     * dwd新增-打点到货时间
+     * dwd新增-打点到货时间 (GPS到货时间)
+     * {@link Sptb02#DGPSDHSJ}
      */
-
     private Long DOT_SITE_TIME;
 
     /**
-     * dwd新增-最终到货时间
+     * dwd新增-最终到货时间(大众到货时间)
+     * {@link Sptb02#DDHSJ}
      */
-
     private Long FINAL_SITE_TIME;
 
     /**
@@ -1152,6 +1155,7 @@ public class DwmSptb02No8TimeFields implements Serializable {
 
     /**
      * dwm新增-实际出库时间
+     * 源:{@link Sptb02#DCKRQ}
      */
 
     private Long ACTUAL_OUT_TIME;

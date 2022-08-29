@@ -37,6 +37,11 @@ public class DwmVlmsDocs {
 	private String baseName;
 
 	/**车型名称*/
+	@Excel(name = "车型代码", width = 15)
+	@ApiModelProperty(value = "车型代码")
+	private String vehicleCode;
+
+	/**车型名称*/
 	@Excel(name = "车型名称", width = 15)
 	@ApiModelProperty(value = "车型名称")
 	private String vehicleName;

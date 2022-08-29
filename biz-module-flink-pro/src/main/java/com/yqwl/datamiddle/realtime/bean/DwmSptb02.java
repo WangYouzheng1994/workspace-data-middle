@@ -10,12 +10,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 
 /**
- * <p>
  * 运单主表-数据拉宽，增加相关字段
- * </p>
- *
- * @author yiqi
- * @since 2022-05-18
+ * 更新字段的源头
+ * @author XiaoFeng
+ * @since 2022-08-29
+ * @Version: V2.0
  */
 @CamelUnderline(isChange = false)
 @TableName("dwm_vlms_sptb02")
@@ -663,8 +662,8 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * TVS到货时间    date 统一时间戳 bigint
+     * {@link Sptb02#DTVSDHSJ}
      */
-
     private Long DTVSDHSJ;
 
     /**
@@ -1083,8 +1082,11 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * dwd新增-起运时间 公路-取DTVSCFSJ(TVS出发时间)的值;铁水-取DSJCFSJ(实际离长时间)的值
+     * 公路取sptb02.dtvscfsj : 
+     * {@link Sptb02#DYSSZPSJ}
+     * 铁水取sptb02取DSJCFSJ(实际离长时间)的值
+     * {@link Sptb02#DSJCFSJ}
      */
-
     private Long SHIPMENT_TIME;
 
     /**
@@ -1094,57 +1096,51 @@ public class DwmSptb02 implements Serializable {
     private Long PLAN_RELEASE_TIME;
 
     /**
-     * dwd新增-运单指派时间
+     * dwd新增-运单指派时间 原字段
+     * {@link Sptb02#DYSSZPSJ}
      */
-
     private Long ASSIGN_TIME;
 
     /**
-     * dwd新增-打点到货时间
+     * dwd新增-打点到货时间 (GPS到货时间)
+     * {@link Sptb02#DGPSDHSJ}
      */
-
     private Long DOT_SITE_TIME;
 
     /**
-     * dwd新增-最终到货时间
+     * dwd新增-最终到货时间(大众到货时间)
+     * {@link Sptb02#DDHSJ}
      */
-
     private Long FINAL_SITE_TIME;
 
     /**
      * dwd新增-运单生成时间
      */
-
     private Long ORDER_CREATE_TIME;
 
     /**
      * dwd基地代码转换 适配 lc_spec_config
      */
-
     private String BASE_CODE;
 
     /**
      * dwd运输方式代码 适配 lc_spec_config
      */
-
     private String TRANS_MODE_CODE;
 
     /**
      * dwd主机公司代码转换 适配 lc_spec_config
      */
-
     private String HOST_COM_CODE;
 
     /**
      * dwm新增-理论起运时间
      */
-
     private Long THEORY_SHIPMENT_TIME;
 
     /**
      * dwm新增-理论出库时间
      */
-
     private Long THEORY_OUT_TIME;
 
     /**
@@ -1155,110 +1151,93 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * dwm新增-实际出库时间
+     * 源:{@link Sptb02#DCKRQ}
      */
-
     private Long ACTUAL_OUT_TIME;
 
     /**
      * dwm新增-入目标库时间
      */
-
     private Long ENTER_TARGET_TIME;
 
     /**
      * dwm新增-车架号
      */
-
     private String VVIN;
 
     /**
      * dwm新增 运单状态-1待出库2已出库3待起运(待离港)4干线在途5已到待卸6末端配送-同城直发(配送中)7异地直发or移库(入库中)8已到库9已到店
      */
-
     private Integer TRAFFIC_STATUS;
 
     /**
      * dwm新增 运单状态名称 1待出库2已出库3待起运(待离港)4干线在途5已到待卸6末端配送-同城直发(配送中)7异地直发or移库(入库中)8已到库9已到店
      */
-
     private String TRAFFIC_STATUS_NAME;
 
     /**
      * dwm新增 主机公司名称
      */
-
     private String CUSTOMER_NAME;
 
     /**
      * dwm新增-发车基地名称
      */
-
     private String BASE_NAME;
 
     /**
      * dwm新增-发运仓库名称
      */
-
     private String SHIPMENT_WAREHOUSE_NAME;
 
     /**
      * dwm新增-到货地省区代码
      */
-
     private String END_PROVINCE_CODE;
 
     /**
      * dwm到货地省区名称
      */
-
     private String END_PROVINCE_NAME;
 
     /**
      * dwm到货地市县代码
      */
-
     private String END_CITY_CODE;
 
     /**
      * dwm到货地市县名称
      */
-
     private String END_CITY_NAME;
 
     /**
      * dwm起货地省区代码
      */
-
     private String START_PROVINCE_CODE;
 
     /**
      * dwm起货地省区名称
      */
-
     private String START_PROVINCE_NAME;
 
     /**
      * dwm起货地市县代码
      */
-
     private String START_CITY_CODE;
 
     /**
      * dwm起货地市县名称
      */
-
     private String START_CITY_NAME;
 
     /**
      * dwm运输商名称
      */
-
     private String TRANSPORT_NAME;
 
     /**
      * dwm经销商名称
      */
-
     private String DEALER_NAME;
 
     /**
@@ -1319,49 +1298,41 @@ public class DwmSptb02 implements Serializable {
     /**
      * 入开始站台时间 应用于铁路
      */
-
     private Long IN_START_PLATFORM_TIME;
 
     /**
      * 出开始站台时间 应用于铁路
      */
-
     private Long OUT_START_PLATFORM_TIME;
 
     /**
      * 入目的站台时间 应用于铁路
      */
-
     private Long IN_END_PLATFORM_TIME;
 
     /**
      * 卸车时间  应用于铁路
      */
-
     private Long UNLOAD_RAILWAY_TIME;
 
     /**
      * 入开始港口时间 应用于水路
      */
-
     private Long IN_START_WATERWAY_TIME;
 
     /**
      * 出开始港口时间 应用于水路
      */
-
     private Long END_START_WATERWAY_TIME;
 
     /**
      * 入目的港口时间 应用于水路
      */
-
     private Long IN_END_WATERWAY_TIME;
 
     /**
      * 卸船时间 应用水路
      */
-
     private Long UNLOAD_SHIP_TIME;
 
     /**
@@ -1410,11 +1381,11 @@ public class DwmSptb02 implements Serializable {
      */
     private String VSCZT_CITY_CODE;
 
-    /**
+    /** 计划下达日期
      * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     * 源:{@link DwmSptb02No8TimeFields#DDJRQ_R3}
      */
     private Long DDJRQ_R3;
-
 
     /**
      * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
