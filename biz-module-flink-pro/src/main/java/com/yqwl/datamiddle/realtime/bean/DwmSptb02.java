@@ -1146,6 +1146,7 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * dwm新增-实际出库时间
+     * 源:{@link Sptb02#DCKRQ}
      */
     private Long ACTUAL_OUT_TIME;
 
