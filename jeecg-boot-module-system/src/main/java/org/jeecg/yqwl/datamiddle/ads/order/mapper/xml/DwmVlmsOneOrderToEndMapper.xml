@@ -3,8 +3,7 @@
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper">
     <sql id="where_count_one_to_end">
         <where>
-            BRAND_NAME = '大众'
-
+            BRAND = '1'
             <choose>
                 <when test="params.vinList != null or params.selections != null ">
                     and VIN IN

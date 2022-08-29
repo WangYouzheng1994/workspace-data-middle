@@ -623,8 +623,7 @@
     </select>
     <sql id="where_count_one_to_end">
         <where>
-            BRAND_NAME = '大众'
-
+            HOST_COM_CODE = '1'
             <choose>
                 <when test="params.vvinList != null or params.selections != null ">
                     AND VVIN IN
