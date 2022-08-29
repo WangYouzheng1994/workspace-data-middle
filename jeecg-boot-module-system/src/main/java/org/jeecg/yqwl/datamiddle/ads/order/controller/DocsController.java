@@ -248,7 +248,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 设置表头行高
         row.setHeight((short) (22.50 * 20));
         // 获取表头
-        String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
+        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
                 "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;
@@ -321,6 +321,9 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 // baseName  基地
                 SXSSFCell cell2 = row1.createCell(j++);
                 cell2.setCellValue(item.getBaseName());
+                // vehicleCode  车型代码
+                SXSSFCell cellvehicleCode = row1.createCell(j++);
+                cellvehicleCode.setCellValue(item.getVehicleCode());
                 // vehicleName  车型
                 SXSSFCell cell3 = row1.createCell(j++);
                 cell3.setCellValue(item.getVehicleName());
@@ -437,7 +440,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 创建行,从0开始
         SXSSFRow row = sheet.createRow(0);
         // 获取表头   18个字段
-        String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
+        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
                 "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;
@@ -510,6 +513,10 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 SXSSFCell cell2 = row1.createCell(j++);
                 // cell2.setCellStyle(cellstyle);
                 cell2.setCellValue(item.getBaseName());
+                // vehicleCode  车型代码
+                SXSSFCell cellvehicleCode  = row1.createCell(j++);
+                // cell3.setCellStyle(cellstyle);
+                cellvehicleCode.setCellValue(item.getVehicleCode());
                 // vehicleName  车型
                 SXSSFCell cell3 = row1.createCell(j++);
                 // cell3.setCellStyle(cellstyle);

@@ -217,7 +217,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         row.setHeight((short) (22.50 * 20));
         // 获取表头(前端页面一共有44个字段,entity一共是57个字段)
         // 最新表头  2022.7.12 更改 顺序更改和添加经销商名称  Y号  删除配板日期,将整车物流接收STD日期 改为 计划下达日期
-        String[] headers = new String[]{"底盘号", "品牌", "基地", "车型", "始发城市","经销商目标城市","经销商代码","经销商名称",
+        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市","经销商目标城市","经销商代码","经销商名称",
                 "CP9下线接车日期", "入库日期", "入库仓库", "任务单号", "计划下达日期", "配板单号", "运输方式", "指派日期",
                 "指派承运商名称", "出库日期", "起运日期-公路", "运输车号", "同板数量", "轿运车车位数",
                 "始发站名称","到达始发站时间/入站时间","始发站台铁路离站时间","目的站名称","到达目的站时间","卸车时间（铁路到目的站）",
@@ -267,6 +267,10 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 SXSSFCell cell2 = row1.createCell(j++);
                 // cell2.setCellStyle(cellstyle);
                 cell2.setCellValue(item.getBaseName());
+                // vehicleCode 车型代码
+                SXSSFCell cellvehicleCode = row1.createCell(j++);
+                // cell3.setCellStyle(cellstyle);
+                cellvehicleCode.setCellValue(item.getVehicleCode());
                 // vehicleName 车型
                 SXSSFCell cell3 = row1.createCell(j++);
                 // cell3.setCellStyle(cellstyle);
