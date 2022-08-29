@@ -10,12 +10,11 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import java.io.Serializable;
 
 /**
- * <p>
  * 运单主表-数据拉宽，增加相关字段
- * </p>
- *
- * @author yiqi
- * @since 2022-05-18
+ * 更新字段的源头
+ * @author XiaoFeng
+ * @since 2022-08-29
+ * @Version: V2.0
  */
 @CamelUnderline(isChange = false)
 @TableName("dwm_vlms_sptb02")
@@ -1410,8 +1409,9 @@ public class DwmSptb02 implements Serializable {
      */
     private String VSCZT_CITY_CODE;
 
-    /**
+    /** 计划下达日期
      * R3的配板下发日期 取自SPTB01C.DDJRQ 20220818新增
+     * 源:{@link DwmSptb02No8TimeFields#DDJRQ_R3}
      */
     private Long DDJRQ_R3;
 
