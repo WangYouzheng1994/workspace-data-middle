@@ -50,7 +50,7 @@ public class OracleSource {
     private BigInteger endScn;
 
     /**
-     * logminer 步进
+     * logminer 步进  默认 2000
      */
     private BigInteger logminerStep;
 
@@ -152,12 +152,12 @@ public class OracleSource {
      * @param oracleCDCConnect
      */
     public void running(OracleCDCConnection oracleCDCConnect) {
-        log.info("Running Current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
+        log.info("One Round Start， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
         // 设置任務持续运转状态下的偏移量~
         this.endScn = oracleCDCConnect.getEndScn();
         payLoad(oracleCDCConnect);
 
-        log.info("Running Current startSCN:{}, endSCN:{}", this.startScn, this.endScn);
+        log.info("One Round End， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
     }
 
     /**
@@ -184,8 +184,12 @@ public class OracleSource {
 
         Connection connection = connecUtil.getConnection();
 
+        // 获取当前数据库的最大偏移量
         currentMaxScn = connecUtil.getCurrentScn(connection);
 
+        log.info("payLoad CurrentMaxScn: {}, startSCN:{}, endSCN:{}", currentMaxScn, startScn, endScn);
+
+        // 最大值 减掉 结束SCN 大于 步进  降低DB压力的一种方式
         if (Objects.isNull(connection) || currentMaxScn.subtract(this.endScn).compareTo(logminerStep) > 0) {
 
             // 按照加载日志文件大小限制，根据endScn作为起点找到对应的一组加载范围
@@ -202,49 +206,51 @@ public class OracleSource {
                 endScn = connecUtil.getEndScn(connection, currentStartScn, new ArrayList<>(32));
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
-                // e.printStackTrace();
             }
-            // 开始日志挖掘
-            connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
-            // 读取v$logmnr_contents 数据由线程池加载
-            String logMinerSelectSql = ""; // 这个地方需要根据指定的表名
-            // 动态组装SQL，摄取update insert delete
-            logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
+            if (endScn != null) {
+                // 开始日志挖掘
+                connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
+                // 读取v$logmnr_contents 数据由线程池加载
+                String logMinerSelectSql = ""; // 这个地方需要根据指定的表名
+                // 动态组装SQL，摄取update insert delete
+                logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
 
-            // 请求日志挖掘结果logmnr_contents查看。 结果会放到 connection的logminerData中 (ResultSet)。 TODO：此操作响应快慢与数据量反比，需要用多线程异步获取结果。
-            boolean selectResult = connecUtil.queryData(logMinerSelectSql);
-            if (selectResult) {
-                // jdbc请求成功
-                try {
-                    // 解析
-                    if (connecUtil.hasNext()) {
-                        // 获取解析结果
-                        QueueData result = connecUtil.getResult();
-                        // 格式化数据 after before
-                        if (result != null) {
-                            producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
-                            // System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
-                            // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
+                // 请求日志挖掘结果logmnr_contents查看。 结果会放到 connection的logminerData中 (ResultSet)。 TODO：此操作响应快慢与数据量反比，需要用多线程异步获取结果。
+                boolean selectResult = connecUtil.queryData(logMinerSelectSql);
+                if (selectResult) {
+                    // jdbc请求成功
+                    try {
+                        // 解析
+                        if (connecUtil.hasNext()) {
+                            // 获取解析结果
+                            QueueData result = connecUtil.getResult();
+                            // 格式化数据 after before
+                            if (result != null) {
+                                producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
+                                // 更新当前位点
+                                this.currentSinkPosition = result.getScn();
+                                this.endScn = endScn.getLeft();
+                                this.loadRedo = endScn.getRight();
+                                // System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
+                                // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
+                            }
                         }
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
                     }
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+
+                    // 格式化数据
+                    //logminerHandler.parse(result, );
+
+                    // TODO: 格式化完了以后，更新任务的开始和结束
                 }
-
-                // 格式化数据
-                //logminerHandler.parse(result, );
-
-                // TODO: 格式化完了以后，更新任务的开始和结束
-            }
-
-            this.endScn = endScn.getLeft();
-            this.loadRedo = endScn.getRight();
-            // if (Objects.isNull(currentConnection)) {
-            //     updateCurrentConnection(logMinerConnection);
-            // }
-            // 如果已经加载了redoLog就不需要多线程加载了
-            if (endScn.getRight()) {
-                // break
+                // if (Objects.isNull(currentConnection)) {
+                //     updateCurrentConnection(logMinerConnection);
+                // }
+                // 如果已经加载了redoLog就不需要多线程加载了
+                if (endScn.getRight()) {
+                    // break
+                }
             }
         }
 /* 多线程处理 屏蔽，目前用单线程执行。

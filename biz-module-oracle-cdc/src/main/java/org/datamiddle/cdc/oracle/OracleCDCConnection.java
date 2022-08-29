@@ -270,7 +270,7 @@ public class OracleCDCConnection {
      */
     public Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
             throws SQLException {
-        return getEndScn(connection, startScn, logFiles, true);
+        return getEndScn(connection, startScn, logFiles, false);
     }
 
     /**
@@ -335,39 +335,39 @@ public class OracleCDCConnection {
 
         // 不知道为什么要判定最大文件大小。。。
         // while (fileSize < logMinerConfig.getMaxLogFileSize()) {
-            List<LogFile> tempList = new ArrayList<>(8);
-            for (List<LogFile> logFileList : values) {
-                for (LogFile logFile1 : logFileList) {
-                    if (!logFiles.contains(logFile1)) {
-                        // 每个thread组文件每次只添加第一个
-                        tempList.add(logFile1);
-                        break;
-                    }
+        List<LogFile> tempList = new ArrayList<>(8);
+        for (List<LogFile> logFileList : values) {
+            for (LogFile logFile1 : logFileList) {
+                if (!logFiles.contains(logFile1)) {
+                    // 每个thread组文件每次只添加第一个
+                    tempList.add(logFile1);
+                    break;
                 }
             }
-            // 如果为空 代表没有可以加载的日志文件 结束循环
-            if (CollectionUtils.isEmpty(tempList)) {
-                // break;
-            } else {
-                // 找到最小的nextSCN 结束偏移量
-                BigInteger minNextScn =
-                        tempList.stream()
-                                .sorted(Comparator.comparing(LogFile::getNextChange))
-                                .collect(Collectors.toList())
-                                .get(0)
-                                .getNextChange();
+        }
+        // 如果为空 代表没有可以加载的日志文件 结束循环
+        if (CollectionUtils.isEmpty(tempList)) {
+            // break;
+        } else {
+            // 找到最小的nextSCN 结束偏移量
+            BigInteger minNextScn =
+                    tempList.stream()
+                            .sorted(Comparator.comparing(LogFile::getNextChange))
+                            .collect(Collectors.toList())
+                            .get(0)
+                            .getNextChange();
 
-                for (LogFile logFile1 : tempList) {
-                    if (logFile1.getFirstChange().compareTo(minNextScn) < 0) {
-                        logFiles.add(logFile1);
-                        fileSize += logFile1.getBytes();
-                        if (logFile1.isOnline()) {
-                            loadRedoLog = true;
-                        }
+            for (LogFile logFile1 : tempList) {
+                if (logFile1.getFirstChange().compareTo(minNextScn) < 0) {
+                    logFiles.add(logFile1);
+                    fileSize += logFile1.getBytes();
+                    if (logFile1.isOnline()) {
+                        loadRedoLog = true;
                     }
                 }
-                endScn = minNextScn;
             }
+            endScn = minNextScn;
+        }
         // }
 
         // 如果加载到了重做日志，需要把currentSCN 作为当前连接的 endSCN 因为此scn只能去数据库的当前状态获取，无法通过log list获取到。原因是还在增量走。
@@ -413,7 +413,7 @@ public class OracleCDCConnection {
         // 包含commit
         sqlBuilder.append(" or OPERATION_CODE = 7 )");
         String sql = sqlBuilder.toString();
-        log.info("SelectSql = {}", sql);
+        log.debug("SelectSql = {}", sql);
         return sql;
     }
 
@@ -539,10 +539,10 @@ public class OracleCDCConnection {
 
             // 这个auto 不是很明白区别
             if (autoaddLog) {
-                logMinerStartStmt.setString(1, startScn.toString());
+                logMinerStartStmt.setString(1, this.startScn.toString());
             } else {
-                logMinerStartStmt.setString(1, startScn.toString());
-                logMinerStartStmt.setString(2, endScn.toString());
+                logMinerStartStmt.setString(1, this.startScn.toString());
+                logMinerStartStmt.setString(2, this.endScn.toString());
             }
 
             logMinerStartStmt.execute();
