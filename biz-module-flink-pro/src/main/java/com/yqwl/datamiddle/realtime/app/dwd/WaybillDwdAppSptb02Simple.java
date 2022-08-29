@@ -113,7 +113,7 @@ public class WaybillDwdAppSptb02Simple {
                                 dwdSptb02.setTRANS_MODE_CODE("3");
                             }
                             // 2.处理 起运时间
-                            // 公路取sptb02.dtvscfsj，其他取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
+                            // 公路取sptb02.dtvscfsj，铁水取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
                             if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
                                 dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                             }
