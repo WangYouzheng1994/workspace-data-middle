@@ -662,8 +662,8 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * TVS到货时间    date 统一时间戳 bigint
+     * {@link Sptb02#DTVSDHSJ}
      */
-
     private Long DTVSDHSJ;
 
     /**
@@ -1102,12 +1102,14 @@ public class DwmSptb02 implements Serializable {
     private Long ASSIGN_TIME;
 
     /**
-     * dwd新增-打点到货时间
+     * dwd新增-打点到货时间 (GPS到货时间)
+     * {@link Sptb02#DGPSDHSJ}
      */
     private Long DOT_SITE_TIME;
 
     /**
-     * dwd新增-最终到货时间
+     * dwd新增-最终到货时间(大众到货时间)
+     * {@link Sptb02#DDHSJ}
      */
     private Long FINAL_SITE_TIME;
 
