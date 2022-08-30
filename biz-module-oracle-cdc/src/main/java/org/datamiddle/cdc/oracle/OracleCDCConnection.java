@@ -270,7 +270,7 @@ public class OracleCDCConnection {
      */
     public Pair<BigInteger, Boolean> getEndScn(Connection connection, BigInteger startScn, List<LogFile> logFiles)
             throws SQLException {
-        return getEndScn(connection, startScn, logFiles, false);
+        return getEndScn(connection, startScn, logFiles, true); // 这里设置成true的原因是没有去确认是否是加载归档到头了。如果要实现持续的增量获取 就得去读online redoLog
     }
 
     /**

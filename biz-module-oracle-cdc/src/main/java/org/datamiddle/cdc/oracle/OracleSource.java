@@ -155,6 +155,7 @@ public class OracleSource {
         log.info("One Round Start， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
         // 设置任務持续运转状态下的偏移量~
         this.endScn = oracleCDCConnect.getEndScn();
+
         payLoad(oracleCDCConnect);
 
         log.info("One Round End， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
@@ -210,6 +211,9 @@ public class OracleSource {
             if (endScn != null) {
                 // 开始日志挖掘
                 connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
+                // 更新当前位点
+                this.endScn = endScn.getLeft();
+                this.loadRedo = endScn.getRight();
                 // 读取v$logmnr_contents 数据由线程池加载
                 String logMinerSelectSql = ""; // 这个地方需要根据指定的表名
                 // 动态组装SQL，摄取update insert delete
@@ -222,15 +226,12 @@ public class OracleSource {
                     try {
                         // 解析
                         if (connecUtil.hasNext()) {
-                            // 获取解析结果
+                            // 获取解析Logminer结果
                             QueueData result = connecUtil.getResult();
-                            // 格式化数据 after before
                             if (result != null) {
+                                // 格式化数据 after before，并推送到kafka
                                 producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
-                                // 更新当前位点
                                 this.currentSinkPosition = result.getScn();
-                                this.endScn = endScn.getLeft();
-                                this.loadRedo = endScn.getRight();
                                 // System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
                                 // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
                             }
