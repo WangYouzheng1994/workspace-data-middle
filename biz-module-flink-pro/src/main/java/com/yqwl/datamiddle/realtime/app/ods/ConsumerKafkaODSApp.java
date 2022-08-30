@@ -252,7 +252,7 @@ public class ConsumerKafkaODSApp {
         //=====================================插入mysql-sink===============================================//
         // mysqlProcess.print("mysql结果数据输出:");
         // 将维度数据保存到mysql对应的维度表中
-        // mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("ConsumerKafkaODSAppDim-sink-batch-mysql").name("ConsumerKafkaODSAppDim-sink-batch-mysql");
+        mysqlProcess.addSink(new DimBatchSink()).setParallelism(1).uid("ConsumerKafkaODSAppDim-sink-batch-mysql").name("ConsumerKafkaODSAppDim-sink-batch-mysql");
         log.info("维表sink到mysql数据库中");
 
         log.info("流处理程序开始执行");
