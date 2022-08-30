@@ -1,7 +1,6 @@
 package com.yqwl.datamiddle.realtime.app.ods;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.google.common.collect.Lists;
@@ -14,6 +13,7 @@ import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -53,6 +53,10 @@ import java.util.concurrent.TimeUnit;
 public class ConsumerKafkaODSApp {
 
     public static void main(String[] args) throws Exception {
+        // 1661788800000 2022.8.30 -
+        // 1659283200000 2022.8.01
+        // =  2505600000 30天的毫秒数
+        Long before30daysTime = System.currentTimeMillis()-2505600000L;
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
         TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712, 0);
@@ -115,11 +119,53 @@ public class ConsumerKafkaODSApp {
                 String tsStr = JsonPartUtil.getTsStr(jsonObj);
                 String tableName = JsonPartUtil.getTableNameStr(jsonObj);
                 if (StringUtil.isNotBlank(tableName)) {
-/*                    // 将表名置为小写
-                    String lowerTableName = org.apache.commons.lang3.StringUtils.toRootLowerCase(tableName);
-                    if (!lowerTableName.equals("sptb22_dq") && !lowerTableName.equals("dcs_orders")) {
-                        return null;
-                    }*/
+                    // 将表名置为小写
+                    String lowerTableName = StringUtils.toRootLowerCase(tableName);
+                    // 将SPTB02、SPTB01C、BASE_STATION_DATA、BASE_STATION_DATE_EPC变为只抽取最近一个月的数据
+                    // 1.先开始筛选SPTB02表的数据
+                    if (StringUtils.equals("sptb02", lowerTableName)){
+                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
+                        if (ddjrq !=null){
+                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                                return jsonObj;
+                            }else {
+                                return null;
+                            }
+                        }
+                    }
+                    // 2.筛选SPTB01C表的数据
+                    if (StringUtils.equals("sptb01c", lowerTableName)){
+                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
+                        if (ddjrq !=null){
+                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                                return jsonObj;
+                            }else {
+                                return null;
+                            }
+                        }
+                    }
+                    // 3.筛选Bsd的数据
+                    if (StringUtils.equals("base_station_data", lowerTableName)){
+                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("SAMPLE_U_T_C");
+                        if (ddjrq !=null){
+                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                                return jsonObj;
+                            }else {
+                                return null;
+                            }
+                        }
+                    }
+                    // 4.筛选EPC的数据
+                    if (StringUtils.equals("base_station_data_epc", lowerTableName)){
+                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("OPERATETIME");
+                        if (ddjrq !=null){
+                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                                return jsonObj;
+                            }else {
+                                return null;
+                            }
+                        }
+                    }
                     // 获取after数据
                     JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
                     afterObj.put("WAREHOUSE_CREATETIME", tsStr);
