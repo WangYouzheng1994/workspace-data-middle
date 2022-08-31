@@ -30,7 +30,7 @@
         left join dwm_vlms_sptb02 b on da.vin = b.VVIN and b.TRAFFIC_TYPE = 'G'
         LEFT JOIN A ON b.CPZDBH = A.CPZDBH
         WHERE da.info_code = #{param.infoCode}
-        ORDER BY da.source,VVIN desc
+        ORDER BY da.source desc,DDJRQ_R3 desc
         <if test="param.pageNo != 0">
             limit ${param.limitStart}, ${param.limitEnd}
         </if>
