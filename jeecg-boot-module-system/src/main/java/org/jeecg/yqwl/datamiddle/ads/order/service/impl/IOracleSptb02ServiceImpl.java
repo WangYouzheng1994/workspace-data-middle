@@ -53,6 +53,7 @@ public class IOracleSptb02ServiceImpl extends ServiceImpl<OracleSptb02Mapper, Sp
      * @return {@link List< DwmVlmsDocs>}
      */
     @Override
+    @DS("oracle-vts")
     public List<DwmVlmsDocs> selectListByVin(List<String> vinList) {
         if (CollectionUtils.isEmpty(vinList)){
             return Lists.newArrayList();
