@@ -110,7 +110,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String end_city_name = dwmSptb02.getEND_CITY_NAME();                    // 目的城市
                         String vdwdm = dwmSptb02.getVDWDM();                                    // 经销商代码
                         String dealer_name = dwmSptb02.getDEALER_NAME();                        // 经销商名称
-                        // String vysfs = dwmSptb02.getVYSFS();                                 // 原始的运输方式
+                        String vysfs = dwmSptb02.getVYSFS();                                 // 原始的运输方式
                         String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      // dwm的合出来的运输方式
                         String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      // 开始站台/港口仓库名称
                         String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          // 到达站台/港口仓库名称
@@ -134,7 +134,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         ootdTransition.setHighwayWarehouseType(highwayWarehouseType);           // ootd的赋值 公路运单物理仓库对应的仓库类型
                         Long dot_site_time = dwmSptb02.getDOT_SITE_TIME();                      // 打点到货时间
                         Long final_site_time = dwmSptb02.getFINAL_SITE_TIME();                  // 最终到货时间
-                        Long dtvsdhsj = dwmSptb02.getDTVSDHSJ();                                // DCS到货时间 (TVS到货时间)
+                        Long dtvsdhsj = dwmSptb02.getDTVSDHSJ();                                // DCS到货时间 (公路TVS到货时间)
                         // 兜底行为
                         Long dztxcsj  = dwmSptb02.getDZTXCSJ();                                 // 中铁卸车时间  兜底
                         Long dsjcfsj  = dwmSptb02.getDSJCFSJ();                                 // 始发站台/港口实际离场时间(实际出发时间)
@@ -225,8 +225,9 @@ public class OneOrderToEndDwmAppSPTB02 {
                             if (StringUtils.isNotBlank(cpzdbh)){
                                 ootdTransition.setCPZDBH(cpzdbh);
                             }
-                            // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时
-                            if (dtvsdhsj !=null){
+                            // 末端配送-DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
+                            // 在此处也更新的Dcs到货时间的原因是: 有些距离短不值得再下一个末端配送的单子的时候,但是还是会送到经销商手中,就会在S/T之间更新这个时间。
+                            if (dtvsdhsj !=null && !StringUtils.equals("J",vysfs)){
                                 ootdTransition.setDTVSDHSJ(dtvsdhsj);
                             }
 
@@ -335,8 +336,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                                     ootdTransition.setDISTRIBUTE_VEHICLE_NUM(mdac33.getInteger("NCYDE"));
                                 }
                             }
-                            // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时
-                            if (dtvsdhsj !=null){
+                            // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
+                            if (dtvsdhsj !=null && !StringUtils.equals("J",vysfs)){
                                 ootdTransition.setDTVSDHSJ(dtvsdhsj);
                             }
                             ootdTransition.setTYPE_G(1);
