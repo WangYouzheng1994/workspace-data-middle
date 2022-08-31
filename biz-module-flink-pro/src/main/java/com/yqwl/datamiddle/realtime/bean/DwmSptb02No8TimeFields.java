@@ -1373,4 +1373,9 @@ public class DwmSptb02No8TimeFields implements Serializable {
      */
     private String BRAND_NAME;
 
+    /**
+     * 逻辑删除字段,0表示未删除,1表示已删除
+     */
+    private Integer DELETE_FLAG;
+
 }
