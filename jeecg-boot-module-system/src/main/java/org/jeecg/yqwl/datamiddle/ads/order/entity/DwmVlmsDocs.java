@@ -130,5 +130,10 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "汽车品牌名")
 	private String brandName;
 
+	/**
+	 * 是否为源库数据 - 用于质量菜单详情页展示
+	 */
+	private Byte source;
+
 
 }

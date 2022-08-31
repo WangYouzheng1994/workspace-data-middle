@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DataRetrieveDetailMapper">
+
+    <resultMap id="BaseResultMap" type="org.jeecg.yqwl.datamiddle.ads.order.entity.DataRetrieveDetail">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="infoCode" column="info_code" jdbcType="BIGINT"/>
+            <result property="vin" column="vin" jdbcType="VARCHAR"/>
+            <result property="source" column="source" jdbcType="TINYINT"/>
+            <result property="isDel" column="is_del" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,info_code,vin,
+        source,is_del
+    </sql>
+    <select id="selectDocsList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs">
+        WITH
+        A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
+
+        SELECT
+            da.source,da.info_code,da.vin,
+            CASE WHEN b.CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
+            VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
+            DDJRQ_R3,b.CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+            DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
+        FROM `data_retrieve_detail` da
+        left join dwm_vlms_sptb02 b on da.vin = b.VVIN and b.TRAFFIC_TYPE = 'G'
+        LEFT JOIN A ON b.CPZDBH = A.CPZDBH
+        WHERE da.info_code = #{param.infoCode}
+        ORDER BY da.source desc
+        <if test="param.pageNo != 0">
+            limit ${param.limitStart}, ${param.limitEnd}
+        </if>
+    </select>
+</mapper>
