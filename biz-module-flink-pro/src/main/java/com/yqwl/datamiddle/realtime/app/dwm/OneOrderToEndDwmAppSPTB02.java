@@ -577,7 +577,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DOT_SITE_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
                         " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) and VALUES(DTVSDHSJ) != 0, VALUES(DTVSDHSJ), DTVSDHSJ), " +
-                        " YPE_T                         = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T), " +
+                        " TYPE_T                         = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST),  " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
                 (ps, ootd) -> {
