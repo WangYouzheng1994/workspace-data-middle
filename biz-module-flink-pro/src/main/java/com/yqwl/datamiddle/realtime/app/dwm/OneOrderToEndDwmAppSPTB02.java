@@ -405,7 +405,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " SHIPMENT_G_TIME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_G_TIME), SHIPMENT_G_TIME), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) and VALUES(DTVSDHSJ) != 0, VALUES(DTVSDHSJ), DTVSDHSJ)," +
+                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ)," +
                         " TYPE_G                        = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
@@ -576,7 +576,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) and VALUES(DTVSDHSJ) != 0, VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_T                         = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST),  " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
@@ -747,7 +747,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " CPZDBH                       = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME),  " +
                         " FINAL_SITE_TIME              = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                     = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) and VALUES(DTVSDHSJ) != 0, VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " DTVSDHSJ                     = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_S                       = if(TYPE_S = 0 , VALUES(TYPE_S), TYPE_S), " +
                         " SETTLEMENT_LAST              = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST),   " +
                         " TYPE_TC                      = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
@@ -913,7 +913,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " VEHICLE_NUM                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM ), " +
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) and VALUES(DTVSDHSJ) != 0, VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_G                        = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
