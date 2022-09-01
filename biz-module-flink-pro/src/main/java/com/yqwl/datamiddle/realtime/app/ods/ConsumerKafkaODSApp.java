@@ -56,13 +56,15 @@ public class ConsumerKafkaODSApp {
         // 1661788800000 2022.8.30 -
         // 1659283200000 2022.8.01
         // 1654012800000 2022.6.01
+        // 1656604800000 2022.7.01
         // =  2505600000 30天的毫秒数
         // =  7776000000 90天的毫秒数
         Long before30daysTime = System.currentTimeMillis()-2505600000L;
         Long before90daysTime = System.currentTimeMillis()-7776000000L;
+        Long before60daysTime = System.currentTimeMillis()-5184000000L;
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
-        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712, 0);
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804, 0);
         offsetMap.put(topicPartition, 500L);
 
         //====================================stream env配置===============================================//
@@ -90,7 +92,7 @@ public class ConsumerKafkaODSApp {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("consumer_kafka_ods_app"));
         // 设置savepoint点二级目录位置
-        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("consumer_kafka_ods_app"));
+        // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("consumer_kafka_ods_app"));
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
@@ -103,7 +105,7 @@ public class ConsumerKafkaODSApp {
                 .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
-                //.setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
+                .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 // .setBounded(OffsetsInitializer.offsets(offsetMap)) // 终止 60 6-1
                 .build();
         // 将kafka中源数据转化成DataStream
@@ -129,7 +131,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb02", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                            if (Long.valueOf(ddjrq) >= before60daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -140,7 +142,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb01c", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before30daysTime){
+                            if (Long.parseLong(ddjrq) >= before60daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
