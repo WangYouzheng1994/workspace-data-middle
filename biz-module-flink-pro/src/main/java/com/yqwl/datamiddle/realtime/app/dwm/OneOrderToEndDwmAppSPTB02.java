@@ -870,7 +870,6 @@ public class OneOrderToEndDwmAppSPTB02 {
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
                 if (StringUtils.equals(value.getTraffic_type(), "G") && "T2".equals(value.getHighwayWarehouseType())) {
                     out.collect(value);
-                    out.collect(value);
                 }
             }
         }).uid("OneOrderToEndDwmAppSPTB02FilterEndG").name("OneOrderToEndDwmAppSPTB02FilterEndG");
