@@ -55,8 +55,11 @@ public class ConsumerKafkaODSApp {
     public static void main(String[] args) throws Exception {
         // 1661788800000 2022.8.30 -
         // 1659283200000 2022.8.01
+        // 1654012800000 2022.6.01
         // =  2505600000 30天的毫秒数
+        // =  7776000000 90天的毫秒数
         Long before30daysTime = System.currentTimeMillis()-2505600000L;
+        Long before90daysTime = System.currentTimeMillis()-7776000000L;
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
         TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_ALL_0712, 0);
@@ -87,7 +90,7 @@ public class ConsumerKafkaODSApp {
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("consumer_kafka_ods_app"));
         // 设置savepoint点二级目录位置
-        // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("consumer_kafka_ods_app"));
+        env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("consumer_kafka_ods_app"));
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
@@ -137,7 +140,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb01c", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                            if (Long.parseLong(ddjrq) >= before30daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -148,7 +151,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("base_station_data", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("SAMPLE_U_T_C");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                            if (Long.parseLong(ddjrq) >= before90daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -159,7 +162,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("base_station_data_epc", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("OPERATETIME");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before30daysTime){
+                            if (Long.parseLong(ddjrq) >= before90daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
