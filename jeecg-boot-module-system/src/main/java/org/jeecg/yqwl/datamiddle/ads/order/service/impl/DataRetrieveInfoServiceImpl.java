@@ -11,6 +11,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.service.DataRetrieveDetailService;
 import org.jeecg.yqwl.datamiddle.ads.order.service.DataRetrieveInfoService;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DataRetrieveInfoMapper;
+import org.jeecg.yqwl.datamiddle.ads.order.service.IOracleSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DataRetrieveQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Administrator
@@ -28,12 +30,14 @@ import java.util.Objects;
  */
 @Service
 @DS("wareHouse")
-@Transactional(rollbackFor = Exception.class)
 public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMapper, DataRetrieveInfo>
         implements DataRetrieveInfoService {
 
     @Autowired
     private DataRetrieveDetailService dataRetrieveDetailService;
+
+    @Autowired
+    private IOracleSptb02Service oracleSptb02Service;
 
     /**
      * 保存数据检索的结果
@@ -160,9 +164,45 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
         createLimitData(query);
         Integer total = dataRetrieveDetailService.selectCountByCount(query);
         List<DwmVlmsDocs> dwmVlmsDocsList = dataRetrieveDetailService.selectDocsList(query);
+        if (CollectionUtils.isEmpty(dwmVlmsDocsList)) {
+            return page;
+        }
+        //源库数据要把源库的日期填充上
+        List<String> sourceVins = dwmVlmsDocsList.stream()
+                .filter(item -> item.getSource().equals(Byte.valueOf("1"))).map(DwmVlmsDocs::getVvin).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(sourceVins)){
+            List<DwmVlmsDocs> docsListSource = oracleSptb02Service.selectListByVin(sourceVins);
+            transplantSourceTime(docsListSource, dwmVlmsDocsList);
+        }
         page.setTotal(total.longValue());
         page.setRecords(dwmVlmsDocsList);
         return page;
+    }
+
+    private void transplantSourceTime(List<DwmVlmsDocs> docsListSource, List<DwmVlmsDocs> dwmVlmsDocsList) {
+        Map<String, DwmVlmsDocs> sourceDataMap = docsListSource.stream()
+                .collect(Collectors.toMap(DwmVlmsDocs::getVvin, DwmVlmsDocs -> DwmVlmsDocs));
+        dwmVlmsDocsList.subList(0, docsListSource.size()).forEach(item -> {
+            DwmVlmsDocs dwmVlmsDocs = sourceDataMap.get(item.getVvin());
+            if (Objects.nonNull(dwmVlmsDocs)){
+                if (Objects.nonNull(dwmVlmsDocs.getDdjrqR3())){
+                    item.setDdjrqR3(dwmVlmsDocs.getDdjrqR3());
+                }
+                if (Objects.nonNull(dwmVlmsDocs.getAssignTime())){
+                    item.setAssignTime(dwmVlmsDocs.getAssignTime());
+                }
+                if (Objects.nonNull(dwmVlmsDocs.getActualOutTime())){
+                    item.setActualOutTime(dwmVlmsDocs.getActualOutTime());
+                }
+                if (Objects.nonNull(dwmVlmsDocs.getShipmentTime())){
+                    item.setShipmentTime(dwmVlmsDocs.getShipmentTime());
+                }
+                if (Objects.nonNull(dwmVlmsDocs.getDtvsdhsj())){
+                    item.setDtvsdhsj(dwmVlmsDocs.getDtvsdhsj());
+                }
+            }
+
+        });
     }
 
 }
