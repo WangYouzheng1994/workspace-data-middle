@@ -3,18 +3,31 @@ package org.jeecg.yqwl.datamiddle.ads.order.enums;
 /**
  * 时间问题枚举类
  * 正常的业务流程： 计划下达 -》 指派 -》 出库 -》 起运 -》 到货
+ * @author dabao
  */
 public enum DateProblemEnum {
 
+    /**
+     * 指派时间早于计划下达时间
+     */
     PROBLEM_00(0,"指派时间早于计划下达时间"),
+    /**
+     * 出库时间早于指派时间
+     */
     PROBLEM_01(1,"出库时间早于指派时间"),
+    /**
+     * 起运时间早于出库时间
+     */
     PROBLEM_02(2,"起运时间早于出库时间"),
+    /**
+     * 到货时间早于起运时间
+     */
     PROBLEM_03(3,"到货时间早于起运时间");
 
     /**
      * 问题编号
      */
-    private Integer problemCode;
+    private final Integer problemCode;
     /**
      * 主题名称描述
      */

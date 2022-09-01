@@ -29,11 +29,10 @@ public class MysqlDwmVlmsSptb02ServiceImpl extends ServiceImpl<MysqlDwmVlmsSptb0
      * @param queryCriteria 查询参数
      * @author dabao
      * @date 2022/8/31
-     * @return {@link List< DwmVlmsDocs>}
+     * @return {@link List<DwmVlmsDocs>}
      */
     @Override
     public List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria) {
-        List<DwmVlmsDocs> dwmVlmsDocsList = baseMapper.selectDocsCcxdlList(queryCriteria);
-        return dwmVlmsDocsList;
+        return baseMapper.selectDocsCcxdlList(queryCriteria);
     }
 }

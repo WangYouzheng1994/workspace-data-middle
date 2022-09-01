@@ -8,7 +8,6 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DataRetrieveInfo;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
-import org.jeecg.yqwl.datamiddle.ads.order.service.DataRetrieveDetailService;
 import org.jeecg.yqwl.datamiddle.ads.order.service.DataRetrieveInfoService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DataRetrieveQuery;
 import org.springframework.beans.factory.annotation.Autowired;

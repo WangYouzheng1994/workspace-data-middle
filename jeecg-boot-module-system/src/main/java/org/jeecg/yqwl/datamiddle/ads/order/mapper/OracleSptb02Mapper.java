@@ -30,7 +30,7 @@ public interface OracleSptb02Mapper extends BaseMapper<Sptb02> {
      * @param vinList vin列表
      * @author dabao
      * @date 2022/8/31
-     * @return {@link List< DwmVlmsDocs>}
+     * @return {@link List<DwmVlmsDocs>}
      */
     List<DwmVlmsDocs> selectListByVin(@Param("list") List<String> vinList);
 }

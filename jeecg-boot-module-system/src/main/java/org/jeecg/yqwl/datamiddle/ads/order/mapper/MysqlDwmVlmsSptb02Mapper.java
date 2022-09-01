@@ -9,8 +9,20 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
 import java.util.List;
 
+/**
+ * mysql数据库的mapper
+ * @author dabao
+ * @date 2022/8/30
+ */
 @DS("wareHouse")
 public interface MysqlDwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
+    /**
+     * 根据查询你条件查询每条vin对应的时间字段
+     * @param queryCriteria 查询参数
+     * @author dabao
+     * @date 2022/9/1
+     * @return {@link List<DwmVlmsDocs>}
+     */
     List<DwmVlmsDocs> selectDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
 }

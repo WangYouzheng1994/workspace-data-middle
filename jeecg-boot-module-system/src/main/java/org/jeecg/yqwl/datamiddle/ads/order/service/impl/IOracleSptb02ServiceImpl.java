@@ -47,7 +47,7 @@ public class IOracleSptb02ServiceImpl extends ServiceImpl<OracleSptb02Mapper, Sp
 
     /**
      * 根据vin码查询数据
-     * @param vinList
+     * @param vinList 参数
      * @author dabao
      * @date 2022/8/29
      * @return {@link List< DwmVlmsDocs>}
