@@ -41,6 +41,10 @@ public class ScheduleTask {
     private DataRetrieveInfoService dataRetrieveInfoService;
 
     /**
+     * Long的初始
+     */
+    private final static Long zero = 0L;
+    /**
      * 定时检索数据 每日0点执行
      * @author dabao
      * @date 2022/8/31
@@ -101,7 +105,7 @@ public class ScheduleTask {
     private Map<Integer,List<String>> groupByProblem(List<DwmVlmsDocs> dwmVlmsDocs){
         //创建分组
         HashMap<Integer, List<String>> vinMap = new HashMap<>();
-        Long zero = 0L;
+
         dwmVlmsDocs.forEach(item -> {
             //满足第一种问题 指派时间早于计划下达时间 指派时间为空-过
             if (Objects.nonNull(item.getAssignTime())
@@ -111,26 +115,17 @@ public class ScheduleTask {
                 buildVinMap(vinMap, DateProblemEnum.PROBLEM_00.getProblemCode(), item.getVvin());
             }
             //满足第二种问题 出库时间早于指派时间+有出库时间，没有指派时间
-            if (Objects.isNull(item.getAssignTime()) && Objects.nonNull(item.getActualOutTime())
-                    || (Objects.nonNull(item.getActualOutTime())
-                        && !item.getActualOutTime().equals(zero)
-                        && item.getActualOutTime() < item.getAssignTime())){
+            if (judgmentProblem(item.getAssignTime(), item.getActualOutTime())){
                 //判断 数组是否存在，存在就加一条数据，不存在就新建一个list
                 buildVinMap(vinMap, DateProblemEnum.PROBLEM_01.getProblemCode(), item.getVvin());
             }
             //满足第三种问题 起运时间早于出库时间
-            if (Objects.isNull(item.getActualOutTime()) && Objects.nonNull(item.getShipmentTime())
-                    || (Objects.nonNull(item.getShipmentTime())
-                        && !item.getShipmentTime().equals(zero)
-                        && item.getShipmentTime() < item.getActualOutTime())){
+            if (judgmentProblem(item.getActualOutTime(), item.getShipmentTime())){
                 //判断 数组是否存在，存在就加一条数据，不存在就新建一个list
                 buildVinMap(vinMap, DateProblemEnum.PROBLEM_02.getProblemCode(), item.getVvin());
             }
             //满足第四种问题 到货时间早于起运时间
-            if (Objects.isNull(item.getShipmentTime()) && Objects.nonNull(item.getDtvsdhsj())
-                    || (Objects.nonNull(item.getDtvsdhsj())
-                        && !item.getDtvsdhsj().equals(zero)
-                        && item.getDtvsdhsj() < item.getShipmentTime())){
+            if (judgmentProblem(item.getShipmentTime(),item.getDtvsdhsj())){
                 //判断 数组是否存在，存在就加一条数据，不存在就新建一个list
                 buildVinMap(vinMap, DateProblemEnum.PROBLEM_03.getProblemCode(), item.getVvin());
             }
@@ -155,5 +150,25 @@ public class ScheduleTask {
             vins.add(vin);
             vinMap.put(problemCode, vins);
         }
+    }
+
+    /**
+     * 比较两个时间是否符合错误条件
+     * 判断条件：
+     * 1.如果靠前时间没有，但是有靠后的时间
+     * 2.两个时间都存在的前提下并且靠后时间不为0（mysql数据库中的初始值为0）
+     *   靠后时间早于靠前时间。
+     * @param preTime 理论靠前时间
+     * @param nextTime 理论靠后时间
+     * @author dabao
+     * @date 2022/9/1
+     * @return {@link Boolean} 符合错误条件返回true
+     */
+    private Boolean judgmentProblem(Long preTime, Long nextTime){
+             //条件
+        return Objects.isNull(preTime) && Objects.nonNull(nextTime)
+                || (Objects.nonNull(nextTime)
+                && !nextTime.equals(zero)
+                && nextTime < preTime);
     }
 }
