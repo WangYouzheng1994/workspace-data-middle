@@ -31,20 +31,20 @@ public interface DataRetrieveInfoService extends IService<DataRetrieveInfo> {
 
     /**
      * 分页查询
-     * @param query
+     * @param query 参数
      * @author dabao
      * @date 2022/8/30
-     * @return {@link Page< DataRetrieveInfo>}
+     * @return {@link Page<DataRetrieveInfo>}
      */
     Page<DataRetrieveInfo> selectDataRetrieveInfoPage(DataRetrieveQuery query);
 
 
     /**
      *
-     * @param query
+     * @param query 参数
      * @author dabao
      * @date 2022/8/30
-     * @return {@link Page<  DwmVlmsDocs >}
+     * @return {@link Page<DwmVlmsDocs>}
      */
     Page<DwmVlmsDocs> selectDataRetrieveDetail(DataRetrieveQuery query);
 }

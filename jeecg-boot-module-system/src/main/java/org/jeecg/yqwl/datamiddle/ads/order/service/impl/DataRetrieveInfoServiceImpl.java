@@ -121,6 +121,13 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
         return page;
     }
 
+    /**
+     * 查质量菜单主表信息
+     * @param query 查询参数
+     * @author dabao
+     * @date 2022/8/30
+     * @return {@link List<DataRetrieveInfo>}
+     */
     private List<DataRetrieveInfo> selectDataRetrieveInfoList(DataRetrieveQuery query) {
         LambdaQueryWrapper<DataRetrieveInfo> queryWrapper = new LambdaQueryWrapper<>();
         //构造查询条件
@@ -150,8 +157,8 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
     private Integer selectCountByCount(DataRetrieveQuery query) {
         LambdaQueryWrapper<DataRetrieveInfo> queryWrapper = new LambdaQueryWrapper<>();
         //此处可构造查询
-        Integer total = baseMapper.selectCount(queryWrapper);
-        return total;
+
+        return baseMapper.selectCount(queryWrapper);
     }
 
 

@@ -22,10 +22,10 @@ public interface IOracleSptb02Service extends IService<Sptb02> {
 
     /**
      * 根据vin码查询数据
-     * @param vinList
+     * @param vinList 参数
      * @author dabao
      * @date 2022/8/29
-     * @return {@link List< DwmVlmsDocs>}
+     * @return {@link List<DwmVlmsDocs>}
      */
     List<DwmVlmsDocs> selectListByVin(List<String> vinList);
 }
