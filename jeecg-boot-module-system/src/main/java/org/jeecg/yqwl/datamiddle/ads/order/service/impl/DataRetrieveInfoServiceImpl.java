@@ -132,7 +132,7 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
         LambdaQueryWrapper<DataRetrieveInfo> queryWrapper = new LambdaQueryWrapper<>();
         //构造查询条件
 
-        queryWrapper.orderByDesc(DataRetrieveInfo::getRetrieveTime, DataRetrieveInfo::getType);
+        queryWrapper.orderByDesc(DataRetrieveInfo::getRetrieveTime).orderByAsc(DataRetrieveInfo::getType);
 
         if (Objects.nonNull(query.getLimitStart()) && Objects.nonNull(query.getLimitEnd())) {
             queryWrapper.last(" limit " + query.getLimitStart() + "," + query.getLimitEnd());
