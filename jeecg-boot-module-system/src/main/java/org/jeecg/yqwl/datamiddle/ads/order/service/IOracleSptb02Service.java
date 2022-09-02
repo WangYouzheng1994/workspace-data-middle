@@ -1,17 +1,9 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
-import lombok.extern.slf4j.Slf4j;
-import org.jeecg.common.api.vo.Result;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.Sptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -27,4 +19,13 @@ public interface IOracleSptb02Service extends IService<Sptb02> {
      * @return
      */
     Integer countOracleVinOfSptb02AndSptb02d1(String vvin);
+
+    /**
+     * 根据vin码查询数据
+     * @param vinList 参数
+     * @author dabao
+     * @date 2022/8/29
+     * @return {@link List<DwmVlmsDocs>}
+     */
+    List<DwmVlmsDocs> selectListByVin(List<String> vinList);
 }

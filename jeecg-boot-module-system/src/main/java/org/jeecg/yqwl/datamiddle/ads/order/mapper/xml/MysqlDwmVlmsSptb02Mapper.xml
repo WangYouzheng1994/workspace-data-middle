@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.MysqlDwmVlmsSptb02Mapper">
+
+    <sql id="where_count_one_to_end">
+        <where>
+            BRAND_NAME = '大众'
+
+            <choose>
+                <when test="params.vvinList != null or params.selections != null ">
+                    AND VVIN IN
+                    <foreach collection="params.vvinList" item="value"  index="key" separator="," open="(" close=")">
+                        #{value}
+                    </foreach>
+                </when>
+                <otherwise>
+                    <if test="params.vvin != null and params.vvin != '' ">
+                        AND VVIN = #{params.vvin}
+                    </if>
+                </otherwise>
+            </choose>
+            <if test="params.baseName != null and params.baseName != '' ">
+                AND BASE_NAME = #{params.baseName}
+            </if>
+            <if test="params.actualOutTimeStart != null   and params.actualOutTimeStart != 0">
+                AND ACTUAL_OUT_TIME <![CDATA[ >= ]]> #{params.actualOutTimeStart}
+            </if>
+            <if test="params.actualOutTimeEnd != null   and params.actualOutTimeEnd != 0 ">
+                AND ACTUAL_OUT_TIME <![CDATA[ <= ]]>  #{params.actualOutTimeEnd}
+            </if>
+            <if test="params.vehiclePlateIssuedTimeStart != null   and params.vehiclePlateIssuedTimeStart != 0  ">
+                AND DDJRQ_R3 <![CDATA[ >= ]]> #{params.vehiclePlateIssuedTimeStart}
+            </if>
+            <if test="params.vehiclePlateIssuedTimeEnd != null   and params.vehiclePlateIssuedTimeEnd != 0 ">
+                AND DDJRQ_R3 <![CDATA[ <= ]]>  #{params.vehiclePlateIssuedTimeEnd}
+            </if>
+            <if test="params.startCityName != null and params.startCityName != '' ">
+                AND START_CITY_NAME = #{params.startCityName}
+            </if>
+            <if test="params.endCityName != null and params.endCityName != '' ">
+                AND END_CITY_NAME = #{params.endCityName}
+            </if>
+            <if test="params.dtvsdhsjStart != null   and params.dtvsdhsjStart != 0  ">
+                AND DTVSDHSJ  <![CDATA[ >= ]]> #{params.dtvsdhsjStart}
+            </if>
+            <if test="params.dtvsdhsjEnd != null   and params.dtvsdhsjEnd != 0 ">
+                AND DTVSDHSJ  <![CDATA[ <= ]]>  #{params.dtvsdhsjEnd}
+            </if>
+            <if test="params.finalSiteTimeStart != null   and params.finalSiteTimeStart != 0  ">
+                AND FINAL_SITE_TIME  <![CDATA[ >= ]]> #{params.finalSiteTimeStart}
+            </if>
+            <if test="params.finalSiteTimeEnd != null   and params.finalSiteTimeEnd != 0 ">
+                AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
+            </if>
+            <if test="params.trafficType != null   and params.trafficType != '' ">
+                AND TRAFFIC_TYPE =  #{params.trafficType}
+            </if>
+            <if test="params.cpzdbh != null   and params.cpzdbh != '' ">
+                AND CPZDBH =  #{params.cpzdbh}
+            </if>
+            <if test="params.ccxdlList != null and params.ccxdlList != '' ">
+                AND CCXDL IN
+                <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">
+                    #{value}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectDocsCcxdlList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs">
+        SELECT
+        VVIN,
+        DDJRQ_R3,ASSIGN_TIME,ACTUAL_OUT_TIME,SHIPMENT_TIME,DTVSDHSJ
+        FROM
+        dwm_vlms_sptb02  SPTB02
+        <include refid="where_count_one_to_end" />
+    </select>
+
+
+</mapper>
