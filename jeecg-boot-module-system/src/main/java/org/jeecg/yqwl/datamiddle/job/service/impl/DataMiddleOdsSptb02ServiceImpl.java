@@ -34,6 +34,7 @@ import java.util.*;
 @DS("oracle-vts")
 @Slf4j
 @Service
+@Deprecated
 public class DataMiddleOdsSptb02ServiceImpl extends ServiceImpl<DataMiddleOdsSptb02Mapper, DwdSptb02> implements DataMiddleOdsSptb02Service {
     @Resource
     private DataMiddleOdsSptb02Mapper dataMiddleOdsSptb02Mapper;
