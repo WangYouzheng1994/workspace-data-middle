@@ -27,6 +27,7 @@ import java.util.*;
 @Slf4j
 @Service
 @DS("wareHouse")
+@Deprecated
 public class DataMiddleOdsBaseStationDataAndEpcServiceImpl extends ServiceImpl<DataMiddleOdsBaseStationDataAndEpcMapper, DwdBaseStationDataEpc> implements DataMiddleOdsBaseStationDataAndEpcService {
     @Resource
     private DataMiddleOdsBaseStationDataAndEpcMapper dataAndEpcMapper;
