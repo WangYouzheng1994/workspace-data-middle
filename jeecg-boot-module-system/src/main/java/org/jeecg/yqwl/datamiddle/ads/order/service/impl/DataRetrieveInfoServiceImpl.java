@@ -15,7 +15,6 @@ import org.jeecg.yqwl.datamiddle.ads.order.service.IOracleSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DataRetrieveQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -143,9 +142,7 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
     private List<DataRetrieveInfo> selectDataRetrieveInfoList(DataRetrieveQuery query) {
         LambdaQueryWrapper<DataRetrieveInfo> queryWrapper = new LambdaQueryWrapper<>();
         //构造查询条件
-
         queryWrapper.orderByDesc(DataRetrieveInfo::getRetrieveTime).orderByAsc(DataRetrieveInfo::getType);
-
         if (Objects.nonNull(query.getLimitStart()) && Objects.nonNull(query.getLimitEnd())) {
             queryWrapper.last(" limit " + query.getLimitStart() + "," + query.getLimitEnd());
         }
