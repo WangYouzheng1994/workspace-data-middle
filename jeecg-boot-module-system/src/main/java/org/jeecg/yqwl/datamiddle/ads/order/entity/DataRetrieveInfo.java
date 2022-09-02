@@ -1,7 +1,6 @@
 package org.jeecg.yqwl.datamiddle.ads.order.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import io.swagger.models.auth.In;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -56,5 +55,25 @@ public class DataRetrieveInfo implements Serializable {
      */
     @TableLogic(value = "0")
     private Integer isDel;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    private Date updateTime;
+
+    /**
+     * 创建人
+     */
+    private String createBy;
+
+    /**
+     * 更新人
+     */
+    private String updateBy;
 
 }

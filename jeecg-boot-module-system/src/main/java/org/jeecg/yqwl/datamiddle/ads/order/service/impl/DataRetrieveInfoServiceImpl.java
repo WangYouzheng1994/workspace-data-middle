@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +26,7 @@ import java.util.stream.Collectors;
  * @createDate 2022-08-29 13:53:06
  */
 @Service
-@DS("wareHouse")
+@DS("master")
 public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMapper, DataRetrieveInfo>
         implements DataRetrieveInfoService {
 
@@ -62,6 +59,7 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
             info.setAbnormalCountSelf(value.size());
             info.setAbnormalCountOrigin(CollectionUtils.isNotEmpty(vinMapFromOracle.get(key)) ? vinMapFromOracle.get(key).size() : 0);
             info.setType(key);
+            createBaseInfo(info,null);
             infoList.add(info);
             //判断详情信息是否空并存入list
             buildDataRetrieveDetail(value, details, code, 0);
@@ -96,11 +94,25 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
                 dataRetrieveDetail.setInfoCode(code);
                 dataRetrieveDetail.setVin(item);
                 dataRetrieveDetail.setSource(isSource);
+                createBaseInfo(null, dataRetrieveDetail);
                 details.add(dataRetrieveDetail);
             });
         }
     }
 
+    private void createBaseInfo(DataRetrieveInfo info, DataRetrieveDetail dataRetrieveDetail){
+        Date now = new Date();
+        if (Objects.nonNull(info)){
+            info.setCreateTime(now);
+            info.setUpdateTime(now);
+            info.setCreateBy("定时任务_数据检索");
+        }
+        if (Objects.nonNull(dataRetrieveDetail)){
+            dataRetrieveDetail.setCreateTime(now);
+            dataRetrieveDetail.setUpdateTime(now);
+            dataRetrieveDetail.setCreateBy("定时任务_数据检索");
+        }
+    }
 
     /**
      * 分页查询

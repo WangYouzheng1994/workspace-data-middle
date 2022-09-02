@@ -18,7 +18,7 @@
     </sql>
     <select id="selectDocsList" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs">
         WITH
-        A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
+        A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM data_middle_flink.dwm_vlms_sptb02 GROUP BY CPZDBH )
 
         SELECT
             da.source,da.info_code,da.vin,
@@ -27,7 +27,7 @@
             DDJRQ_R3,b.CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
             DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
         FROM `data_retrieve_detail` da
-        left join dwm_vlms_sptb02 b on da.vin = b.VVIN and b.TRAFFIC_TYPE = 'G'
+        left join data_middle_flink.dwm_vlms_sptb02 b on da.vin = b.VVIN and b.TRAFFIC_TYPE = 'G'
         LEFT JOIN A ON b.CPZDBH = A.CPZDBH
         WHERE da.info_code = #{param.infoCode}
         ORDER BY da.source desc,DDJRQ_R3 desc

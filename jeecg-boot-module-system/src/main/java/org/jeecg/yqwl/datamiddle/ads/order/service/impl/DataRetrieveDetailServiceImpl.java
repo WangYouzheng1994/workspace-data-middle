@@ -20,7 +20,7 @@ import java.util.List;
 * @createDate 2022-08-29 13:53:06
 */
 @Service
-@DS("wareHouse")
+@DS("master")
 @Transactional(rollbackFor = Exception.class)
 public class DataRetrieveDetailServiceImpl extends ServiceImpl<DataRetrieveDetailMapper, DataRetrieveDetail>
     implements DataRetrieveDetailService{
