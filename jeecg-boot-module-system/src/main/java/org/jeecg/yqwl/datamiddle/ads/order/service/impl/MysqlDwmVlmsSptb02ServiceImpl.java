@@ -12,6 +12,8 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +35,27 @@ public class MysqlDwmVlmsSptb02ServiceImpl extends ServiceImpl<MysqlDwmVlmsSptb0
      */
     @Override
     public List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria) {
-        return baseMapper.selectDocsCcxdlList(queryCriteria);
+        //分页去查
+        Integer total = baseMapper.selectDocsCcxdlCount(queryCriteria);
+        List<DwmVlmsDocs> dwmVlmsDocsList = new ArrayList<>();
+        boolean flag = true;
+        int pageNo = 1;
+        int pageSize = 1000;
+        //计算总共多少页
+        int pageNoTotal = BigDecimal.valueOf(total).divide(BigDecimal.valueOf(pageSize), 0, BigDecimal.ROUND_UP).intValue();
+        //一千条查一次
+        queryCriteria.setPageSize(pageSize);
+        while (flag){
+            queryCriteria.setPageNo(pageNo);
+            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
+            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
+            List<DwmVlmsDocs> vlmsDocs = baseMapper.selectDocsCcxdlList(queryCriteria);
+            dwmVlmsDocsList.addAll(vlmsDocs);
+            pageNo ++;
+            if (pageNo > pageNoTotal){
+                flag = false;
+            }
+        }
+        return dwmVlmsDocsList;
     }
 }

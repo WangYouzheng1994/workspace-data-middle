@@ -50,7 +50,6 @@ public class ScheduleTask {
      * @date 2022/8/31
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    @GetMapping("/data")//测试接口用
     public void retrieveData(){
         //获取当前时间
         LocalDateTime now = LocalDateTime.now();
@@ -62,7 +61,7 @@ public class ScheduleTask {
         queryCriteria.setVehiclePlateIssuedTimeStart(lastLong);
         queryCriteria.setVehiclePlateIssuedTimeEnd(nowLong);
         queryCriteria.setTrafficType("G");
-        //查询近30日mysql中的数据
+        //查询近30日mysql中的数据 利用分页分部查
         List<DwmVlmsDocs> dwmVlmsDocs = mysqlDwmVlmsSptb02Service.selectDocsCcxdlList(queryCriteria);
         if (CollectionUtils.isEmpty(dwmVlmsDocs)){
             return;
@@ -91,7 +90,7 @@ public class ScheduleTask {
         DateTimeFormatter dfDate = DateTimeFormatter.ofPattern("yyyy年MM月dd日");
         String range = dfDate.format(last) + "0点 -- " + dfDate.format(now) + "23点59分59秒";
         dataRetrieveInfo.setRetrieveRange(range);
-        //保存数据
+        //保存数据 也要分部保存
         dataRetrieveInfoService.saveInfo(dataRetrieveInfo, vinMap, vinMapFromOracle);
     }
 

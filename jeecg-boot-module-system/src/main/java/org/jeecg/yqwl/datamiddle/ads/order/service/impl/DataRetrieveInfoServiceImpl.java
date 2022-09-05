@@ -16,6 +16,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.DataRetrieveQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,8 +70,18 @@ public class DataRetrieveInfoServiceImpl extends ServiceImpl<DataRetrieveInfoMap
         });
 
 
-        //批量处理详情
-        dataRetrieveDetailService.saveBatch(details);
+        //批量处理详情 分批处理，减少数据库压力
+        int size = 500;
+        int count = BigDecimal.valueOf(details.size()).divide(BigDecimal.valueOf(size), 0, BigDecimal.ROUND_UP).intValue();
+        for (int i = 0; i < count; i++){
+            int startIndex = i * size;
+            int endIndex = startIndex + size;
+            if (endIndex > details.size()){
+                endIndex = details.size();
+            }
+            dataRetrieveDetailService.saveBatch(details.subList(startIndex, endIndex));
+        }
+
         //保存主表信息
         saveBatch(infoList);
     }

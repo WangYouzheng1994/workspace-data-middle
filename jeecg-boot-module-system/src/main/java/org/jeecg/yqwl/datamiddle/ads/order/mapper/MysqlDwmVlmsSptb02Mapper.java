@@ -25,4 +25,6 @@ public interface MysqlDwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @return {@link List<DwmVlmsDocs>}
      */
     List<DwmVlmsDocs> selectDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
+
+    Integer selectDocsCcxdlCount(@Param("params") GetQueryCriteria queryCriteria);
 }
