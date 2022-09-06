@@ -346,4 +346,18 @@ public class OotdTransition {
      * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
      */
     private String BRAND_NAME;
+    /**
+     * 逻辑删除标记
+     */
+    private Integer DELETE_FLAG;
+
+    /**
+     * 用来给结算单编号备份的
+     */
+    private String backupsCjsdbh;
+
+    /**
+     * 运单类型
+     */
+    private String VYSFS;
 }

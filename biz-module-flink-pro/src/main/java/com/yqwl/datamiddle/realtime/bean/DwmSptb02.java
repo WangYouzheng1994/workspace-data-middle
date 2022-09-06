@@ -1394,6 +1394,9 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * 逻辑删除字段,0表示未删除,1表示已删除
+     * 20220906 此字段暂时搁置添加，后续上线此字段。
+     * ALTER TABLE `data_middle_flink`.`dwm_vlms_sptb02`
+     * ADD COLUMN `DELETE_FLAG` int NOT NULL DEFAULT 0 COMMENT '逻辑删除字段 0为没有删除 1为已删除' AFTER `BRAND_NAME`;
      */
-    private Integer DELETE_FLAG;
+    // private Integer DELETE_FLAG;
 }
