@@ -68,7 +68,8 @@
         <module>biz-module-flink-pro</module>
 		<module>biz-module-oracle-cdc</module>
         <module>biz-module-common</module>
-    </modules>
+		<module>jeecg-boot-module-system-schedule</module>
+	</modules>
 
 	<distributionManagement>
 	  	<repository>
