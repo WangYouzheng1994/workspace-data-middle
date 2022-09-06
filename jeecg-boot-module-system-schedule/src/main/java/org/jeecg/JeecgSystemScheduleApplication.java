@@ -14,11 +14,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 @MapperScan("org.jeecg.yqwl.datamiddle.ads.order.mapper")
-public class JeecgSystemDemoApplication {
+public class JeecgSystemScheduleApplication {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(JeecgSystemDemoApplication.class, args);
+        SpringApplication.run(JeecgSystemScheduleApplication.class, args);
 
     }
 

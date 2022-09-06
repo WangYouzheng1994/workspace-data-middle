@@ -4,8 +4,7 @@
 
     <sql id="where_count_one_to_end">
         <where>
-            BRAND_NAME = '大众'
-
+            HOST_COM_CODE = '1'
             <choose>
                 <when test="params.vvinList != null or params.selections != null ">
                     AND VVIN IN
@@ -74,6 +73,9 @@
         FROM
         dwm_vlms_sptb02  SPTB02
         <include refid="where_count_one_to_end" />
+        <if test="params.pageNo != 0">
+            limit ${params.limitStart}, ${params.limitEnd}
+        </if>
     </select>
     <select id="selectDocsCcxdlCount" resultType="java.lang.Integer">
         SELECT
