@@ -226,6 +226,45 @@ public class MysqlUtil {
         }
         return dimJsonObj;
     }
+    public static void incrementRedis(String hourOfDay) {
+        log.info("redisKey:{}", hourOfDay);
+        //从Redis中获取数据
+        Jedis jedis = null;
+        // 小时的总数
+        String totalStr = null;
+        try {
+            //获取jedis客户端
+            jedis = RedisUtil.getJedis();
+            //根据key到Redis中查询value
+            totalStr = jedis.get(hourOfDay);
+            //判断是否从Redis中查询到了数据
+            if (totalStr != null && totalStr.length() > 0) {
+                // ++ 做++操作 暂时用string....
+                String totalNums = Integer.parseInt(totalStr)+1+"";
+                jedis.setex(hourOfDay, 3600 * 24, totalNums);
+            } else {
+                if (jedis != null) {
+                    jedis.setex(hourOfDay, 3600 * 24, "1");
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } finally {
+            //关闭Jedis
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        log.info("+1:{}", hourOfDay);
+    }
+
+
+
+
+
+
+
     static List<Long> timeLists = new ArrayList<>();
     public static JSONObject queryNoRedis(String sql) {
         Long startTime = System.currentTimeMillis();
