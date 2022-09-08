@@ -242,6 +242,7 @@ public class MysqlUtil {
                 // ++ 做++操作 暂时用string....
                 String totalNums = Integer.parseInt(totalStr)+1+"";
                 jedis.setex(hourOfDay, 3600 * 24, totalNums);
+                log.info("redisValue:{}", totalNums);
             } else {
                 if (jedis != null) {
                     jedis.setex(hourOfDay, 3600 * 24, "1");
@@ -256,7 +257,6 @@ public class MysqlUtil {
                 jedis.close();
             }
         }
-        log.info("+1:{}", hourOfDay);
     }
 
 
