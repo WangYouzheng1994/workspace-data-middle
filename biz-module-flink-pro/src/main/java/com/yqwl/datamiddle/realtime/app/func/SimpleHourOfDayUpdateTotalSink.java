@@ -22,7 +22,7 @@ public class SimpleHourOfDayUpdateTotalSink<T> extends RichSinkFunction<String> 
 
     private static Map<Long, String> keyMap = new HashMap<>();
 
-    private final static List<Long> timestampEveryHouse = null;
+    private final static List<Long> timestampEveryHouse = new ArrayList<>();
 
     @Override
     public void invoke(String value, Context context) throws Exception {

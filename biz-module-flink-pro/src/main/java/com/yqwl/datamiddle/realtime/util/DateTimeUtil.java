@@ -22,15 +22,9 @@ public class DateTimeUtil {
     public static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) {
-
-        List<Long> timeStampEveryHouse = getTimeStampEveryHouse(1662307200000L, 72);
-
-        System.out.println(timestampToDate(1662307200000L) + ":" + timestampToHour(1662307200000L));
-
-        System.out.println("二分：" + timeStampEveryHouse.get(timeStampEveryHouse.size()/2));
-        timeStampEveryHouse.forEach(System.out::println);
-
-        //System.out.println(ZoneId.systemDefault());
+        System.out.println(System.currentTimeMillis());
+        System.out.println(timestampRound(System.currentTimeMillis()));
+        System.out.println(ZoneId.systemDefault());
     }
 
     /**
@@ -108,15 +102,31 @@ public class DateTimeUtil {
      * @return {@link List< Long>}
      */
     public static List<Long> getTimeStampEveryHouse(Long startTimestamp, Integer hourNum){
+        //取小时整数
+        Long startTime = timestampRound(startTimestamp);
         BigDecimal oneHouse = BigDecimal.valueOf(3600000L);
-        BigDecimal start = BigDecimal.valueOf(startTimestamp);
+        BigDecimal start = BigDecimal.valueOf(startTime);
         List<Long> timestampList = new ArrayList<>();
-        timestampList.add(startTimestamp);
+        timestampList.add(startTime);
         for (int i = 1; i <= hourNum; i++) {
             BigDecimal addend = oneHouse.multiply(BigDecimal.valueOf(i)).setScale(0, BigDecimal.ROUND_HALF_UP);
             timestampList.add(start.add(addend).setScale(0).longValue());
         }
         return timestampList;
+    }
+
+    public static Long timestampRound(Long time){
+        SimpleDateFormat dfDate = new SimpleDateFormat("yyyyMMdd HH");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        Date date = new Date(time);
+        Date newDate = null;
+        try {
+            newDate = formatter.parse(dfDate.format(date) + ":00:00");
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return newDate.getTime();
     }
 
     /**
