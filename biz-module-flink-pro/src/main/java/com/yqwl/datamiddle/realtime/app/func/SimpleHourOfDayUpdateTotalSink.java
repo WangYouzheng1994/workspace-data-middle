@@ -31,7 +31,8 @@ public class SimpleHourOfDayUpdateTotalSink<T> extends RichSinkFunction<String> 
         long tsNum = Long.parseLong(JsonPartUtil.getTsStr(valueObj));
         //1662480000000L 20220907日00点 时间戳 获取
         if (CollectionUtils.isEmpty(timestampEveryHouse)){
-            timestampEveryHouse.addAll(DateTimeUtil.getTimeStampEveryHouse(System.currentTimeMillis(), 72));
+            //第一次捕获数据时，将第一次cdc进入kafka的时间作为开始时间
+            timestampEveryHouse.addAll(DateTimeUtil.getTimeStampEveryHouse(tsNum, 72));
         }
         // 1.先去看是否在要求取的时间范围内
         if (tsNum>= timestampEveryHouse.get(0) && tsNum < timestampEveryHouse.get(timestampEveryHouse.size() - 1)){
