@@ -98,7 +98,14 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
                     return true;
                 }
                 return false;
-            }).collect(Collectors.groupingBy(DwmSptb02::getBaseName));
+            }).collect(Collectors.groupingBy(i -> {
+                //分组条件
+                if (!"".equals(baseBrandTime.getCqwh()) && "".equals(baseBrandTime.getCzjgsdm())){
+                    return i.getCustomerName();
+                }else {
+                    return i.getBaseName();
+                }
+            }));
 
 
             dwmSptb02Map.forEach( (key,value) -> {

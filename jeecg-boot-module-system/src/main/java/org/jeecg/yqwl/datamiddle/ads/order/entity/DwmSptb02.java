@@ -1189,6 +1189,8 @@ public class DwmSptb02 implements Serializable {
 
     private String CUSTOMER_NAME;
 
+    private String customerName;
+
     /**
      * dwm新增-发车基地名称
      */
