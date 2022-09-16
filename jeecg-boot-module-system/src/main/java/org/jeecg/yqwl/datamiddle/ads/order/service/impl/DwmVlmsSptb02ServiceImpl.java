@@ -3,10 +3,8 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.common.handler.IFillRuleHandler;
-import org.jeecg.yqwl.datamiddle.ads.order.content.TimeGranularity;
+import org.jeecg.yqwl.datamiddle.ads.order.constant.TimeGranularity;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentHaveTimestamp;
@@ -23,6 +21,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -72,7 +71,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     /**
      * 查询top10在途量列表
      *
-     * @param baseBrandTime
+     * @param baseBrandTime 查询参数
      * @return 品牌或基地  数量  时间
      */
     @Override
@@ -89,17 +88,13 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         allTime.forEach(item -> {
             //过滤符合条件的数据
             Map<String, List<DwmSptb02>> dwmSptb02Map = dwmVlmsSptb02s.stream().filter(data -> {
-
                 if (data.getFinalSiteTime() >= item.getEndTime() && data.getShipmentTime() <= item.getEndTime()) {
                     //今天没到货，今天或今天之前起运，符合条件
                     return true;
                 }
-                if (data.getShipmentTime() <= item.getEndTime() &&
-                        (data.getFinalSiteTime().equals(0L) || Objects.isNull(data.getFinalSiteTime()))) {
-                    //已经发运但是没有到货，符合
-                    return true;
-                }
-                return false;
+                //已经发运但是没有到货，符合
+                return data.getShipmentTime() <= item.getEndTime() &&
+                        (data.getFinalSiteTime().equals(0L) || Objects.isNull(data.getFinalSiteTime()));
             }).collect(Collectors.groupingBy(i -> {
                 //分组条件
                 if (!"".equals(baseBrandTime.getCqwh()) && "".equals(baseBrandTime.getCzjgsdm())) {
@@ -146,7 +141,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      * 考虑数据量会大，分页查所有符合时间断内的数据
      *
      * @param baseBrandTime 查询参数
-     * @return {@link List< DwmSptb02>}
+     * @return {@link List<DwmSptb02>}
      * @author dabao
      * @date 2022/9/16
      */
@@ -158,7 +153,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         int pageNo = 1;
         int pageSize = 5000;
         //计算总共多少页
-        int pageNoTotal = BigDecimal.valueOf(total).divide(BigDecimal.valueOf(pageSize), 0, BigDecimal.ROUND_UP).intValue();
+        int pageNoTotal = BigDecimal.valueOf(total).divide(BigDecimal.valueOf(pageSize), 0, RoundingMode.UP).intValue();
         //5千条查一次
         baseBrandTime.setPageSize(pageSize);
         while (flag) {
@@ -234,7 +229,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         //开始到结束的天数 一天86400000毫秒
         BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
-                .divide(BigDecimal.valueOf(TimeGranularity.ONE_DAY_MILLI), 0, BigDecimal.ROUND_DOWN);
+                .divide(BigDecimal.valueOf(TimeGranularity.ONE_DAY_MILLI), 0, RoundingMode.DOWN);
         Date date = new Date(baseBrandTime.getStartTime());
         for (int i = 0; i <= dayNums.intValue(); i++) {
             Calendar cd = Calendar.getInstance();

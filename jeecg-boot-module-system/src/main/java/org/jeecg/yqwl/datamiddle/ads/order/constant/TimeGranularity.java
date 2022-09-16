@@ -1,4 +1,4 @@
-package org.jeecg.yqwl.datamiddle.ads.order.content;
+package org.jeecg.yqwl.datamiddle.ads.order.constant;
 
 /**
  * 时间粒度
