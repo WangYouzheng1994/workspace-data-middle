@@ -308,7 +308,7 @@
     </select>
 
 
-
+<!-- 查所有的在时间段内的数据，   在该时间段内已经起运或者正在起运的数据并且在该时间段之前没有到货-->
     <select id="getOnwayDatas" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02">
         select dvs.CJSDBH,SHIPMENT_TIME AS SHIPMENT_TIME,FINAL_SITE_TIME AS FINAL_SITE_TIME,CQWH,CZJGSDM,BASE_NAME AS BASE_NAME,CUSTOMER_NAME as CUSTOMER_NAME,MAX(WAREHOUSE_UPDATETIME)
         from dwm_vlms_sptb02 dvs

@@ -46,6 +46,11 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       */
      List<ShipmentDTO> onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
 
+    /**
+     * 新在途量
+     * @param baseBrandTime
+     * @return
+     */
     List<DwmSptb02> getOnwayDatas(@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
