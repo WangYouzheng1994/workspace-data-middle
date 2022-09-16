@@ -1084,6 +1084,7 @@ public class DwmSptb02 implements Serializable {
      */
 
     private Long SHIPMENT_TIME;
+    private Long shipmentTime;
 
     /**
      * dwd新增-计划下达时间
@@ -1108,6 +1109,7 @@ public class DwmSptb02 implements Serializable {
      */
 
     private Long FINAL_SITE_TIME;
+    private Long finalSiteTime;
 
     /**
      * dwd新增-运单生成时间
@@ -1192,6 +1194,7 @@ public class DwmSptb02 implements Serializable {
      */
 
     private String BASE_NAME;
+    private String baseName;
 
     /**
      * dwm新增-发运仓库名称

@@ -235,11 +235,9 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SITE_TIME <![CDATA[ != ]]> 0
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SITE_TIME <![CDATA[ != ]]> 0
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  CQWH = #{params.cqwh}
@@ -309,6 +307,21 @@
 
     </select>
 
+    <select id="getOnwayDatas" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02">
+        select dvs.CJSDBH,SHIPMENT_TIME AS SHIPMENT_TIME,FINAL_SITE_TIME AS FINAL_SITE_TIME,CQWH,CZJGSDM,BASE_NAME AS BASE_NAME,MAX(WAREHOUSE_UPDATETIME)
+        from dwm_vlms_sptb02 dvs
+        where
+        dvs.SHIPMENT_TIME != 0
+        and  dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+        and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs.FINAL_SITE_TIME = 0)
+        <if test="params.cqwh != null and params.cqwh != ''">
+            AND  dvs.CQWH = #{params.cqwh}
+        </if>
+        <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+            AND dvs.CZJGSDM = #{params.czjgsdm}
+        </if>
+        GROUP BY dvs.CJSDBH,dvs.SHIPMENT_TIME,dvs.FINAL_SITE_TIME,dvs.CQWH,dvs.CZJGSDM,dvs.BASE_NAME
+    </select>
     <!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
     <select id="onWayList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
@@ -410,7 +423,7 @@
             dwm_vlms_sptb02 v
             <where>
                 <if test="  params.startTime != null and params.endTime != null">
-                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  v.CQWH = #{params.cqwh}
@@ -440,21 +453,13 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SITE_TIME <![CDATA[ != ]]> 0
+                    AND (FINAL_SITE_TIME <![CDATA[ < ]]> THEORY_SITE_TIME OR
+                    (FINAL_SITE_TIME <![CDATA[ = ]]> 0 and THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND FINAL_SITE_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND FINAL_SITE_TIME <![CDATA[ < ]]> THEORY_SITE_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR FINAL_SITE_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  CQWH = #{params.cqwh}
                 </if>
@@ -483,21 +488,14 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
+                    AND ( SHIPMENT_TIME <![CDATA[ < ]]> THEORY_SHIPMENT_TIME OR
+--                     实际还没起运，但是 理论起运时间在当前时间之后，视为一条正常数据
+                    (SHIPMENT_TIME <![CDATA[ = ]]> 0 AND THEORY_SHIPMENT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND SHIPMENT_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND SHIPMENT_TIME <![CDATA[ < ]]> THEORY_SHIPMENT_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR SHIPMENT_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SHIPMENT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  CQWH = #{params.cqwh}
                 </if>
@@ -561,21 +559,13 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_OUT_TIME <![CDATA[ != ]]> 0
+                    AND (ACTUAL_OUT_TIME <![CDATA[ < ]]> THEORY_OUT_TIME OR
+                    (ACTUAL_OUT_TIME <![CDATA[ = ]]> 0 and THEORY_OUT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND ACTUAL_OUT_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND ACTUAL_OUT_TIME <![CDATA[ < ]]> THEORY_OUT_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR ACTUAL_OUT_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_OUT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  CQWH = #{params.cqwh}
                 </if>
@@ -604,11 +594,9 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_OUT_TIME <![CDATA[ != ]]> 0
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_OUT_TIME <![CDATA[ != ]]> 0
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  CQWH = #{params.cqwh}
@@ -745,5 +733,6 @@
         dwm_vlms_sptb02
         <include refid="where_count_one_to_end" />
     </select>
+
 
 </mapper>

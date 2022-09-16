@@ -115,6 +115,13 @@ public class DateTimeUtil {
         return timestampList;
     }
 
+    /**
+     * 取正小时的时间戳
+     * @param time 时间戳参数
+     * @author dabao
+     * @date 2022/9/14
+     * @return {@link Long}
+     */
     public static Long timestampRound(Long time){
         SimpleDateFormat dfDate = new SimpleDateFormat("yyyyMMdd HH");
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd HH:mm:ss");

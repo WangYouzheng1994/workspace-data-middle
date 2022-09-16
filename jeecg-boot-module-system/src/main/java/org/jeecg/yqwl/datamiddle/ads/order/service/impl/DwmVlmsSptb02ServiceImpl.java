@@ -1,15 +1,13 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.common.util.DateUtils;
+import org.jeecg.common.handler.IFillRuleHandler;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentHaveTimestamp;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
@@ -22,7 +20,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -37,6 +37,10 @@ import java.util.*;
 public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, DwmVlmsSptb02> implements IDwmVlmsSptb02Service {
     @Resource
     private DwmVlmsSptb02Mapper dwmVlmsSptb02Mapper;
+
+    private static final Long ONE_DAY_MILLI = 86400000L;
+
+    private static final Long ONE_MONTH_MILLI = 2592000000L;
 
     /**
      * 查询出库量列表
@@ -70,10 +74,113 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public Result<ShipmentVO> findTop10OnWayList(GetBaseBrandTime baseBrandTime) {
-        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.onWayList(baseBrandTime);
-        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
+        //考虑数据量问题，目前只显示30天的在运量
+        if (baseBrandTime.getEndTime() - baseBrandTime.getStartTime() > ONE_MONTH_MILLI){
+            baseBrandTime.setEndTime(baseBrandTime.getStartTime() + ONE_MONTH_MILLI.longValue());
+        }
+        //查出该时间段内已经起运，没有实际到货的数据
+        List<DwmSptb02> dwmVlmsSptb02s = dwmVlmsSptb02Mapper.getOnwayDatas(baseBrandTime);
+        //创建时间段和计量单位（年月日分组）的数组
+        List<ShipmentHaveTimestamp> allTime = createAllTime(baseBrandTime);
+
+        //构造ShipmentDTO
+        List<ShipmentDTO> shipmentDTOS = new ArrayList<>();
+        allTime.forEach(item -> {
+            //计算符合条件的数据量
+            Map<String, List<DwmSptb02>> dwmSptb02Map = dwmVlmsSptb02s.stream().filter(data -> {
+
+                if (data.getFinalSiteTime() >= item.getEndTime() && data.getShipmentTime() <= item.getEndTime()){
+                    //今天没到货，今天或今天之前起运，符合条件
+                    return true;
+                }
+                if (data.getShipmentTime() <= item.getEndTime() &&
+                        (data.getFinalSiteTime().equals(0L) || Objects.isNull(data.getFinalSiteTime())) ){
+                    //已经发运但是没有到货
+                    return true;
+                }
+                return false;
+            }).collect(Collectors.groupingBy(DwmSptb02::getBaseName));
+
+
+            dwmSptb02Map.forEach( (key,value) -> {
+                ShipmentDTO shipmentDTO = new ShipmentDTO();
+                shipmentDTO.setTotalNum(value.size());
+                shipmentDTO.setGroupName(key);
+                shipmentDTO.setDates(item.getDates());
+                shipmentDTOS.add(shipmentDTO);
+            });
+        });
+
+        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipmentDTOS,baseBrandTime);
         return Result.OK(resultVO);
     }
+
+    private List<ShipmentHaveTimestamp> createAllTime(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentHaveTimestamp> times = new ArrayList<>();
+        //暂时按天计算，按其他时间粒度计算有歧义
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            //开始到结束的天数 一天86400000毫秒
+            BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
+                    .divide(BigDecimal.valueOf(ONE_DAY_MILLI), 0, BigDecimal.ROUND_DOWN);
+            Date date = new Date(baseBrandTime.getStartTime());
+            for (int i = 0; i <= dayNums.intValue(); i++){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                cd.add(Calendar.DATE,i);
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(dateFormat.format(cd.getTime()));
+                haveTimestamp.setDateTimestamp(cd.getTimeInMillis());
+                haveTimestamp.setEndTime(cd.getTimeInMillis() + ONE_DAY_MILLI);
+                times.add(haveTimestamp);
+            }
+//        else if ("week".equals(baseBrandTime.getTimeType())) {
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-ww");
+//            Date startDate = new Date(baseBrandTime.getStartTime());
+//            //开始到结束的天数 一天86400000毫秒
+//            BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
+//                    .divide(BigDecimal.valueOf(86400000), 0, BigDecimal.ROUND_UP);
+//
+//            //计算周数
+//            int weekNum = dayNums.divide(BigDecimal.valueOf(7),0,BigDecimal.ROUND_UP).intValue();
+//            for (int i = 1; i <= weekNum; i++){
+//                Calendar cd = Calendar.getInstance();
+//                cd.setTime(startDate);
+//                cd.add(Calendar.WEEK_OF_YEAR,i);
+//                times.add(dateFormat.format(cd.getTime()));
+//            }
+//        } else if ("month".equals(baseBrandTime.getTimeType())) {
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
+//            Date startDate = new Date(baseBrandTime.getStartTime());
+//            Date endDate = new Date(baseBrandTime.getEndTime());
+//            int startMonth = DateUtils.getMonth(startDate);
+//            int endMonth = DateUtils.getMonth(endDate);
+//            //计算年数
+//            int years = DateUtils.getYear(startDate) - DateUtils.getYear(endDate);
+//            int monthNum = years * 12 + endMonth - startMonth + 1;
+//            for (int i = 1; i <= monthNum; i++){
+//                Calendar cd = Calendar.getInstance();
+//                cd.setTime(startDate);
+//                cd.add(Calendar.MONTH,i);
+//                times.add(dateFormat.format(cd.getTime()));
+//            }
+//        } else if ("quarter".equals(baseBrandTime.getTimeType())) {
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
+//            Date startDate = new Date(baseBrandTime.getStartTime());
+//            int startSeason = DateUtils.getSeason(startDate);
+//            int endSeason = DateUtils.getSeason(new Date(baseBrandTime.getEndTime()));
+//            int seasonNum = endSeason - startSeason + 1;
+//            for (int i = 1; i <= seasonNum; i++){
+//                Calendar cd = Calendar.getInstance();
+//                cd.setTime(startDate);
+//
+//                times.add(dateFormat.format(cd.getTime()));
+//            }
+//        } else {
+//
+//        }
+        return times;
+    }
+
     /**
      * 按条件查询到货量
      *
