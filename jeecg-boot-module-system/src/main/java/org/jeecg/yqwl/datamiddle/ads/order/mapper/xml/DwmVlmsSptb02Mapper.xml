@@ -307,6 +307,8 @@
 
     </select>
 
+
+
     <select id="getOnwayDatas" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02">
         select dvs.CJSDBH,SHIPMENT_TIME AS SHIPMENT_TIME,FINAL_SITE_TIME AS FINAL_SITE_TIME,CQWH,CZJGSDM,BASE_NAME AS BASE_NAME,MAX(WAREHOUSE_UPDATETIME)
         from dwm_vlms_sptb02 dvs
@@ -321,6 +323,9 @@
             AND dvs.CZJGSDM = #{params.czjgsdm}
         </if>
         GROUP BY dvs.CJSDBH,dvs.SHIPMENT_TIME,dvs.FINAL_SITE_TIME,dvs.CQWH,dvs.CZJGSDM,dvs.BASE_NAME
+        <if test="params.pageNo != 0">
+            limit ${params.limitStart}, ${params.limitEnd}
+        </if>
     </select>
     <!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
     <select id="onWayList"
@@ -423,7 +428,7 @@
             dwm_vlms_sptb02 v
             <where>
                 <if test="  params.startTime != null and params.endTime != null">
-                    AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
+                    AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
                     AND  v.CQWH = #{params.cqwh}
@@ -732,6 +737,21 @@
         FROM
         dwm_vlms_sptb02
         <include refid="where_count_one_to_end" />
+    </select>
+
+    <select id="getOnwayDatasCount" resultType="java.lang.Integer">
+        select count(distinct CJSDBH)
+        from dwm_vlms_sptb02 dvs
+        where
+        dvs.SHIPMENT_TIME != 0
+        and  dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+        and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs.FINAL_SITE_TIME = 0)
+        <if test="params.cqwh != null and params.cqwh != ''">
+            AND  dvs.CQWH = #{params.cqwh}
+        </if>
+        <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+            AND dvs.CZJGSDM = #{params.czjgsdm}
+        </if>
     </select>
 
 

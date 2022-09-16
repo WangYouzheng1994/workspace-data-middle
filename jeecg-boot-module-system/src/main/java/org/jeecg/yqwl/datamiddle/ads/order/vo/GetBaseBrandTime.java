@@ -40,6 +40,14 @@ public class GetBaseBrandTime {
      */
     private String czjgsdm;
 
+    private Integer pageNo;
+
+    private Integer pageSize;
+
+    private Integer limitStart;
+
+    private Integer limitEnd;
+
 
     public static void main(String[] args) {
         DateUtil.rangeToList(DateUtil.offsetDay(new Date(), -7), new Date(), DateField.DAY_OF_YEAR);

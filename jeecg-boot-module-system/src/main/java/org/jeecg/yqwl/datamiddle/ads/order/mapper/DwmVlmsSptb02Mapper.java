@@ -154,4 +154,5 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     Integer countDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
 
 
+    Integer getOnwayDatasCount(@Param("params") GetBaseBrandTime baseBrandTime);
 }
