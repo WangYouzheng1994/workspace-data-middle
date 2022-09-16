@@ -360,4 +360,10 @@ public class OotdTransition {
      * 运单类型
      */
     private String VYSFS;
+
+    /**
+     * SPTB02.CQRR
+     * 存储区域公司
+     */
+    private String CQRR;
 }
