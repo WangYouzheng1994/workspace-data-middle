@@ -130,7 +130,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
 
                             /**
-                             //理论起运时间
+                             //理论起运时间 和 理论出库时间
                              //关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
                              // 获取车架号 VVIN 从mysql中获取
                              * 查询 ods_vlms_lc_spec_config
@@ -146,8 +146,16 @@ public class WaybillDwmAppSptb02Simple {
                             String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
                             log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
                             if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
-                                String specConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
-                                JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, specConfigSql, hostComCode, baseCode, transModeCode);
+                                //SPEC_CODE 指标代码 0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
+                                String shipmentSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
+                                        "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
+                                //2022-09-19 新增--理论出库时间
+                                String outSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
+                                        "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '2' limit 1 ";
+
+                                JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, shipmentSpecConfigSql, hostComCode, baseCode, transModeCode);
+                                JSONObject outSpecConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, outSpecConfigSql, hostComCode, baseCode, transModeCode);
+                                //=========================理论起运时间==================================//
                                 if (specConfig != null) {
                                     // 定义要增加的时间戳
                                     Long outSiteTime = null;
@@ -175,6 +183,35 @@ public class WaybillDwmAppSptb02Simple {
                                         DateTime parse = DateUtil.parse(formatDate);
                                         DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
                                         dwmSptb02.setTHEORY_SHIPMENT_TIME(newStepTime.getTime());
+                                    }
+                                }
+                                //==================理论出库时间===========================//
+                                if (outSpecConfig != null) {
+                                    // 定义要增加的时间戳
+                                    Long outTime = null;
+                                    // 获取增加的时间步长
+                                    String hours = outSpecConfig.getString("STANDARD_HOURS");
+                                    // 获取前置节点代码
+                                    String nodeCode = outSpecConfig.getString("START_CAL_NODE_CODE").trim();
+                                    /**
+                                     * DZJDJRQ     主机厂计划下达时间       一汽大众
+                                     * DYSSZPSJ    运输商指派时间       其他主机厂
+                                     */
+                                    if ("DZJDJRQ".equals(nodeCode)) {
+                                        outTime = dwmSptb02.getDPZRQ();
+                                    }
+                                    if ("DYSSZPSJ".equals(nodeCode)) {
+                                        outTime = dwmSptb02.getDYSSZPSJ();
+                                    }
+
+                                    if (outTime != null) {
+                                        Date outDate = new Date(outTime);
+                                        // 格式化时间
+                                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                        String formatDate = formatter.format(outDate);
+                                        DateTime parse = DateUtil.parse(formatDate);
+                                        DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
+                                        dwmSptb02.setTHEORY_OUT_TIME(newStepTime.getTime());
                                     }
                                 }
                             }
