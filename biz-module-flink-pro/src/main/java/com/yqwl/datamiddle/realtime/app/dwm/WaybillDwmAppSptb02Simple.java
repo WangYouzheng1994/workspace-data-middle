@@ -154,14 +154,14 @@ public class WaybillDwmAppSptb02Simple {
                                         "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '2' limit 1 ";
 
                                 JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, shipmentSpecConfigSql, hostComCode, baseCode, transModeCode);
-                                JSONObject outSpecConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, outSpecConfigSql, hostComCode, baseCode, transModeCode);
+                                JSONObject outSpecConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + "-out", outSpecConfigSql, hostComCode, baseCode, transModeCode);
                                 //=========================理论起运时间==================================//
                                 if (specConfig != null) {
                                     // 定义要增加的时间戳
                                     Long outSiteTime = null;
                                     // 获取增加的时间步长
                                     String hours = specConfig.getString("STANDARD_HOURS");
-                                    // 获取前置节点代码
+                                    //获取前置节点代码
                                     String nodeCode = specConfig.getString("START_CAL_NODE_CODE").trim();
                                     /**
                                      * DZJDJRQ 主机厂计划下达时间       公路
