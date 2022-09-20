@@ -88,7 +88,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @PostMapping("/selectArrivalRate")
     public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
         BigDecimal num = new BigDecimal("100");
-        // TODO: 起运及时率
+        // 起运及时率
         //获取起运样本总量
         BigDecimal totalShipment = dwmVlmsSptb02Service.getTotalShipment(baseBrandTime);
         //获取起运准时样本数量
@@ -102,7 +102,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
             shipmentValue = timelyShipment.divide(totalShipment, 2, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
-        //TODO: 出库及时率
+        //出库及时率
         //获取出库准时样本数量
         BigDecimal onTimeDelivery = dwmVlmsSptb02Service.getOnTimeDelivery(baseBrandTime);
         //获取出库样本总量
@@ -116,7 +116,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         }
 
 
-        // TODO: 到货准时率计算
+        //  到货准时率计算
         // 到货样本总量  1733
         BigDecimal arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
         //到货准时样本数量   52
@@ -129,11 +129,14 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
             arrivalValue = arriveOnTime.divide(arrivalRate, 2, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
-        // TODO: 合并出返回对象。
+        //合并出返回对象。
        TimelinessRatioVO timelinessRatioVO = new TimelinessRatioVO();
-        timelinessRatioVO.setStartPercent(shipmentValue);//起运及时率
-        timelinessRatioVO.setOutWarehousePercent(Outbound);//出库及时率
-        timelinessRatioVO.setEndPercent(arrivalValue);//到货及时率
+        //起运及时率
+        timelinessRatioVO.setStartPercent(shipmentValue);
+        //出库及时率
+        timelinessRatioVO.setOutWarehousePercent(Outbound);
+        //到货及时率
+        timelinessRatioVO.setEndPercent(arrivalValue);
         return Result.OK(timelinessRatioVO);
     }
 
