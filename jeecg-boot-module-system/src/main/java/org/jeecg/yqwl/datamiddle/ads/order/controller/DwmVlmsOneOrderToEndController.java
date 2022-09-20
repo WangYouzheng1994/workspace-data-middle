@@ -690,8 +690,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 queryCriteria.setTypeS(0);
             }
         }
-
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+        //判断有没有末位vin码查询， 如果有,判断是不是6-7位
+        if (StringUtils.isNotBlank(queryCriteria.getLastVin())){
+            if (queryCriteria.getLastVin().length() < 6 || queryCriteria.getLastVin().length() > 7){
+                throw new SecurityException("末位查询只支持6位或者7位VIN码尾号，请核实重试");
+            }
+        }
 
         // TODO: 临时设置成只看大众，后续改成根据角色查询不同客户品牌。
 

@@ -25,6 +25,11 @@ public class GetQueryCriteria {
     private  String vvin;
 
     /**
+     * 末位vin码 6-7位查询
+     */
+    private String lastVin;
+
+    /**
      * 基地
      */
     private String baseName;

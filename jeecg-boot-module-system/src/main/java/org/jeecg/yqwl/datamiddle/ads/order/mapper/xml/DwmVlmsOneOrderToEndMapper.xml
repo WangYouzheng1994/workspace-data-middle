@@ -84,6 +84,9 @@
             <if test="params.typeS != null  and params.typeS != ''  ">
                 AND TYPE_S =  #{params.typeS}
             </if>
+            <if test="params.lastVin != null and params.lastVin != ''">
+                AND VIN LIKE concat('%',#{params.lastVin})
+            </if>
         </where>
     </sql>
 
