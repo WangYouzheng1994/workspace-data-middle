@@ -6,6 +6,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
@@ -26,6 +27,7 @@ import org.apache.flink.util.Collector;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -411,6 +413,43 @@ public class WaybillDwmAppSptb02Simple {
                                     }
                                 }
                             }
+
+
+                            // ======================= 理论到货时间 ==================================//
+                            // 一般取  sptb02表的DBZDHSJ_DZ
+                            // 佛山水运系统理论到货时间按照以下逻辑单独处理
+                            // update LC_VW_DH_RECORD a set a.dlldhsj_xt = a.dzjdjrq + 2.2 + (select b.nbzwlsj_dz FROM sptb02 b where b.cjsdbh = a.cjsdbh)
+                            // where a.vysfs = 'S' and a.vlj = '佛山基地';
+                            //同城或者公路计划系统理论到货时间按照以下逻辑单独处理
+                            //   update LC_VW_DH_RECORD
+                            //    set  DLLDHSJ_XT = trunc(DLLDHSJ_XT,'dd')+1-1/(24*60*60)
+                            //    WHERE
+                            //    istc = 'YES' OR VYSFS = 'G';
+                            if (Objects.nonNull(dwmSptb02.getDBZDHSJ_DZ()) && !dwmSptb02.getDBZDHSJ_DZ().equals(0L)){
+                                Long theorySiteTime = dwmSptb02.getDBZDHSJ_DZ();
+                                //处理佛山水运
+                                // CQWH : 长春0431  成都028  佛山0757  青岛0532  天津022
+                                if ("S".equals(dwmSptb02.getTRAFFIC_TYPE()) && "0757".equals(dwmSptb02.getCQWH())){
+                                    String ddjrqSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C +  " where CPCDBH = '" + dwmSptb02.getCPCDBH() + "' limit 1 ";
+                                    JSONObject ddjrqConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB01C + "-ddjrq", ddjrqSql, dwmSptb02.getCPCDBH());
+                                    if (Objects.nonNull(ddjrqConfig)){
+                                        //2.2天 = 190080000 ms
+                                        theorySiteTime = Long.parseLong(ddjrqConfig.getString("DDJRQ")) + theorySiteTime + 190080000L;
+                                    }
+                                }
+                                //处理同城或者公路计划
+                                if ("G".equals(dwmSptb02.getTRAFFIC_TYPE()) || Integer.valueOf(1).equals(dwmSptb02.getTYPE_TC())){
+                                    //将日期转为今天的 23:59:59
+                                    Date outDate = new Date(dwmSptb02.getDBZDHSJ_DZ());
+                                    // 格式化时间
+                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                    String formatDate = formatter.format(outDate) + " 23:59:59";
+                                    DateTime parse = DateUtil.parse(formatDate);
+                                    theorySiteTime = parse.getTime();
+                                }
+                                dwmSptb02.setTHEORY_SITE_TIME(theorySiteTime);
+                            }
+
 //                            // 分配及时率  出库及时率  起运及时率 到货及时率
 //                            /**
 //                             * 处理理论出库时间 THEORY_OUT_TIME
