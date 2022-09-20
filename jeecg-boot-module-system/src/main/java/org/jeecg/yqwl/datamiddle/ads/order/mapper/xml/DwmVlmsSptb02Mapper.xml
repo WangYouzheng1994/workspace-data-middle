@@ -459,8 +459,8 @@
             dwm_vlms_sptb02
             <where>
                 THEORY_SITE_TIME <![CDATA[ != ]]> 0
-                    AND (FINAL_SITE_TIME <![CDATA[ < ]]> THEORY_SITE_TIME OR
-                    (FINAL_SITE_TIME <![CDATA[ = ]]> 0 and THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
+                    AND (DDHSJ_XT <![CDATA[ < ]]> THEORY_SITE_TIME OR
+                    (DDHSJ_XT <![CDATA[ = ]]> 0 and THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
