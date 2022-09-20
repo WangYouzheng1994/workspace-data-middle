@@ -690,10 +690,15 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 queryCriteria.setTypeS(0);
             }
         }
+        Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
         //判断有没有末位vin码查询， 如果有,判断是不是6-7位
         if (StringUtils.isNotBlank(queryCriteria.getLastVin())){
             if (queryCriteria.getLastVin().length() < 6 || queryCriteria.getLastVin().length() > 7){
-                throw new SecurityException("末位查询只支持6位或者7位VIN码尾号，请核实重试");
+                List<DwmVlmsOneOrderToEnd> list = new ArrayList<>();
+                page.setRecords(list);
+                page.setTotal(0L);
+                return Result.error("末位查询只支持6位或者7位VIN码尾号，请核实重试",page);
+
             }
         }
 
@@ -701,7 +706,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
 
         // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- END
         Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
-        Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+
         List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
         page.setRecords(pageList);
         page.setTotal(total);
