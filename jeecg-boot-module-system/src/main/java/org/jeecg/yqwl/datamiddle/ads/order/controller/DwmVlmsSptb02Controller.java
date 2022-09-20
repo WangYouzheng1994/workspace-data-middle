@@ -99,7 +99,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
             shipmentValue = 0;
         }else{
             //起运准时样本数量/起运样本总数 * 100  转换成Integer
-            shipmentValue = timelyShipment.divide(totalShipment, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+            shipmentValue = timelyShipment.divide(totalShipment, 2, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
         //TODO: 出库及时率
@@ -112,7 +112,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         if ( totalOutboundQuantity.equals(BigDecimal.ZERO) ) {
             Outbound = 0;
         }else{
-            Outbound = onTimeDelivery.divide(totalOutboundQuantity, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+            Outbound = onTimeDelivery.divide(totalOutboundQuantity, 2, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
 
@@ -126,7 +126,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         if ( arrivalRate.equals(BigDecimal.ZERO) ) {
             arrivalValue = 0;
         }else{
-            arrivalValue = arriveOnTime.divide(arrivalRate, 4, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
+            arrivalValue = arriveOnTime.divide(arrivalRate, 2, BigDecimal.ROUND_HALF_UP).multiply(num).intValue();
         }
 
         // TODO: 合并出返回对象。
