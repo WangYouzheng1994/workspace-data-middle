@@ -281,7 +281,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
 //        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
-        Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
+        Integer integer = dwmVlmsOneOrderToEndService.selectDocsCount(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;

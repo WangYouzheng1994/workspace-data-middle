@@ -13,6 +13,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.VvinGroupQuery;
+import org.omg.PortableInterceptor.INACTIVE;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -311,10 +312,14 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             vvinSize = distinctVvin.size();
         }
         if (vvinSize > shardsNumber) {
-            List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
-            List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
+            //vin码数量超过设定值
+            GetQueryCriteria criteria = (GetQueryCriteria) queryCriteria.clone();
+
+            List<VvinGroupQuery> vvinGroup = buildVvinGroup(criteria);
+            List<DwmVlmsDocs> vlmsDocs = buildNewQuery(criteria, vvinGroup);
             return vlmsDocs;
         }
+        //没有大批量vin码的情况
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
         return dwmVlmsDocs;
     }
@@ -406,6 +411,51 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             vvinGroup.add(vvinGroupQuery);
         }
         return vvinGroup;
+    }
+
+    /**
+     * 分片查总数
+     *
+     * @param queryCriteria 查询条件
+     * @return
+     */
+    public Integer selectDocsCount(GetQueryCriteria queryCriteria) {
+        List<String> vvinList = queryCriteria.getVvinList();
+        GetQueryCriteria criteria = (GetQueryCriteria) queryCriteria.clone();
+        int vvinSize = vvinList.size();
+        Integer totalFinal = Integer.valueOf(0);
+        if (vvinSize > shardsNumber){
+            List<Integer> countGroup = new ArrayList<>();
+            //计算需要分几组
+            BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);
+            BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
+            //结果要向上取整
+            int count = vvinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
+
+            //开始处理
+            for (int i = 1; i <= count; i++) {
+                //数组截取开始下标
+                int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
+                //数组截取结束下标
+                int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
+                if (endIndex > vvinSize) {
+                    endIndex = vvinSize;
+                }
+                //截取数组
+                List<String> newVinList = vvinList.subList(startIndex, endIndex);
+                //创建新的查询
+                criteria.setVvinList(newVinList);
+                //查询数据
+                Integer total = countDocsList(criteria);
+                countGroup.add(total);
+            }
+            if (Objects.nonNull(countGroup)){
+                totalFinal = countGroup.stream().reduce(0, (n1, n2) -> n1 + n2);
+            }
+            return totalFinal;
+        }
+        //正常查询
+        return countDocsList(queryCriteria);
     }
 
     /**

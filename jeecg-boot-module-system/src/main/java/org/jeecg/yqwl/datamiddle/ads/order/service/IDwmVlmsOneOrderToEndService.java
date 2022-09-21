@@ -59,6 +59,15 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     List<DwmVlmsDocs> selectDocsList2(GetQueryCriteria queryCriteria);
 
+    /**
+     * 分片查总数
+     * @param queryCriteria
+     * @author dabao
+     * @date 2022/9/21
+     * @return {@link Integer}
+     */
+    Integer selectDocsCount(GetQueryCriteria queryCriteria);
+
 
 
     /**

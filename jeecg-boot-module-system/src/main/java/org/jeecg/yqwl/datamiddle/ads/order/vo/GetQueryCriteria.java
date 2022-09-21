@@ -12,7 +12,7 @@ import java.util.List;
  * @version 1.0
  */
 @Data
-public class GetQueryCriteria {
+public class GetQueryCriteria implements Cloneable{
 
     /**
      * 底盘号   one_order_to_end 表字段
@@ -190,5 +190,16 @@ public class GetQueryCriteria {
      * 是否为水路的运输方式 1为是 0为否 (20220719添加)
      */
     private Integer typeS;
+
+    @Override
+    public Object clone(){
+        GetQueryCriteria getQueryCriteria = null;
+        try{
+            getQueryCriteria = (GetQueryCriteria)super.clone();
+        }catch(CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return getQueryCriteria;
+    }
 
 }
