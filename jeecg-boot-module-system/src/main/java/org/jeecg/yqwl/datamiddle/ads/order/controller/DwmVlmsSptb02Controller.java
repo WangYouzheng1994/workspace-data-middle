@@ -165,7 +165,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         //  到货准时率计算
         // 到货样本总量  1733
         BigDecimal arrivalRate = dwmVlmsSptb02Service.findArrivalRate(baseBrandTime);
-        //到货准时样本数量   52
+        // 到货准时样本数量   52
         BigDecimal arriveOnTime = dwmVlmsSptb02Service.getArriveOnTime(baseBrandTime);
         Integer arrivalValue;
         //判断是否为0,若为0,返回0,否则返回计算

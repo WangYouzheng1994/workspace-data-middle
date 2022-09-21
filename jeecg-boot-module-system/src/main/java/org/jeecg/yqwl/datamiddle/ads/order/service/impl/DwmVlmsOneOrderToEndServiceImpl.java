@@ -166,6 +166,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             page.setTotal(finalTotal);
             return page;
         }
+        //正常情况处理
+        Integer total = countOneOrderToEndList(queryCriteria);
+        List<DwmVlmsOneOrderToEnd> pageList = selectOneOrderToEndList(queryCriteria);
+        page.setRecords(pageList);
+        page.setTotal(total);
 
         return page;
     }
@@ -230,7 +235,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             //截取数组
             List<String> newVinList = vinList.subList(startIndex, endIndex);
             //创建新的查询
-            queryCriteria.setVvinList(newVinList);
+            queryCriteria.setVinList(newVinList);
             //查询数据
             Integer total = countOneOrderToEndList(queryCriteria);
             //将本次查询数据存入到list

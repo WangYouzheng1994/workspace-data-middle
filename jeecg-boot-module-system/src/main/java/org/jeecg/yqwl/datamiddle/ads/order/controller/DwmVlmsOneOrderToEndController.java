@@ -704,13 +704,12 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         // TODO: 临时设置成只看大众，后续改成根据角色查询不同客户品牌。
 
         // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- END
-        Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
+//        Integer total = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
+//        List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+//        page.setRecords(pageList);
+//        page.setTotal(total);
 
-        List<DwmVlmsOneOrderToEnd> pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
-        page.setRecords(pageList);
-        page.setTotal(total);
-
-        Page<DwmVlmsOneOrderToEnd> page1 = dwmVlmsOneOrderToEndService.selectOneOrderToEndPage(queryCriteria);
+        page = dwmVlmsOneOrderToEndService.selectOneOrderToEndPage(queryCriteria);
         return Result.OK(page);
     }
 }
