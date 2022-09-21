@@ -47,10 +47,67 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectAmountOfPlan")
     public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
+        log.info("查询了计划量");
         Result<ShipmentVO> dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
         //  参数校验,去除key的空值
         Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(dayAmountOfPlan);
         return shipmentVOResult ;
+    }
+
+    /**
+     * 出库量
+     * @param
+     * @return
+     */
+    @AutoLog(value = "DwmVlmsSptb02-出库量")
+    @ApiOperation(value = "DwmVlmsSptb02-出库量", notes = "DwmVlmsSptb02-出库量")
+    @PostMapping(value = "/findTop10StockOutList")
+    public Result<?> findTop10StockOutList(@RequestBody GetBaseBrandTime baseBrandTime ) {
+        log.info("查询了出库量");
+        Result<ShipmentVO> top10StockOutList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime));
+        return top10StockOutList;
+    }
+
+    /**
+     * top10待发量
+     * @param
+     * @return
+     */
+    @AutoLog(value = "DwmVlmsSptb02-top10待发量")
+    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10待发量")
+    @PostMapping(value = "/findTop10PendingList" )
+    public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
+        log.info("查询了待发量");
+        Result<ShipmentVO> top10PendingList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime));
+        return top10PendingList;
+    }
+
+    /**
+     * 按条件查询发运量/起运量
+     * @param baseBrandTime
+     * @return
+     */
+    @PostMapping("/selectShipment")
+    public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
+        log.info("查询了起运量");
+        Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
+        //  参数校验,去除key的空值
+        Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);
+        return shipmentVOResult ;
+    }
+
+    /**
+     * top10在途量
+     * @param
+     * @return
+     */
+    @AutoLog(value = "DwmVlmsSptb02-top10在途量")
+    @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
+    @PostMapping(value = "/findTop10OnWayList" )
+    public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
+        log.info("查询了在途量");
+        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
+        return top10OnWayList;
     }
 
     /**
@@ -67,18 +124,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return shipmentVOResult ;
     }
 
-    /**
-     * 按条件查询发运量
-     * @param baseBrandTime
-     * @return
-     */
-    @PostMapping("/selectShipment")
-    public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
-        //  参数校验,去除key的空值
-        Result<ShipmentVO> shipmentVOResult = FormatDataUtil.formatRemoveEmptyValue(shipment);
-        return shipmentVOResult ;
-    }
+
 
     /**
      * 到货率查询
@@ -165,62 +211,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     }
 
     /**
-     * 添加
-     *
-     * @param dwmVlmsSptb02
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-添加")
-    @ApiOperation(value = "DwmVlmsSptb02-添加", notes = "DwmVlmsSptb02-添加")
-    @PostMapping(value = "/add")
-    public Result<?> add(@RequestBody DwmVlmsSptb02 dwmVlmsSptb02) {
-        dwmVlmsSptb02Service.save(dwmVlmsSptb02);
-        return Result.OK("添加成功！");
-    }
-
-    /**
-     * 编辑
-     *
-     * @param dwmVlmsSptb02
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-编辑")
-    @ApiOperation(value = "DwmVlmsSptb02-编辑", notes = "DwmVlmsSptb02-编辑")
-    @PutMapping(value = "/edit")
-    public Result<?> edit(@RequestBody DwmVlmsSptb02 dwmVlmsSptb02) {
-        dwmVlmsSptb02Service.updateById(dwmVlmsSptb02);
-        return Result.OK("编辑成功!");
-    }
-
-    /**
-     * 通过id删除
-     *
-     * @param id
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-通过id删除")
-    @ApiOperation(value = "DwmVlmsSptb02-通过id删除", notes = "DwmVlmsSptb02-通过id删除")
-    @DeleteMapping(value = "/delete")
-    public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
-        dwmVlmsSptb02Service.removeById(id);
-        return Result.OK("删除成功!");
-    }
-
-    /**
-     * 批量删除
-     *
-     * @param ids
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-批量删除")
-    @ApiOperation(value = "DwmVlmsSptb02-批量删除", notes = "DwmVlmsSptb02-批量删除")
-    @DeleteMapping(value = "/deleteBatch")
-    public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
-        this.dwmVlmsSptb02Service.removeByIds(Arrays.asList(ids.split(",")));
-        return Result.OK("批量删除成功！");
-    }
-
-    /**
      * 通过id查询
      *
      * @param id
@@ -257,53 +247,4 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return super.importExcel(request, response, DwmVlmsSptb02.class);
     }
 
-    /**
-     * top10待发量
-     * @param
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-top10待发量")
-    @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10待发量")
-    @PostMapping(value = "/findTop10PendingList" )
-    public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> top10PendingList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime));
-        return top10PendingList;
-    }
-
-    /**
-     * top10在途量
-     * @param
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-top10在途量")
-    @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
-    @PostMapping(value = "/findTop10OnWayList" )
-    public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
-        return top10OnWayList;
-    }
-
-    /**
-     * 出库量
-     * @param
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-出库量")
-    @ApiOperation(value = "DwmVlmsSptb02-出库量", notes = "DwmVlmsSptb02-出库量")
-    @PostMapping(value = "/findTop10StockOutList")
-    public Result<?> findTop10StockOutList(@RequestBody GetBaseBrandTime baseBrandTime ) {
-        Result<ShipmentVO> top10StockOutList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime));
-        return top10StockOutList;
-    }
-
-    /**
-     * 插入接口
-     * @param dwmSptb02VO
-     * @return
-     */
-    @PostMapping(value = "/insertCLickhouse")
-    public Result<?> insertClickhouse(@RequestBody DwmSptb02VO dwmSptb02VO) {
-        dwmVlmsSptb02Service.insertClickhouse(dwmSptb02VO);
-        return Result.OK("插入成功");
-    }
 }
