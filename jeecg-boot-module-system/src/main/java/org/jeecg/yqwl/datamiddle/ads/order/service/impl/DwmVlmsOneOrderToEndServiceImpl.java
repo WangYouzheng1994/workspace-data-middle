@@ -141,6 +141,27 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return oneOrderToEndList;
     }
 
+    @Override
+    public List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList2(GetQueryCriteria queryCriteria) {
+        int vinSize = 0;
+        //判断vin码的数量如果超过一定数量，分批查询
+        if (CollectionUtils.isNotEmpty(queryCriteria.getVinList())) {
+            //去重
+            List<String> distinctVin = queryCriteria.getVinList().stream().distinct().collect(Collectors.toList());
+            queryCriteria.setVinList(distinctVin);
+            //去重后的总数
+            vinSize = distinctVin.size();
+        }
+        if (vinSize > shardsNumber) {
+            //存放分组返回数量以及分组查询的vin
+            GetQueryCriteria newQuery = (GetQueryCriteria) queryCriteria.clone();
+            List<VvinGroupQuery> vinGroup = buildVinGroupOneOrderToEnd(newQuery);
+            List<DwmVlmsOneOrderToEnd> vlmsDocs = buildNewQueryOneOrderToEnd(newQuery, vinGroup);
+            return vlmsDocs;
+        }
+        return selectOneOrderToEndList(queryCriteria);
+    }
+
 
     @Override
     public Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndPage(GetQueryCriteria queryCriteria) {
@@ -252,6 +273,45 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             vinGroup.add(vvinGroupQuery);
         }
         return vinGroup;
+    }
+
+    @Override
+    public Integer selectCountDocs(GetQueryCriteria queryCriteria) {
+        List<String> vinList = queryCriteria.getVinList();
+        int vinSize = vinList.size();
+        if (vinSize > shardsNumber) {
+            List<Integer> vinGroup = new ArrayList<>();
+            GetQueryCriteria newQuety = (GetQueryCriteria) queryCriteria.clone();
+            //计算需要分几组
+            BigDecimal vinDecimal = BigDecimal.valueOf(vinSize);
+            BigDecimal numberDecimal = BigDecimal.valueOf(shardsNumber);
+            //结果要向上取整
+            int count = vinDecimal.divide(numberDecimal, 0, BigDecimal.ROUND_UP).intValue();
+
+            //开始处理
+            for (int i = 1; i <= count; i++) {
+                //数组截取开始下标
+                int startIndex = numberDecimal.multiply(BigDecimal.valueOf(i - 1)).intValue();
+                //数组截取结束下标
+                int endIndex = numberDecimal.multiply(BigDecimal.valueOf(i)).intValue();
+                if (endIndex > vinSize) {
+                    endIndex = vinSize;
+                }
+                //截取数组
+                List<String> newVinList = vinList.subList(startIndex, endIndex);
+                //创建新的查询
+                newQuety.setVinList(newVinList);
+                //查询数据
+                Integer total = countOneOrderToEndList(newQuety);
+                vinGroup.add(total);
+
+            }
+            if (CollectionUtils.isEmpty(vinGroup)) {
+                return Integer.valueOf(0);
+            }
+            return vinGroup.stream().reduce(0,(n1, n2)-> n1 + n2);
+        }
+        return countDocsCcxdlList(queryCriteria);
     }
 
     /**

@@ -33,6 +33,7 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @return
      */
     List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList(GetQueryCriteria queryCriteria);
+    List<DwmVlmsOneOrderToEnd> selectOneOrderToEndList2(GetQueryCriteria queryCriteria);
 
     /**
      * DOCS count计数
@@ -117,4 +118,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @return {@link Page< DwmVlmsOneOrderToEnd>}
      */
     Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndPage(GetQueryCriteria queryCriteria);
+
+    Integer selectCountDocs(GetQueryCriteria queryCriteria);
 }

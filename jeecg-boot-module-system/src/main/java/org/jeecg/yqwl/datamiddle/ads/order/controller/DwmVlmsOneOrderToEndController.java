@@ -190,7 +190,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         boolean intervalFlag = true;
         queryCriteria.setPageSize(pageSize);
 
-        Integer integer = dwmVlmsOneOrderToEndService.countOneOrderToEndList(queryCriteria);
+        Integer integer = dwmVlmsOneOrderToEndService.selectCountDocs(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;
@@ -250,7 +250,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             queryCriteria.setPageNo(pageNo);
 
             // 获取查询数据
-            pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList(queryCriteria);
+            pageList = dwmVlmsOneOrderToEndService.selectOneOrderToEndList2(queryCriteria);
             for (DwmVlmsOneOrderToEnd item : pageList) {
                 // 时间字段转换成年月日时分秒类型
                 row1 = sheet.createRow(rowNum);
