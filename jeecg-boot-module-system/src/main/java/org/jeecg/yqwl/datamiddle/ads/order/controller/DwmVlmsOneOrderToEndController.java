@@ -690,7 +690,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 queryCriteria.setTypeS(0);
             }
         }
-        Page<DwmVlmsOneOrderToEnd> page = new Page<DwmVlmsOneOrderToEnd>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+        Page<DwmVlmsOneOrderToEnd> page = new Page<>(queryCriteria.getPageNo(), queryCriteria.getPageSize());
         //判断有没有末位vin码查询， 如果有,判断是不是6-7位
         if (StringUtils.isNotBlank(queryCriteria.getLastVin())){
             if (queryCriteria.getLastVin().length() < 6 || queryCriteria.getLastVin().length() > 7){
@@ -698,7 +698,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 page.setRecords(list);
                 page.setTotal(0L);
                 return Result.error("末位查询只支持6位或者7位VIN码尾号，请核实重试",page);
-
             }
         }
 
