@@ -192,7 +192,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         if (StringUtil.length(selections) > 2) {
             queryCriteria.setVinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+
         Integer pageNo = 1;
         Integer pageSize = 5000;
 
@@ -215,11 +215,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         font.setFontName("宋体");
         // 字体大小
         font.setFontHeightInPoints((short)12);
-        // 设置字体加粗
-//        font.setBold(true);
-        // 设置格式居中显示
-        /*CellStyle cellstyle = wb.createCellStyle();
-        cellstyle.setAlignment(HorizontalAlignment.CENTER);*/
+
         // 创建行,从0开始
         SXSSFRow row = sheet.createRow(0);
         // 设置表头行高
@@ -266,77 +262,60 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 cell.setCellValue(item.getVin());
                 // brand 品牌
                 SXSSFCell cell1 = row1.createCell(j++);
-                // cell1.setCellStyle(cellstyle);
                 cell1.setCellValue(item.getBrandName());
                 // baseName 基地
                 SXSSFCell cell2 = row1.createCell(j++);
-                // cell2.setCellStyle(cellstyle);
                 cell2.setCellValue(item.getBaseName());
                 // vehicleCode 车型代码
                 SXSSFCell cellvehicleCode = row1.createCell(j++);
-                // cell3.setCellStyle(cellstyle);
                 cellvehicleCode.setCellValue(item.getVehicleCode());
                 // vehicleName 车型
                 SXSSFCell cell3 = row1.createCell(j++);
-                // cell3.setCellStyle(cellstyle);
                 cell3.setCellValue(item.getVehicleName());
                 // startCityName 始发城市
                 SXSSFCell cell4 = row1.createCell(j++);
-                // cell4.setCellStyle(cellstyle);
                 cell4.setCellValue(item.getStartCityName());
                 // endCityName 经销商目标城市
                 SXSSFCell cell5 = row1.createCell(j++);
-                // cell5.setCellStyle(cellstyle);
                 cell5.setCellValue(item.getEndCityName());
                 // vdwdm 经销商代码
                 SXSSFCell cell6 = row1.createCell(j++);
-                // cell6.setCellStyle(cellstyle);
                 cell6.setCellValue(item.getVdwdm());
                 // DEALER_NAME  经销商名称
                 SXSSFCell cell7 = row1.createCell(j++);
-                // cell7.setCellStyle(cellstyle);
                 cell7.setCellValue(item.getDealerName());
                 // cp9OfflineTime  CP9下线接车日期  11
                 if (item.getCp9OfflineTime() != 0) {
                     SXSSFCell cell8 = row1.createCell(j++);
-                    // cell8.setCellStyle(cellstyle);
                     cell8.setCellValue(sdf.format(item.getCp9OfflineTime()));
                 }else{
                     SXSSFCell cell8 = row1.createCell(j++);
-                    // cell8.setCellStyle(cellstyle);
                     cell8.setCellValue("");
                 }
                 // inSiteTime  入库日期   16WEI
                 if (item.getInSiteTime() != 0) {
                     SXSSFCell cell9 = row1.createCell(j++);
-                    // cell9.setCellStyle(cellstyle);
                     cell9.setCellValue(sdf.format(item.getInSiteTime()));
                 }else{
                     SXSSFCell cell9 = row1.createCell(j++);
-                    // cell9.setCellStyle(cellstyle);
                     cell9.setCellValue("");
                 }
                 // inWarehouseName  入库仓库
                 SXSSFCell cell10 = row1.createCell(j++);
-                // cell10.setCellStyle(cellstyle);
                 cell10.setCellValue(item.getInWarehouseName());
                 // taskNo 任务单号
                 SXSSFCell cell11 = row1.createCell(j++);
-                // cell11.setCellStyle(cellstyle);
                 cell11.setCellValue(item.getTaskNo());
                 // vehiclePlateIssuedTimeR3  计划下达日期  修改为R3.DDJRQ的时间
                 if (item.getVehiclePlateIssuedTimeR3() != 0) {
                     SXSSFCell cell12 = row1.createCell(j++);
-                    // cell12.setCellStyle(cellstyle);
                     cell12.setCellValue(sdf.format(item.getVehiclePlateIssuedTimeR3()));
                 }else{
                     SXSSFCell cell12 = row1.createCell(j++);
-                    // cell12.setCellStyle(cellstyle);
                     cell12.setCellValue("");
                 }
                 // Cpzdbh 配板单号
                 SXSSFCell cell13 = row1.createCell(j++);
-                // cell13.setCellStyle(cellstyle);
                 cell13.setCellValue(item.getCpzdbh());
                 // trafficType  运输方式
                 // 利用获取的typeT,typeS,typeG 进行拼接 并将值赋值给trafficType
@@ -373,223 +352,177 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 // 将公铁水的值拼接起来并赋值给trafficType
                 trafficType = StringUtils.join(list,",");
                 SXSSFCell cell14 = row1.createCell(j++);
-                // cell14.setCellStyle(cellstyle);
                 cell14.setCellValue(item.setTrafficType(trafficType));
                 // assignTime  指派日期  11
                 if (item.getAssignTime() != 0) {
                     SXSSFCell cell15 = row1.createCell(j++);
-                    // cell15.setCellStyle(cellstyle);
                     cell15.setCellValue(sdf.format(item.getAssignTime()));
                 }else{
                     SXSSFCell cell15 = row1.createCell(j++);
-                    // cell15.setCellStyle(cellstyle);
                     cell15.setCellValue("");
                 }
                 // carrierName  指派承运商名称
                 SXSSFCell cell16 = row1.createCell(j++);
-                // cell16.setCellStyle(cellstyle);
                 cell16.setCellValue(item.getCarrierName());
                 // actualOutTime  出库日期  11
                 if (item.getActualOutTime() != 0) {
                     SXSSFCell cell17 = row1.createCell(j++);
-                    // cell17.setCellStyle(cellstyle);
                     cell17.setCellValue(sdf.format(item.getActualOutTime()));
                 }else{
                     SXSSFCell cell17 = row1.createCell(j++);
-                    // cell17.setCellStyle(cellstyle);
                     cell17.setCellValue("");
                 }
                 // shipmentTime  起运日期-公路   11
                 if (item.getShipmentGTime() != 0) {
                     SXSSFCell cell18 = row1.createCell(j++);
-                    // cell18.setCellStyle(cellstyle);
                     cell18.setCellValue(sdf.format(item.getShipmentGTime()));
                 }else{
                     SXSSFCell cell18 = row1.createCell(j++);
-                    // cell18.setCellStyle(cellstyle);
                     cell18.setCellValue("");
                 }
                 // transportVehicleNo  运输车号
                 SXSSFCell cell19 = row1.createCell(j++);
-                // cell19.setCellStyle(cellstyle);
                 cell19.setCellValue(item.getTransportVehicleNo());
                 // samePlateNum  同板数量
                 SXSSFCell cell20 = row1.createCell(j++);
-                // cell20.setCellStyle(cellstyle);
                 cell20.setCellValue(item.getSamePlateNum());
                 // vehicleNum  轿运车车位数
                 row1.createCell(j++).setCellValue(item.getVehicleNum());
                 // startPlatformName  始发站名称
                 SXSSFCell cell21 = row1.createCell(j++);
-                // cell21.setCellStyle(cellstyle);
                 cell21.setCellValue(item.getStartPlatformName());
                 // inStartPlatformTime  到达始发站时间/入站时间   16WEI
                 if (item.getInStartPlatformTime() != 0) {
                     SXSSFCell cell22 = row1.createCell(j++);
-                    // cell22.setCellStyle(cellstyle);
                     cell22.setCellValue(sdf.format(item.getInStartPlatformTime()));
                 }else{
                     SXSSFCell cell22 = row1.createCell(j++);
-                    // cell22.setCellStyle(cellstyle);
                     cell22.setCellValue("");
                 }
                 // outStartPlatformTime  始发站台铁路离站时间    16WEI
                 if (item.getOutStartPlatformTime() != 0) {
                     SXSSFCell cell23 = row1.createCell(j++);
-                    // cell23.setCellStyle(cellstyle);
                     cell23.setCellValue(sdf.format(item.getOutStartPlatformTime()));
                 }else{
                     SXSSFCell cell23 = row1.createCell(j++);
-                    // cell23.setCellStyle(cellstyle);
                     cell23.setCellValue("");
                 }
                 // endPlatformName  目的站名称
                 SXSSFCell cell24 = row1.createCell(j++);
-                // cell24.setCellStyle(cellstyle);
                 cell24.setCellValue(item.getEndPlatformName());
                 // inEndPlatformTime  到达目的站时间     16WEI
                 if (item.getInEndPlatformTime() != 0) {
                     SXSSFCell cell25 = row1.createCell(j++);
-                    // cell25.setCellStyle(cellstyle);
                     cell25.setCellValue(sdf.format(item.getInEndPlatformTime()));
                 }else{
                     SXSSFCell cell25 = row1.createCell(j++);
-                    // cell25.setCellStyle(cellstyle);
                     cell25.setCellValue("");
                 }
                 // unloadRailwayTime  卸车时间（铁路到目的站）   16WEI
                 if (item.getUnloadRailwayTime() != 0) {
                     SXSSFCell cell26 = row1.createCell(j++);
-                    // cell26.setCellStyle(cellstyle);
                     cell26.setCellValue(sdf.format(item.getUnloadRailwayTime()));
                 }else{
                     SXSSFCell cell26 = row1.createCell(j++);
-                    // cell26.setCellStyle(cellstyle);
                     cell26.setCellValue("");
                 }
                 // startWaterwayName  始发港名称
                 SXSSFCell cell27 = row1.createCell(j++);
-                // cell27.setCellStyle(cellstyle);
                 cell27.setCellValue(item.getStartWaterwayName());
                 // inStartWaterwayTime 到达始发港口时间/入港时间    16WEI
                 if (item.getInStartWaterwayTime() != 0) {
                     SXSSFCell cell28 = row1.createCell(j++);
-                    // cell28.setCellStyle(cellstyle);
                     cell28.setCellValue(sdf.format(item.getInStartWaterwayTime()));
                 }else{
                     SXSSFCell cell28 = row1.createCell(j++);
-                    // cell28.setCellStyle(cellstyle);
                     cell28.setCellValue("");
                 }
                 // endStartWaterwayTime 始发港口水运离港时间  16WEI
                 if (item.getEndStartWaterwayTime() != 0) {
                     SXSSFCell cell29 = row1.createCell(j++);
-                    // cell29.setCellStyle(cellstyle);
                     cell29.setCellValue(sdf.format(item.getEndStartWaterwayTime()));
                 }else{
                     SXSSFCell cell29 = row1.createCell(j++);
-                    // cell29.setCellStyle(cellstyle);
                     cell29.setCellValue("");
                 }
                 // endWaterwayName 目的港名称
                 SXSSFCell cell30 = row1.createCell(j++);
-                // cell30.setCellStyle(cellstyle);
                 cell30.setCellValue(item.getEndWaterwayName());
                 // inEndWaterwayTime  到达目的港时间    16WEI
                 if (item.getInEndWaterwayTime() != 0) {
                     SXSSFCell cell31 = row1.createCell(j++);
-                    // cell31.setCellStyle(cellstyle);
                     cell31.setCellValue(sdf.format(item.getInEndWaterwayTime()));
                 }else{
                     SXSSFCell cell31 = row1.createCell(j++);
-                    // cell31.setCellStyle(cellstyle);
                     cell31.setCellValue("");
                 }
                 // unloadShipTime  卸船时间（水路到目的站）   16WEI
                 if (item.getUnloadShipTime() != 0) {
                     SXSSFCell cell32 = row1.createCell(j++);
-                    // cell32.setCellStyle(cellstyle);
                     cell32.setCellValue(sdf.format(item.getUnloadShipTime()));
                 }else{
                     SXSSFCell cell32 = row1.createCell(j++);
-                    // cell32.setCellStyle(cellstyle);
                     cell32.setCellValue("");
                 }
                 // inDistributeTime  末端分拨中心入库时间   16WEI
                 if (item.getInDistributeTime() != 0) {
                     SXSSFCell cell33 = row1.createCell(j++);
-                    // cell33.setCellStyle(cellstyle);
                     cell33.setCellValue(sdf.format(item.getInDistributeTime()));
                 }else{
                     SXSSFCell cell33 = row1.createCell(j++);
-                    // cell33.setCellStyle(cellstyle);
                     cell33.setCellValue("");
                 }
                 // distributeAssignTime 末端分拨中心指派时间   11
                 if (item.getDistributeAssignTime() != 0) {
                     SXSSFCell cell34 = row1.createCell(j++);
-                    // cell34.setCellStyle(cellstyle);
                     cell34.setCellValue(sdf.format(item.getDistributeAssignTime()));
                 }else{
                     SXSSFCell cell34 = row1.createCell(j++);
-                    // cell34.setCellStyle(cellstyle);
                     cell34.setCellValue("");
                 }
                 // distributeCarrierName   末端分拨承运商
                 SXSSFCell cell35 = row1.createCell(j++);
-                // cell35.setCellStyle(cellstyle);
                 cell35.setCellValue(item.getDistributeCarrierName());
                 // distributeVehicleNo  分拨承运轿运车车牌号
                 SXSSFCell cell36 = row1.createCell(j++);
-                // cell36.setCellStyle(cellstyle);
                 cell36.setCellValue(item.getDistributeVehicleNo());
                 // distributeVehicleNum  港/站分拨承运轿运车车位数
                 SXSSFCell cell37 = row1.createCell(j++);
-                // cell37.setCellStyle(cellstyle);
                 cell37.setCellValue(item.getDistributeVehicleNum());
                 // outDistributeTime  分拨出库时间   11
                 if (item.getOutDistributeTime() != 0) {
                     SXSSFCell cell38 = row1.createCell(j++);
-                    // cell38.setCellStyle(cellstyle);
                     cell38.setCellValue(sdf.format(item.getOutDistributeTime()));
                 }else{
                     SXSSFCell cell38 = row1.createCell(j++);
-                    // cell38.setCellStyle(cellstyle);
                     cell38.setCellValue("");
                 }
                 // distributeShipmentTime  分拨起运时间  11
                 if (item.getDistributeShipmentTime() != 0) {
                     SXSSFCell cell39 = row1.createCell(j++);
-                    // cell39.setCellStyle(cellstyle);
                     cell39.setCellValue(sdf.format(item.getDistributeShipmentTime()));
                 }else{
                     SXSSFCell cell39 = row1.createCell(j++);
-                    // cell39.setCellStyle(cellstyle);
                     cell39.setCellValue("");
                 }
                 // dtvsdhsj  送达时间-DCS到货时间  11
                 if (item.getDtvsdhsj() != 0) {
                     SXSSFCell cell40 = row1.createCell(j++);
-                    // cell40.setCellStyle(cellstyle);
                     cell40.setCellValue(sdf.format(item.getDtvsdhsj()));
                 }else{
                     SXSSFCell cell40 = row1.createCell(j++);
-                    // cell40.setCellStyle(cellstyle);
                     cell40.setCellValue("");
                 }
                 // finalSiteTime  经销商确认到货时间  11
                 if (item.getFinalSiteTime() != 0) {
                     SXSSFCell cell41 = row1.createCell(j++);
-                    // cell41.setCellStyle(cellstyle);
                     cell41.setCellValue(sdf.format(item.getFinalSiteTime()));
                 }else{
                     SXSSFCell cell41 = row1.createCell(j++);
-                    // cell41.setCellStyle(cellstyle);
                     cell41.setCellValue("");
                 }
                 // vwz 位置信息
                 SXSSFCell cell42 = row1.createCell(j++);
-                // cell42.setCellStyle(cellstyle);
                 cell42.setCellValue(item.getVwz());
                 // TYPE_TC 是否同城异地
                 String typeTc = item.getTypeTc().toString();
@@ -601,21 +534,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                     typeTc = "异地";
                 }
                 SXSSFCell cell43 = row1.createCell(j++);
-                // cell43.setCellStyle(cellstyle);
                 cell43.setCellValue(item.setTypeTc(typeTc));
-
-                // 设置数据的行高
-                // row1.setHeight((short) (16.5 * 20));
-                // 设置自适应列宽
-                /*for ( int m = 0; m < headers.length; m++ ) {
-                    // 跟踪列以调节大小
-                    // sheet.trackAllColumnsForAutoSizing();
-                    // 调整宽度以适应内容
-                    // sheet.autoSizeColumn(m);
-                    // 设置宽度的取值
-                    // int width = Math.max(15 * 256, Math.min(256 * 256, sheet.getColumnWidth(m) * 12 / 10));
-                    // sheet.setColumnWidth(m, width);
-                }*/
                 rowNum++;
             }
 
