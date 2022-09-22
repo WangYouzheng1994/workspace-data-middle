@@ -276,7 +276,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
     }
 
     @Override
-    public Integer selectCountDocs(GetQueryCriteria queryCriteria) {
+    public Integer selectCountOOTD(GetQueryCriteria queryCriteria) {
 
         int vinSize = CollectionUtils.isNotEmpty(queryCriteria.getVinList()) ? queryCriteria.getVinList().size() : 0;
         if (vinSize > shardsNumber) {

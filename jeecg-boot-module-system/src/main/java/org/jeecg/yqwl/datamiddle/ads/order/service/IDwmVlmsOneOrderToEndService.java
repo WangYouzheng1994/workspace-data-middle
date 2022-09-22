@@ -119,5 +119,5 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     Page<DwmVlmsOneOrderToEnd> selectOneOrderToEndPage(GetQueryCriteria queryCriteria);
 
-    Integer selectCountDocs(GetQueryCriteria queryCriteria);
+    Integer selectCountOOTD(GetQueryCriteria queryCriteria);
 }

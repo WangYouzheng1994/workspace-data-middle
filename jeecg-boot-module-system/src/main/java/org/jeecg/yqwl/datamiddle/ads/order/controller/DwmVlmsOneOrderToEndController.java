@@ -199,7 +199,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
         boolean intervalFlag = true;
         queryCriteria.setPageSize(pageSize);
 
-        Integer integer = dwmVlmsOneOrderToEndService.selectCountDocs(queryCriteria);
+        Integer integer = dwmVlmsOneOrderToEndService.selectCountOOTD(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;
@@ -240,10 +240,6 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
             SXSSFCell cell = row.createCell(i++);
             // 为单元格赋值
             cell.setCellValue(header);
-            /*// 设置表头居中显示
-            cell.setCellStyle(cellstyle);
-            // 设置表头字体
-            cellstyle.setFont(font);*/
         }
 
         List<DwmVlmsOneOrderToEnd> pageList = null;
