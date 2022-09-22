@@ -152,10 +152,19 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
     public void exportXls(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
 
         String vin = queryCriteria.getVin();
-        if (StringUtil.length(vin) > 2 && StringUtils.contains(vin, ",")) {
-            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
-        } else if (StringUtils.length(vin) > 2 && StringUtils.contains(vin, "\n")) {
-            queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
+        if (StringUtils.isNotBlank(vin)) {
+            if (!StringUtils.contains(vin,",") && !StringUtils.contains(vin,"\n")) {
+                List<String> list = new ArrayList<>();
+                list.add(vin);
+                queryCriteria.setVinList(list);
+            } else {
+                if (StringUtils.contains(vin, ",")) {
+                    queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, ",")));
+                } else if (StringUtils.contains(vin, "\n")) {
+                    queryCriteria.setVinList(Arrays.asList(StringUtils.split(vin, "\n")));
+                }
+            }
+
         }
 
         // 获取一单到底的运输方式

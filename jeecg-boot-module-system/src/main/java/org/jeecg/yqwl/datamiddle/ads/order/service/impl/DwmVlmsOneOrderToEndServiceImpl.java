@@ -277,10 +277,11 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
     @Override
     public Integer selectCountDocs(GetQueryCriteria queryCriteria) {
-        List<String> vinList = queryCriteria.getVinList();
-        int vinSize = vinList.size();
+
+        int vinSize = CollectionUtils.isNotEmpty(queryCriteria.getVinList()) ? queryCriteria.getVinList().size() : 0;
         if (vinSize > shardsNumber) {
             List<Integer> vinGroup = new ArrayList<>();
+            List<String> vinList = queryCriteria.getVinList();
             GetQueryCriteria newQuety = (GetQueryCriteria) queryCriteria.clone();
             //计算需要分几组
             BigDecimal vinDecimal = BigDecimal.valueOf(vinSize);
@@ -311,7 +312,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             }
             return vinGroup.stream().reduce(0,(n1, n2)-> n1 + n2);
         }
-        return countDocsCcxdlList(queryCriteria);
+        return countOneOrderToEndList(queryCriteria);
     }
 
     /**
@@ -480,11 +481,12 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @return
      */
     public Integer selectDocsCount(GetQueryCriteria queryCriteria) {
-        List<String> vvinList = queryCriteria.getVvinList();
+
         GetQueryCriteria criteria = (GetQueryCriteria) queryCriteria.clone();
-        int vvinSize = vvinList.size();
+        int vvinSize = CollectionUtils.isNotEmpty(queryCriteria.getVvinList()) ? queryCriteria.getVvinList().size() : 0;
         Integer totalFinal = Integer.valueOf(0);
         if (vvinSize > shardsNumber){
+            List<String> vvinList = queryCriteria.getVvinList();
             List<Integer> countGroup = new ArrayList<>();
             //计算需要分几组
             BigDecimal vvinDecimal = BigDecimal.valueOf(vvinSize);

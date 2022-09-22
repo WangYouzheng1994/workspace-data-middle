@@ -44,7 +44,7 @@ public class WaybillDwmAppClickhouseOOTD {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "root");
         log.info("checkpoint设置完成");
 
         Properties properties = new Properties();
@@ -59,8 +59,8 @@ public class WaybillDwmAppClickhouseOOTD {
                 .hostname(props.getStr("cdc.mysql.hostname"))
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
-                .tableList("data_flink.dwm_vlms_one_order_to_end")
-                //.tableList("data_middle_flink.dwm_vlms_one_order_to_end")
+//                .tableList("data_flink.dwm_vlms_one_order_to_end")
+                .tableList("data_middle_flink.dwm_vlms_one_order_to_end")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
