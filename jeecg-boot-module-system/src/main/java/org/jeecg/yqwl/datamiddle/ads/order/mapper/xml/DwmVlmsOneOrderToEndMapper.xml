@@ -44,12 +44,6 @@
             <if test="params.inSiteTimeEnd != null   and params.inSiteTimeEnd != 0">
                 AND IN_SITE_TIME <![CDATA[ <= ]]> #{params.inSiteTimeEnd}
             </if>
-            <!--<if test="params.vehicleReceivingTimeStart != null   and params.vehicleReceivingTimeStart != 0  ">-->
-            <!--    AND VEHICLE_RECEIVING_TIME <![CDATA[ >= ]]> #{params.vehicleReceivingTimeStart}-->
-            <!--</if>-->
-            <!--<if test="params.vehicleReceivingTimeEnd != null   and params.vehicleReceivingTimeEnd != 0 ">-->
-            <!--    AND VEHICLE_RECEIVING_TIME <![CDATA[ <= ]]>  #{params.vehicleReceivingTimeEnd}-->
-            <!--</if>-->
             <!-- 当前更改为取R3的DDJRQ 也就是sptb01c -->
             <if test="params.vehiclePlateIssuedTimeStart != null   and params.vehiclePlateIssuedTimeStart != 0  ">
                 AND VEHICLE_PLATE_ISSUED_TIME_R3 <![CDATA[ >= ]]> #{params.vehiclePlateIssuedTimeStart}
