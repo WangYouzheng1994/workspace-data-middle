@@ -13,8 +13,6 @@ import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.VvinGroupQuery;
-import org.omg.PortableInterceptor.INACTIVE;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
