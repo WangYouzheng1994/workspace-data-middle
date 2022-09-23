@@ -567,6 +567,48 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         List<String> oneOrderToEndVin = dwmVlmsOneOrderToEndMapper.getOneOrderToEndVin(vvin);
         return oneOrderToEndVin;
     }
+    /**
+     * docs 分页
+     * @param queryCriteria 查询参数
+     * @return Page<DwmVlmsDocs>
+     */
+    @Override
+    public Page<DwmVlmsDocs> selectDocsPage(GetQueryCriteria queryCriteria) {
+        if (queryCriteria.getPageNo() != null) {
+            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
+            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
+        }
+        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+        //存放总数量
+        Integer finalTotal = 0;
+        int vvinSize = 0;
+        //判断vin码的数量如果超过一定数量，分批查询
+        if (CollectionUtils.isNotEmpty(queryCriteria.getVvinList())) {
+            //去重
+            List<String> distinctVvin = queryCriteria.getVvinList().stream().distinct().collect(Collectors.toList());
+            queryCriteria.setVvinList(distinctVvin);
+            //去重后的总数
+            vvinSize = distinctVvin.size();
+        }
+        if (vvinSize > shardsNumber) {
+            //存放分组返回数量以及分组查询的vin
+            List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
+
+            List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
+            //总数
+            finalTotal = vvinGroup.stream().map(VvinGroupQuery::getDataCount).reduce(0, (n1, n2) -> n1 + n2);
+            page.setRecords(vlmsDocs);
+            page.setTotal(finalTotal);
+            return page;
+        }
+        //正常情况处理
+        finalTotal = countDocsList(queryCriteria);
+        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+        page.setRecords(dwmVlmsDocs);
+        page.setTotal(finalTotal);
+
+        return page;
+    }
 
     /**
      * 英文运输方式
