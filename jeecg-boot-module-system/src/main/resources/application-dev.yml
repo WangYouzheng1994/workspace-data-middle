@@ -222,6 +222,7 @@ mybatis-plus:
 minidao :
   base-package: org.jeecg.modules.jmreport.*
 jeecg :
+  # vin码搜索框-分片查询-上限值
   shardsNumber: 12000
   # 签名密钥串(前后端要一致，正式发布请自行修改)
   signatureSecret: dd05f1c54d63749eda95f9fa6d49v442a
