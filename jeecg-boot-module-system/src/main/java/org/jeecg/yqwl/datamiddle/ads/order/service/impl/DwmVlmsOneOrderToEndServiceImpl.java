@@ -71,68 +71,72 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 //            this.formatTime(params);
         }
         if (CollectionUtils.isNotEmpty(oneOrderToEndList)) {
+            List<DwmVlmsSptb02> sptbTrafficTypeByVin = null;
             // 运输方式拼接显示处理。
             ArrayList<String> vinList = oneOrderToEndList.stream().collect(ArrayList::new, (list, item) -> list.add(item.getVin()), ArrayList::addAll);
             if (CollectionUtils.isNotEmpty(vinList)) {
-                List<DwmVlmsSptb02> sptbTrafficTypeByVin = this.dwmVlmsSptb02Mapper.getSptbTrafficTypeByVin(vinList);
+                sptbTrafficTypeByVin = this.dwmVlmsSptb02Mapper.getSptbTrafficTypeByVin(vinList);
                 // group concat
                 // sptbTrafficTypeByVin.stream().collect(groupingBy())
-                sptbTrafficTypeByVin.stream().collect(groupingBy(DwmVlmsSptb02::getVvin)).entrySet().stream().forEach(
-                        (item) -> {
-                            DwmVlmsOneOrderToEnd dbOotd = oneOrderToEndList.get(listMap.get(item.getKey()));
-                            final int[] orderIdx = {0};
-                            final String[] lastVwz = {""};
-                            // List<String> trafficLists = new ArrayList();  DELETE By QingSong for Fix zental: 871
-                            item.getValue().stream().forEach(it -> {
-                                orderIdx[0]++;
-                                // 累计多个运单的运输方式。
-                                // trafficLists.add(it.getTrafficType());  DELETE By QingSong for Fix zental: 871
-                                // 铁水的物流时间节点兜底处理 -- START By qingsong  2022年7月10日21:14:28
-                                // Xxx: 1. 集港/集站时间 用物流溯源时间节点来更新，无法兜底
-                                // 铁路单
-                                if (StringUtils.equals(it.getTrafficType(), "T")) {
-                                    // 2. 始发站台离站时间 outStartPlatformTime 用运单的起运时间dsjcfsj
-                                    if (dbOotd.getOutStartPlatformTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
-                                        dbOotd.setOutStartPlatformTime(it.getDsjcfsj());
+                if (CollectionUtils.isNotEmpty(sptbTrafficTypeByVin)) {
+                    sptbTrafficTypeByVin.stream().collect(groupingBy(DwmVlmsSptb02::getVvin)).entrySet().stream().forEach(
+                            (item) -> {
+                                DwmVlmsOneOrderToEnd dbOotd = oneOrderToEndList.get(listMap.get(item.getKey()));
+                                final int[] orderIdx = {0};
+                                final String[] lastVwz = {""};
+                                // List<String> trafficLists = new ArrayList();  DELETE By QingSong for Fix zental: 871
+                                item.getValue().stream().forEach(it -> {
+                                    orderIdx[0]++;
+                                    // 累计多个运单的运输方式。
+                                    // trafficLists.add(it.getTrafficType());  DELETE By QingSong for Fix zental: 871
+                                    // 铁水的物流时间节点兜底处理 -- START By qingsong  2022年7月10日21:14:28
+                                    // Xxx: 1. 集港/集站时间 用物流溯源时间节点来更新，无法兜底
+                                    // 铁路单
+                                    if (StringUtils.equals(it.getTrafficType(), "T")) {
+                                        // 2. 始发站台离站时间 outStartPlatformTime 用运单的起运时间dsjcfsj
+                                        if (dbOotd.getOutStartPlatformTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
+                                            dbOotd.setOutStartPlatformTime(it.getDsjcfsj());
+                                        }
+                                        // 3. 到达目标站台时间 inEndPlatformTime 用运单的dgpsdhsj
+                                        if (dbOotd.getInEndPlatformTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
+                                            dbOotd.setInEndPlatformTime(it.getDgpsdhsj());
+                                        }
                                     }
-                                    // 3. 到达目标站台时间 inEndPlatformTime 用运单的dgpsdhsj
-                                    if (dbOotd.getInEndPlatformTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
-                                        dbOotd.setInEndPlatformTime(it.getDgpsdhsj());
+                                    // 水路单
+                                    if (StringUtils.equals(it.getTrafficType(), "S")) {
+                                        // 2. 始发港口离港时间 endStartWaterwayTime用运单的起运时间dsjcfsj
+                                        if (dbOotd.getEndStartWaterwayTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
+                                            dbOotd.setEndStartWaterwayTime(it.getDsjcfsj());
+                                        }
+                                        // 3. 到达目的港时间 inEndWaterwayTime 用运单的dgpsdhsj
+                                        if (dbOotd.getInEndWaterwayTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
+                                            dbOotd.setInEndWaterwayTime(it.getDgpsdhsj());
+                                        }
                                     }
-                                }
-                                // 水路单
-                                if (StringUtils.equals(it.getTrafficType(), "S")) {
-                                    // 2. 始发港口离港时间 endStartWaterwayTime用运单的起运时间dsjcfsj
-                                    if (dbOotd.getEndStartWaterwayTime() == 0L && it.getDsjcfsj() != null && it.getDsjcfsj() != 0L) {
-                                        dbOotd.setEndStartWaterwayTime(it.getDsjcfsj());
-                                    }
-                                    // 3. 到达目的港时间 inEndWaterwayTime 用运单的dgpsdhsj
-                                    if (dbOotd.getInEndWaterwayTime() == 0L && it.getDgpsdhsj() != null && it.getDgpsdhsj() != 0L) {
-                                        dbOotd.setInEndWaterwayTime(it.getDgpsdhsj());
-                                    }
-                                }
-                                // Xxx: 4. 卸船 应该用物流溯源时间节点来更新，无法兜底。
-                                // 铁水的物流时间节点处理 -- END  By qingsong
+                                    // Xxx: 4. 卸船 应该用物流溯源时间节点来更新，无法兜底。
+                                    // 铁水的物流时间节点处理 -- END  By qingsong
 
-                                // 对于在途位置的处理：根据运单区分顺序。依次取值赋值即可 Add BY QingSong
-                                // 如果上一个节点到货那么显示下个节点。
-                                if (orderIdx[0] == 1) {
-                                    // 如果是第一个节点。
-                                    dbOotd.setVwz(it.getVWZ());
-                                } else if (StringUtils.isBlank(lastVwz[0])) {
-                                    // 如果上一个节点没有信息，那么也要显示本次节点，作为兜底。
-                                    dbOotd.setVwz(it.getVWZ());
-                                } else if (StringUtils.equals(lastVwz[0], "已到货")) {
-                                    // 如果上一个节点是已到货 才能赋值。
-                                    dbOotd.setVwz(it.getVWZ());
-                                }
-                                // 上一个节点 赋值
-                                lastVwz[0] = it.getVWZ();
-                            });
-                            // 运输方式转换
-                            // dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists)); DELETE By QingSong for Fix zental: 871
-                        }
-                );
+                                    // 对于在途位置的处理：根据运单区分顺序。依次取值赋值即可 Add BY QingSong
+                                    // 如果上一个节点到货那么显示下个节点。
+                                    if (orderIdx[0] == 1) {
+                                        // 如果是第一个节点。
+                                        dbOotd.setVwz(it.getVWZ());
+                                    } else if (StringUtils.isBlank(lastVwz[0])) {
+                                        // 如果上一个节点没有信息，那么也要显示本次节点，作为兜底。
+                                        dbOotd.setVwz(it.getVWZ());
+                                    } else if (StringUtils.equals(lastVwz[0], "已到货")) {
+                                        // 如果上一个节点是已到货 才能赋值。
+                                        dbOotd.setVwz(it.getVWZ());
+                                    }
+                                    // 上一个节点 赋值
+                                    lastVwz[0] = it.getVWZ();
+                                });
+                                // 运输方式转换
+                                // dbOotd.setTrafficType(formatTrafficTypeToChinese(trafficLists)); DELETE By QingSong for Fix zental: 871
+                            }
+                    );
+
+                }
             }
         }
         return oneOrderToEndList;
@@ -492,7 +496,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             }
             //所查询数据的开始值
             int preTotal = item.getCurrentTotal() - item.getDataCount();
-            //计算limit开始值             
+            //计算limit开始值
             int limitStart = startCount.intValue() - preTotal - 1;
             //计算limit结束值
             int limitEnd = pageSize.intValue() - dwmVlmsDocsList.size();
