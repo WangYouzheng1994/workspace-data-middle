@@ -749,6 +749,46 @@
             AND dvs.CZJGSDM = #{params.czjgsdm}
         </if>
     </select>
+<!--    获取在途量 -->
+    <select id="getOnWayCount" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+        select COUNT(DISTINCT dvs.CJSDBH) as total_num,
+        <if test="params.allTime != null">
+            <foreach collection="params.allTime" open="(case " close=" else '0000-00-00' end) dates" item="item">
+                when dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{item.endTime}
+                     and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{item.dateTimestamp} or dvs.FINAL_SITE_TIME <![CDATA[ = ]]> 0)
+                then #{item.dateFormat}
+            </foreach>
+        </if>
+        <choose>
+            <when test="params.cqwh !='' and params.czjgsdm ==''">
+                ,dvs.CUSTOMER_NAME as groupName    --品牌   主机公司代码
+            </when>
+            <otherwise>
+                ,dvs.BASE_NAME as groupName   --基地  区位号
+            </otherwise>
+        </choose>
+        from dwm_vlms_sptb02 dvs
+        <where>
+            (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
+            (select
+            dvs1.CJSDBH,
+            max(dvs1.WAREHOUSE_CREATETIME)
+            from
+            dwm_vlms_sptb02  dvs1
+            <where>
+                dvs1.SHIPMENT_TIME != 0
+                <if test="params.endTime != null and params.endTime != ''">
+                    and  dvs1.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+                </if>
+                <if test="params.startTime != null and params.startTime != ''">
+                    and (dvs1.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs1.FINAL_SITE_TIME =0)
+                </if>
+            </where>
+            group by dvs1.CJSDBH
+            )
+        </where>
+        GROUP BY dates , groupName
+    </select>
 
 
 </mapper>

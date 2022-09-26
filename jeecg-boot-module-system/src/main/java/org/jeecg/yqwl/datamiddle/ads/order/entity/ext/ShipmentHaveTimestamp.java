@@ -18,4 +18,6 @@ public class ShipmentHaveTimestamp extends ShipmentDTO{
 
     private Long endTime;
 
+    private String dateFormat;
+
 }

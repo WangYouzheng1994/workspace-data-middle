@@ -105,8 +105,8 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
     @PostMapping(value = "/findTop10OnWayList" )
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        log.info("查询了在途量");
-        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
+        log.info("查询在途量");
+        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList2(baseBrandTime));
         return top10OnWayList;
     }
 

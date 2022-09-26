@@ -138,6 +138,25 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     }
 
     /**
+     * 查询top10在途量列表
+     *
+     * @param baseBrandTime 查询参数
+     * @return 品牌或基地  数量  时间
+     */
+    @Override
+    public Result<ShipmentVO> findTop10OnWayList2(GetBaseBrandTime baseBrandTime) {
+
+        //创建时间段数据 以天为单位
+        List<ShipmentHaveTimestamp> allTime = createAllTime(baseBrandTime);
+        baseBrandTime.setAllTime(allTime);
+        //构造ShipmentDTO
+        List<ShipmentDTO> shipmentDTOS = dwmVlmsSptb02Mapper.getOnWayCount(baseBrandTime);
+
+        return Result.OK(FormatDataUtil.formatDataList(shipmentDTOS, baseBrandTime));
+    }
+
+
+    /**
      * 考虑数据量会大，分页查所有符合时间断内的数据
      *
      * @param baseBrandTime 查询参数
@@ -227,20 +246,42 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         List<ShipmentHaveTimestamp> times = new ArrayList<>();
         //按天计算
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        //开始到结束的天数 一天86400000毫秒
-        BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
-                .divide(BigDecimal.valueOf(TimeGranularity.ONE_DAY_MILLI), 0, RoundingMode.DOWN);
+
         Date date = new Date(baseBrandTime.getStartTime());
-        for (int i = 0; i <= dayNums.intValue(); i++) {
-            Calendar cd = Calendar.getInstance();
-            cd.setTime(date);
-            cd.add(Calendar.DATE, i);
-            ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
-            haveTimestamp.setDates(dateFormat.format(cd.getTime()));
-            haveTimestamp.setDateTimestamp(cd.getTimeInMillis());
-            haveTimestamp.setEndTime(cd.getTimeInMillis() + TimeGranularity.ONE_DAY_MILLI);
-            times.add(haveTimestamp);
+        if (TimeGranularity.DAY.equals(baseBrandTime.getTimeType())){
+            //开始到结束的天数 一天86400000毫秒
+            BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
+                    .divide(BigDecimal.valueOf(TimeGranularity.ONE_DAY_MILLI), 0, RoundingMode.DOWN);
+
+            for (int i = 0; i <= dayNums.intValue(); i++) {
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                cd.add(Calendar.DATE, i);
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(dateFormat.format(cd.getTime()));
+                haveTimestamp.setDateFormat(dateFormat.format(cd.getTime()));
+                haveTimestamp.setDateTimestamp(cd.getTimeInMillis());
+                haveTimestamp.setEndTime(cd.getTimeInMillis() + TimeGranularity.ONE_DAY_MILLI);
+                times.add(haveTimestamp);
+            }
+        } else if (TimeGranularity.WEEK.equals(baseBrandTime.getTimeType())){
+            //开始时间所在的周 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(DateUtils.getMondayOfWeek(date));
+                cd.add(Calendar.WEEK_OF_YEAR, i);
+                // TODO 还没写完。。
+            }
+        } else if (TimeGranularity.MONTH.equals(baseBrandTime.getTimeType())) {
+
+        } else if (TimeGranularity.QUARTER.equals(baseBrandTime.getTimeType())) {
+
+        } else if (TimeGranularity.YEAR.equals(baseBrandTime.getTimeType())) {
+
         }
+
         return times;
     }
 

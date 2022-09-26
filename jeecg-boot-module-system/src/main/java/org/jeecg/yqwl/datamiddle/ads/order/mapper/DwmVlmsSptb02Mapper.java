@@ -160,4 +160,6 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
 
     Integer getOnwayDatasCount(@Param("params") GetBaseBrandTime baseBrandTime);
+
+    List<ShipmentDTO> getOnWayCount(@Param("params") GetBaseBrandTime baseBrandTime);
 }
