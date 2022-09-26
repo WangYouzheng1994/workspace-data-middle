@@ -68,6 +68,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         return Result.OK(resultVO);
     }
 
+
     /**
      * 查询top10在途量列表
      *
@@ -76,75 +77,6 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      */
     @Override
     public Result<ShipmentVO> findTop10OnWayList(GetBaseBrandTime baseBrandTime) {
-        //查出该时间段内已经起运，没有实际到货的数据,数据量过大，进行分页处理
-        List<DwmSptb02> dwmVlmsSptb02s = getOnwayDatas(baseBrandTime);
-        //创建时间段数据 以天为单位
-        List<ShipmentHaveTimestamp> allTime = createAllTime(baseBrandTime);
-        //构造ShipmentDTO
-        List<ShipmentDTO> shipmentDTOS = new ArrayList<>();
-        //带有时间戳得数据集，便于后期比较日期
-        List<ShipmentHaveTimestamp> shipmentHaveTimestamps = new ArrayList<>();
-        //按天比较--今天有多少个在途的数据
-        allTime.forEach(item -> {
-            //过滤符合条件的数据
-            Map<String, List<DwmSptb02>> dwmSptb02Map = dwmVlmsSptb02s.stream().filter(data -> {
-                if (data.getFinalSiteTime() >= item.getEndTime() && data.getShipmentTime() <= item.getEndTime()) {
-                    //今天没到货，今天或今天之前起运，符合条件
-                    return true;
-                }
-                //已经发运但是没有到货，符合
-                return data.getShipmentTime() <= item.getEndTime() &&
-                        (data.getFinalSiteTime().equals(0L) || Objects.isNull(data.getFinalSiteTime()));
-            }).collect(Collectors.groupingBy(i -> {
-                //分组条件
-                if (!"".equals(baseBrandTime.getCqwh()) && "".equals(baseBrandTime.getCzjgsdm())) {
-                    //按主机公司分组 大众，红旗。。。
-                    return i.getCustomerName();
-                } else {
-                    //按基地分组 长春，青岛。。。
-                    return i.getBaseName();
-                }
-            }));
-
-            dwmSptb02Map.forEach((key, value) -> {
-                //填充DTO
-                ShipmentDTO shipmentDTO = new ShipmentDTO();
-                shipmentDTO.setTotalNum(value.size());
-                shipmentDTO.setGroupName(key);
-                shipmentDTO.setDates(item.getDates());
-                shipmentDTOS.add(shipmentDTO);
-                //填充带时间戳的数组
-                if (!TimeGranularity.DAY.equals(baseBrandTime.getTimeType())) {
-                    ShipmentHaveTimestamp shipmentHaveTimestamp = new ShipmentHaveTimestamp();
-                    shipmentHaveTimestamp.setDates(item.getDates());
-                    shipmentHaveTimestamp.setDateTimestamp(item.getDateTimestamp());
-                    shipmentHaveTimestamp.setEndTime(item.getEndTime());
-                    shipmentHaveTimestamp.setGroupName(key);
-                    shipmentHaveTimestamp.setTotalNum(value.size());
-                    shipmentHaveTimestamps.add(shipmentHaveTimestamp);
-                }
-
-            });
-        });
-        ShipmentVO resultVO = null;
-        //其他时间粒度统计
-        if (!TimeGranularity.DAY.equals(baseBrandTime.getTimeType())) {
-            //其他粒度 需要将天叠加， ！降雨量算法！ 一个周就是把每天的量加一块
-            resultVO = FormatDataUtil.formatDataList(buildShipmentDtoByGrain(shipmentHaveTimestamps, baseBrandTime), baseBrandTime);
-        } else {
-            resultVO = FormatDataUtil.formatDataList(shipmentDTOS, baseBrandTime);
-        }
-        return Result.OK(resultVO);
-    }
-
-    /**
-     * 查询top10在途量列表
-     *
-     * @param baseBrandTime 查询参数
-     * @return 品牌或基地  数量  时间
-     */
-    @Override
-    public Result<ShipmentVO> findTop10OnWayList2(GetBaseBrandTime baseBrandTime) {
 
         //创建时间段数据 以天为单位
         List<ShipmentHaveTimestamp> allTime = createAllTime(baseBrandTime);
@@ -157,39 +89,6 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
 
     /**
-     * 考虑数据量会大，分页查所有符合时间断内的数据
-     *
-     * @param baseBrandTime 查询参数
-     * @return {@link List<DwmSptb02>}
-     * @author dabao
-     * @date 2022/9/16
-     */
-    private List<DwmSptb02> getOnwayDatas(GetBaseBrandTime baseBrandTime) {
-        //分页去查
-        Integer total = dwmVlmsSptb02Mapper.getOnwayDatasCount(baseBrandTime);
-        List<DwmSptb02> dwmSptb02s = new ArrayList<>();
-        boolean flag = true;
-        int pageNo = 1;
-        int pageSize = 5000;
-        //计算总共多少页
-        int pageNoTotal = BigDecimal.valueOf(total).divide(BigDecimal.valueOf(pageSize), 0, RoundingMode.UP).intValue();
-        //5千条查一次
-        baseBrandTime.setPageSize(pageSize);
-        while (flag) {
-            baseBrandTime.setPageNo(pageNo);
-            baseBrandTime.setLimitStart((baseBrandTime.getPageNo() - 1) * baseBrandTime.getPageSize());
-            baseBrandTime.setLimitEnd(baseBrandTime.getPageSize());
-            List<DwmSptb02> onwayDatas = dwmVlmsSptb02Mapper.getOnwayDatas(baseBrandTime);
-            dwmSptb02s.addAll(onwayDatas);
-            pageNo++;
-            if (pageNo > pageNoTotal) {
-                flag = false;
-            }
-        }
-        return dwmSptb02s;
-    }
-
-    /**
      * 降雨量算法！
      *
      * @param allTime       数据
@@ -198,6 +97,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
      * @author dabao
      * @date 2022/9/16
      */
+    @Deprecated
     private List<ShipmentDTO> buildShipmentDtoByGrain(List<ShipmentHaveTimestamp> allTime, GetBaseBrandTime baseBrandTime) {
         List<ShipmentDTO> shipmentDTOS = new ArrayList<>();
         if (TimeGranularity.WEEK.equals(baseBrandTime.getTimeType())) {

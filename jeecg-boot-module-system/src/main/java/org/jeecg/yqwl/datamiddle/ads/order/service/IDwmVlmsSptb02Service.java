@@ -58,8 +58,6 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      */
     Result<ShipmentVO> findShipment(GetBaseBrandTime baseBrandTime );
 
-    Result<ShipmentVO> findTop10OnWayList2(GetBaseBrandTime baseBrandTime);
-
     /**
      * 按条件查询到货量
      *
