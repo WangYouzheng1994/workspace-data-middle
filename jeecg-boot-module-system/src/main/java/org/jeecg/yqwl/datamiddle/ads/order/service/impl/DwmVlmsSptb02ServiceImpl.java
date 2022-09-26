@@ -270,16 +270,102 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
             Boolean flag = true;
             while (flag){
                 Calendar cd = Calendar.getInstance();
-                cd.setTime(DateUtils.getMondayOfWeek(date));
+                cd.setTime(date);
+                //没吃加一周
                 cd.add(Calendar.WEEK_OF_YEAR, i);
-                // TODO 还没写完。。
+                long startTime = DateUtils.getMondayOfWeek(cd.getTime()).getTime();
+                long endTime = DateUtils.getSundayOfWeek(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getWeekOfYear(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                i++;
             }
         } else if (TimeGranularity.MONTH.equals(baseBrandTime.getTimeType())) {
-
+            //开始时间所在的月 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加一月
+                cd.add(Calendar.MONTH, i);
+                long startTime = DateUtils.getFirstDateOfMonth(cd.getTime()).getTime();
+                long endTime = DateUtils.getLastDateOfMonth(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getMonth(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                i++;
+            }
         } else if (TimeGranularity.QUARTER.equals(baseBrandTime.getTimeType())) {
+            //开始时间所在的季 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加三个月，三月为一季度
+                cd.add(Calendar.MONTH, i * 3);
+                long startTime = DateUtils.getFirstDateOfSeason(cd.getTime()).getTime();
+                long endTime = DateUtils.getLastDateOfSeason(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getSeason(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
 
+                //是否可以结束--
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                times.add(haveTimestamp);
+                i++;
+            }
         } else if (TimeGranularity.YEAR.equals(baseBrandTime.getTimeType())) {
+            //开始时间所在的年 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加一年
+                cd.add(Calendar.YEAR, i);
+                long startTime = DateUtils.getFirstDayOfYear(cd.getTime());
+                long endTime = DateUtils.getLastDayOfYear(cd.getTime());
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 4);
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
 
+                //是否可以结束--
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                times.add(haveTimestamp);
+                i++;
+            }
         }
 
         return times;

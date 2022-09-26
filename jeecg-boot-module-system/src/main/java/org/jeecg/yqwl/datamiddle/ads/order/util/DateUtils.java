@@ -130,9 +130,25 @@ public class DateUtils {
      */
     public static int getDayOfYear(Date date) {
         Calendar c = Calendar.getInstance();
-        c.setTime(date);
+        Date parseDate = parseDate(formatDate(date) + " 00:00:00","yyyy-MM-dd HH:mm:ss");
+        c.setTime(parseDate);
         int da = c.get(Calendar.DAY_OF_YEAR);
         return da;
+    }
+
+
+    public static long getFirstDayOfYear(Date date){
+        Calendar c = Calendar.getInstance();
+        Date parseDate = parseDate(formatDate(date, "yyyy") + "-01-01 00:00:00","yyyy-MM-dd HH:mm:ss");
+        c.setTime(parseDate);
+        return c.getTimeInMillis();
+    }
+
+    public static long getLastDayOfYear(Date date){
+        Calendar c = Calendar.getInstance();
+        Date parseDate = parseDate(formatDate(date, "yyyy") + "-12-31 23:59:59","yyyy-MM-dd HH:mm:ss");
+        c.setTime(parseDate);
+        return c.getTimeInMillis();
     }
 
     /**
@@ -198,7 +214,8 @@ public class DateUtils {
      */
     public static Date getMondayOfWeek(Date date) {
         Calendar monday = Calendar.getInstance();
-        monday.setTime(date);
+        Date parseDate = parseDate(formatDate(date) + " 00:00:00","yyyy-MM-dd HH:mm:ss");
+        monday.setTime(parseDate);
         monday.setFirstDayOfWeek(FIRST_DAY_OF_WEEK);
         monday.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
         return monday.getTime();
@@ -212,7 +229,8 @@ public class DateUtils {
      */
     public static Date getSundayOfWeek(Date date) {
         Calendar sunday = Calendar.getInstance();
-        sunday.setTime(date);
+        Date parseDate = parseDate(formatDate(date) + " 23:59:59","yyyy-MM-dd HH:mm:ss");
+        sunday.setTime(parseDate);
         sunday.setFirstDayOfWeek(FIRST_DAY_OF_WEEK);
         sunday.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
         return sunday.getTime();
@@ -262,7 +280,8 @@ public class DateUtils {
      */
     public static Date getFirstDateOfMonth(Date date) {
         Calendar c = Calendar.getInstance();
-        c.setTime(date);
+        Date parseDate = parseDate(formatDate(date) + " 00:00:00","yyyy-MM-dd HH:mm:ss");
+        c.setTime(parseDate);
         c.set(Calendar.DAY_OF_MONTH, c.getActualMinimum(Calendar.DAY_OF_MONTH));
         return c.getTime();
     }
@@ -275,7 +294,8 @@ public class DateUtils {
      */
     public static Date getLastDateOfMonth(Date date) {
         Calendar c = Calendar.getInstance();
-        c.setTime(date);
+        Date parseDate = parseDate(formatDate(date) + " 23:59:59","yyyy-MM-dd HH:mm:ss");
+        c.setTime(parseDate);
         c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
         return c.getTime();
     }
