@@ -60,7 +60,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
-        //遍历list VIN码:list下标
+/*         //遍历list VIN码:list下标
         Map<String, Integer> listMap = new HashMap<>();
 
         DwmVlmsOneOrderToEnd params = null;
@@ -138,7 +138,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
                 }
             }
-        }
+        } */
         return oneOrderToEndList;
     }
 
