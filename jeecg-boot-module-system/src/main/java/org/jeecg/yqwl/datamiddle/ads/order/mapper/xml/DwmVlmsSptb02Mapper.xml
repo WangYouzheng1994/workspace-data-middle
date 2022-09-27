@@ -780,7 +780,7 @@
         <if test="params.allTime != null">
             -- 时间粒度为天时， 在今天结束之前起运，在今天到货 或者没到货都是在途
             <foreach collection="params.allTime" open="(case " close=" else '0000-00-00' end) dates" item="item">
-                when dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{item.endTime}
+                when dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{item.endTime}
                 and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{item.dateTimestamp} or dvs.FINAL_SITE_TIME <![CDATA[ = ]]> 0)
                 then #{item.dateFormat}
             </foreach>
@@ -804,7 +804,7 @@
             <where>
                 dvs1.SHIPMENT_TIME != 0
                 <if test="params.endTime != null and params.endTime != ''">
-                    and dvs1.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+                    and dvs1.SHIPMENT_TIME <![CDATA[ < ]]> #{params.endTime}
                 </if>
                 <if test="params.startTime != null and params.startTime != ''">
                     and (dvs1.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs1.FINAL_SITE_TIME =0)

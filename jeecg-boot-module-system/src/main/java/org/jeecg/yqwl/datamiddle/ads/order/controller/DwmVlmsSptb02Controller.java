@@ -107,7 +107,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
         log.info("查询在途量");
         Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
-        return top10OnWayList;
+        return null;
     }
 
     /**
