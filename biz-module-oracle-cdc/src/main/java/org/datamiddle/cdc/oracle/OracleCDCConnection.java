@@ -15,7 +15,7 @@ import org.datamiddle.cdc.oracle.bean.element.column.StringColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.TimestampColumn;
 import org.datamiddle.cdc.oracle.constants.ConstantValue;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
@@ -59,7 +59,11 @@ public class OracleCDCConnection {
     private TransactionManager transactionManager;
     /** 为delete类型的rollback语句查找对应的insert语句的connection */
     private OracleCDCConnection queryDataForRollbackConnection;
-    private QueueData result;
+    private List<QueueData> result;
+    //重新启动异常标识
+    private int identification=0;
+    //V$LOGMNR_CONTENTS 的唯一值
+    private String  rs_id;
 
     public OracleCDCConnection() {
     }
@@ -399,6 +403,10 @@ public class OracleCDCConnection {
     public String buildSelectSql(
             String listenerOptions, String listenerTables, boolean isCdb) {
         StringBuilder sqlBuilder = new StringBuilder(SqlUtil.SQL_SELECT_DATA);
+        //判断异常类型
+        if(this.identification==4||this.identification==1){
+            sqlBuilder.append(" and ").append(" rs_id > '"+this.rs_id+"'");
+        }
 
         if (StringUtils.isNotEmpty(listenerTables)) {
             sqlBuilder.append(" and ( ").append(buildSchemaTableFilter(listenerTables, isCdb));
@@ -519,7 +527,7 @@ public class OracleCDCConnection {
      * @param endScn
      * @param autoaddLog
      */
-    public void startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog) {
+    public void startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog,BigInteger currentSinkPosition) {
 
         String startSql;
         try {
@@ -549,6 +557,8 @@ public class OracleCDCConnection {
             // 查找出加载到logMiner里的日志文件
             this.addedLogFiles = queryAddedLogFiles();
         } catch (Exception e) {
+            //当出现异常的时候 停止程序 并将之前的scn 持久化
+            //writeTxtFG("断点续传记录SCN，开始SCN="+startScn+",消费SCN="+currentSinkPosition+"Identification = 2","D://cdc/mysqlRecord.txt");
             // this.CURRENT_STATE.set(STATE.FAILED);
             // this.exception = e;
             throw new RuntimeException(e);
@@ -580,7 +590,7 @@ public class OracleCDCConnection {
     }
 
     /** 从LogMiner视图查询数据 */
-    public boolean queryData(String logMinerSelectSql) {
+    public boolean queryData(String logMinerSelectSql,BigInteger startScnPosition,BigInteger currentSinkPosition) {
 
         try {
 /*
@@ -600,7 +610,11 @@ public class OracleCDCConnection {
             logMinerSelectStmt.setString(1, startScn.toString());
             logMinerSelectStmt.setString(2, endScn.toString());
             long before = System.currentTimeMillis();
-
+           /* if(("83743364".equals(startScn.toString()))){
+                //scn大于固定值
+                int a = 1;
+                int b = a/0;
+            }*/
             // 抽取出解析到的 lgminerData
             logMinerData = logMinerSelectStmt.executeQuery();
 
@@ -619,6 +633,7 @@ public class OracleCDCConnection {
             //         String.format(
             //                 "query logMiner data failed, sql:[%s], e: %s",
             //                 logMinerSelectSql, ExceptionUtil.getErrorMessage(e));
+            //writeTxtFG("断点续传记录SCN，开始SCN="+startScnPosition+",消费SCN="+currentSinkPosition+"Identification = 3","D://cdc/mysqlRecord.txt");
             log.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -640,7 +655,7 @@ public class OracleCDCConnection {
             this.CURRENT_STATE.set(STATE.READEND);
             return false;
         }*/
-
+        result = new ArrayList<>();
         // 从JDBC ResultSEt中获取数据并解析多行SQL。如果解析到了以后 此方法返回True，并且把解析后的数据存放到QueueData中。
         String sqlLog;
         while (logMinerData.next()) {
@@ -660,6 +675,7 @@ public class OracleCDCConnection {
             }
             BigInteger scn = new BigInteger(logMinerData.getString(LogminerKeyConstants.KEY_SCN));
             String operation = logMinerData.getString(LogminerKeyConstants.KEY_OPERATION);
+            String RS_ID = logMinerData.getString(LogminerKeyConstants.RS_ID);
             int operationCode = logMinerData.getInt(LogminerKeyConstants.KEY_OPERATION_CODE);
             String tableName = logMinerData.getString(LogminerKeyConstants.KEY_TABLE_NAME);
 
@@ -834,7 +850,8 @@ public class OracleCDCConnection {
             columnRowData.addField(new TimestampColumn(timestamp));
             columnRowData.addHeader("opTime");
 
-            result = new QueueData(scn, columnRowData);
+            QueueData queueData = new QueueData(scn, columnRowData,RS_ID);
+            result.add(queueData);
 
             // 只有非回滚的insert update解析的数据放入缓存
             if (!rollback) {
@@ -851,11 +868,11 @@ public class OracleCDCConnection {
                                 hasMultiSql,
                                 tableName));
             }
-            return true;
+            //return true;
         }
 
         // this.CURRENT_STATE.set(STATE.READEND); TODO: 任务控制
-        return false;
+        return true;
     }
 
     // --------------- 处理CDC日志解析的动作
@@ -985,6 +1002,30 @@ public class OracleCDCConnection {
         } catch (SQLException e) {
             throw new RuntimeException(
                     String.format("error to get meta from [%s.%s]", schema, tableName), e);
+        }
+    }
+
+    /***
+     *  测试 将内容写入到文件
+     */
+    private void writeTxtFG(String datastr,String diststr){
+        FileWriter fw = null;
+        try {
+            //如果文件存在，则追加内容；如果文件不存在，则创建文件
+            File f = new File(diststr);
+            fw = new FileWriter(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(datastr);
+        pw.flush();
+        try {
+            fw.flush();
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

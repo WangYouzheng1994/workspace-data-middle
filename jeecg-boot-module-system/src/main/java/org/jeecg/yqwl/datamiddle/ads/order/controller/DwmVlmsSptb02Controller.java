@@ -47,6 +47,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectAmountOfPlan")
     public Result<?> queryDayAmountOfPlan (@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         log.info("查询了计划量");
         Result<ShipmentVO> dayAmountOfPlan = dwmVlmsSptb02Service.findDayAmountOfPlan(baseBrandTime);
         //  参数校验,去除key的空值
@@ -63,6 +64,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-出库量", notes = "DwmVlmsSptb02-出库量")
     @PostMapping(value = "/findTop10StockOutList")
     public Result<?> findTop10StockOutList(@RequestBody GetBaseBrandTime baseBrandTime ) {
+        checkStartTime(baseBrandTime);
         log.info("查询了出库量");
         Result<ShipmentVO> top10StockOutList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10StockOutList(baseBrandTime));
         return top10StockOutList;
@@ -77,6 +79,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10待发量")
     @PostMapping(value = "/findTop10PendingList" )
     public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         log.info("查询了待发量");
         Result<ShipmentVO> top10PendingList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10PendingList(baseBrandTime));
         return top10PendingList;
@@ -89,6 +92,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectShipment")
     public Result<?> queryShipment (@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         log.info("查询了起运量");
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.findShipment(baseBrandTime);
         //  参数校验,去除key的空值
@@ -105,6 +109,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
     @PostMapping(value = "/findTop10OnWayList" )
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         log.info("查询在途量");
         Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
         return null;
@@ -117,6 +122,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectEndNum")
     public Result<?> queryEndNum (@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         log.info("查询了到货量");
         Result<ShipmentVO> shipment = dwmVlmsSptb02Service.getFINAL_SITE_TIME(baseBrandTime);
         //  参数校验,去除key的空值
@@ -133,6 +139,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      */
     @PostMapping("/selectArrivalRate")
     public Result<?> queryArrivalRate (@RequestBody GetBaseBrandTime baseBrandTime) {
+        checkStartTime(baseBrandTime);
         BigDecimal num = new BigDecimal("100");
         // 起运及时率
         //获取起运样本总量
@@ -245,6 +252,13 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
     public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
         return super.importExcel(request, response, DwmVlmsSptb02.class);
+    }
+
+    private void checkStartTime(GetBaseBrandTime param){
+        if (Objects.isNull(param.getStartTime())){
+            throw new SecurityException("请选择开始时间");
+        }
+
     }
 
 }
