@@ -62,7 +62,7 @@ public class OneOrderToEndDwmAppEPC {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_EPC_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         //1.将mysql中的源数据转化成 DataStream

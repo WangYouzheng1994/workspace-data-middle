@@ -60,7 +60,7 @@ public class OneOrderToEndDwmAppBSD {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_GROUP_2)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
         // 1.将mysql中的源数据转化成 DataStream

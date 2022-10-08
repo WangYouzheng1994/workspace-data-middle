@@ -74,7 +74,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701)
                 .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_EPC_LATEST_0701_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
