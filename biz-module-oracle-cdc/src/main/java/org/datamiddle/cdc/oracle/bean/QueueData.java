@@ -29,12 +29,16 @@ import java.math.BigInteger;
 public class QueueData {
     private final BigInteger scn;
     private final RowData data;
+    private final String rsId;
 
-    public QueueData(BigInteger lsn, RowData data) {
+    public QueueData(BigInteger lsn, RowData data,String rsId) {
         this.scn = lsn;
         this.data = data;
+        this.rsId =rsId;
     }
-
+    public String getRsId(){
+        return rsId;
+    }
     public BigInteger getScn() {
         return scn;
     }
