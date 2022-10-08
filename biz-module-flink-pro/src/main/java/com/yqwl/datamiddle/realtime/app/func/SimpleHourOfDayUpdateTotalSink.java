@@ -3,16 +3,13 @@ package com.yqwl.datamiddle.realtime.app.func;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.util.DateTimeUtil;
-import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Description:
@@ -25,13 +22,18 @@ public class SimpleHourOfDayUpdateTotalSink<T> extends RichSinkFunction<String> 
 
     private static Map<Long, String> keyMap = new HashMap<>();
 
+    private final static List<Long> timestampEveryHouse = new ArrayList<>();
+
     @Override
     public void invoke(String value, Context context) throws Exception {
         JSONObject valueObj = JSON.parseObject(value);
         // 获取cdc进入kafka的时间
         long tsNum = Long.parseLong(JsonPartUtil.getTsStr(valueObj));
-        //1662480000000L 20220907日00点 时间戳
-        List<Long> timestampEveryHouse = DateTimeUtil.getTimeStampEveryHouse(1662480000000L, 48);
+        //1662480000000L 20220907日00点 时间戳 获取
+        if (CollectionUtils.isEmpty(timestampEveryHouse)){
+            //第一次捕获数据时，将第一次cdc进入kafka的时间作为开始时间
+            timestampEveryHouse.addAll(DateTimeUtil.getTimeStampEveryHouse(tsNum, 72));
+        }
         // 1.先去看是否在要求取的时间范围内
         if (tsNum>= timestampEveryHouse.get(0) && tsNum < timestampEveryHouse.get(timestampEveryHouse.size() - 1)){
             //二分法比对

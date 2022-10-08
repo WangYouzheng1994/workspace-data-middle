@@ -1,11 +1,8 @@
 package com.yqwl.datamiddle.realtime.app.ods;
 
 import cn.hutool.setting.dialect.Props;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.SimpleHourOfDayUpdateTotalSink;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
@@ -16,8 +13,6 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.ProcessFunction;
-import org.apache.flink.util.Collector;
 import org.apache.kafka.common.TopicPartition;
 
 import java.util.HashMap;
@@ -84,7 +79,7 @@ public class FilterConsumerKafka {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804)
                 .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 // .setBounded(OffsetsInitializer.offsets(offsetMap)) // 终止 60 6-1

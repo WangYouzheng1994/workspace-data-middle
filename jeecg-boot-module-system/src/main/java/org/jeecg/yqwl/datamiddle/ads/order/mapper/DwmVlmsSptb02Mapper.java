@@ -2,6 +2,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
@@ -44,6 +45,13 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
       * @return
       */
      List<ShipmentDTO> onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
+
+    /**
+     * 新在途量
+     * @param baseBrandTime
+     * @return
+     */
+    List<DwmSptb02> getOnwayDatas(@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 按条件查询计划量
@@ -150,4 +158,8 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      */
     Integer countDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
 
+
+    Integer getOnwayDatasCount(@Param("params") GetBaseBrandTime baseBrandTime);
+
+    List<ShipmentDTO> getOnWayCount(@Param("params") GetBaseBrandTime baseBrandTime);
 }

@@ -6,6 +6,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
+import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
 import com.yqwl.datamiddle.realtime.util.*;
@@ -22,10 +23,13 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
+import org.apache.kafka.common.TopicPartition;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +45,10 @@ public class WaybillDwmAppSptb02Simple {
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
+        // 从偏移量表中读取指定的偏移量模式
+        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.DWD_VLMS_SPTB02, 0);
+        offsetMap.put(topicPartition, 112904L);
         // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
@@ -66,8 +74,9 @@ public class WaybillDwmAppSptb02Simple {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 .build();
 
         // 1.将mysql中的源数据转化成 DataStream
@@ -130,7 +139,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
 
                             /**
-                             //理论起运时间
+                             //理论起运时间 和 理论出库时间
                              //关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
                              // 获取车架号 VVIN 从mysql中获取
                              * 查询 ods_vlms_lc_spec_config
@@ -146,14 +155,22 @@ public class WaybillDwmAppSptb02Simple {
                             String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
                             log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
                             if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
-                                String specConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
-                                JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, specConfigSql, hostComCode, baseCode, transModeCode);
+                                //SPEC_CODE 指标代码 0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
+                                String shipmentSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
+                                        "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
+                                //2022-09-19 新增--理论出库时间
+                                String outSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
+                                        "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '2' limit 1 ";
+
+                                JSONObject specConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG, shipmentSpecConfigSql, hostComCode, baseCode, transModeCode);
+                                JSONObject outSpecConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + "-out", outSpecConfigSql, hostComCode, baseCode, transModeCode);
+                                //=========================理论起运时间==================================//
                                 if (specConfig != null) {
                                     // 定义要增加的时间戳
                                     Long outSiteTime = null;
                                     // 获取增加的时间步长
                                     String hours = specConfig.getString("STANDARD_HOURS");
-                                    // 获取前置节点代码
+                                    //获取前置节点代码
                                     String nodeCode = specConfig.getString("START_CAL_NODE_CODE").trim();
                                     /**
                                      * DZJDJRQ 主机厂计划下达时间       公路
@@ -175,6 +192,35 @@ public class WaybillDwmAppSptb02Simple {
                                         DateTime parse = DateUtil.parse(formatDate);
                                         DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
                                         dwmSptb02.setTHEORY_SHIPMENT_TIME(newStepTime.getTime());
+                                    }
+                                }
+                                //==================理论出库时间===========================//
+                                if (outSpecConfig != null) {
+                                    // 定义要增加的时间戳
+                                    Long outTime = null;
+                                    // 获取增加的时间步长
+                                    String hours = outSpecConfig.getString("STANDARD_HOURS");
+                                    // 获取前置节点代码
+                                    String nodeCode = outSpecConfig.getString("START_CAL_NODE_CODE").trim();
+                                    /**
+                                     * DZJDJRQ     主机厂计划下达时间       一汽大众
+                                     * DYSSZPSJ    运输商指派时间       其他主机厂
+                                     */
+                                    if ("DZJDJRQ".equals(nodeCode)) {
+                                        outTime = dwmSptb02.getDPZRQ();
+                                    }
+                                    if ("DYSSZPSJ".equals(nodeCode)) {
+                                        outTime = dwmSptb02.getDYSSZPSJ();
+                                    }
+
+                                    if (outTime != null) {
+                                        Date outDate = new Date(outTime);
+                                        // 格式化时间
+                                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                        String formatDate = formatter.format(outDate);
+                                        DateTime parse = DateUtil.parse(formatDate);
+                                        DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
+                                        dwmSptb02.setTHEORY_OUT_TIME(newStepTime.getTime());
                                     }
                                 }
                             }
@@ -374,6 +420,43 @@ public class WaybillDwmAppSptb02Simple {
                                     }
                                 }
                             }
+
+
+                            // ======================= 理论到货时间 ==================================//
+                            // 一般取  sptb02表的DBZDHSJ_DZ
+                            // 佛山水运系统理论到货时间按照以下逻辑单独处理
+                            // update LC_VW_DH_RECORD a set a.dlldhsj_xt = a.dzjdjrq + 2.2 + (select b.nbzwlsj_dz FROM sptb02 b where b.cjsdbh = a.cjsdbh)
+                            // where a.vysfs = 'S' and a.vlj = '佛山基地';
+                            //同城或者公路计划系统理论到货时间按照以下逻辑单独处理
+                            //   update LC_VW_DH_RECORD
+                            //    set  DLLDHSJ_XT = trunc(DLLDHSJ_XT,'dd')+1-1/(24*60*60)
+                            //    WHERE
+                            //    istc = 'YES' OR VYSFS = 'G';
+                            if (Objects.nonNull(dwmSptb02.getDBZDHSJ_DZ()) && !dwmSptb02.getDBZDHSJ_DZ().equals(0L)){
+                                Long theorySiteTime = dwmSptb02.getDBZDHSJ_DZ();
+                                //处理佛山水运
+                                // CQWH : 长春0431  成都028  佛山0757  青岛0532  天津022
+                                if ("S".equals(dwmSptb02.getTRAFFIC_TYPE()) && "0757".equals(dwmSptb02.getCQWH())){
+                                    String ddjrqSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C +  " where CPCDBH = '" + dwmSptb02.getCPCDBH() + "' limit 1 ";
+                                    JSONObject ddjrqConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB01C + "-ddjrq", ddjrqSql, dwmSptb02.getCPCDBH());
+                                    if (Objects.nonNull(ddjrqConfig)){
+                                        //2.2天 = 190080000 ms
+                                        theorySiteTime = Long.parseLong(ddjrqConfig.getString("DDJRQ")) + theorySiteTime + 190080000L;
+                                    }
+                                }
+                                //处理同城或者公路计划
+                                if ("G".equals(dwmSptb02.getTRAFFIC_TYPE()) || Integer.valueOf(1).equals(dwmSptb02.getTYPE_TC())){
+                                    //将日期转为今天的 23:59:59
+                                    Date outDate = new Date(dwmSptb02.getDBZDHSJ_DZ());
+                                    // 格式化时间
+                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                    String formatDate = formatter.format(outDate) + " 23:59:59";
+                                    DateTime parse = DateUtil.parse(formatDate);
+                                    theorySiteTime = parse.getTime();
+                                }
+                                dwmSptb02.setTHEORY_SITE_TIME(theorySiteTime);
+                            }
+
 //                            // 分配及时率  出库及时率  起运及时率 到货及时率
 //                            /**
 //                             * 处理理论出库时间 THEORY_OUT_TIME

@@ -1,15 +1,14 @@
 package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
-import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
-import org.jeecg.common.util.DateUtils;
+import org.jeecg.yqwl.datamiddle.ads.order.constant.TimeGranularity;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentHaveTimestamp;
+import org.jeecg.yqwl.datamiddle.ads.order.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
@@ -22,13 +21,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
  * @Description: DwmVlmsSptb02
  * @Author: jeecg-boot
- * @Date:   2022-05-12
+ * @Date: 2022-05-12
  * @Version: V1.0
  */
 @Slf4j
@@ -38,42 +40,237 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     @Resource
     private DwmVlmsSptb02Mapper dwmVlmsSptb02Mapper;
 
+
     /**
      * 查询出库量列表
+     *
      * @param baseBrandTime
      * @return 品牌或基地  数量  时间
      */
     @Override
     public Result<ShipmentVO> findTop10StockOutList(GetBaseBrandTime baseBrandTime) {
         List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.stockOutList(baseBrandTime);
-        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
+        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment, baseBrandTime);
         return Result.OK(resultVO);
     }
 
     /**
      * 查询top10待发量列表
-     * @param  baseBrandTime
-     * @return  品牌或基地  数量  时间
+     *
+     * @param baseBrandTime
+     * @return 品牌或基地  数量  时间
      */
     @Override
     public Result<ShipmentVO> findTop10PendingList(GetBaseBrandTime baseBrandTime) {
         List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.pendingList(baseBrandTime);
         //todo:对返回前端的值做处理
-        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
+        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment, baseBrandTime);
         return Result.OK(resultVO);
     }
 
+
     /**
      * 查询top10在途量列表
-     * @param baseBrandTime
-     * @return  品牌或基地  数量  时间
+     *
+     * @param baseBrandTime 查询参数
+     * @return 品牌或基地  数量  时间
      */
     @Override
     public Result<ShipmentVO> findTop10OnWayList(GetBaseBrandTime baseBrandTime) {
-        List<ShipmentDTO> shipment = dwmVlmsSptb02Mapper.onWayList(baseBrandTime);
-        ShipmentVO resultVO = FormatDataUtil.formatDataList(shipment,baseBrandTime);
-        return Result.OK(resultVO);
+
+        //创建时间段数据 以天为单位
+        List<ShipmentHaveTimestamp> allTime = createAllTime(baseBrandTime);
+        baseBrandTime.setAllTime(allTime);
+        //构造ShipmentDTO
+        List<ShipmentDTO> shipmentDTOS = dwmVlmsSptb02Mapper.getOnWayCount(baseBrandTime);
+
+        return Result.OK(FormatDataUtil.formatDataList(shipmentDTOS, baseBrandTime));
     }
+
+
+    /**
+     * 降雨量算法！
+     *
+     * @param allTime       数据
+     * @param baseBrandTime 查询条件
+     * @return {@link List<ShipmentDTO>}
+     * @author dabao
+     * @date 2022/9/16
+     */
+    @Deprecated
+    private List<ShipmentDTO> buildShipmentDtoByGrain(List<ShipmentHaveTimestamp> allTime, GetBaseBrandTime baseBrandTime) {
+        List<ShipmentDTO> shipmentDTOS = new ArrayList<>();
+        if (TimeGranularity.WEEK.equals(baseBrandTime.getTimeType())) {
+            //时间类型变为周
+            allTime.forEach(item ->
+                    item.setDates(item.getDates().substring(0, 5) + DateUtils.getWeekOfYear(new Date(item.getDateTimestamp()))));
+        } else if (TimeGranularity.MONTH.equals(baseBrandTime.getTimeType())) {
+            //时间类型变为月
+            allTime.forEach(item ->
+                    item.setDates(item.getDates().substring(0, 5) + DateUtils.getMonth(new Date(item.getDateTimestamp()))));
+        } else if (TimeGranularity.QUARTER.equals(baseBrandTime.getTimeType())) {
+            //时间类型变为季度
+            allTime.forEach(item ->
+                    item.setDates(item.getDates().substring(0, 5) + DateUtils.getSeason(new Date(item.getDateTimestamp()))));
+        } else if (TimeGranularity.YEAR.equals(baseBrandTime.getTimeType())) {
+            //时间类型变为年
+            allTime.forEach(item ->
+                    item.setDates(item.getDates().substring(0, 4)));
+        }
+        //按照时间粒度和分组条件再次分组
+        Map<String, List<ShipmentHaveTimestamp>> listMap = allTime.stream().collect(Collectors.groupingBy(item -> item.getDates() + "," + item.getGroupName()));
+        listMap.forEach((key, value) -> {
+            //求时间该时间粒度的总和
+            int sum = value.stream().mapToInt(ShipmentDTO::getTotalNum).sum();
+            String[] splitKey = key.split(",");
+            ShipmentDTO shipmentDTO = new ShipmentDTO();
+            //获取时间类型名
+            shipmentDTO.setDates(splitKey[0]);
+            //获取分组名 基地或品牌
+            shipmentDTO.setGroupName(splitKey[1]);
+            shipmentDTO.setTotalNum(sum);
+            shipmentDTOS.add(shipmentDTO);
+        });
+        return shipmentDTOS;
+    }
+
+    /**
+     * 生成所有天
+     *
+     * @param baseBrandTime 查询条件
+     * @return {@link List<ShipmentHaveTimestamp>}
+     * @author dabao
+     * @date 2022/9/16
+     */
+    private List<ShipmentHaveTimestamp> createAllTime(GetBaseBrandTime baseBrandTime) {
+        List<ShipmentHaveTimestamp> times = new ArrayList<>();
+        //按天计算
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        Date date = new Date(baseBrandTime.getStartTime());
+        if (TimeGranularity.DAY.equals(baseBrandTime.getTimeType())){
+            //开始到结束的天数 一天86400000毫秒
+            BigDecimal dayNums = BigDecimal.valueOf(baseBrandTime.getEndTime()).subtract(BigDecimal.valueOf(baseBrandTime.getStartTime()))
+                    .divide(BigDecimal.valueOf(TimeGranularity.ONE_DAY_MILLI), 0, RoundingMode.DOWN);
+
+            for (int i = 0; i <= dayNums.intValue(); i++) {
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                cd.add(Calendar.DATE, i);
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(dateFormat.format(cd.getTime()));
+                haveTimestamp.setDateFormat(dateFormat.format(cd.getTime()));
+                haveTimestamp.setDateTimestamp(cd.getTimeInMillis());
+                haveTimestamp.setEndTime(cd.getTimeInMillis() + TimeGranularity.ONE_DAY_MILLI);
+                times.add(haveTimestamp);
+            }
+        } else if (TimeGranularity.WEEK.equals(baseBrandTime.getTimeType())){
+            //开始时间所在的周 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //没吃加一周
+                cd.add(Calendar.WEEK_OF_YEAR, i);
+                long startTime = DateUtils.getMondayOfWeek(cd.getTime()).getTime();
+                long endTime = DateUtils.getSundayOfWeek(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getWeekOfYear(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                i++;
+            }
+        } else if (TimeGranularity.MONTH.equals(baseBrandTime.getTimeType())) {
+            //开始时间所在的月 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加一月
+                cd.add(Calendar.MONTH, i);
+                long startTime = DateUtils.getFirstDateOfMonth(cd.getTime()).getTime();
+                long endTime = DateUtils.getLastDateOfMonth(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getMonth(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                i++;
+            }
+        } else if (TimeGranularity.QUARTER.equals(baseBrandTime.getTimeType())) {
+            //开始时间所在的季 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加三个月，三月为一季度
+                cd.add(Calendar.MONTH, i * 3);
+                long startTime = DateUtils.getFirstDateOfSeason(cd.getTime()).getTime();
+                long endTime = DateUtils.getLastDateOfSeason(cd.getTime()).getTime();
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 5) + DateUtils.getSeason(cd.getTime());
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+
+                //是否可以结束--
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                times.add(haveTimestamp);
+                i++;
+            }
+        } else if (TimeGranularity.YEAR.equals(baseBrandTime.getTimeType())) {
+            //开始时间所在的年 的 第一天
+            int i = 0;
+            Boolean flag = true;
+            while (flag){
+                Calendar cd = Calendar.getInstance();
+                cd.setTime(date);
+                //每次加一年
+                cd.add(Calendar.YEAR, i);
+                long startTime = DateUtils.getFirstDayOfYear(cd.getTime());
+                long endTime = DateUtils.getLastDayOfYear(cd.getTime());
+                String fmt = dateFormat.format(cd.getTime()).substring(0, 4);
+                ShipmentHaveTimestamp haveTimestamp = new ShipmentHaveTimestamp();
+                haveTimestamp.setDates(fmt);
+                haveTimestamp.setDateFormat(fmt);
+                haveTimestamp.setDateTimestamp(startTime < baseBrandTime.getStartTime() ? baseBrandTime.getStartTime() : startTime);
+                haveTimestamp.setEndTime(endTime);
+                times.add(haveTimestamp);
+
+                //是否可以结束--
+                if (endTime > baseBrandTime.getEndTime()){
+                    haveTimestamp.setEndTime(baseBrandTime.getEndTime());
+                    flag = false;
+                }
+                times.add(haveTimestamp);
+                i++;
+            }
+        }
+
+        return times;
+    }
+
     /**
      * 按条件查询到货量
      *
@@ -87,8 +284,10 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         ShipmentVO shipmentVO = FormatDataUtil.formatDataList(planAmount, baseBrandTime);
         return Result.OK(shipmentVO);
     }
+
     /**
      * 按条件查询计划量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -102,6 +301,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 按条件查询发运量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -129,6 +329,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 获取准时到达样本总量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -140,6 +341,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 起运样本总量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -151,6 +353,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 起运及时样本总量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -162,6 +365,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 出库及时样本总量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -173,6 +377,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 出库样本总量
+     *
      * @param baseBrandTime
      * @return
      */
@@ -184,6 +389,7 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
 
     /**
      * 插入clickhouse-dwm_vlms_sptb02表
+     *
      * @param dwmSptb02VO
      */
     @Override
@@ -194,8 +400,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         String customer_name = dwmSptb02VO.getCUSTOMER_NAME();
         String cqwh = dwmSptb02VO.getCQWH();
         String czjgsdm = dwmSptb02VO.getCZJGSDM();
-        String cjsdbh="";
-        int num =5000;
+        String cjsdbh = "";
+        int num = 5000;
         int numValue = 1;
 
         DwmSptb02VO dwmSptb02VO1;

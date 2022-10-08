@@ -2,23 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper">
     <resultMap id="sptb02Result" type="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02">
-        <result column="TRAFFIC_TYPE" property="trafficType" />
+        <result column="TRAFFIC_TYPE" property="trafficType"/>
     </resultMap>
-    <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02" parameterType="java.util.List" >
+    <select id="getSptbTrafficTypeByVin" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02"
+            parameterType="java.util.List">
         select
-               a.TRAFFIC_TYPE as TRAFFIC_TYPE,
-               a.VVIN as VVIN,
-               a.CJSDBH as CJSDBH,
-               a.DSJCFSJ as DSJCFSJ,
-               a.DGPSDHSJ as DGPSDHSJ,
-                case when (a.TRAFFIC_TYPE = 'G' and(a.DDHSJ != 0 or a.DGPSDHSJ != 0 )) then '已到货'
-                when (a.TRAFFIC_TYPE in ('T', 'S') and (a.DDHSJ != 0 or a.DTVSDHSJ != 0)) then '已到货'
-                when (a.DCKRQ = 0) then '未出库'
-                when (b.NOW_DATE > a.DSJCFSJ and a.TRAFFIC_TYPE = 'G') then b.NOW_ADDRESS || b.NOW_CITY_NAME
-                when (c.DCJSJ > a.DSJCFSJ and a.TRAFFIC_TYPE in ('T', 'S')) then c.VWZ
-                end VWZ
+        a.TRAFFIC_TYPE as TRAFFIC_TYPE,
+        a.VVIN as VVIN,
+        a.CJSDBH as CJSDBH,
+        a.DSJCFSJ as DSJCFSJ,
+        a.DGPSDHSJ as DGPSDHSJ,
+        case when (a.TRAFFIC_TYPE = 'G' and(a.DDHSJ != 0 or a.DGPSDHSJ != 0 )) then '已到货'
+        when (a.TRAFFIC_TYPE in ('T', 'S') and (a.DDHSJ != 0 or a.DTVSDHSJ != 0)) then '已到货'
+        when (a.DCKRQ = 0) then '未出库'
+        when (b.NOW_DATE > a.DSJCFSJ and a.TRAFFIC_TYPE = 'G') then b.NOW_ADDRESS || b.NOW_CITY_NAME
+        when (c.DCJSJ > a.DSJCFSJ and a.TRAFFIC_TYPE in ('T', 'S')) then c.VWZ
+        end VWZ
         from
-             dwm_vlms_sptb02 a
+        dwm_vlms_sptb02 a
         left join ods_vlms_dcs_orders b
         on a.VVIN = b.VIN_NO
         left join ods_vlms_sptb22_dq c
@@ -31,76 +32,80 @@
             and VYSFS != 'J'
         </where>
         order by
-            CJSDBH
+        CJSDBH
     </select>
 
     <!--clickhouse插入数据    -->
-    <insert id="insertClickhouse" parameterType="java.util.List" >
+    <insert id="insertClickhouse" parameterType="java.util.List">
         INSERT INTO `default`.dwm_vlms_sptb02(
-            CJSDBH,
-            DDJRQ,
-            ACTUAL_OUT_TIME,
-            THEORY_OUT_TIME,
-            SHIPMENT_TIME,
-            FINAL_SITE_TIME,
-            CUSTOMER_NAME,
-            BASE_NAME,
-            CZJGSDM,
-            CQWH)
-            VALUES
-           <foreach collection="list" item="item" index="index" separator=",">
-                   (
-                       #{item.CJSDBH},
-                       #{item.DDJRQ},
-                       #{item.ACTUAL_OUT_TIME},
-                       #{item.THEORY_OUT_TIME},
-                       #{item.SHIPMENT_TIME},
-                       #{item.FINAL_SITE_TIME},
-                       #{item.CUSTOMER_NAME},
-                       #{item.BASE_NAME},
-                       #{item.CZJGSDM},
-                       #{item.CQWH}
-                    )
-           </foreach>
+        CJSDBH,
+        DDJRQ,
+        ACTUAL_OUT_TIME,
+        THEORY_OUT_TIME,
+        SHIPMENT_TIME,
+        FINAL_SITE_TIME,
+        CUSTOMER_NAME,
+        BASE_NAME,
+        CZJGSDM,
+        CQWH)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.CJSDBH},
+            #{item.DDJRQ},
+            #{item.ACTUAL_OUT_TIME},
+            #{item.THEORY_OUT_TIME},
+            #{item.SHIPMENT_TIME},
+            #{item.FINAL_SITE_TIME},
+            #{item.CUSTOMER_NAME},
+            #{item.BASE_NAME},
+            #{item.CZJGSDM},
+            #{item.CQWH}
+            )
+        </foreach>
     </insert>
     <!--按条件查询计划量    -->
-    <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+    <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.DDJRQ) as totalNum,
-            <choose>
-                <when test="params.cqwh != '' and params.czjgsdm == '' ">
-                    dvs.CUSTOMER_NAME as groupName,
-                </when>
-                <otherwise>
-                    dvs.BASE_NAME as groupName,
-                </otherwise>
-            </choose>
+        <choose>
+            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <otherwise>
+                dvs.BASE_NAME as groupName,
+            </otherwise>
+        </choose>
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.DDJRQ))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ)) AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
-                dvs1.CJSDBH,
-                max(dvs1.WAREHOUSE_CREATETIME)
+            dvs1.CJSDBH,
+            max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02 dvs1
             <where>
-                <if test=" params.startTime != null and params.endTime !=null " >
-                    and dvs1.DDJRQ BETWEEN  #{params.startTime}and #{params.endTime}
+                <if test=" params.startTime != null and params.endTime !=null ">
+                    and dvs1.DDJRQ BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
                     and dvs1.CQWH = #{params.cqwh}
@@ -109,13 +114,14 @@
                     and dvs1.CZJGSDM = #{params.czjgsdm}
                 </if>
             </where>
-                 group by dvs1.CJSDBH
+            group by dvs1.CJSDBH
             )
         </where>
-            group by dates,groupName
+        group by dates,groupName
     </select>
     <!--按条件查询发运量    -->
-    <select id="getShipment" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+    <select id="getShipment" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.SHIPMENT_TIME) as totalNum,
         <choose>
@@ -128,19 +134,22 @@
         </choose>
 
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
@@ -149,16 +158,16 @@
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02 dvs1
             <where>
-                <if test=" params.startTime != null and params.endTime !=null " >
-                    and dvs1.SHIPMENT_TIME BETWEEN  #{params.startTime}and #{params.endTime}
+                <if test=" params.startTime != null and params.endTime !=null ">
+                    and dvs1.SHIPMENT_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh}          --基地
+                    and dvs1.CQWH = #{params.cqwh} --基地
                 </if>
                 <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm}    --主机品牌
+                    and dvs1.CZJGSDM = #{params.czjgsdm} --主机品牌
                 </if>
             </where>
             group by dvs1.CJSDBH
@@ -167,7 +176,8 @@
         group by dates ,groupName
     </select>
     <!--按条件查询到货量-->
-    <select id="getFINAL_SITE_TIME" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+    <select id="getFINAL_SITE_TIME" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.FINAL_SITE_TIME) as totalNum,
         <choose>
@@ -180,19 +190,22 @@
         </choose>
 
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME)) AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
@@ -201,16 +214,16 @@
             dvs1.CJSDBH,
             max(dvs1.WAREHOUSE_CREATETIME)
             from
-            dwm_vlms_sptb02  dvs1
+            dwm_vlms_sptb02 dvs1
             <where>
-                <if test=" params.startTime != null and params.endTime !=null " >
-                    and dvs1.FINAL_SITE_TIME BETWEEN  #{params.startTime}and #{params.endTime}
+                <if test=" params.startTime != null and params.endTime !=null ">
+                    and dvs1.FINAL_SITE_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh}          --基地
+                    and dvs1.CQWH = #{params.cqwh} --基地
                 </if>
                 <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm}    --主机品牌
+                    and dvs1.CZJGSDM = #{params.czjgsdm} --主机品牌
                 </if>
             </where>
             group by dvs1.CJSDBH
@@ -235,14 +248,12 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SITE_TIME <![CDATA[ != ]]> 0
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SITE_TIME <![CDATA[ != ]]> 0
-                </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -259,19 +270,22 @@
         SELECT
         count(dvs.CJSDBH) AS totalNum ,
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType =='quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
         </if>
         <choose>
             <when test="params.cqwh !='' and params.czjgsdm ==''">
@@ -296,7 +310,7 @@
                     AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  v.CQWH = #{params.cqwh}
+                    AND v.CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND v.CZJGSDM = #{params.czjgsdm}
@@ -309,6 +323,27 @@
 
     </select>
 
+
+    <!-- 查所有的在时间段内的数据，   在该时间段内已经起运或者正在起运的数据并且在该时间段之前没有到货-->
+    <select id="getOnwayDatas" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02">
+        select dvs.CJSDBH,SHIPMENT_TIME AS SHIPMENT_TIME,FINAL_SITE_TIME AS FINAL_SITE_TIME,CQWH,CZJGSDM,BASE_NAME AS
+        BASE_NAME,CUSTOMER_NAME as CUSTOMER_NAME,MAX(WAREHOUSE_UPDATETIME)
+        from dwm_vlms_sptb02 dvs
+        where
+        dvs.SHIPMENT_TIME != 0
+        and dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+        and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs.FINAL_SITE_TIME = 0)
+        <if test="params.cqwh != null and params.cqwh != ''">
+            AND dvs.CQWH = #{params.cqwh}
+        </if>
+        <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+            AND dvs.CZJGSDM = #{params.czjgsdm}
+        </if>
+        GROUP BY dvs.CJSDBH,dvs.SHIPMENT_TIME,dvs.FINAL_SITE_TIME,dvs.CQWH,dvs.CZJGSDM,dvs.BASE_NAME,CUSTOMER_NAME
+        <if test="params.pageNo != 0">
+            limit ${params.limitStart}, ${params.limitEnd}
+        </if>
+    </select>
     <!-- top10在途量    select count(*)  cnf from dwm_vlms_sptb02_test  where  startTime <=  SHIPMENT_TIME and endTime >= FINAL_SITE_TIME  or  FINAL_SITE_TIME = 0L order by cnf desc-->
     <select id="onWayList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
@@ -316,19 +351,22 @@
         SELECT
         count(dvs.CJSDBH) AS totalNum ,
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType =='quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-              YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
         </if>
         <choose>
             <when test="params.cqwh !='' and params.czjgsdm ==''">
@@ -348,7 +386,7 @@
             dwm_vlms_sptb02 v
             <where>
                 <if test=" params.startTime != null ">
-                    AND  v.SHIPMENT_TIME <![CDATA[ >= ]]> #{params.startTime}
+                    AND v.SHIPMENT_TIME <![CDATA[ >= ]]> #{params.startTime}
                 </if>
                 <if test="  params.endTime != null">
                     AND v.FINAL_SITE_TIME <![CDATA[ = ]]> #{params.endTime}
@@ -357,7 +395,7 @@
                     OR v.FINAL_SITE_TIME <![CDATA[ = ]]> 0
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  v.CQWH = #{params.cqwh}
+                    AND v.CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND v.CZJGSDM = #{params.czjgsdm}
@@ -377,26 +415,29 @@
         SELECT
         count(dvs.CJSDBH) AS totalNum ,
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
+            toDate(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME),9)))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME),9)))
+            AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType =='quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))))   AS dates
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))))
+            AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME))  AS dates
+            YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
         </if>
         <choose>
             <when test="params.cqwh !='' and params.czjgsdm ==''">
-                ,dvs.CUSTOMER_NAME as groupName    --品牌   主机公司代码
+                ,dvs.CUSTOMER_NAME as groupName --品牌 主机公司代码
             </when>
             <otherwise>
-                ,dvs.BASE_NAME as groupName   --基地  区位号
+                ,dvs.BASE_NAME as groupName --基地 区位号
             </otherwise>
         </choose>
         FROM
@@ -413,7 +454,7 @@
                     AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  v.CQWH = #{params.cqwh}
+                    AND v.CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND v.CZJGSDM = #{params.czjgsdm}
@@ -424,7 +465,7 @@
         </where>
         GROUP BY dates , groupName
     </select>
-<!--    到货及时样本总量-->
+    <!--    到货及时样本总量-->
     <select id="getArriveOnTime"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -440,23 +481,15 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SITE_TIME <![CDATA[ != ]]> 0
+                AND (DDHSJ_XT <![CDATA[ < ]]> THEORY_SITE_TIME OR
+                (DDHSJ_XT <![CDATA[ = ]]> 0 and THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND FINAL_SITE_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND FINAL_SITE_TIME <![CDATA[ < ]]> THEORY_SITE_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR FINAL_SITE_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SITE_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -467,7 +500,7 @@
         </where>
     </select>
 
-<!--    起运及时样本数量-->
+    <!--    起运及时样本数量-->
     <select id="getTimelyShipment"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -483,23 +516,17 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
+                AND ( SHIPMENT_TIME <![CDATA[ < ]]> THEORY_SHIPMENT_TIME OR
+                -- 实际还没起运，但是 理论起运时间在当前时间之后，视为一条正常数据
+                (SHIPMENT_TIME <![CDATA[ = ]]> 0 AND THEORY_SHIPMENT_TIME <![CDATA[ > ]]>
+                toUnixTimestamp64Milli(now64(3)) ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND SHIPMENT_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND SHIPMENT_TIME <![CDATA[ < ]]> THEORY_SHIPMENT_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR SHIPMENT_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_SHIPMENT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -509,7 +536,7 @@
             )
         </where>
     </select>
-<!--    起运样本总体-->
+    <!--    起运样本总体-->
     <select id="getTotalShipment"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -532,7 +559,7 @@
                     AND THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
                 </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -545,7 +572,7 @@
 
     </select>
 
-<!--    出库准时-->
+    <!--    出库准时-->
     <select id="getOnTimeDelivery"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -561,23 +588,16 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_OUT_TIME <![CDATA[ != ]]> 0
+                AND (ACTUAL_OUT_TIME <![CDATA[ < ]]> THEORY_OUT_TIME OR
+                (ACTUAL_OUT_TIME <![CDATA[ = ]]> 0 and THEORY_OUT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
+                ))
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND ACTUAL_OUT_TIME <![CDATA[ != ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND ACTUAL_OUT_TIME <![CDATA[ < ]]> THEORY_OUT_TIME
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    OR ACTUAL_OUT_TIME <![CDATA[ = ]]> 0
-                </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_OUT_TIME <![CDATA[ > ]]> toUnixTimestamp64Milli(now64(3))
-                </if>
+
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -588,7 +608,7 @@
         </where>
     </select>
 
-<!--    出库总量-->
+    <!--    出库总量-->
     <select id="getTotalOutboundQuantity"
             resultType="java.math.BigDecimal"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
@@ -604,14 +624,12 @@
             FROM
             dwm_vlms_sptb02
             <where>
+                THEORY_OUT_TIME <![CDATA[ != ]]> 0
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="  params.startTime != null and params.endTime != null">
-                    AND THEORY_OUT_TIME <![CDATA[ != ]]> 0
-                </if>
                 <if test="params.cqwh != null and params.cqwh != ''">
-                    AND  CQWH = #{params.cqwh}
+                    AND CQWH = #{params.cqwh}
                 </if>
                 <if test="params.czjgsdm != null and params.czjgsdm != '' ">
                     AND CZJGSDM = #{params.czjgsdm}
@@ -627,7 +645,7 @@
             <choose>
                 <when test="params.vvinList != null or params.selections != null ">
                     AND VVIN IN
-                    <foreach collection="params.vvinList" item="value"  index="key" separator="," open="(" close=")">
+                    <foreach collection="params.vvinList" item="value" index="key" separator="," open="(" close=")">
                         #{value}
                     </foreach>
                 </when>
@@ -671,34 +689,54 @@
                 AND FINAL_SITE_TIME <![CDATA[ <= ]]>  #{params.finalSiteTimeEnd}
             </if>
             <if test="params.trafficType != null   and params.trafficType != '' ">
-                AND TRAFFIC_TYPE =  #{params.trafficType}
+                AND TRAFFIC_TYPE = #{params.trafficType}
             </if>
             <if test="params.cpzdbh != null   and params.cpzdbh != '' ">
-                AND CPZDBH =  #{params.cpzdbh}
+                AND CPZDBH = #{params.cpzdbh}
             </if>
             <if test="params.ccxdlList != null and params.ccxdlList != '' ">
                 AND CCXDL IN
-                <foreach collection="params.ccxdlList" item="value"  index="key" separator="," open="(" close=")">
+                <foreach collection="params.ccxdlList" item="value" index="key" separator="," open="(" close=")">
                     #{value}
                 </foreach>
             </if>
         </where>
     </sql>
-<!--    docs查询-->
+    <!--    docs查询-->
     <select id="selectDocsList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
-            parameterType = "org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
         WITH
-             A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
+        A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
         SELECT
-            CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
-           VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_CODE, VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
-           DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-           DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
+        CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM ELSE 0 END,
+        VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_CODE, VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
+        DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+        DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
         FROM
-            dwm_vlms_sptb02  SPTB02
+        dwm_vlms_sptb02 SPTB02
         LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
-        <include refid="where_count_one_to_end" />
+        <include refid="where_count_one_to_end"/>
+        ORDER BY SPTB02.DDJRQ_R3 DESC
+        <if test="params.pageNo != 0">
+            limit ${params.limitStart}, ${params.limitEnd}
+        </if>
+    </select>
+    <!--    docs 车型列表页查询-->
+    <select id="selectDocsCcxdlList"
+            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
+            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
+        WITH
+        A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
+        SELECT
+        CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM ELSE 0 END,
+        VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_CODE, VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
+        DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
+        DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
+        FROM
+        dwm_vlms_sptb02 SPTB02
+        LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
+        <include refid="where_count_one_to_end"/>
         ORDER BY SPTB02.DDJRQ_R3 DESC
         <if test="params.pageNo != 0">
             limit ${params.limitStart}, ${params.limitEnd}
@@ -708,42 +746,75 @@
     <select id="countDocsList"
             resultType="java.lang.Integer">
         SELECT
-               COUNT(*)
+        COUNT(*)
         FROM
         dwm_vlms_sptb02
-        <include refid="where_count_one_to_end" />
+        <include refid="where_count_one_to_end"/>
     </select>
-
-<!--    docs 车型列表页查询-->
-    <select id="selectDocsCcxdlList"
-            resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
-            parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria">
-        WITH
-            A AS ( SELECT count(*) SAME_PLATE_NUM, CPZDBH  FROM dwm_vlms_sptb02 GROUP BY CPZDBH )
-        SELECT
-            CASE WHEN CPZDBH != '' THEN A.SAME_PLATE_NUM  ELSE 0 END,
-            VVIN,HOST_COM_CODE,BASE_NAME,VEHICLE_CODE, VEHICLE_NAME,START_CITY_NAME,END_CITY_NAME,VDWDM,DEALER_NAME,
-            DDJRQ_R3,CPZDBH,ASSIGN_TIME,TRANSPORT_NAME,ACTUAL_OUT_TIME,SHIPMENT_TIME,VJSYDM,A.SAME_PLATE_NUM,
-            DTVSDHSJ,FINAL_SITE_TIME,BRAND_NAME
-        FROM
-            dwm_vlms_sptb02  SPTB02
-        LEFT JOIN A ON SPTB02.CPZDBH = A.CPZDBH
-        <include refid="where_count_one_to_end" />
-        ORDER BY SPTB02.DDJRQ_R3 DESC
-        <if test="params.pageNo != 0">
-            limit ${params.limitStart}, ${params.limitEnd}
-        </if>
-
-
-    </select>
-
-<!--   docs车型计数 -->
+    <!--   docs车型计数 -->
     <select id="countDocsCcxdlList" resultType="java.lang.Integer">
         SELECT
-            COUNT(*)
+        COUNT(*)
         FROM
         dwm_vlms_sptb02
-        <include refid="where_count_one_to_end" />
+        <include refid="where_count_one_to_end"/>
     </select>
+
+    <select id="getOnwayDatasCount" resultType="java.lang.Integer">
+        select count(distinct CJSDBH)
+        from dwm_vlms_sptb02 dvs
+        where
+        dvs.SHIPMENT_TIME != 0
+        and dvs.SHIPMENT_TIME <![CDATA[ <= ]]> #{params.endTime}
+        and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs.FINAL_SITE_TIME = 0)
+        <if test="params.cqwh != null and params.cqwh != ''">
+            AND dvs.CQWH = #{params.cqwh}
+        </if>
+        <if test="params.czjgsdm != null and params.czjgsdm != '' ">
+            AND dvs.CZJGSDM = #{params.czjgsdm}
+        </if>
+    </select>
+    <!--    获取在途量 -->
+    <select id="getOnWayCount" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
+        select COUNT(DISTINCT dvs.CJSDBH) as total_num,
+        <if test="params.allTime != null">
+            -- 时间粒度为天时， 在今天结束之前起运，在今天到货 或者没到货都是在途
+            <foreach collection="params.allTime" open="(case " close=" else '0000-00-00' end) dates" item="item">
+                when dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{item.endTime}
+                and (dvs.FINAL_SITE_TIME <![CDATA[ > ]]> #{item.dateTimestamp} or dvs.FINAL_SITE_TIME <![CDATA[ = ]]> 0)
+                then #{item.dateFormat}
+            </foreach>
+        </if>
+        <choose>
+            <when test="params.cqwh !='' and params.czjgsdm ==''">
+                ,dvs.CUSTOMER_NAME as groupName --品牌 主机公司代码
+            </when>
+            <otherwise>
+                ,dvs.BASE_NAME as groupName --基地 区位号
+            </otherwise>
+        </choose>
+        from dwm_vlms_sptb02 dvs
+        <where>
+            (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
+            (select
+            dvs1.CJSDBH,
+            max(dvs1.WAREHOUSE_CREATETIME)
+            from
+            dwm_vlms_sptb02 dvs1
+            <where>
+                dvs1.SHIPMENT_TIME != 0
+                <if test="params.endTime != null and params.endTime != ''">
+                    and dvs1.SHIPMENT_TIME <![CDATA[ < ]]> #{params.endTime}
+                </if>
+                <if test="params.startTime != null and params.startTime != ''">
+                    and (dvs1.FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or dvs1.FINAL_SITE_TIME =0)
+                </if>
+            </where>
+            group by dvs1.CJSDBH
+            )
+        </where>
+        GROUP BY dates , groupName
+    </select>
+
 
 </mapper>

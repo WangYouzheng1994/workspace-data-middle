@@ -84,12 +84,24 @@ public class OracleCDCKafkaApp {
         //oracle cdc 相关配置
         Properties properties = new Properties();
         properties.put("database.tablename.case.insensitive", "false");
-        properties.put("log.mining.strategy", "online_catalog"); // 解决归档日志数据延迟
-        properties.put("log.mining.continuous.mine", "true");   // 解决归档日志数据延迟
-        // properties.put("log.mining.archive.log.only.mode", "true");   // 只读archive log 原因为归档速度太慢,导致最新的数据读不到
+        // 解决归档日志数据延迟
+        properties.put("log.mining.strategy", "online_catalog");
+        // 解决归档日志数据延迟
+        properties.put("log.mining.continuous.mine", "true");
+        // 只读archive log 原因为归档速度太慢,导致最新的数据读不到
+        // properties.put("log.mining.archive.log.only.mode", "true");
         properties.put("log.mining.batch.size.default", "2000");
         // properties.put("log.mining.batch.size.max", "400000");
-        properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+        // 解决number类数据 不能解析的方法
+        properties.put("decimal.handling.mode", "string");
+        // 设置在从重做/归档日志中读取数据之后以及再次开始读取数据之前，连接器休眠的最短,最大,默认时间 ms。
+        properties.put("log.mining.sleep.time.min.ms","10000");
+        properties.put("log.mining.sleep.time.max.ms","60000");
+        properties.put("log.mining.sleep.time.default.ms","20000");
+        // 设置在从重做/归档日志中读取数据之后以及再次开始读取数据之前，连接器休眠的最短,最大,默认时间 ms。
+        properties.put("log.mining.sleep.time.increment.ms","10000");
+        // 连接器从 LogMiner 内容视图中提取的内容记录数。 此举意为降低IO
+        properties.put("log.mining.view.fetch.size","3000");
         properties.put("event.processing.failure.handling.mode", "warn");
         properties.put("rac.nodes","10.123.175.197:1250,10.123.175.197:1251");
         properties.put("converters", "aaa");

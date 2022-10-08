@@ -281,7 +281,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
 //        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
-        Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
+        Integer integer = dwmVlmsOneOrderToEndService.selectDocsCount(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;
@@ -307,7 +307,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             queryCriteria.setPageNo(pageNo);
 
             // 获取查询数据
-            pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+            pageList = dwmVlmsOneOrderToEndService.selectDocsList2(queryCriteria);
             for (DwmVlmsDocs item : pageList) {
                 // 时间字段转换成年月日时分秒类型
                 row1 = sheet.createRow(rowNum);
@@ -481,7 +481,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
         // 转换时间格式,将Long类型转换成date类型
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Integer integer = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
+        Integer integer = dwmVlmsOneOrderToEndService.selectDocsCount(queryCriteria);
         if (integer > 150000) {
             this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
             return;
@@ -496,7 +496,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             queryCriteria.setPageNo(pageNo);
 
             // 获取查询数据
-            pageList = dwmVlmsOneOrderToEndService.selectDocsCcxdlList(queryCriteria);
+            pageList = dwmVlmsOneOrderToEndService.selectDocsList2(queryCriteria);
             for (DwmVlmsDocs item : pageList) {
                 // 时间字段转换成年月日时分秒类型
                 row1 = sheet.createRow(rowNum);
@@ -663,13 +663,14 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
 
 //        formatQueryTime(queryCriteria);
 
-        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
-        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+//        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
+//        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+//        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+//
+//        page.setRecords(pageList);
+//        page.setTotal(total);
 
-        page.setRecords(pageList);
-        page.setTotal(total);
-        return Result.OK(page);
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
     }
 
     /**
@@ -702,13 +703,13 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         }
 //        formatQueryTime(queryCriteria);
 
-        Integer total = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
-        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsCcxdlList(queryCriteria);
-
-        page.setRecords(pageList);
-        page.setTotal(total);
-        return Result.OK(page);
+//        Integer total = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
+//        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
+//        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsCcxdlList(queryCriteria);
+//
+//        page.setRecords(pageList);
+//        page.setTotal(total);
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
     }
 
 

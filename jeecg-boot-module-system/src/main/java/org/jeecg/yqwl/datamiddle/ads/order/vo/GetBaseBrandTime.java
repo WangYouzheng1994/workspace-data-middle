@@ -3,8 +3,10 @@ package org.jeecg.yqwl.datamiddle.ads.order.vo;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import lombok.Data;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentHaveTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @Description:
@@ -39,6 +41,19 @@ public class GetBaseBrandTime {
      * 主机厂品牌
      */
     private String czjgsdm;
+
+    private Integer pageNo;
+
+    private Integer pageSize;
+
+    private Integer limitStart;
+
+    private Integer limitEnd;
+
+    /**
+     * 用于在途量获取每天的时间戳
+     */
+    List<ShipmentHaveTimestamp> allTime;
 
 
     public static void main(String[] args) {
