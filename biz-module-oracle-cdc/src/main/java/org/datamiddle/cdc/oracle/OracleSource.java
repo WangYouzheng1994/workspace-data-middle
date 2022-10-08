@@ -2,6 +2,8 @@ package org.datamiddle.cdc.oracle;
 
 import com.alibaba.fastjson2.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.yqwl.datamiddle.realtime.util.DateTimeUtil;
+import com.yqwl.datamiddle.realtime.util.MemcachedUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -11,14 +13,17 @@ import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
 import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
 import org.datamiddle.cdc.util.KafkaProduceUtil;
+import org.jeecgframework.boot.DateUtil;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -89,6 +94,8 @@ public class OracleSource {
      */
     private boolean runningFlag = true;
 
+    //日志唯一id rs_id
+    private String rs_id;
     /**
      * 转换日志生产
      */
@@ -109,8 +116,8 @@ public class OracleSource {
         transactionManager = new TransactionManager(1000L, 20);
 
         this.oracleCDCConfig = oracleCDCConfig;
-        this.startScn = new BigInteger("0");
-        this.endScn = new BigInteger("0");
+        this.startScn = new BigInteger(oracleCDCConfig.getStartSCN());
+        this.endScn = new BigInteger(oracleCDCConfig.getEndSCN());
         this.logminerStep = new BigInteger("2000");
         // 初始化连接
         OracleCDCConnection oracleCDCConnect = init(oracleCDCConfig);
@@ -169,7 +176,7 @@ public class OracleSource {
      */
     public void loadData(OracleCDCConnection connection, String sql) {
         connectionExecutor.submit(() -> {
-            connection.queryData(sql);
+            //connection.queryData(sql);
         });
     }
 
@@ -196,21 +203,30 @@ public class OracleSource {
             // 按照加载日志文件大小限制，根据endScn作为起点找到对应的一组加载范围
             BigInteger currentStartScn = Objects.nonNull(this.endScn) ? this.endScn : startScn;
 
+            //断点续传：
+            //     需要记录当前的开始scn  并且记录消费的scn的值 为了解决当开始scn小于消费scn时 ，取开始scn会出现写入重复的情况
+            //     此处如果startscn> currentStartScn 说明此区间内没有数据情况；startscn< currentStartScn 说明出现数据情况，此处要注意避免数据重复
+            //writeTxtFG("断点续传记录SCN，开始SCN="+currentStartScn+",消费SCN="+currentSinkPosition+"Identification = 1"+"rs_id="+rs_id,"D://cdc/mysqlRecord.txt");
+
             // 如果加载了redo日志，则起点不能是上一次记载的日志的结束位点，而是上次消费的最后一条数据的位点
             if (loadRedo) {
+                //writeTxt("进入实时日志查询时currentSinkPosition="+currentSinkPosition,"D://cdc/dd.txt");
                 // 需要加1  因为logminer查找数据是左闭右开，如果不加1  会导致最后一条数据重新消费
                 currentStartScn = currentSinkPosition.add(BigInteger.ONE);
             }
-
+            //定义结束endScn
             Pair<BigInteger, Boolean> endScn = null;
             try {
+                //获取结束SCN
                 endScn = connecUtil.getEndScn(connection, currentStartScn, new ArrayList<>(32));
             } catch (SQLException e) {
+                //获取结束的SCN失败时
                 log.error(e.getMessage(), e);
             }
             if (endScn != null) {
                 // 开始日志挖掘
-                connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false);
+                connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endScn.getLeft(), false,this.currentSinkPosition);
+                //writeTxt("开始的scn:"+currentStartScn+"--结束scn:"+endScn.getLeft(),"D://cdc/dd.txt");
                 // 更新当前位点
                 this.endScn = endScn.getLeft();
                 this.loadRedo = endScn.getRight();
@@ -220,24 +236,48 @@ public class OracleSource {
                 logMinerSelectSql = connecUtil.buildSelectSql("UPDATE,INSERT,DELETE", StringUtils.join(oracleCDCConfig.getTable().toArray(), ","), false);
 
                 // 请求日志挖掘结果logmnr_contents查看。 结果会放到 connection的logminerData中 (ResultSet)。 TODO：此操作响应快慢与数据量反比，需要用多线程异步获取结果。
-                boolean selectResult = connecUtil.queryData(logMinerSelectSql);
+                boolean selectResult = connecUtil.queryData(logMinerSelectSql,currentStartScn,this.currentSinkPosition);
                 if (selectResult) {
                     // jdbc请求成功
                     try {
                         // 解析
                         if (connecUtil.hasNext()) {
                             // 获取解析Logminer结果
-                            QueueData result = connecUtil.getResult();
-                            if (result != null) {
+                            List<QueueData> result = connecUtil.getResult();
+                            if(null!=result&&result.size()>0){
+                                for (int i = 0; i <result.size() ; i++) {
+                                    QueueData queueData = result.get(i);
+
+                                    //发打印输出 此处该写入kafka,
+                                    //写入kafka时，写入成功后 出错，此时记录的scn是上一次的scn ，再次启动项目时候，会重复写入当前条
+                                    String querydata = JSON.toJSONString(LogminerHandler.parse(queueData, logminerConverter));
+                                    producer.send(new ProducerRecord<>("test_oracle_cdc_custom", querydata));
+                                    this.currentSinkPosition = queueData.getScn();
+                                    this.rs_id = queueData.getRsId();
+                                    //写入memcached
+                                    Boolean aBoolean = MemcachedUtil.setValue(currentSinkPosition + "" + rs_id, 0, querydata+"||||"+ new Date().getTime());
+                                    log.info("写入memcache成功："+aBoolean);
+                                    //writeTxt("内容："+queueData,"D://cdc/dd.txt");
+
+                                    //writeTxt("消费的CSN 记录下每次有数据的scn："+queueData+"rsid="+rs_id,"D://cdc/dd.txt");
+
+                                }
+                            }
+
+                            /*if (result != null) {
                                 // 格式化数据 after before，并推送到kafka
-                                producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
+                                //producer.send(new ProducerRecord<>("test_oracle_cdc_custom", JSON.toJSONString(LogminerHandler.parse(result, logminerConverter))));
+                                writeTxt(result+"");
                                 this.currentSinkPosition = result.getScn();
                                 // System.out.println(JSON.toJSONString(LogminerHandler.parse(result, logminerConverter)));
                                 // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
-                            }
+                            } */
                         }
                     } catch (Exception e) {
+                        //如果出错此处记录
+                        //writeTxtFG("断点续传记录SCN，开始SCN="+currentStartScn+",消费SCN="+currentSinkPosition+"Identification = 4,"+"rs_id="+rs_id,"D://cdc/mysqlRecord.txt");
                         log.error(e.getMessage(), e);
+                        throw new RuntimeException(e);
                     }
 
                     // 格式化数据
@@ -245,13 +285,14 @@ public class OracleSource {
 
                     // TODO: 格式化完了以后，更新任务的开始和结束
                 }
+                //writeTxt("-----------------------------------------------------------------------------------------------------","D://cdc/dd.txt");
                 // if (Objects.isNull(currentConnection)) {
                 //     updateCurrentConnection(logMinerConnection);
                 // }
                 // 如果已经加载了redoLog就不需要多线程加载了
-                if (endScn.getRight()) {
+                //if (endScn.getRight()) {
                     // break
-                }
+                //}
             }
         }
 /* 多线程处理 屏蔽，目前用单线程执行。
@@ -293,7 +334,53 @@ public class OracleSource {
             }
         }*/
     }
+    /***
+     *  测试 将内容写入到文件
+     */
+    private void writeTxt(String datastr,String diststr){
+        FileWriter fw = null;
+        try {
+            //如果文件存在，则追加内容；如果文件不存在，则创建文件
+            File f = new File(diststr);
+            fw = new FileWriter(f, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw);
+        pw.println(datastr);
+        pw.flush();
+        try {
+            fw.flush();
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    /***
+     *  测试 将内容写入到文件
+     */
+    private void writeTxtFG(String datastr,String diststr){
+        FileWriter fw = null;
+        try {
+            //如果文件存在，则追加内容；如果文件不存在，则创建文件
+            File f = new File(diststr);
 
+            fw = new FileWriter(f);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PrintWriter pw = new PrintWriter(fw,false);
+        pw.write(datastr);
+        pw.flush();
+        try {
+            fw.flush();
+            pw.close();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private static BigInteger a;
 
     public static void main(String[] args) {
@@ -301,10 +388,14 @@ public class OracleSource {
         System.out.println(bigInteger.subtract(a));
         System.out.println(a);*/
         // new OracleCDCConfig();
-        OracleCDCConfig build = OracleCDCConfig.builder()
+        /***
+         * 测试说明1. startscn 》消费scn时  再起启动时候的入参为starscn
+         *         2.startscn < 消费scn时  断点续传的scn为 消费scn+1 (其中会出现相同事务提交的数据，出现异常时候的bug)
+         */
+        OracleCDCConfig build = OracleCDCConfig.builder().startSCN("0").endSCN("0")
                 .readPosition("ALL")
                 .driverClass("oracle.jdbc.OracleDriver")
-                .table(Arrays.asList("TDS_LJ.TEST_SCN"))
+                .table(Arrays.asList("TDS_LJ.TEST_SCN,TDS_LJ.TEST_WLX"))
                 .username("flinkuser")
                 .password("flinkpw").jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
                         "192.168.3.95" + ")(PORT=" +
@@ -379,5 +470,61 @@ public class OracleSource {
 
     public void readLogInfo() {
 
+    }
+
+    /****
+     *  断点续传重新启动
+     * @param oracleCDCConfig
+     */
+    public void reStart(OracleCDCConfig oracleCDCConfig) {
+        // 初始化连接池
+        connectionExecutor = new ThreadPoolExecutor(
+                20, 20, 300, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(Integer.MAX_VALUE));
+        // 初始化日志缓存器， 底层是google的 lru缓存架构
+        transactionManager = new TransactionManager(1000L, 20);
+
+        this.oracleCDCConfig = oracleCDCConfig;
+        this.startScn = new BigInteger(oracleCDCConfig.getStartSCN());
+        this.endScn = new BigInteger(oracleCDCConfig.getEndSCN());
+        this.logminerStep = new BigInteger("2000");
+        //获取异常标识
+        int identification = oracleCDCConfig.getIdentification();
+        //获取异常处理的最后一条消费数据的id
+        String rs_id = oracleCDCConfig.getRs_id();
+        // 初始化连接
+        OracleCDCConnection oracleCDCConnect = init(oracleCDCConfig);
+        //设置异常标识
+        oracleCDCConnect.setIdentification(identification);
+        oracleCDCConnect.setRs_id(rs_id);
+        // 获取开始偏移量 根据模式判定
+        startScn = getStartSCN(oracleCDCConnect, startScn);
+        // 读取的位置 从startSCN偏移量开始
+        this.currentSinkPosition = startScn;
+
+        // 给转换器设置一个Connection，查询metaData信息。
+        String jdbcUrl = oracleCDCConfig.getJdbcUrl();
+        String username = oracleCDCConfig.getUsername();
+        String password = oracleCDCConfig.getPassword();
+        // String driverClass = oracleCDCConfig.getDriverClass();
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(
+                    jdbcUrl,
+                    username,
+                    password);
+            logminerConverter.setConnection(connection);
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+
+        // 初始化Logminer
+        payLoad(oracleCDCConnect);
+        // 如果当前的id = 4 ;需要将此数据修改为0
+        oracleCDCConnect.setIdentification(0);
+        // 一直沿用这个流程去处理
+        while (runningFlag) {
+            running(oracleCDCConnect);
+        }
     }
 }

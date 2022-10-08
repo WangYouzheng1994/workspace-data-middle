@@ -7,6 +7,7 @@ package org.datamiddle.cdc.oracle;
  * @Version: V1.0
  */
 public class LogminerKeyConstants {
+    public static final String RS_ID = "RS_ID";
     public static final String KEY_SEG_OWNER = "SEG_OWNER";
     public static final String KEY_TABLE_NAME = "TABLE_NAME";
     public static final String KEY_OPERATION = "OPERATION";
