@@ -124,6 +124,12 @@
             <artifactId>fastjson2</artifactId>
             <version>${fastjson2.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>biz-module-flink-pro</artifactId>
+            <version>2.4.6</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

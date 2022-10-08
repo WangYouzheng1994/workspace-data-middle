@@ -35,6 +35,12 @@ public class OracleCDCConfig {
     // 要过滤的表 schema.TableName 大写
     private List<String> table;
 
+    //处理日志为相同SCN数据得情况，以及异常出错位置[1.正常记录 2.创建日志报错 3.获取试图报错  4.写入数据逻辑报错]
+    private int identification;
+
+    //V$LOGMNR_CONTENTS 的唯一值
+    private String  rs_id;
+
     /**
      * jdbc 驱动连接
      */
@@ -54,4 +60,5 @@ public class OracleCDCConfig {
      * jdbc 驱动类class
      */
     private String driverClass;
+
 }

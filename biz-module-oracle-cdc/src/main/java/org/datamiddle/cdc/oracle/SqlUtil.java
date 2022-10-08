@@ -132,13 +132,13 @@ public class SqlUtil {
                     + "    xidsqn,\n"
                     + "    row_id,\n"
                     + "    rollback,\n"
-                    + "    csf\n"
+                    + "    csf,\n"
+                    +"     rs_id\n"
                     + "FROM\n"
                     + "    v$logmnr_contents\n"
                     + "WHERE\n"
                     + "    scn >= ? \n"
                     + "    AND scn < ? \n";
-
 
     /** 加载包含startSCN和endSCN之间日志的日志文件 */
     public static final String SQL_START_LOGMINER =
