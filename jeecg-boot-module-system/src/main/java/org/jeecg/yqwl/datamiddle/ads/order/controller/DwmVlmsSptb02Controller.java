@@ -78,6 +78,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @AutoLog(value = "DwmVlmsSptb02-top10待发量")
     @ApiOperation(value = "DwmVlmsSptb02-top10发运量", notes = "DwmVlmsSptb02-top10待发量")
     @PostMapping(value = "/findTop10PendingList" )
+    @Deprecated
     public Result<?> findTop10PendingList(@RequestBody GetBaseBrandTime baseBrandTime) {
         checkStartTime(baseBrandTime);
         log.info("查询了待发量");
@@ -108,6 +109,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     @AutoLog(value = "DwmVlmsSptb02-top10在途量")
     @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
     @PostMapping(value = "/findTop10OnWayList" )
+    @Deprecated
     public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
         checkStartTime(baseBrandTime);
         log.info("查询在途量");

@@ -64,11 +64,11 @@
             )
         </foreach>
     </insert>
-    <!--按条件查询计划量    -->
+    <!--按条件查询计划量   禅道#914 计划量的统计口径字段调整为 sptb01c.ddjrq => sptb01c.ddjrq对应dwm_vlms_sptb02的ddjrq_r3 -->
     <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
-        COUNT(dvs.DDJRQ) as totalNum,
+        COUNT(dvs.CJSDBH) as totalNum,
         <choose>
             <when test="params.cqwh != '' and params.czjgsdm == '' ">
                 dvs.CUSTOMER_NAME as groupName,
@@ -105,7 +105,7 @@
             dwm_vlms_sptb02 dvs1
             <where>
                 <if test=" params.startTime != null and params.endTime !=null ">
-                    and dvs1.DDJRQ BETWEEN #{params.startTime}and #{params.endTime}
+                    and dvs1.DDJRQ_R3 BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
                 <if test=" params.cqwh != null and params.cqwh != '' ">
                     and dvs1.CQWH = #{params.cqwh}
