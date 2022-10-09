@@ -35,6 +35,45 @@
         CJSDBH
     </select>
 
+    <sql id="search">
+        <choose>
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <!--默认: 基地 -->
+            <otherwise>
+                dvs.BASE_NAME as groupName,
+            </otherwise>
+        </choose>
+    </sql>
+    <!--    大屏的条件查询 -->
+    <sql id="bigScreenQuery">
+        <if test="params.cqwh != '' and params.cqwh != null">
+            and CQWH = #{params.cqwh}
+        </if>
+        <if test="params.czjgsdm != '' and params.czjgsdm != null">
+            and CZJGSDM = #{params.czjgsdm}
+        </if>
+        <if test="params.trafficType != '' and params.trafficType != null">
+            and TRAFFIC_TYPE = #{params.trafficType}
+        </if>
+    </sql>
+
     <!--clickhouse插入数据    -->
     <insert id="insertClickhouse" parameterType="java.util.List">
         INSERT INTO `default`.dwm_vlms_sptb02(
@@ -69,47 +108,24 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.CJSDBH) as totalNum,
-        <choose>
-            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
-                關於分组条件:
-                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
-                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
-                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
-                  默认   :  基地
-             -->
-            <!--公铁水 -->
-            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
-                dvs.TRAFFIC_TYPE as groupName,
-            </when>
-            <!--主机公司 -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <!--默认: 基地 -->
-            <otherwise>
-                dvs.BASE_NAME as groupName,
-            </otherwise>
-        </choose>
+        <include refid="search"/>
         <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.DDJRQ)) AS dates
+            toDate(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3))) AS dates
         </if>
         <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
             AS dates
         </if>
         <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
             AS dates
         </if>
         <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
+            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
             AS dates
         </if>
         <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.DDJRQ)) AS dates
+            YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3))) AS dates
         </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
@@ -664,18 +680,7 @@
         </where>
     </sql>
 
-    <!--    大屏的条件查询 -->
-    <sql id="bigScreenQuery">
-        <if test="param.cqwh != '' and param.cqwh != null">
-            and CQWH = #{param.cqwh}
-        </if>
-        <if test="param.czjgsdm != '' and param.czjgsdm != null">
-            and CZJGSDM = #{param.czjgsdm}
-        </if>
-        <if test="param.trafficType != '' and param.trafficType != null">
-            and TRAFFIC_TYPE = #{param.trafficType}
-        </if>
-    </sql>
+
     <!--    docs查询-->
     <select id="selectDocsList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
@@ -741,7 +746,7 @@
         SELECT COUNT(VVIN)
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME != 0
-        and dvs.SHIPMENT_TIME BETWEEN #{param.startTime} and #{param.endTime}
+        and dvs.SHIPMENT_TIME BETWEEN #{params.startTime} and #{params.endTime}
         <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日在途量 -->
@@ -750,8 +755,8 @@
         from dwm_vlms_sptb02 dvs
         where
         dvs.SHIPMENT_TIME != 0
-        and  dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{param.endTime}
-        and (FINAL_SITE_TIME <![CDATA[ > ]]> #{param.startTime} or FINAL_SITE_TIME = 0)
+        and  dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{params.endTime}
+        and (FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or FINAL_SITE_TIME = 0)
         <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日代发量 已指派未起运-->
@@ -759,7 +764,7 @@
         SELECT COUNT(distinct VVIN)
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME = 0
-        and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
+        and dvs.ASSIGN_TIME BETWEEN #{params.startTime} and #{params.endTime}
         <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日运力需求量 已指派但是未装车sptb02.dzpsj -->
@@ -767,7 +772,7 @@
         SELECT COUNT(distinct VVIN)
         from dwm_vlms_sptb02 dvs
         WHERE dvs.DZPSJ = 0
-        and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
+        and dvs.ASSIGN_TIME BETWEEN #{params.startTime} and #{params.endTime}
         <include refid="bigScreenQuery"></include>
     </select>
 

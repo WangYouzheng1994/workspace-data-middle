@@ -160,11 +160,11 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @date 2022/10/9
      * @return {@link Long}
      */
-    Long getShipmentToday(@Param("param") GetBaseBrandTime query);
+    Long getShipmentToday(@Param("params") GetBaseBrandTime query);
 
-    Long getOnWayCountToday(@Param("param") GetBaseBrandTime query);
+    Long getOnWayCountToday(@Param("params") GetBaseBrandTime query);
 
-    Long getPendingCountToday(@Param("param") GetBaseBrandTime query);
+    Long getPendingCountToday(@Param("params") GetBaseBrandTime query);
 
-    Long getCapacityDemandToday(@Param("param") GetBaseBrandTime query);
+    Long getCapacityDemandToday(@Param("params") GetBaseBrandTime query);
 }
