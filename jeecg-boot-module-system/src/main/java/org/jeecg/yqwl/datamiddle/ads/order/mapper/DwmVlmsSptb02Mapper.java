@@ -162,4 +162,19 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     Integer getOnwayDatasCount(@Param("params") GetBaseBrandTime baseBrandTime);
 
     List<ShipmentDTO> getOnWayCount(@Param("params") GetBaseBrandTime baseBrandTime);
+
+    /**
+     * 获取今日起运量
+     * @param query
+     * @author dabao
+     * @date 2022/10/9
+     * @return {@link Long}
+     */
+    Long getShipmentToday(@Param("param") GetBaseBrandTime query);
+
+    Long getOnWayCountToday(@Param("param") GetBaseBrandTime query);
+
+    Long getPendingCountToday(@Param("param") GetBaseBrandTime query);
+
+    Long getCapacityDemandToday(@Param("param") GetBaseBrandTime query);
 }

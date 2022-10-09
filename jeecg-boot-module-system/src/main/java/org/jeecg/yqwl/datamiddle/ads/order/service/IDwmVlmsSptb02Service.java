@@ -7,6 +7,8 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.TodayIndicatorsVo;
+
 import java.math.BigDecimal;
 
 
@@ -116,8 +118,12 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime);
 
 
-
-
-
-
+    /**
+     * 获取今日指标
+     * @param query 查询参数
+     * @author dabao
+     * @date 2022/10/9
+     * @return {@link TodayIndicatorsVo}
+     */
+    TodayIndicatorsVo getTodayIndicators(GetBaseBrandTime query);
 }

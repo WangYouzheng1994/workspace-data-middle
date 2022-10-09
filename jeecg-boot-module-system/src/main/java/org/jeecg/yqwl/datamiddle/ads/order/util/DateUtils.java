@@ -32,6 +32,21 @@ public class DateUtils {
     }
 
     /**
+     * 获取今日0点时间戳
+     * @param
+     * @author dabao
+     * @date 2022/10/9
+     * @return {@link Long}
+     */
+    public static Long getTodayStartTimestamp(){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
+        String format = dateFormat.format(date);
+        Date date1 = DateUtils.parseDate(format + " 00:00:00", "yyyy-MM-dd HH:mm:ss");
+        return date1.getTime();
+    }
+
+    /**
      * parseDate
      *
      * @param strDate

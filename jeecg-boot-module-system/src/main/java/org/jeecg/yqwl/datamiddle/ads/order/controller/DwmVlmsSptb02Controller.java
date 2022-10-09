@@ -11,11 +11,8 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.*;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.TimelinessRatioVO;
 import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -256,11 +253,29 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return super.importExcel(request, response, DwmVlmsSptb02.class);
     }
 
+    /**
+     * 校验开始时间有没有传
+     * @param param 参数
+     * @author dabao
+     * @date 2022/10/9
+     */
     private void checkStartTime(GetBaseBrandTime param){
         if (Objects.isNull(param.getStartTime())){
             throw new SecurityException("请选择开始时间");
         }
+    }
 
+    /**
+     * 获取 今日指标数据
+     * @param query 查询条件
+     * @author dabao
+     * @date 2022/10/9
+     * @return {@link Result<TodayIndicatorsVo>}
+     */
+    @PostMapping("/getTodayIndicators")
+    public Result<TodayIndicatorsVo> getTodayIndicators(@RequestBody GetBaseBrandTime query){
+        TodayIndicatorsVo todayIndicators = dwmVlmsSptb02Service.getTodayIndicators(query);
+        return Result.OK(todayIndicators);
     }
 
 }

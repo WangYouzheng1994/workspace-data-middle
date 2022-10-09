@@ -14,6 +14,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.TodayIndicatorsVo;
 import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
 import org.springframework.stereotype.Service;
 
@@ -385,6 +386,29 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     public BigDecimal getTotalOutboundQuantity(GetBaseBrandTime baseBrandTime) {
         BigDecimal totalOutboundQuantity = dwmVlmsSptb02Mapper.getTotalOutboundQuantity(baseBrandTime);
         return totalOutboundQuantity;
+    }
+
+    @Override
+    public TodayIndicatorsVo getTodayIndicators(GetBaseBrandTime query) {
+        TodayIndicatorsVo todayIndicatorsVo = new TodayIndicatorsVo();
+        //获取今日开始与结束时间
+        Long todayStart = DateUtils.getTodayStartTimestamp();
+        Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
+        query.setStartTime(todayStart);
+        query.setEndTime(todayEnd);
+        //今日起运量
+        Long shipmentToday = dwmVlmsSptb02Mapper.getShipmentToday(query);
+        //今日在途量
+        Long onWayCountToday = dwmVlmsSptb02Mapper.getOnWayCountToday(query);
+        //今日待发量
+        Long pendingCountToday= dwmVlmsSptb02Mapper.getPendingCountToday(query);
+        //今日运力需求量
+        Long capacityDemandToday = dwmVlmsSptb02Mapper.getCapacityDemandToday(query);
+        todayIndicatorsVo.setShipmentToday(shipmentToday);
+        todayIndicatorsVo.setOnWayToday(onWayCountToday);
+        todayIndicatorsVo.setPendingToday(pendingCountToday);
+        todayIndicatorsVo.setCapacityDemandToday(capacityDemandToday);
+        return todayIndicatorsVo;
     }
 
     /**
