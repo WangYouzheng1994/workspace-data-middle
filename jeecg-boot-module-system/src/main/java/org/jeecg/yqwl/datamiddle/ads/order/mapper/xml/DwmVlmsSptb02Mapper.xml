@@ -123,7 +123,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.DDJRQ_R3 BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -189,7 +189,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.SHIPMENT_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -255,7 +255,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.FINAL_SITE_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -355,7 +355,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY v.CJSDBH
             )
@@ -446,7 +446,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY v.CJSDBH
             )
@@ -475,7 +475,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -507,7 +507,7 @@
                     AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
 
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -535,7 +535,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -567,7 +567,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -594,7 +594,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <include refid="todayQuery"></include>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -664,7 +664,8 @@
         </where>
     </sql>
 
-    <sql id="todayQuery">
+    <!--    大屏的条件查询 -->
+    <sql id="bigScreenQuery">
         <if test="param.cqwh != '' and param.cqwh != null">
             and CQWH = #{param.cqwh}
         </if>
@@ -741,7 +742,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME != 0
         and dvs.SHIPMENT_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <include refid="todayQuery"></include>
+        <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日在途量 -->
     <select id="getOnWayCountToday" resultType="java.lang.Long">
@@ -751,7 +752,7 @@
         dvs.SHIPMENT_TIME != 0
         and  dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{param.endTime}
         and (FINAL_SITE_TIME <![CDATA[ > ]]> #{param.startTime} or FINAL_SITE_TIME = 0)
-        <include refid="todayQuery"></include>
+        <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日代发量 已指派未起运-->
     <select id="getPendingCountToday" resultType="java.lang.Long">
@@ -759,7 +760,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME = 0
         and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <include refid="todayQuery"></include>
+        <include refid="bigScreenQuery"></include>
     </select>
 <!--    获取今日运力需求量 已指派但是未装车sptb02.dzpsj -->
     <select id="getCapacityDemandToday" resultType="java.lang.Long">
@@ -767,7 +768,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.DZPSJ = 0
         and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <include refid="todayQuery"></include>
+        <include refid="bigScreenQuery"></include>
     </select>
 
 
