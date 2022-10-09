@@ -70,11 +70,25 @@
         SELECT
         COUNT(dvs.CJSDBH) as totalNum,
         <choose>
-            <!--如果选择了基地(不为空),并且 主机公司代码-品牌 为空(选择了全部),那么就展示品牌  -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
                 dvs.CUSTOMER_NAME as groupName,
             </when>
-            <!--默认展示全部基地,只有在选了基地后,才会展示底下的品牌 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <!--默认: 基地 -->
             <otherwise>
                 dvs.BASE_NAME as groupName,
             </otherwise>
@@ -109,12 +123,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.DDJRQ_R3 BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh}
-                </if>
-                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -127,7 +136,22 @@
         SELECT
         COUNT(dvs.SHIPMENT_TIME) as totalNum,
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
                 dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
@@ -165,12 +189,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.SHIPMENT_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh} --基地
-                </if>
-                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm} --主机品牌
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -183,7 +202,22 @@
         SELECT
         COUNT(dvs.FINAL_SITE_TIME) as totalNum,
         <choose>
-            <when test="params.cqwh != '' and params.czjgsdm == '' ">
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
                 dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
@@ -221,12 +255,7 @@
                 <if test=" params.startTime != null and params.endTime !=null ">
                     and dvs1.FINAL_SITE_TIME BETWEEN #{params.startTime}and #{params.endTime}
                 </if>
-                <if test=" params.cqwh != null and params.cqwh != '' ">
-                    and dvs1.CQWH = #{params.cqwh} --基地
-                </if>
-                <if test=" params.czjgsdm != null and params.czjgsdm != '' ">
-                    and dvs1.CZJGSDM = #{params.czjgsdm} --主机品牌
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             group by dvs1.CJSDBH
             )
@@ -290,8 +319,23 @@
             YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
         </if>
         <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                ,dvs.CUSTOMER_NAME as groupName
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
                 ,dvs.BASE_NAME as groupName
@@ -311,12 +355,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND v.CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND v.CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY v.CJSDBH
             )
@@ -371,8 +410,23 @@
             YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
         </if>
         <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                ,dvs.CUSTOMER_NAME as groupName
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
                 ,dvs.BASE_NAME as groupName
@@ -435,8 +489,23 @@
             YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
         </if>
         <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                ,dvs.CUSTOMER_NAME as groupName --品牌 主机公司代码
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
                 ,dvs.BASE_NAME as groupName --基地 区位号
@@ -455,12 +524,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND v.ACTUAL_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND v.CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND v.CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY v.CJSDBH
             )
@@ -489,13 +553,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -527,12 +585,7 @@
                     AND THEORY_SHIPMENT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
 
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -560,12 +613,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SHIPMENT_TIME <![CDATA[ != ]]> 0
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -597,13 +645,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -630,12 +672,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_OUT_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="todayQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -800,8 +837,23 @@
             </foreach>
         </if>
         <choose>
-            <when test="params.cqwh !='' and params.czjgsdm ==''">
-                ,dvs.CUSTOMER_NAME as groupName --品牌 主机公司代码
+            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
+                關於分组条件:
+                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
+                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
+                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
+                  默认   :  基地
+             -->
+            <!--公铁水 -->
+            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
+                dvs.TRAFFIC_TYPE as groupName,
+            </when>
+            <!--主机公司 -->
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
+                dvs.CUSTOMER_NAME as groupName,
+            </when>
+            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
+                dvs.CUSTOMER_NAME as groupName,
             </when>
             <otherwise>
                 ,dvs.BASE_NAME as groupName --基地 区位号
