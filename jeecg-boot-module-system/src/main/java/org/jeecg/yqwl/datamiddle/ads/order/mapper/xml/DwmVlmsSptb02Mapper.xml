@@ -72,6 +72,9 @@
         <if test="params.trafficType != '' and params.trafficType != null">
             and TRAFFIC_TYPE = #{params.trafficType}
         </if>
+        <if test="params.cqrr != '' and params.cqrr != null and params.cqrr = '分拨中心'">
+            and CQRR = '分拨中心'
+        </if>
     </sql>
 
     <!--clickhouse插入数据    -->

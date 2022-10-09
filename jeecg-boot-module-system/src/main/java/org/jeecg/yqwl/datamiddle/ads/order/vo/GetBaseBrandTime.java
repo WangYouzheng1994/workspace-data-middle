@@ -56,6 +56,11 @@ public class GetBaseBrandTime {
     private String trafficType;
 
     /**
+     * 是否为分拨中心
+     */
+    private String cqrr;
+
+    /**
      * 用于在途量获取每天的时间戳
      */
     List<ShipmentHaveTimestamp> allTime;
