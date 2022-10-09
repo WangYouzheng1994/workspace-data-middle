@@ -151,29 +151,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.SHIPMENT_TIME) as totalNum,
-        <choose>
-            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
-                關於分组条件:
-                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
-                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
-                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
-                  默认   :  基地
-             -->
-            <!--公铁水 -->
-            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
-                dvs.TRAFFIC_TYPE as groupName,
-            </when>
-            <!--主机公司 -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName,
-            </otherwise>
-        </choose>
+        <include refid="search"/>
 
         <if test="params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
@@ -217,29 +195,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
         COUNT(dvs.FINAL_SITE_TIME) as totalNum,
-        <choose>
-            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
-                關於分组条件:
-                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
-                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
-                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
-                  默认   :  基地
-             -->
-            <!--公铁水 -->
-            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
-                dvs.TRAFFIC_TYPE as groupName,
-            </when>
-            <!--主机公司 -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <otherwise>
-                dvs.BASE_NAME as groupName,
-            </otherwise>
-        </choose>
+        <include refid="search"/>
 
         <if test="params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME)) AS dates
@@ -334,29 +290,7 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
         </if>
-        <choose>
-            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
-                關於分组条件:
-                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
-                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
-                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
-                  默认   :  基地
-             -->
-            <!--公铁水 -->
-            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
-                dvs.TRAFFIC_TYPE as groupName,
-            </when>
-            <!--主机公司 -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <otherwise>
-                ,dvs.BASE_NAME as groupName
-            </otherwise>
-        </choose>
+        <include refid="search"/>
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -426,29 +360,7 @@
         <if test="params.timeType == 'year' ">
             YEAR(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
         </if>
-        <choose>
-            <!--搜索条件:     cqwh:基地   czjgsdm:主机公司  traffic_type: 公铁水
-                關於分组条件:
-                  公铁水  :   cqwh-单选   czjgsdm-单选     traffic_type-全选
-                  主机公司: 1.cqwh-单选   czjgsdm-全选     traffic_type-全选
-                          2.cqwh-单选   czjgsdm-全选     traffic_type-单选
-                  默认   :  基地
-             -->
-            <!--公铁水 -->
-            <when test="params.cqwh != '' and params.czjgsdm != '' and params.trafficType == '' ">
-                dvs.TRAFFIC_TYPE as groupName,
-            </when>
-            <!--主机公司 -->
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType == '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <when test="params.cqwh != '' and params.czjgsdm == '' and params.trafficType != '' ">
-                dvs.CUSTOMER_NAME as groupName,
-            </when>
-            <otherwise>
-                ,dvs.BASE_NAME as groupName --基地 区位号
-            </otherwise>
-        </choose>
+        <include refid="search"/>
         FROM
         dwm_vlms_sptb02 dvs
         <where>
