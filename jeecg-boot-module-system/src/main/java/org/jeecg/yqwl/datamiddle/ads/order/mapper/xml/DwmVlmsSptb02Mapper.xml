@@ -704,6 +704,18 @@
             </if>
         </where>
     </sql>
+
+    <sql id="todayQuery">
+        <if test="param.cqwh != '' and param.cqwh != null">
+            and CQWH = #{param.cqwh}
+        </if>
+        <if test="param.czjgsdm != '' and param.czjgsdm != null">
+            and CZJGSDM = #{param.czjgsdm}
+        </if>
+        <if test="param.trafficType != '' and param.trafficType != null">
+            and TRAFFIC_TYPE = #{param.trafficType}
+        </if>
+    </sql>
     <!--    docs查询-->
     <select id="selectDocsList"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs"
@@ -824,12 +836,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME != 0
         and dvs.SHIPMENT_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <if test="param.cqwh != '' and param.cqwh != null">
-            and CQWH = #{param.cqwh}
-        </if>
-        <if test="param.czjgsdm != '' and param.czjgsdm != null">
-            and CZJGSDM = #{param.czjgsdm}
-        </if>
+        <include refid="todayQuery"></include>
     </select>
 <!--    获取今日在途量 -->
     <select id="getOnWayCountToday" resultType="java.lang.Long">
@@ -839,12 +846,7 @@
         dvs.SHIPMENT_TIME != 0
         and  dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{param.endTime}
         and (FINAL_SITE_TIME <![CDATA[ > ]]> #{param.startTime} or FINAL_SITE_TIME = 0)
-        <if test="param.cqwh != '' and param.cqwh != null">
-            and CQWH = #{param.cqwh}
-        </if>
-        <if test="param.czjgsdm != '' and param.czjgsdm != null">
-            and CZJGSDM = #{param.czjgsdm}
-        </if>
+        <include refid="todayQuery"></include>
     </select>
 <!--    获取今日代发量 已指派未起运-->
     <select id="getPendingCountToday" resultType="java.lang.Long">
@@ -852,12 +854,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME = 0
         and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <if test="param.cqwh != '' and param.cqwh != null">
-            and CQWH = #{param.cqwh}
-        </if>
-        <if test="param.czjgsdm != '' and param.czjgsdm != null">
-            and CZJGSDM = #{param.czjgsdm}
-        </if>
+        <include refid="todayQuery"></include>
     </select>
 <!--    获取今日运力需求量 已指派但是未装车sptb02.dzpsj -->
     <select id="getCapacityDemandToday" resultType="java.lang.Long">
@@ -865,12 +862,7 @@
         from dwm_vlms_sptb02 dvs
         WHERE dvs.DZPSJ = 0
         and dvs.ASSIGN_TIME BETWEEN #{param.startTime} and #{param.endTime}
-        <if test="param.cqwh != '' and param.cqwh != null">
-            and CQWH = #{param.cqwh}
-        </if>
-        <if test="param.czjgsdm != '' and param.czjgsdm != null">
-            and CZJGSDM = #{param.czjgsdm}
-        </if>
+        <include refid="todayQuery"></include>
     </select>
 
 

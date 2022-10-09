@@ -51,6 +51,11 @@ public class GetBaseBrandTime {
     private Integer limitEnd;
 
     /**
+     * 运输方式 公路 G 铁路T 水路S
+     */
+    private String trafficType;
+
+    /**
      * 用于在途量获取每天的时间戳
      */
     List<ShipmentHaveTimestamp> allTime;
