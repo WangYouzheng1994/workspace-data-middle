@@ -98,21 +98,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return shipmentVOResult ;
     }
 
-    /**
-     * top10在途量
-     * @param
-     * @return
-     */
-    @AutoLog(value = "DwmVlmsSptb02-top10在途量")
-    @ApiOperation(value = "DwmVlmsSptb02-top10在途量", notes = "DwmVlmsSptb02-top10在途量")
-    @PostMapping(value = "/findTop10OnWayList" )
-    @Deprecated
-    public Result<?> findTop10OnWayList(@RequestBody GetBaseBrandTime baseBrandTime) {
-        checkStartTime(baseBrandTime);
-        log.info("查询在途量");
-        Result<ShipmentVO> top10OnWayList = FormatDataUtil.formatRemoveEmptyValue(dwmVlmsSptb02Service.findTop10OnWayList(baseBrandTime));
-        return null;
-    }
 
     /**
      * 按条件查询到货量

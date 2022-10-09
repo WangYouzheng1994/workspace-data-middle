@@ -36,12 +36,6 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     Result<ShipmentVO> findTop10PendingList(GetBaseBrandTime baseBrandTime);
 
 
-    /**
-     * 查询top10在途量列表
-     * @param baseBrandTime
-     * @return
-     */
-    Result<ShipmentVO> findTop10OnWayList(GetBaseBrandTime baseBrandTime);
 
 
 

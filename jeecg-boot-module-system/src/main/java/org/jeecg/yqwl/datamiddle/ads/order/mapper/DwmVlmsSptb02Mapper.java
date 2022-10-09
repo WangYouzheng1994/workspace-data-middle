@@ -39,12 +39,6 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
 
 
-     /**
-      * top10在途量
-      * @param baseBrandTime
-      * @return
-      */
-     List<ShipmentDTO> onWayList (@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 新在途量
@@ -158,10 +152,6 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      */
     Integer countDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
 
-
-    Integer getOnwayDatasCount(@Param("params") GetBaseBrandTime baseBrandTime);
-
-    List<ShipmentDTO> getOnWayCount(@Param("params") GetBaseBrandTime baseBrandTime);
 
     /**
      * 获取今日起运量
