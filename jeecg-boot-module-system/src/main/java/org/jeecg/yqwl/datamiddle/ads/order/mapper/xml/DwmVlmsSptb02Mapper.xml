@@ -70,9 +70,11 @@
         SELECT
         COUNT(dvs.CJSDBH) as totalNum,
         <choose>
+            <!--如果选择了基地(不为空),并且 主机公司代码-品牌 为空(选择了全部),那么就展示品牌  -->
             <when test="params.cqwh != '' and params.czjgsdm == '' ">
                 dvs.CUSTOMER_NAME as groupName,
             </when>
+            <!--默认展示全部基地,只有在选了基地后,才会展示底下的品牌 -->
             <otherwise>
                 dvs.BASE_NAME as groupName,
             </otherwise>
