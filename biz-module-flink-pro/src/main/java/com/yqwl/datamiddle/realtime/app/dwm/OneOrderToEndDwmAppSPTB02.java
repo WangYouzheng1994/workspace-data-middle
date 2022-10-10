@@ -911,7 +911,6 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " TYPE_TC                                        = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
 
                 (ps, ootd) -> {
-                    System.out.println("999");
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
