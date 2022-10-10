@@ -75,7 +75,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
@@ -324,6 +324,10 @@ public class OneOrderToEndDwmAppSPTB02 {
                             ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());
                             // 出库时间
                             ootdTransition.setOUT_DISTRIBUTE_TIME(dwmSptb02.getACTUAL_OUT_TIME());
+                            // 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+                            ootdTransition.setDISTRIBUTE_CPZDBH(dwmSptb02.getCPZDBH());
+                            // 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+                            ootdTransition.setDISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3(dwmSptb02.getDDJRQ_R3());
                             // 指派时间
                             ootdTransition.setDISTRIBUTE_ASSIGN_TIME(dwmSptb02.getASSIGN_TIME());
                             // 承运商名称
@@ -885,24 +889,29 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_START_WATERWAY_TIME, END_START_WATERWAY_TIME, " +
                         " IN_END_WATERWAY_TIME, UNLOAD_SHIP_TIME,  WAREHOUSE_UPDATETIME, BRAND, " +
                         " DISTRIBUTE_BOARD_TIME, OUT_DISTRIBUTE_TIME, DISTRIBUTE_ASSIGN_TIME, " +
-                        " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM, DISTRIBUTE_VEHICLE_NUM ,CPZDBH ,SHIPMENT_G_TIME ,DTVSDHSJ, TYPE_G, SETTLEMENT_LAST, TYPE_TC)\n" +
+                        " DISTRIBUTE_CARRIER_NAME, DISTRIBUTE_VEHICLE_NO, DISTRIBUTE_SHIPMENT_TIME, " +
+                        " DOT_SITE_TIME, FINAL_SITE_TIME ,BASE_CODE, BASE_NAME, VEHICLE_NUM," +
+                        " DISTRIBUTE_VEHICLE_NUM ,CPZDBH ,SHIPMENT_G_TIME ,DTVSDHSJ, TYPE_G, SETTLEMENT_LAST, TYPE_TC, DISTRIBUTE_CPZDBH, DISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3 )\n" +
                         " VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? ,?, ?, ?, ?, ?) \n" +
+                        "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? ,?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        " DISTRIBUTE_BOARD_TIME         = VALUES(DISTRIBUTE_BOARD_TIME), " +
-                        " OUT_DISTRIBUTE_TIME           = VALUES(OUT_DISTRIBUTE_TIME), " +
-                        " DISTRIBUTE_ASSIGN_TIME        = VALUES(DISTRIBUTE_ASSIGN_TIME), " +
-                        " DISTRIBUTE_CARRIER_NAME       = VALUES(DISTRIBUTE_CARRIER_NAME), " +
-                        " DISTRIBUTE_VEHICLE_NO         = VALUES(DISTRIBUTE_VEHICLE_NO) , " +
-                        " DISTRIBUTE_SHIPMENT_TIME      = VALUES(DISTRIBUTE_SHIPMENT_TIME) , " +
-                        " DISTRIBUTE_VEHICLE_NUM        = VALUES(DISTRIBUTE_VEHICLE_NUM)," +
-                        " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1   = '' or VALUES(SETTLEMENT_Y1)   >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
-                        " TYPE_G                        = if(TYPE_G           = 0 , VALUES(TYPE_G), TYPE_G), " +
-                        " SETTLEMENT_LAST               = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
-                        " TYPE_TC                       = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
+                        " DISTRIBUTE_BOARD_TIME                          = VALUES(DISTRIBUTE_BOARD_TIME), " +
+                        " OUT_DISTRIBUTE_TIME                            = VALUES(OUT_DISTRIBUTE_TIME), " +
+                        " DISTRIBUTE_CPZDBH                              = VALUES(DISTRIBUTE_CPZDBH), " +
+                        " DISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3        = VALUES(DISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3), " +
+                        " DISTRIBUTE_ASSIGN_TIME                         = VALUES(DISTRIBUTE_ASSIGN_TIME), " +
+                        " DISTRIBUTE_CARRIER_NAME                        = VALUES(DISTRIBUTE_CARRIER_NAME), " +
+                        " DISTRIBUTE_VEHICLE_NO                          = VALUES(DISTRIBUTE_VEHICLE_NO) , " +
+                        " DISTRIBUTE_SHIPMENT_TIME                       = VALUES(DISTRIBUTE_SHIPMENT_TIME) , " +
+                        " DISTRIBUTE_VEHICLE_NUM                         = VALUES(DISTRIBUTE_VEHICLE_NUM)," +
+                        " FINAL_SITE_TIME                                = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
+                        " DTVSDHSJ                                       = if((SETTLEMENT_Y1   = '' or VALUES(SETTLEMENT_Y1)   >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " TYPE_G                                         = if(TYPE_G           = 0 , VALUES(TYPE_G), TYPE_G), " +
+                        " SETTLEMENT_LAST                                = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
+                        " TYPE_TC                                        = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
 
                 (ps, ootd) -> {
+                    System.out.println("999");
                     String vvin = ootd.getVVIN();                                        // 底盘号
                     String vehicle_code = ootd.getVEHICLE_CODE();                        // 车型
                     String vehicle_name = ootd.getVEHICLE_NAME();                        // 车型名称
@@ -941,6 +950,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                     Long in_end_waterway_time = ootd.getIN_END_WATERWAY_TIME();          // 水路入目的港口时间
                     Long unload_ship_time = ootd.getUNLOAD_SHIP_TIME();                  // 水路卸船时间
                     Integer typeTc = ootd.getTYPE_TC();                                  // 同城异地标识符 0无 1同城 2异地   默认值为0
+                    String cpzdbh =  ootd.getCPZDBH();                                   // 配载单编号 Y号
+
 
                     int i = 1;
 
@@ -998,7 +1009,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                     // 末端配送轿运车车位数
                     ps.setInt   (i++,distribute_vehicle_num);
                     // Y号 (配载单号) 20220712新增字段
-                    ps.setString(i++,ootd.getCPZDBH());
+                    ps.setString(i++, cpzdbh);
                     // 起运日期-公路  20220713新增字段 且此字段仅在条件为"干线公路"的时候会插入此字段
                     ps.setLong  (i++,ootd.getSHIPMENT_G_TIME());
                     // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时
@@ -1009,6 +1020,10 @@ public class OneOrderToEndDwmAppSPTB02 {
                     ps.setString(i++,ootd.getCJSDBH());
                     // 同城异地标识符 0无 1同城 2异地   默认值为0
                     ps.setInt   (i++, typeTc);
+                    // 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+                    ps.setString(i++, ootd.getDISTRIBUTE_CPZDBH());
+                    // 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+                    ps.setLong  (i++, ootd.getDISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3());
 
                 },
                 new JdbcExecutionOptions.Builder()

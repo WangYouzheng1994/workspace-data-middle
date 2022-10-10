@@ -353,6 +353,21 @@ public class DwmVlmsOneOrderToEnd {
 	@ApiModelProperty(value = "汽车品牌名")
 	private String brandName;
 
+
+	/**
+	 * 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+	 */
+	@Excel(name = "末端分拨中心 配载单编号", width = 15)
+	@ApiModelProperty(value = "末端分拨中心 配载单编号")
+	private String distributeCpzdbh;
+
+	/**
+	 * 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+	 */
+	@Excel(name = "末端分拨中心 计划下达时间", width = 15)
+	@ApiModelProperty(value = "末端分拨中心 计划下达时间")
+	private Long distributeVehiclePlateIssuedTimeR3;
+
 	public String setTrafficType(String trafficType) {
 		this.trafficType = trafficType;
 		return trafficType;

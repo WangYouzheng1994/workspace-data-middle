@@ -366,4 +366,15 @@ public class OotdTransition {
      * 存储区域公司
      */
     private String CQRR;
+
+
+    /**
+     * 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+     */
+    private String DISTRIBUTE_CPZDBH;
+
+    /**
+     * 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+     */
+    private Long DISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3;
 }

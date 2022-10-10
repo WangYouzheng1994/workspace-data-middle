@@ -466,4 +466,14 @@ public class DwmOneOrderToEnd implements Serializable {
      * 汽车品牌名 取自MDAC10.VPPSM 20220825新增
      */
     private String BRAND_NAME;
+
+    /**
+     * 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+     */
+    private String DISTRIBUTE_CPZDBH;
+
+    /**
+     * 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+     */
+    private Long DISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3;
 }
