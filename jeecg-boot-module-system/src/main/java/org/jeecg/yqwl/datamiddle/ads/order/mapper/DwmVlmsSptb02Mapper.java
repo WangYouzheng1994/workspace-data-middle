@@ -155,16 +155,37 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
 
     /**
      * 获取今日起运量
-     * @param query
+     * @param query 查询条件
      * @author dabao
      * @date 2022/10/9
      * @return {@link Long}
      */
     Long getShipmentToday(@Param("params") GetBaseBrandTime query);
 
+    /**
+     * 获取今日在途量
+     * @param query 查询条件
+     * @author dabao
+     * @date 2022/10/10
+     * @return {@link Long}
+     */
     Long getOnWayCountToday(@Param("params") GetBaseBrandTime query);
 
+    /**
+     * 获取今日待发量
+     * @param query 查询条件
+     * @author dabao
+     * @date 2022/10/10
+     * @return {@link Long}
+     */
     Long getPendingCountToday(@Param("params") GetBaseBrandTime query);
 
+    /**
+     * 获取今日运力需求量
+     * @param query 查询条件
+     * @author dabao
+     * @date 2022/10/10
+     * @return {@link Long}
+     */
     Long getCapacityDemandToday(@Param("params") GetBaseBrandTime query);
 }
