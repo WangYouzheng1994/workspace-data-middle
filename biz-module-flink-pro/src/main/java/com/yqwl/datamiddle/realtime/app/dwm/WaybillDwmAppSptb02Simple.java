@@ -467,13 +467,7 @@ public class WaybillDwmAppSptb02Simple {
                                 }
                                 dwmSptb02.setTHEORY_SITE_TIME(theorySiteTime);
                             }
-
-                            /** 配车单编号
-                             *  String jhxdSql = "select count(*)\n" +
-                             *                 "  from sptb01c a\n" +
-                             *                 "  left join sptb02 b\n" +
-                             *                 "    on a.cpcdbh = b.cpcdbh\n" +
-                             */
+                            //---------------新增R3的DDJRQ字段:DDJRQ_R3  此表是在sptb01c中取的,与sptb02以CPCDBH关联 _禅道891-------------------------------------------------------------------------------------------//
                             String cpcdbh = dwmSptb02.getCPCDBH();
                             if (StringUtils.isNotBlank(cpcdbh)){
                                 String sptb01cDDJRQSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C + " where CPCDBH = '" + cpcdbh + "' limit 1 ";
