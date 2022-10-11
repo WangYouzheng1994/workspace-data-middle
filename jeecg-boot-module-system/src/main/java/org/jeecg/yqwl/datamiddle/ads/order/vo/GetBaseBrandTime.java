@@ -58,7 +58,7 @@ public class GetBaseBrandTime {
     /**
      * 是否为分拨中心
      */
-    private String cqrr;
+    private Boolean cqrr;
 
     /**
      * 用于在途量获取每天的时间戳
