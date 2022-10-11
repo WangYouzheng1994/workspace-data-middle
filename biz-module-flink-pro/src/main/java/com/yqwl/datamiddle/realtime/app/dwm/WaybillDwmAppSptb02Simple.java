@@ -74,7 +74,7 @@ public class WaybillDwmAppSptb02Simple {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 .build();
@@ -89,7 +89,7 @@ public class WaybillDwmAppSptb02Simple {
                 DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 Long ddjrq = dwmSptb02.getDDJRQ();
-                if (ddjrq >= START && ddjrq <= END) {
+                if (ddjrq != null && ddjrq >= START && ddjrq <= END) {
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {
@@ -317,16 +317,14 @@ public class WaybillDwmAppSptb02Simple {
                             String startCityCode = dwmSptb02.getSTART_CITY_CODE();
                             String vysfs = dwmSptb02.getVYSFS();
                             log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
-                            if (StringUtils.equalsAny(vysfs,"SD","TD")){
+                            if (StringUtils.equalsAny(vysfs,"SD","TD") && StringUtils.isNotBlank(vsczt)){
                                 // 新增SD,TD线路的始发地城市 修改为按照 收车站台去取值 "也就是说 TD，SD运输方式的计划 得用 vsczt 去匹配始发城市" -白 10月10日 11:48
                                 // 注:SD,TD无始发省区名称
-                                if ((vysfs.equals("TD") || vysfs.equals("SD")) && StringUtils.isNotBlank(vsczt)){
                                     String sptc34SqlOfSDTD = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vsczt + "' limit 1 ";
                                     JSONObject odsVlmsSptc34OfSDTD = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34SqlOfSDTD, vsczt);
                                     if (odsVlmsSptc34OfSDTD != null) {
                                         dwmSptb02.setSTART_CITY_NAME(odsVlmsSptc34OfSDTD.getString("VWLCKMC"));
                                     }
-                                }
                             }else if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode)) {
                                 String provinceSql = "select vsqmc, vsxmc from " + KafkaTopicConst.DIM_VLMS_PROVINCES + " where csqdm = '" + startProvinceCode + "' and csxdm = '" + startCityCode + "' limit 1 ";
                                 JSONObject province = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_PROVINCES, provinceSql, startProvinceCode, startCityCode);
