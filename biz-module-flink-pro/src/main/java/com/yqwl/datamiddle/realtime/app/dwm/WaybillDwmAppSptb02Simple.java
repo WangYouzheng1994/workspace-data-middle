@@ -321,7 +321,7 @@ public class WaybillDwmAppSptb02Simple {
                                 // 新增SD,TD线路的始发地城市 修改为按照 收车站台去取值 "也就是说 TD，SD运输方式的计划 得用 vsczt 去匹配始发城市" -白 10月10日 11:48
                                 // 注:SD,TD无始发省区名称
                                     String sptc34SqlOfSDTD = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vsczt + "' limit 1 ";
-                                    JSONObject odsVlmsSptc34OfSDTD = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, sptc34SqlOfSDTD, vsczt);
+                                    JSONObject odsVlmsSptc34OfSDTD = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34SDTD, sptc34SqlOfSDTD, vsczt);
                                     if (odsVlmsSptc34OfSDTD != null) {
                                         dwmSptb02.setSTART_CITY_NAME(odsVlmsSptc34OfSDTD.getString("VWLCKMC"));
                                     }
