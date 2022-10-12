@@ -48,8 +48,8 @@ public class WaybillDwdAppSptb02Simple {
     public static void main(String[] args) throws Exception {
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
-        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.DWD_VLMS_SPTB02, 0);
-        offsetMap.put(topicPartition, 112904L);
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701, 0);
+        offsetMap.put(topicPartition, 112127L);
         // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
