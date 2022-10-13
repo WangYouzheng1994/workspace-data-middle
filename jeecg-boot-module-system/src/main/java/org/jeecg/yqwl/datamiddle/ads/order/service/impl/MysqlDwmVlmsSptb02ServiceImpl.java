@@ -8,6 +8,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.MysqlDwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IMysqlDwmVlmsSptb02Service;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DimProvinceVo;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,5 +58,16 @@ public class MysqlDwmVlmsSptb02ServiceImpl extends ServiceImpl<MysqlDwmVlmsSptb0
             }
         }
         return dwmVlmsDocsList;
+    }
+
+    @Override
+    public List<DimProvinceVo> getProVinceVo() {
+
+        return baseMapper.getProVinceVo();
+    }
+
+    @Override
+    public void updateProvince(List<DimProvinceVo> param) {
+        baseMapper.updateProvince(param);
     }
 }

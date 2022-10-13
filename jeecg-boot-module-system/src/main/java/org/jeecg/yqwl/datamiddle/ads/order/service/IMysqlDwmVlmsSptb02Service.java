@@ -3,6 +3,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.DimProvinceVo;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
 
 import java.util.List;
@@ -24,5 +25,17 @@ public interface IMysqlDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @return {@link List< DwmVlmsDocs>}
      */
     List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria);
+
+
+    /**
+     * 获取没有经纬度的城市
+     * @param
+     * @author dabao
+     * @date 2022/10/13
+     * @return {@link List< DimProvinceVo>}
+     */
+    List<DimProvinceVo> getProVinceVo();
+
+    void updateProvince(List<DimProvinceVo> param);
 
 }

@@ -85,6 +85,22 @@
         dwm_vlms_sptb02  SPTB02
         <include refid="where_count_one_to_end" />
     </select>
+    <select id="getProVinceVo" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.DimProvinceVo">
+        SELECT IDNUM, vsxmc, njd, nwd from dim_vlms_provinces WHERE njd is null
+    </select>
+
+    <update id="updateProvince">
+        update dim_vlms_provinces set
+        <foreach collection="param" item="item" index="index" open="njd = case " close=" end,">
+            when IDNUM = #{item.idnum} then #{item.njd}
+        </foreach>
+        <foreach collection="param" item="item" index="index" open="nwd = case " close=" end">
+            when IDNUM = #{item.idnum} then #{item.nwd}
+        </foreach>
+        where njd is null
+    </update>
+
+
 
 
 </mapper>

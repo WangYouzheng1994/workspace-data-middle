@@ -263,4 +263,6 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return Result.OK(todayIndicators);
     }
 
+
+
 }

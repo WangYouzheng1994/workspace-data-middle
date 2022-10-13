@@ -118,4 +118,7 @@ public class KafkaTopicConst {
     public static final String XIAO_FENG_TEST_22_DQ = "XIAO_FENG_TEST_22_DQ";
 
 
+    public static final String ORACLE_SPTB02 = "oracle_sptb02";
+    public static final String BASE_STATION_DATA = "base_station_data";
+    public static final String BASE_STATION_DATA_EPC = "base_station_data_epc";
 }
