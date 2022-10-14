@@ -2,6 +2,7 @@ package org.jeecg.yqwl.datamiddle.ads.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DimVlmsProvinces;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
@@ -9,6 +10,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.OnWayCountVo;
 
 
 import java.math.BigDecimal;
@@ -188,4 +190,8 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
      * @return {@link Long}
      */
     Long getCapacityDemandToday(@Param("params") GetBaseBrandTime query);
+
+    List<OnWayCountVo> getOnWayCountByCity(@Param("params") GetBaseBrandTime query);
+
+    List<DimVlmsProvinces> getProvincesByCity(@Param("list") List<String> startCitys);
 }

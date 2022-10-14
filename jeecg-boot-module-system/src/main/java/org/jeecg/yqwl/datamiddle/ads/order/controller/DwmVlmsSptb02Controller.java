@@ -263,6 +263,16 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return Result.OK(todayIndicators);
     }
 
-
+    /**
+     * 获取地图数据
+     * @param query
+     * @author dabao
+     * @date 2022/10/13
+     * @return {@link Result< ConvertDataVo>}
+     */
+    @PostMapping("/getConvertData")
+    public Result<List<List<ConvertDataVo>>> getConvertData(@RequestBody GetBaseBrandTime query){
+        return Result.OK(dwmVlmsSptb02Service.getConvertData(query));
+    }
 
 }

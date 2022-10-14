@@ -1177,6 +1177,9 @@ public class DwdSptb02 implements Serializable {
      */
     private String START_CITY_CODE;
 
+
+    private String START_CITY_NAME;
+
     /**
      * dwd到货地省区代码
      */
@@ -1186,6 +1189,8 @@ public class DwdSptb02 implements Serializable {
      * dwd到货地市县代码
      */
     private String END_CITY_CODE;
+
+    private String END_CITY_NAME;
 
     /**
      * dwd实际出库时间

@@ -4,17 +4,15 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.constant.TimeGranularity;
+import org.jeecg.yqwl.datamiddle.ads.order.entity.DimVlmsProvinces;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentHaveTimestamp;
 import org.jeecg.yqwl.datamiddle.ads.order.util.DateUtils;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.*;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.TodayIndicatorsVo;
 import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -207,6 +206,62 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         todayIndicatorsVo.setPendingToday(pendingCountToday);
         todayIndicatorsVo.setCapacityDemandToday(capacityDemandToday);
         return todayIndicatorsVo;
+    }
+
+    @Override
+    public List<List<ConvertDataVo>> getConvertData(GetBaseBrandTime query) {
+        //获取今日开始与结束时间
+//        Long todayStart = DateUtils.getTodayStartTimestamp();
+        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
+        Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
+        query.setStartTime(todayStart);
+        query.setEndTime(todayEnd);
+        //查sptb02表数据
+        List<OnWayCountVo> onWayCountByCity = dwmVlmsSptb02Mapper.getOnWayCountByCity(query);
+        List<String> startCitys = onWayCountByCity.stream().map(OnWayCountVo::getStartCityName).collect(Collectors.toList());
+        List<String> endCitys = onWayCountByCity.stream().map(OnWayCountVo::getEndCityName).collect(Collectors.toList());
+        startCitys.addAll(endCitys);
+        List<String> allCitys = startCitys.stream().distinct().collect(Collectors.toList());
+        //查province表数据
+        List<DimVlmsProvinces> provincesByCity = dwmVlmsSptb02Mapper.getProvincesByCity(allCitys);
+
+        //根据城市名分组
+        Map<String, DimVlmsProvinces> provincesMap = provincesByCity.stream().collect(Collectors.toMap(item -> item.getSqsxdm() + item.getVsxmc(), Function.identity()));
+        //关联到sptb02
+        List<List<ConvertDataVo>> convertDataList = new ArrayList<>();
+        onWayCountByCity.forEach(item -> {
+            ConvertDataVo startCityVo = new ConvertDataVo();
+            ConvertDataVo endCityVo = new ConvertDataVo();
+            List<ConvertDataVo> convertDataVoList = new ArrayList<>();
+            DimVlmsProvinces startProvince = provincesMap.get(item.getStartProvinceCode() + item.getStartCityCode() + item.getStartCityName());
+            if (Objects.isNull(startProvince)){
+                //处理与维表对应不上的意外情况，直接跳过本次循环
+                return;
+            }
+            BigDecimal njd = startProvince.getNjd();
+            BigDecimal nwd = startProvince.getNwd();
+            BigDecimal[] longitude = {njd, nwd};
+            startCityVo.setName(item.getStartCityName());
+            startCityVo.setCoord(longitude);
+            startCityVo.setValue(item.getValue());
+
+            DimVlmsProvinces endProvince = provincesMap.get(item.getEndProvinceCode() + item.getEndCityCode() + item.getEndCityName());
+            if (Objects.isNull(endProvince)){
+                return;
+            }
+            BigDecimal njdEnd = endProvince.getNjd();
+            BigDecimal nwdEnd = endProvince.getNwd();
+            BigDecimal[] longitudeEnd = {njdEnd, nwdEnd};
+
+            endCityVo.setName(item.getEndCityName());
+            endCityVo.setCoord(longitudeEnd);
+
+            convertDataVoList.add(startCityVo);
+            convertDataVoList.add(endCityVo);
+
+            convertDataList.add(convertDataVoList);
+        });
+        return convertDataList;
     }
 
     /**

@@ -1,20 +1,16 @@
 package org.jeecg.yqwl.datamiddle.ads.order.entity;
-
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.experimental.Accessors;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.CamelUnderline;
 
 import java.math.BigDecimal;
 
 @Data
 @ToString
 @TableName("dim_vlms_provinces")
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
-public class ProvincesWide {
-
+@CamelUnderline
+public class DimVlmsProvinces {
     private Long IDNUM;
 
     private String csqdm;
@@ -23,6 +19,7 @@ public class ProvincesWide {
 
     private String csxdm;
 
+    //在原视图的基础上新增的一条联合的数据:省区市县代码
     private String sqsxdm;
 
     private String vsqmc;
@@ -49,12 +46,9 @@ public class ProvincesWide {
 
     private String cwlmc;
 
-    private String cwlbmSq;
+    private String cwlbm_sq;
 
-    private Long warehouseCreatetime;
+    private Long WAREHOUSE_CREATETIME;
 
-    private Long warehouseUpdatetime;
-
-
-
+    private Long WAREHOUSE_UPDATETIME;
 }

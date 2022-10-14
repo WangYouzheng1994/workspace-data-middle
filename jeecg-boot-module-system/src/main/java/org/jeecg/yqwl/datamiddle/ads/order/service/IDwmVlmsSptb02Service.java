@@ -4,12 +4,10 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.TodayIndicatorsVo;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -120,4 +118,13 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @return {@link TodayIndicatorsVo}
      */
     TodayIndicatorsVo getTodayIndicators(GetBaseBrandTime query);
+
+    /**
+     *  地图
+     * @param query
+     * @author dabao
+     * @date 2022/10/13
+     * @return {@link List< List< ConvertDataVo>>}
+     */
+    List<List<ConvertDataVo>> getConvertData(GetBaseBrandTime query);
 }

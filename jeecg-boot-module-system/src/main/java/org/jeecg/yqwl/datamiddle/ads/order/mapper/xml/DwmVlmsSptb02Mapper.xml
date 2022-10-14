@@ -692,6 +692,25 @@
         and dvs.ASSIGN_TIME BETWEEN #{params.startTime} and #{params.endTime}
         <include refid="bigScreenQuery"></include>
     </select>
+<!--    获取今日在途量根据城市分组-->
+    <select id="getOnWayCountByCity" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.OnWayCountVo">
+        select COUNT(DISTINCT VVIN) as `value`, START_PROVINCE_CODE,dvs.START_CITY_CODE as START_CITY_CODE, dvs.START_CITY_NAME, dvs.END_PROVINCE_CODE, dvs.END_CITY_CODE, dvs.END_CITY_NAME
+        from dwm_vlms_sptb02 dvs
+        where
+        dvs.SHIPMENT_TIME != 0
+        and  dvs.SHIPMENT_TIME <![CDATA[ < ]]> #{params.endTime}
+        and (FINAL_SITE_TIME <![CDATA[ > ]]> #{params.startTime} or FINAL_SITE_TIME = 0)
+        and dvs.START_CITY_NAME !='' and dvs.END_CITY_NAME != ''
+        <include refid="bigScreenQuery"></include>
+        GROUP by dvs.START_PROVINCE_CODE,dvs.START_CITY_CODE, dvs.START_CITY_NAME, dvs.END_PROVINCE_CODE, dvs.END_CITY_CODE, dvs.END_CITY_NAME
+        order by `value` desc
+    </select>
+    <select id="getProvincesByCity" resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.DimVlmsProvinces">
+        SELECT sqsxdm, vsxmc, njd, nwd from dim_vlms_provinces dvp WHERE vsxmc in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
 
 
 </mapper>
