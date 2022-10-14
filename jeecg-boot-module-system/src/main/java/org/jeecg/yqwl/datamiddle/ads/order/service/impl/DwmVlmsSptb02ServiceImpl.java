@@ -17,6 +17,7 @@ import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -216,8 +217,16 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
         query.setStartTime(todayStart);
         query.setEndTime(todayEnd);
+
+        List<List<ConvertDataVo>> convertDataList = new ArrayList<>();
+
         //查sptb02表数据
         List<OnWayCountVo> onWayCountByCity = dwmVlmsSptb02Mapper.getOnWayCountByCity(query);
+        if (CollectionUtils.isEmpty(onWayCountByCity)){
+            List<ConvertDataVo> list = new ArrayList<>();
+            convertDataList.add(list);
+            return convertDataList;
+        }
         List<String> startCitys = onWayCountByCity.stream().map(OnWayCountVo::getStartCityName).collect(Collectors.toList());
         List<String> endCitys = onWayCountByCity.stream().map(OnWayCountVo::getEndCityName).collect(Collectors.toList());
         startCitys.addAll(endCitys);
@@ -228,7 +237,6 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         //根据城市名分组
         Map<String, DimVlmsProvinces> provincesMap = provincesByCity.stream().collect(Collectors.toMap(item -> item.getSqsxdm() + item.getVsxmc(), Function.identity()));
         //关联到sptb02
-        List<List<ConvertDataVo>> convertDataList = new ArrayList<>();
         onWayCountByCity.forEach(item -> {
             ConvertDataVo startCityVo = new ConvertDataVo();
             ConvertDataVo endCityVo = new ConvertDataVo();
