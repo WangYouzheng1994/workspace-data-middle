@@ -189,8 +189,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     public TodayIndicatorsVo getTodayIndicators(GetBaseBrandTime query) {
         TodayIndicatorsVo todayIndicatorsVo = new TodayIndicatorsVo();
         //获取今日开始与结束时间
-//        Long todayStart = DateUtils.getTodayStartTimestamp();
-        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
+        Long todayStart = DateUtils.getTodayStartTimestamp();
+//        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
         Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
         query.setStartTime(todayStart);
         query.setEndTime(todayEnd);
@@ -212,8 +212,8 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
     @Override
     public List<List<ConvertDataVo>> getConvertData(GetBaseBrandTime query) {
         //获取今日开始与结束时间
-//        Long todayStart = DateUtils.getTodayStartTimestamp();
-        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
+        Long todayStart = DateUtils.getTodayStartTimestamp();
+//        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
         Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
         query.setStartTime(todayStart);
         query.setEndTime(todayEnd);
