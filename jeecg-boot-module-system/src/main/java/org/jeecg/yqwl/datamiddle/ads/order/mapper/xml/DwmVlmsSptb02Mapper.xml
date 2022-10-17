@@ -110,7 +110,7 @@
     <select id="getPlanAmount" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
-        COUNT(dvs.CJSDBH) as totalNum,
+        COUNT(distinct dvs.CJSDBH) as totalNum,
         <include refid="search"/>
         <if test="params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3))) AS dates
@@ -197,7 +197,7 @@
     <select id="getFINAL_SITE_TIME" parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO">
         SELECT
-        COUNT(dvs.FINAL_SITE_TIME) as totalNum,
+        COUNT(distinct dvs.CJSDBH) as totalNum,
         <include refid="search"/>
 
         <if test="params.timeType == 'day' ">
@@ -243,7 +243,7 @@
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="java.math.BigDecimal">
         SELECT
-        count(dvs.CJSDBH) AS totalNum
+        count(distinct dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
@@ -258,12 +258,7 @@
                 <if test="  params.startTime != null and params.endTime != null">
                     AND THEORY_SITE_TIME BETWEEN #{params.startTime} AND #{params.endTime}
                 </if>
-                <if test="params.cqwh != null and params.cqwh != ''">
-                    AND CQWH = #{params.cqwh}
-                </if>
-                <if test="params.czjgsdm != null and params.czjgsdm != '' ">
-                    AND CZJGSDM = #{params.czjgsdm}
-                </if>
+                <include refid="bigScreenQuery"></include>
             </where>
             GROUP BY CJSDBH
             )
@@ -274,7 +269,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
+        count(distinct dvs.CJSDBH) AS totalNum ,
         <include refid="search"/>
         <if test="params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(dvs.THEORY_OUT_TIME)) AS dates
@@ -345,7 +340,7 @@
             resultType="org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO"
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime">
         SELECT
-        count(dvs.CJSDBH) AS totalNum ,
+        count(distinct dvs.CJSDBH) AS totalNum ,
         <include refid="search"/>
         <if test="params.timeType == 'day' ">
             toDate(fromUnixTimestamp64Milli(dvs.ACTUAL_OUT_TIME)) AS dates
@@ -660,7 +655,7 @@
 
 <!--    获取今日起运量 -->
     <select id="getShipmentToday" resultType="java.lang.Long">
-        SELECT COUNT(VVIN)
+        SELECT COUNT(distinct VVIN)
         from dwm_vlms_sptb02 dvs
         WHERE dvs.SHIPMENT_TIME != 0
         and dvs.SHIPMENT_TIME BETWEEN #{params.startTime} and #{params.endTime}

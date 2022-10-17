@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.util.DateUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.ShippingMethodEnum;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
 import org.jeecg.yqwl.datamiddle.ads.order.vo.ShipmentVO;
 
@@ -148,7 +149,10 @@ public class FormatDataUtil {
 
             dbMap.forEach((k, v) -> {
                 ShipmentVO.Item item = new ShipmentVO.Item();
-                item.setName(k);
+                //处理公铁水的名字
+                String nameByCode = ShippingMethodEnum.getNameByCode(k);
+
+                item.setName(nameByCode == null ? k : nameByCode);
                 item.setDataList(new ArrayList<>(v.values()));
                 resultVO.addResultItem(item);
             });
