@@ -60,7 +60,8 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
         }
         List<DwmVlmsOneOrderToEnd> oneOrderToEndList = dwmVlmsOneOrderToEndMapper.selectOneOrderToEndList(queryCriteria);
-/*         //遍历list VIN码:list下标
+        if (queryCriteria.getIsSearch()){
+        //遍历list VIN码:list下标
         Map<String, Integer> listMap = new HashMap<>();
 
         DwmVlmsOneOrderToEnd params = null;
@@ -138,7 +139,9 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
                 }
             }
-        } */
+        }
+        }
+
         return oneOrderToEndList;
     }
 
@@ -160,6 +163,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             List<DwmVlmsOneOrderToEnd> vlmsDocs = buildNewQueryOneOrderToEnd(newQuery, vinGroup);
             return vlmsDocs;
         }
+        queryCriteria.setIsSearch(false);
         return selectOneOrderToEndList(queryCriteria);
     }
 
@@ -191,6 +195,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
         //正常情况处理
         Integer total = countOneOrderToEndList(queryCriteria);
+        queryCriteria.setIsSearch(true);
         List<DwmVlmsOneOrderToEnd> pageList = selectOneOrderToEndList(queryCriteria);
         page.setRecords(pageList);
         page.setTotal(total);

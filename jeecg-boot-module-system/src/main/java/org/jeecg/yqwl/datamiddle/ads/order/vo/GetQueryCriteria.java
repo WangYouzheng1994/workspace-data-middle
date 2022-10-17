@@ -191,6 +191,11 @@ public class GetQueryCriteria implements Cloneable{
      */
     private Integer typeS;
 
+    /**
+     * 区分一单到底的查询和导出  TRUE查询
+     */
+    private Boolean isSearch;
+
     @Override
     public Object clone(){
         GetQueryCriteria getQueryCriteria = null;
