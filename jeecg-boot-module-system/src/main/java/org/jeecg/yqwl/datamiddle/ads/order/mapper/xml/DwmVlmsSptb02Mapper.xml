@@ -243,7 +243,7 @@
             parameterType="org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime"
             resultType="java.math.BigDecimal">
         SELECT
-        count(distinct dvs.CJSDBH) AS totalNum
+        count(dvs.CJSDBH) AS totalNum
         FROM
         dwm_vlms_sptb02 dvs
         <where>
