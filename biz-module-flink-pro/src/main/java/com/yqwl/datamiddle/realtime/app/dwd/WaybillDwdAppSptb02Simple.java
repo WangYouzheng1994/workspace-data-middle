@@ -27,7 +27,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Collector;
+import org.apache.kafka.common.TopicPartition;
 
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +46,10 @@ public class WaybillDwdAppSptb02Simple {
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
+        // 从偏移量表中读取指定的偏移量模式
+        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701, 0);
+        offsetMap.put(topicPartition, 112127L);
         // Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
@@ -73,6 +79,7 @@ public class WaybillDwdAppSptb02Simple {
                 .setGroupId(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701_GROUP)
                 .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 .build();
 
         // 1.将kafka中的源数据转化成 DataStream

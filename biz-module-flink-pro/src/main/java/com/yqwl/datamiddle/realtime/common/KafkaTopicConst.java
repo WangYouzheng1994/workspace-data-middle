@@ -44,6 +44,7 @@ public class KafkaTopicConst {
     public static final String ODS_VLMS_SYSC09D = "ods_vlms_sysc09d";
     public static final String ODS_VLMS_SPTC62 = "ods_vlms_sptc62";
     public static final String ODS_VLMS_SPTC34 = "ods_vlms_sptc34";
+    public static final String ODS_VLMS_SPTC34SDTD = "ods_vlms_sptc34sdtd";
     public static final String ODS_VLMS_MDAC52 = "ods_vlms_mdac52";
     public static final String ODS_VLMS_MDAC31 = "ods_vlms_mdac31";
     public static final String ODS_VLMS_SPTB02D1 = "ods_vlms_sptb02d1";

@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  * @Version: V1.0
  */
 @Slf4j
+@Deprecated
 public class OracleCDCKafkaAppLatest {
 
     /**
