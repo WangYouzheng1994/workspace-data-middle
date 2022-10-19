@@ -712,11 +712,11 @@
 
     <select id="getArrivalsTopTen" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.TopTenDataVo">
         SELECT
-        COUNT(distinct dvs.CJSDBH) as `value`, dvs.END_CITY_NAME
+        COUNT(distinct dvs.CJSDBH) as `value`,dvs.START_CITY_NAME, dvs.END_CITY_NAME
 
         FROM dwm_vlms_sptb02 dvs
         <where>
-            dvs.END_CITY_NAME != '' AND
+            dvs.END_CITY_NAME != '' AND dvs.START_CITY_NAME != '' AND
             (dvs.CJSDBH, dvs.WAREHOUSE_CREATETIME) in
             (select
             dvs1.CJSDBH,
@@ -732,7 +732,7 @@
             group by dvs1.CJSDBH
             )
         </where>
-        group by dvs.END_CITY_NAME
+        group by dvs.START_CITY_NAME, dvs.END_CITY_NAME
         ORDER BY `value` desc
         LIMIT 10
     </select>
