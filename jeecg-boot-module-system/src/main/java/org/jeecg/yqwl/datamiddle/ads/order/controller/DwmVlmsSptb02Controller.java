@@ -275,4 +275,54 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return Result.OK(dwmVlmsSptb02Service.getConvertData(query));
     }
 
+    /**
+     * 在途量列表top10 （今日）
+     * @param query 查询条件
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link Result<List<TopTenDataVo>>}
+     */
+    @PostMapping("/getOnWayTopTenData")
+    public Result<List<TopTenDataVo>> getOnWayTopTenData(@RequestBody GetBaseBrandTime query){
+        return Result.OK(dwmVlmsSptb02Service.getOnWayTopTenData(query));
+    }
+
+    /**
+     * 到货量列表top10
+     * @param query 查询参数
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link Result<List<TopTenDataVo>>}
+     */
+    @PostMapping("/getArrivalsTopTen")
+    public Result<List<TopTenDataVo>> getArrivalsTopTen(@RequestBody GetBaseBrandTime query){
+        return Result.OK(dwmVlmsSptb02Service.getArrivalsTopTen(query));
+    }
+
+    /**
+     * 计划量 top10
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link Result<List<TopTenDataVo>>}
+     */
+    @PostMapping("getAmountOfPlanTopTen")
+    public Result<List<TopTenDataVo>> getAmountOfPlanTopTen(@RequestBody GetBaseBrandTime query){
+        return Result.OK(dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
+    }
+
+    /**
+     * 起运量 top10
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link Result< List< TopTenDataVo>>}
+     */
+    @PostMapping("getShipmentTopTen")
+    public Result<List<TopTenDataVo>> getShipmentTopTen(@RequestBody GetBaseBrandTime query){
+        return Result.OK(dwmVlmsSptb02Service.getShipmentTopTen(query));
+    }
+
+
+
 }

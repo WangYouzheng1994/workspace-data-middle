@@ -7,10 +7,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.ext.ShipmentDTO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.DwmSptb02VO;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetBaseBrandTime;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.GetQueryCriteria;
-import org.jeecg.yqwl.datamiddle.ads.order.vo.OnWayCountVo;
+import org.jeecg.yqwl.datamiddle.ads.order.vo.*;
 
 
 import java.math.BigDecimal;
@@ -194,4 +191,10 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     List<OnWayCountVo> getOnWayCountByCity(@Param("params") GetBaseBrandTime query);
 
     List<DimVlmsProvinces> getProvincesByCity(@Param("list") List<String> startCitys);
+
+    List<TopTenDataVo> getArrivalsTopTen(@Param("params") GetBaseBrandTime query);
+
+    List<TopTenDataVo> getAmountOfPlanTopTen(@Param("params") GetBaseBrandTime query);
+
+    List<TopTenDataVo> getShipmentTopTen(@Param("params") GetBaseBrandTime query);
 }

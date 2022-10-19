@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -306,6 +307,42 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
             dwmSptb02VOS.add(dwmSptb02VO1);
         }
         dwmVlmsSptb02Mapper.insertClickhouse(dwmSptb02VOS);
+    }
+
+
+    @Override
+    public List<TopTenDataVo> getOnWayTopTenData(GetBaseBrandTime query) {
+        //获取今日开始与结束时间
+        Long todayStart = DateUtils.getTodayStartTimestamp();
+//        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
+        Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
+        query.setStartTime(todayStart);
+        query.setEndTime(todayEnd);
+        List<OnWayCountVo> onWayCountByCity = dwmVlmsSptb02Mapper.getOnWayCountByCity(query);
+        List<TopTenDataVo> topTenDataVos = onWayCountByCity.subList(0, 10).stream().map(item -> {
+            TopTenDataVo vo = new TopTenDataVo();
+            vo.setStartCityName(!StringUtils.isEmpty(item.getStartCityName()) ? item.getStartCityName() : "");
+            vo.setEndCityName(!StringUtils.isEmpty(item.getEndCityName()) ? item.getEndCityName() : "");
+            vo.setValue(Objects.nonNull(item.getValue()) ? item.getValue() : 0);
+            return vo;
+        }).collect(Collectors.toList());
+        return topTenDataVos;
+    }
+
+    @Override
+    public List<TopTenDataVo> getArrivalsTopTen(GetBaseBrandTime query) {
+        return dwmVlmsSptb02Mapper.getArrivalsTopTen(query);
+    }
+
+    @Override
+    public List<TopTenDataVo> getAmountOfPlanTopTen(GetBaseBrandTime query) {
+        return dwmVlmsSptb02Mapper.getAmountOfPlanTopTen(query);
+    }
+
+    @Override
+    public List<TopTenDataVo> getShipmentTopTen(GetBaseBrandTime query) {
+
+        return dwmVlmsSptb02Mapper.getShipmentTopTen(query);
     }
 
 

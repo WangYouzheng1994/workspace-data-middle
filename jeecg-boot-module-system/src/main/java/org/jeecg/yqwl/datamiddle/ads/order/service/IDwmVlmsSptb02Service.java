@@ -127,4 +127,40 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
      * @return {@link List< List< ConvertDataVo>>}
      */
     List<List<ConvertDataVo>> getConvertData(GetBaseBrandTime query);
+
+    /**
+     *
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link List<TopTenDataVo>}
+     */
+    List<TopTenDataVo> getOnWayTopTenData(GetBaseBrandTime query);
+
+    /**
+     *
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link List<TopTenDataVo>}
+     */
+    List<TopTenDataVo> getArrivalsTopTen(GetBaseBrandTime query);
+
+    /**
+     *
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link List<TopTenDataVo>}
+     */
+    List<TopTenDataVo> getAmountOfPlanTopTen(GetBaseBrandTime query);
+
+    /**
+     *
+     * @param query
+     * @author dabao
+     * @date 2022/10/19
+     * @return {@link List< TopTenDataVo>}
+     */
+    List<TopTenDataVo> getShipmentTopTen(GetBaseBrandTime query);
 }
