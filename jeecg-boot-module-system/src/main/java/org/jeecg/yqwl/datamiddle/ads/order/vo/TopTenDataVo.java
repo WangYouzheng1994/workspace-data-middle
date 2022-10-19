@@ -10,9 +10,18 @@ import lombok.Data;
 @Data
 public class TopTenDataVo {
 
+    /**
+     * 始发城市
+     */
     private String startCityName;
 
+    /**
+     * 到达城市
+     */
     private String endCityName;
 
+    /**
+     * 数量
+     */
     private Integer value;
 }

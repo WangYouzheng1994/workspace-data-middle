@@ -129,8 +129,8 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     List<List<ConvertDataVo>> getConvertData(GetBaseBrandTime query);
 
     /**
-     *
-     * @param query
+     * 获取在途量 top10 仅限今日
+     * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
      * @return {@link List<TopTenDataVo>}
@@ -138,8 +138,8 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     List<TopTenDataVo> getOnWayTopTenData(GetBaseBrandTime query);
 
     /**
-     *
-     * @param query
+     * 获取到货量 top10
+     * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
      * @return {@link List<TopTenDataVo>}
@@ -147,8 +147,8 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     List<TopTenDataVo> getArrivalsTopTen(GetBaseBrandTime query);
 
     /**
-     *
-     * @param query
+     * 获取计划量 -- top10
+     * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
      * @return {@link List<TopTenDataVo>}
@@ -156,8 +156,8 @@ public interface IDwmVlmsSptb02Service extends IService<DwmVlmsSptb02> {
     List<TopTenDataVo> getAmountOfPlanTopTen(GetBaseBrandTime query);
 
     /**
-     *
-     * @param query
+     * 获取起运量 top10
+     * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
      * @return {@link List< TopTenDataVo>}
