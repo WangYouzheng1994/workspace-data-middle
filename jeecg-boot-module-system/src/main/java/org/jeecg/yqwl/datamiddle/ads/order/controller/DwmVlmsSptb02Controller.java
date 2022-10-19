@@ -323,6 +323,26 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
         return Result.OK(dwmVlmsSptb02Service.getShipmentTopTen(query));
     }
 
+    @PostMapping("getTopTenData")
+    public Result<List<List<TopTenDataVo>>> getTopTenData(@RequestBody GetBaseBrandTime query){
+        List<List<TopTenDataVo>> finalList = new ArrayList<>();
+        finalList.add(dwmVlmsSptb02Service.getOnWayTopTenData(query));
+        finalList.add(dwmVlmsSptb02Service.getArrivalsTopTen(query));
+        finalList.add(dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
+        finalList.add(dwmVlmsSptb02Service.getShipmentTopTen(query));
+        return Result.OK(finalList);
+    }
+
+    @PostMapping("getTopTenDataMap")
+    public Result<Map<String, List<TopTenDataVo>>> getTopTenDataMap(@RequestBody GetBaseBrandTime query){
+        Map<String, List<TopTenDataVo>> finalMap = new HashMap<>();
+        finalMap.put("onWay", dwmVlmsSptb02Service.getOnWayTopTenData(query));
+        finalMap.put("arrivals", dwmVlmsSptb02Service.getArrivalsTopTen(query));
+        finalMap.put("amountOfPlan", dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
+        finalMap.put("shipment", dwmVlmsSptb02Service.getShipmentTopTen(query));
+        return Result.OK(finalMap);
+    }
+
 
 
 }

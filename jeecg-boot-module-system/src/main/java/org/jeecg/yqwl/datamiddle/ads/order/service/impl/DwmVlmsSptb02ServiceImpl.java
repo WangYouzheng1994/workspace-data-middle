@@ -14,6 +14,7 @@ import org.jeecg.yqwl.datamiddle.ads.order.vo.*;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsSptb02Service;
 import org.jeecg.yqwl.datamiddle.util.FormatDataUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -316,6 +317,9 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
         Long todayStart = DateUtils.getTodayStartTimestamp();
 //        Long todayStart = DateUtils.parseDate("2022-10-09 00:00:00", "yyyy-MM-dd HH:mm:ss").getTime();
         Long todayEnd = todayStart + TimeGranularity.ONE_DAY_MILLI;
+        // 参数过度
+        Long startTime = query.getStartTime();
+        Long endTime = query.getEndTime();
         query.setStartTime(todayStart);
         query.setEndTime(todayEnd);
         List<OnWayCountVo> onWayCountByCity = dwmVlmsSptb02Mapper.getOnWayCountByCity(query);
@@ -326,23 +330,28 @@ public class DwmVlmsSptb02ServiceImpl extends ServiceImpl<DwmVlmsSptb02Mapper, D
             vo.setValue(Objects.nonNull(item.getValue()) ? item.getValue() : 0);
             return vo;
         }).collect(Collectors.toList());
+        // 设置源参数
+        query.setStartTime(startTime);
+        query.setEndTime(endTime);
         return topTenDataVos;
     }
 
     @Override
     public List<TopTenDataVo> getArrivalsTopTen(GetBaseBrandTime query) {
-        return dwmVlmsSptb02Mapper.getArrivalsTopTen(query);
+        List<TopTenDataVo> arrivalsTopTen = dwmVlmsSptb02Mapper.getArrivalsTopTen(query);
+        return CollectionUtils.isEmpty(arrivalsTopTen) ? new ArrayList<>() : arrivalsTopTen;
     }
 
     @Override
     public List<TopTenDataVo> getAmountOfPlanTopTen(GetBaseBrandTime query) {
-        return dwmVlmsSptb02Mapper.getAmountOfPlanTopTen(query);
+        List<TopTenDataVo> amountOfPlanTopTen = dwmVlmsSptb02Mapper.getAmountOfPlanTopTen(query);
+        return CollectionUtils.isEmpty(amountOfPlanTopTen) ? new ArrayList<>() : amountOfPlanTopTen;
     }
 
     @Override
     public List<TopTenDataVo> getShipmentTopTen(GetBaseBrandTime query) {
-
-        return dwmVlmsSptb02Mapper.getShipmentTopTen(query);
+        List<TopTenDataVo> shipmentTopTen = dwmVlmsSptb02Mapper.getShipmentTopTen(query);
+        return CollectionUtils.isEmpty(shipmentTopTen) ? new ArrayList<>() : shipmentTopTen;
     }
 
 

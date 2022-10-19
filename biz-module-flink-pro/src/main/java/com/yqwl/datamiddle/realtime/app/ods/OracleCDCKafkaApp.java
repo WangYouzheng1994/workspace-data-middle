@@ -76,7 +76,7 @@ public class OracleCDCKafkaApp {
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oracle_cdc_kafka_app"));
         //同一时间只允许进行一个检查点
         //ck.setMaxConcurrentCheckpoints(1);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "root");
 
         log.info("stream流环境初始化完成");
 
@@ -117,8 +117,8 @@ public class OracleCDCKafkaApp {
                 .port(props.getInt("cdc.oracle.port"))
                 .database(props.getStr("cdc.oracle.database"))
                 .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
-                .tableList(sourceTableList.toArray(new String[sourceTableList.size()]))
-                //.tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
+//                .tableList(sourceTableList.toArray(new String[sourceTableList.size()]))
+                .tableList(StrUtil.getStrList(props.getStr("cdc.oracle.table.list"), ","))
                 .username(props.getStr("cdc.oracle.username"))
                 .password(props.getStr("cdc.oracle.password"))
                 .deserializer(new CustomerDeserialization())
@@ -133,8 +133,8 @@ public class OracleCDCKafkaApp {
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804));
+                KafkaTopicConst.BASE_STATION_DATA_EPC,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.BASE_STATION_DATA_EPC));
 
         // 输出到kafka
         oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
