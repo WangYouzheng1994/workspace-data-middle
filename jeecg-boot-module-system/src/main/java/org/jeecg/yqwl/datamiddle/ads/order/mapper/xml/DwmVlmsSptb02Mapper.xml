@@ -709,27 +709,8 @@
 
     <select id="getArrivalsTopTen" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.TopTenDataVo">
         SELECT
-        COUNT(distinct dvs.CJSDBH) as `value`, dvs.END_CITY_NAME,
-        <include refid="search"/>
+        COUNT(distinct dvs.CJSDBH) as `value`, dvs.END_CITY_NAME
 
-        <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME)) AS dates
-        </if>
-        <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME),9)))
-            AS dates
-        </if>
-        <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.FINAL_SITE_TIME)) AS dates
-        </if>
         FROM dwm_vlms_sptb02 dvs
         <where>
             dvs.END_CITY_NAME != '' AND
@@ -748,33 +729,15 @@
             group by dvs1.CJSDBH
             )
         </where>
-        group by dates ,groupName,dvs.END_CITY_NAME
+        group by dvs.END_CITY_NAME
         ORDER BY `value` desc
         LIMIT 10
     </select>
 
     <select id="getAmountOfPlanTopTen" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.TopTenDataVo">
         SELECT
-        COUNT(distinct dvs.CJSDBH) as `value`, dvs.START_CITY_NAME, dvs.END_CITY_NAME,
-        <include refid="search"/>
-        <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3))) AS dates
-        </if>
-        <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
-            AS dates
-        </if>
-        <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3)))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(toInt64(dvs.DDJRQ_R3))) AS dates
-        </if>
+        COUNT(distinct dvs.CJSDBH) as `value`, dvs.START_CITY_NAME, dvs.END_CITY_NAME
+
         FROM dwm_vlms_sptb02 dvs
         <where>
             dvs.END_CITY_NAME != '' AND  dvs.START_CITY_NAME != '' AND
@@ -793,34 +756,33 @@
             group by dvs1.CJSDBH
             )
         </where>
-        group by dates,groupName,dvs.START_CITY_NAME, dvs.END_CITY_NAME
+        group by dvs.START_CITY_NAME, dvs.END_CITY_NAME
         ORDER BY `value` DESC
         LIMIT 10
     </select>
 
     <select id="getShipmentTopTen" resultType="org.jeecg.yqwl.datamiddle.ads.order.vo.TopTenDataVo">
         SELECT
-        COUNT(dvs.SHIPMENT_TIME) as `value`, dvs.START_CITY_NAME, dvs.END_CITY_NAME,
-        <include refid="search"/>
-
-        <if test="params.timeType == 'day' ">
-            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
-        </if>
-        <if test="params.timeType == 'week' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))
-            AS dates
-        </if>
-        <if test="params.timeType == 'month' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'quarter' ">
-            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))
-            AS dates
-        </if>
-        <if test="params.timeType == 'year' ">
-            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates
-        </if>
+        COUNT(dvs.SHIPMENT_TIME) as `value`, dvs.START_CITY_NAME, dvs.END_CITY_NAME
+<!--        <include refid="search"/>-->
+<!--        <if test="params.timeType == 'day' ">-->
+<!--            toDate(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates-->
+<!--        </if>-->
+<!--        <if test="params.timeType == 'week' ">-->
+<!--            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toWeek(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME),9)))-->
+<!--            AS dates-->
+<!--        </if>-->
+<!--        <if test="params.timeType == 'month' ">-->
+<!--            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(toMonth(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))-->
+<!--            AS dates-->
+<!--        </if>-->
+<!--        <if test="params.timeType == 'quarter' ">-->
+<!--            CONCAT(toString(YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))),'-',toString(QUARTER(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME))))-->
+<!--            AS dates-->
+<!--        </if>-->
+<!--        <if test="params.timeType == 'year' ">-->
+<!--            YEAR(fromUnixTimestamp64Milli(dvs.SHIPMENT_TIME)) AS dates-->
+<!--        </if>-->
         FROM dwm_vlms_sptb02 dvs
         <where>
             dvs.END_CITY_NAME != '' AND  dvs.START_CITY_NAME != '' AND
@@ -839,7 +801,7 @@
             group by dvs1.CJSDBH
             )
         </where>
-        group by dates,groupName,dvs.START_CITY_NAME, dvs.END_CITY_NAME
+        group by dvs.START_CITY_NAME, dvs.END_CITY_NAME
         ORDER BY `value` DESC
         LIMIT 10
     </select>
