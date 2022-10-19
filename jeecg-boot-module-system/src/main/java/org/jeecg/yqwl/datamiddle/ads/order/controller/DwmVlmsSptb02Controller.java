@@ -276,73 +276,25 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
     }
 
     /**
-     * 在途量列表top10 （今日）
-     * @param query 查询条件
-     * @author dabao
-     * @date 2022/10/19
-     * @return {@link Result<List<TopTenDataVo>>}
-     */
-    @PostMapping("/getOnWayTopTenData")
-    public Result<List<TopTenDataVo>> getOnWayTopTenData(@RequestBody GetBaseBrandTime query){
-        return Result.OK(dwmVlmsSptb02Service.getOnWayTopTenData(query));
-    }
-
-    /**
-     * 到货量列表top10
+     * 获取top数据
      * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
-     * @return {@link Result<List<TopTenDataVo>>}
+     * @return {@link Result< List< List< TopTenDataVo>>>}
      */
-    @PostMapping("/getArrivalsTopTen")
-    public Result<List<TopTenDataVo>> getArrivalsTopTen(@RequestBody GetBaseBrandTime query){
-        return Result.OK(dwmVlmsSptb02Service.getArrivalsTopTen(query));
-    }
-
-    /**
-     * 计划量 top10
-     * @param query
-     * @author dabao
-     * @date 2022/10/19
-     * @return {@link Result<List<TopTenDataVo>>}
-     */
-    @PostMapping("getAmountOfPlanTopTen")
-    public Result<List<TopTenDataVo>> getAmountOfPlanTopTen(@RequestBody GetBaseBrandTime query){
-        return Result.OK(dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
-    }
-
-    /**
-     * 起运量 top10
-     * @param query
-     * @author dabao
-     * @date 2022/10/19
-     * @return {@link Result< List< TopTenDataVo>>}
-     */
-    @PostMapping("getShipmentTopTen")
-    public Result<List<TopTenDataVo>> getShipmentTopTen(@RequestBody GetBaseBrandTime query){
-        return Result.OK(dwmVlmsSptb02Service.getShipmentTopTen(query));
-    }
-
     @PostMapping("getTopTenData")
     public Result<List<List<TopTenDataVo>>> getTopTenData(@RequestBody GetBaseBrandTime query){
         List<List<TopTenDataVo>> finalList = new ArrayList<>();
+        // 获取top10路线的 在途量 今日
         finalList.add(dwmVlmsSptb02Service.getOnWayTopTenData(query));
+        // 获取top10到货量
         finalList.add(dwmVlmsSptb02Service.getArrivalsTopTen(query));
+        // 获取top10计划量
         finalList.add(dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
+        // 获取top10起运量
         finalList.add(dwmVlmsSptb02Service.getShipmentTopTen(query));
         return Result.OK(finalList);
     }
-
-    @PostMapping("getTopTenDataMap")
-    public Result<Map<String, List<TopTenDataVo>>> getTopTenDataMap(@RequestBody GetBaseBrandTime query){
-        Map<String, List<TopTenDataVo>> finalMap = new HashMap<>();
-        finalMap.put("onWay", dwmVlmsSptb02Service.getOnWayTopTenData(query));
-        finalMap.put("arrivals", dwmVlmsSptb02Service.getArrivalsTopTen(query));
-        finalMap.put("amountOfPlan", dwmVlmsSptb02Service.getAmountOfPlanTopTen(query));
-        finalMap.put("shipment", dwmVlmsSptb02Service.getShipmentTopTen(query));
-        return Result.OK(finalMap);
-    }
-
 
 
 }
