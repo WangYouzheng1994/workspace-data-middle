@@ -476,7 +476,7 @@ public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOr
                 SXSSFCell distributeCpzdbh = row1.createCell(j++);
                 distributeCpzdbh.setCellValue(item.getDistributeCpzdbh());
 
-                // distributeAssignTime 末端分拨中心计划下达日期
+                // distributeVehiclePlateIssuedTimeR3 末端分拨中心计划下达日期
                 if (!item.getDistributeVehiclePlateIssuedTimeR3().equals(0L)) {
                     SXSSFCell distributeVehiclePlateIssuedTimeR3 = row1.createCell(j++);
                     distributeVehiclePlateIssuedTimeR3.setCellValue(sdf.format(item.getDistributeVehiclePlateIssuedTimeR3()));
