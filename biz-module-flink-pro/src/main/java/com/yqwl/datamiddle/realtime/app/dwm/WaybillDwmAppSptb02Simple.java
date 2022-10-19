@@ -477,7 +477,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                             dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
 
-                            //实体类中null值进行默认值赋值
+                            // 实体类中null值进行默认值赋值
                             DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
                             out.collect(bean);
                         }
