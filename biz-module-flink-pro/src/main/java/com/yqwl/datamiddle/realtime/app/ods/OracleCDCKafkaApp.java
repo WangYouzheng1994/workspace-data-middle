@@ -59,6 +59,8 @@ public class OracleCDCKafkaApp {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
+        // 算子禁止合并
+        env.disableOperatorChaining();
 
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();

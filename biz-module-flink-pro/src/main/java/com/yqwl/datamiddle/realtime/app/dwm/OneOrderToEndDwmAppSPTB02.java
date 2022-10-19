@@ -48,6 +48,8 @@ public class OneOrderToEndDwmAppSPTB02 {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子拒绝合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
         // 设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();

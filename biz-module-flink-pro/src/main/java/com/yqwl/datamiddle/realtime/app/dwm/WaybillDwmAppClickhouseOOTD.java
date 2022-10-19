@@ -33,16 +33,18 @@ import java.util.concurrent.TimeUnit;
 public class WaybillDwmAppClickhouseOOTD {
 
     public static void main(String[] args) throws Exception {
-        //1.创建环境  Flink 流式处理环境
+        // 1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子拒绝合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
-        //设置CK相关参数
+        // 设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");

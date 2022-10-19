@@ -42,6 +42,8 @@ public class WaybillDwmAppClickHouseSptb02 {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子拒绝合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
@@ -76,7 +78,7 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .serverId("5417-5420")
                 .build();
