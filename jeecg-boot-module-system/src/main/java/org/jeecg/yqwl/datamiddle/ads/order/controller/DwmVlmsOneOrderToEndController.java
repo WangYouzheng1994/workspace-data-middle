@@ -38,13 +38,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 /**
- * @Description: 大众一单到底全节点查询
- * @Author: jeecg-boot
+ * @Description: dwmVlmsOneOrderToEnd 大众一单到底全节点查询
+ * @Author: DaBao & XiaoFeng
  * @Date: 2022-06-06
- * @Version: V1.0
+ * @Version: V2.0
  */
 @Slf4j
-@Api(tags = "一单到底")
+@Api(tags = "后台_全节点跟踪(一单到底)")
 @RestController
 @RequestMapping("/ads/order/dwmVlmsOneOrderToEnd")
 public class DwmVlmsOneOrderToEndController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVlmsOneOrderToEndService> {

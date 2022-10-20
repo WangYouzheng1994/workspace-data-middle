@@ -24,13 +24,13 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * @Description: DwmVlmsSptb02
- * @Author: jeecg-boot
+ * @Description: DwmVlmsSptb02-数据中台大屏
+ * @Author: DaBao & XiaoFeng
  * @Date: 2022-05-12
- * @Version: V1.0
+ * @Version: V2.0
  */
 @Slf4j
-@Api(tags = "DwmVlmsSptb02")
+@Api(tags = "DwmVlmsSptb02-数据中台大屏")
 @RestController
 @RequestMapping("/ads/order/dwmVlmsSptb02")
 public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwmVlmsSptb02Service> {

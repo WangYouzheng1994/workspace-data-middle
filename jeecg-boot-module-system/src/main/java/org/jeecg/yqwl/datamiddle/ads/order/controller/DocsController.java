@@ -36,8 +36,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @Description: DwmVlmsSptb02-DOCS菜单
+ * @Author: DaBao & XiaoFeng
+ * @Date: 2022-05-12
+ * @Version: V2.0
+ */
+
 @Slf4j
-@Api(tags = "一单到底")
+@Api(tags = "后台_DOCS菜单")
 @RestController
 @RequestMapping("/ads/order/docsSearch")
 public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVlmsOneOrderToEndService> {
