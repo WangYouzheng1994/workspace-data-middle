@@ -55,185 +55,69 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
     @Autowired
     private IOracleSptb02Service iOracleSptb02Service;
 
+
     /**
-     * 通过excel导入数据
-     * 查询Oracle专用的
-     * @param request
-     * @param response
+     * DOCS列表页查询
+     *
+     * @param queryCriteria
      * @return
      */
-    @RequestMapping(value = "/importExcelOfOracle", method = RequestMethod.POST)
-    public void importExcelOracle(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
-        // 读取表格数据
-        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
-        List dataList = excelLoadResult.getDataList();
-
-        SXSSFWorkbook wb = new SXSSFWorkbook();
-        // 在工作簿中创建sheet页
-        SXSSFSheet sheet = wb.createSheet("sheet1");
-        // 设置字体和样式
-        Font font = wb.createFont();
-        // 字体名称
-        font.setFontName("宋体");
-        // 字体大小
-        font.setFontHeightInPoints((short) 12);
-        // 创建行,从0开始
-        SXSSFRow row = sheet.createRow(0);
-        // 设置表头行高
-        row.setHeight((short) (22.50 * 20));
-
-        int line = 0;
-        SXSSFRow row1 = null;
-        for (int i = 0; i < dataList.size(); i++) {
-            HashMap dataMap = (HashMap) dataList.get(i);
-            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
-            // 3.构建SQL语句
-            // SELECT COUNT(*)  FROM SPTB02 d1 JOIN SPTB02D1 d2 on d1.CJSDBH = d2.CJSDBH WHERE D2.VVIN='LFV3B2FY3N3056545';
-            Integer integer = iOracleSptb02Service.countOracleVinOfSptb02AndSptb02d1(vinStr);
-            System.out.println("展示:::::::::::::::::::::"+integer);
-            // 4.执行SQL语句
-            boolean oracleHas = true;
-            if (integer >= 1) {
-                oracleHas = false;
+    @AutoLog(value = "一单到底-DOCS查询")
+    @ApiOperation(value = "一单到底-DOCS查询", notes = "一单到底-DOCS查询")
+    @PostMapping("/selectDocsList")
+    public Result<Page<DwmVlmsDocs>> selectDocsList(@RequestBody GetQueryCriteria queryCriteria) {
+        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
+        String vvin = queryCriteria.getVvin();
+        if ( StringUtils.isNotBlank(vvin)) {
+            if (StringUtils.contains(vvin, ",") && StringUtils.contains(vvin, "\n")) {
+                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
             }
-            if (oracleHas) {
-                // row 行
-                row1= sheet.createRow(line);
-                // 这个地方是设置第几列的
-                SXSSFCell cell = row1.createCell(0);
-                cell.setCellValue(vinStr);
-                line++;
+            // vin码批量模式： 0 逗号， 1 回车换行
+            if ( StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
+            } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
             }
-
         }
-        // 设置内容类型
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
-        OutputStream outputStream = response.getOutputStream();
-        wb.write(outputStream);
-        outputStream.flush();
-        outputStream.close();
+
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
     }
 
     /**
-     * 通过excel导入数据
-     * 查询Oracle专用的
-     * @param request
-     * @param response
-     * @return
+     * DOCS 移库检索
+     *
      */
-    @RequestMapping(value = "/importExcelOfClickhouse", method = RequestMethod.POST)
-    public void importExcelClickhouse(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
-        // 读取表格数据
-        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
-        List dataList = excelLoadResult.getDataList();
 
-        SXSSFWorkbook wb = new SXSSFWorkbook();
-        // 在工作簿中创建sheet页
-        SXSSFSheet sheet = wb.createSheet("sheet1");
-        // 设置字体和样式
-        Font font = wb.createFont();
-        // 字体名称
-        font.setFontName("宋体");
-        // 字体大小
-        font.setFontHeightInPoints((short) 12);
-        // 创建行,从0开始
-        SXSSFRow row = sheet.createRow(0);
-        // 设置表头行高
-        row.setHeight((short) (22.50 * 20));
-
-        int line = 0;
-        SXSSFRow row1 = null;
-        for (int i = 0; i < dataList.size(); i++) {
-            HashMap dataMap = (HashMap) dataList.get(i);
-            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
-            // 3.构建SQL语句
-            // SELECT COUNT(*)  FROM SPTB02 d1 JOIN SPTB02D1 d2 on d1.CJSDBH = d2.CJSDBH WHERE D2.VVIN='LFV3B2FY3N3056545';
-            Integer integer = dwmVlmsOneOrderToEndService.countClickhouseVin(vinStr);
-            System.out.println("展示:::::::::::::::::::::"+integer);
-            // 4.执行SQL语句
-            boolean oracleHas = true;
-            if (integer >= 1) {
-                oracleHas = false;
-            }
-            if (oracleHas) {
-                // row 行
-                row1= sheet.createRow(line);
-                // 这个地方是设置第几列的
-                SXSSFCell cell = row1.createCell(0);
-                cell.setCellValue(vinStr);
-                line++;
-            }
-
-        }
-        // 设置内容类型
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
-        OutputStream outputStream = response.getOutputStream();
-        wb.write(outputStream);
-        outputStream.flush();
-        outputStream.close();
-    }
     /**
-     * 通过excel导入数据
-     * 查询Oracle专用的且为BatchIn的版本
-     * @param request
-     * @param response
+     * DOCS ID车型检索列表页查询
+     *
+     * @param queryCriteria
      * @return
      */
-    @RequestMapping(value = "/importExcelOfClickhouseBatchIn", method = RequestMethod.POST)
-    public void importExcelClickhouseBatchIn(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
-        // 读取表格数据
-        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
-        List dataList = excelLoadResult.getDataList();
+    @AutoLog(value = "一单到底-DOCS ID车型")
+    @ApiOperation(value = "一单到底-DOCS ID车型", notes = "一单到底-DOCS ID车型")
+    @PostMapping("/selectDocsCcxdlList")
+    public Result<Page<DwmVlmsDocs>> selectDocsCcxdlList(@RequestBody GetQueryCriteria queryCriteria) {
+        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
+        String vvin = queryCriteria.getVvin();
+        if (StringUtils.isNotBlank(vvin)) {
+            if (StringUtils.contains(vvin, ",") && StringUtils.contains(vvin, "\n")) {
+                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
+            }
+            // vin码批量模式： 0 逗号， 1 回车换行
+            if (StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
+            } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
+            }
+        }
+        // id车型条件
+        String ccxdl = queryCriteria.getCcxdl();
+        if ( StringUtil.length(ccxdl) > 2 && StringUtils.contains(ccxdl,",")) {
+            queryCriteria.setCcxdlList(Arrays.asList(StringUtils.split(ccxdl,",")));
+        }
 
-        SXSSFWorkbook wb = new SXSSFWorkbook();
-        // 在工作簿中创建sheet页
-        SXSSFSheet sheet = wb.createSheet("sheet1");
-        // 设置字体和样式
-        Font font = wb.createFont();
-        // 字体名称
-        font.setFontName("宋体");
-        // 字体大小
-        font.setFontHeightInPoints((short) 12);
-        // 创建行,从0开始
-        SXSSFRow row = sheet.createRow(0);
-        // 设置表头行高
-        row.setHeight((short) (22.50 * 20));
-        List<String> totalListStr = new ArrayList<String>();
-        List<String> resultVinLists = new ArrayList<>();
-        int line = 0;
-        SXSSFRow row1 = null;
-        for (int i = 0; i < dataList.size(); i++) {
-            HashMap dataMap = (HashMap) dataList.get(i);
-            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
-            //  1.新建一个List<string> Vin的 把导入的表的所有Vin收集起来
-            //  2.再去用Vin的集合组成的in去Clickhosue查寻所有的Vin,把查到的Vin的List和List<Vin>进行比对,取交集
-
-            totalListStr.add(vinStr);
-        }
-        // 用谷歌的插件把List分成多个List
-        List<List<String>> listsParts = Lists.partition(totalListStr, 999);
-        for (List<String> listsPart : listsParts) {
-            List<String> oneOrderToEndVin = dwmVlmsOneOrderToEndService.getOneOrderToEndVin(listsPart);
-            totalListStr = totalListStr.stream().filter(item -> !oneOrderToEndVin.contains(item)).collect(Collectors.toList());
-        }
-        // 单元格赋值
-        for (String resultOfVin : totalListStr) {
-            // row 行
-            row1= sheet.createRow(line);
-            // 这个地方是设置第几列的
-            SXSSFCell cell = row1.createCell(0);
-            cell.setCellValue(resultOfVin);
-            line++;
-        }
-        // 设置内容类型
-        response.setContentType("application/vnd.ms-excel;charset=utf-8");
-        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
-        OutputStream outputStream = response.getOutputStream();
-        wb.write(outputStream);
-        outputStream.flush();
-        outputStream.close();
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
     }
 
     /**
@@ -286,7 +170,6 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
             queryCriteria.setVvinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
 
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
 
         Integer integer = dwmVlmsOneOrderToEndService.selectDocsCount(queryCriteria);
         if (integer > 150000) {
@@ -484,7 +367,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         if (StringUtil.length(selections) > 2) {
             queryCriteria.setVvinList(Arrays.asList(StringUtils.split(selections, ",")));
         }
-//        DwmVlmsFormatUtil.formatQueryTime(queryCriteria);
+
         Integer pageNo = 1;
         Integer pageSize = 5000;
 
@@ -651,80 +534,190 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         outputStream.close();
     }
 
+
+
+
     /**
-     * DOCS列表页查询
-     *
-     * @param queryCriteria
+     * 通过excel导入数据
+     * 查询Oracle专用的
+     * @param request
+     * @param response
      * @return
      */
-    @AutoLog(value = "一单到底-DOCS查询")
-    @ApiOperation(value = "一单到底-DOCS查询", notes = "一单到底-DOCS查询")
-    @PostMapping("/selectDocsList")
-    public Result<Page<DwmVlmsDocs>> selectDocsList(@RequestBody GetQueryCriteria queryCriteria) {
-        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
-        String vvin = queryCriteria.getVvin();
-        if ( StringUtils.isNotBlank(vvin)) {
-            if (StringUtils.contains(vvin, ",") && StringUtils.contains(vvin, "\n")) {
-                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
+    @RequestMapping(value = "/importExcelOfOracle", method = RequestMethod.POST)
+    public void importExcelOracle(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+        // 读取表格数据
+        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
+        List dataList = excelLoadResult.getDataList();
+
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 设置字体和样式
+        Font font = wb.createFont();
+        // 字体名称
+        font.setFontName("宋体");
+        // 字体大小
+        font.setFontHeightInPoints((short) 12);
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+
+        int line = 0;
+        SXSSFRow row1 = null;
+        for (int i = 0; i < dataList.size(); i++) {
+            HashMap dataMap = (HashMap) dataList.get(i);
+            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
+            // 3.构建SQL语句
+            // SELECT COUNT(*)  FROM SPTB02 d1 JOIN SPTB02D1 d2 on d1.CJSDBH = d2.CJSDBH WHERE D2.VVIN='LFV3B2FY3N3056545';
+            Integer integer = iOracleSptb02Service.countOracleVinOfSptb02AndSptb02d1(vinStr);
+            System.out.println("展示:::::::::::::::::::::"+integer);
+            // 4.执行SQL语句
+            boolean oracleHas = true;
+            if (integer >= 1) {
+                oracleHas = false;
             }
-            // vin码批量模式： 0 逗号， 1 回车换行
-            if ( StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
-                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
-            } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
-                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
+            if (oracleHas) {
+                // row 行
+                row1= sheet.createRow(line);
+                // 这个地方是设置第几列的
+                SXSSFCell cell = row1.createCell(0);
+                cell.setCellValue(vinStr);
+                line++;
             }
+
         }
-
-//        formatQueryTime(queryCriteria);
-
-//        Integer total = dwmVlmsOneOrderToEndService.countDocsList(queryCriteria);
-//        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-//        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
-//
-//        page.setRecords(pageList);
-//        page.setTotal(total);
-
-        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
+        OutputStream outputStream = response.getOutputStream();
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
     }
 
     /**
-     * DOCS ID车型检索列表页查询
-     *
-     * @param queryCriteria
+     * 通过excel导入数据
+     * 查询Oracle专用的
+     * @param request
+     * @param response
      * @return
      */
-    @AutoLog(value = "一单到底-DOCS ID车型")
-    @ApiOperation(value = "一单到底-DOCS ID车型", notes = "一单到底-DOCS ID车型")
-    @PostMapping("/selectDocsCcxdlList")
-    public Result<Page<DwmVlmsDocs>> selectDocsCcxdlList(@RequestBody GetQueryCriteria queryCriteria) {
-        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
-        String vvin = queryCriteria.getVvin();
-        if (StringUtils.isNotBlank(vvin)) {
-            if (StringUtils.contains(vvin, ",") && StringUtils.contains(vvin, "\n")) {
-                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
-            }
-            // vin码批量模式： 0 逗号， 1 回车换行
-            if (StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
-                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
-            } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
-                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
-            }
-        }
-        // id车型条件
-        String ccxdl = queryCriteria.getCcxdl();
-        if ( StringUtil.length(ccxdl) > 2 && StringUtils.contains(ccxdl,",")) {
-            queryCriteria.setCcxdlList(Arrays.asList(StringUtils.split(ccxdl,",")));
-        }
-//        formatQueryTime(queryCriteria);
+    @RequestMapping(value = "/importExcelOfClickhouse", method = RequestMethod.POST)
+    public void importExcelClickhouse(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+        // 读取表格数据
+        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
+        List dataList = excelLoadResult.getDataList();
 
-//        Integer total = dwmVlmsOneOrderToEndService.countDocsCcxdlList(queryCriteria);
-//        Page<DwmVlmsDocs> page = new Page(queryCriteria.getPageNo(), queryCriteria.getPageSize());
-//        List<DwmVlmsDocs> pageList = dwmVlmsOneOrderToEndService.selectDocsCcxdlList(queryCriteria);
-//
-//        page.setRecords(pageList);
-//        page.setTotal(total);
-        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 设置字体和样式
+        Font font = wb.createFont();
+        // 字体名称
+        font.setFontName("宋体");
+        // 字体大小
+        font.setFontHeightInPoints((short) 12);
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+
+        int line = 0;
+        SXSSFRow row1 = null;
+        for (int i = 0; i < dataList.size(); i++) {
+            HashMap dataMap = (HashMap) dataList.get(i);
+            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
+            // 3.构建SQL语句
+            // SELECT COUNT(*)  FROM SPTB02 d1 JOIN SPTB02D1 d2 on d1.CJSDBH = d2.CJSDBH WHERE D2.VVIN='LFV3B2FY3N3056545';
+            Integer integer = dwmVlmsOneOrderToEndService.countClickhouseVin(vinStr);
+            System.out.println("展示:::::::::::::::::::::"+integer);
+            // 4.执行SQL语句
+            boolean oracleHas = true;
+            if (integer >= 1) {
+                oracleHas = false;
+            }
+            if (oracleHas) {
+                // row 行
+                row1= sheet.createRow(line);
+                // 这个地方是设置第几列的
+                SXSSFCell cell = row1.createCell(0);
+                cell.setCellValue(vinStr);
+                line++;
+            }
+
+        }
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
+        OutputStream outputStream = response.getOutputStream();
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
     }
+    /**
+     * 通过excel导入数据
+     * 查询Oracle专用的且为BatchIn的版本
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/importExcelOfClickhouseBatchIn", method = RequestMethod.POST)
+    public void importExcelClickhouseBatchIn(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, SQLException, IOException {
+        // 读取表格数据
+        ExcelLoadResult excelLoadResult = ExcelReadUtil.readExcelData(request);
+        List dataList = excelLoadResult.getDataList();
+
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 设置字体和样式
+        Font font = wb.createFont();
+        // 字体名称
+        font.setFontName("宋体");
+        // 字体大小
+        font.setFontHeightInPoints((short) 12);
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+        List<String> totalListStr = new ArrayList<String>();
+        List<String> resultVinLists = new ArrayList<>();
+        int line = 0;
+        SXSSFRow row1 = null;
+        for (int i = 0; i < dataList.size(); i++) {
+            HashMap dataMap = (HashMap) dataList.get(i);
+            String vinStr = (String) dataMap.get("全长底盘号(数据中台表格无此底盘号版本)");
+            //  1.新建一个List<string> Vin的 把导入的表的所有Vin收集起来
+            //  2.再去用Vin的集合组成的in去Clickhosue查寻所有的Vin,把查到的Vin的List和List<Vin>进行比对,取交集
+
+            totalListStr.add(vinStr);
+        }
+        // 用谷歌的插件把List分成多个List
+        List<List<String>> listsParts = Lists.partition(totalListStr, 999);
+        for (List<String> listsPart : listsParts) {
+            List<String> oneOrderToEndVin = dwmVlmsOneOrderToEndService.getOneOrderToEndVin(listsPart);
+            totalListStr = totalListStr.stream().filter(item -> !oneOrderToEndVin.contains(item)).collect(Collectors.toList());
+        }
+        // 单元格赋值
+        for (String resultOfVin : totalListStr) {
+            // row 行
+            row1= sheet.createRow(line);
+            // 这个地方是设置第几列的
+            SXSSFCell cell = row1.createCell(0);
+            cell.setCellValue(resultOfVin);
+            line++;
+        }
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=Vin.xls");
+        OutputStream outputStream = response.getOutputStream();
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
+    }
+
 
 
 }
