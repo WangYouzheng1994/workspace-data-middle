@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.VysfsEnums;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
 import org.jeecg.yqwl.datamiddle.ads.order.service.IDwmVlmsOneOrderToEndService;
@@ -378,10 +379,24 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
             List<VvinGroupQuery> vvinGroup = buildVvinGroup(criteria);
             List<DwmVlmsDocs> vlmsDocs = buildNewQuery(criteria, vvinGroup);
+            if (CollectionUtils.isNotEmpty(vlmsDocs)) {
+                vlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getVysfs())){
+                        item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                    }
+                });
+            }
             return vlmsDocs;
         }
         //没有大批量vin码的情况
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+        if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+            dwmVlmsDocs.forEach(item -> {
+                if (Objects.nonNull(item.getVysfs())){
+                    item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                }
+            });
+        }
         return dwmVlmsDocs;
     }
 
@@ -604,6 +619,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             List<VvinGroupQuery> vvinGroup = buildVvinGroup(queryCriteria);
 
             List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
+            if (CollectionUtils.isNotEmpty(vlmsDocs)) {
+                vlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getVysfs())){
+                        item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                    }
+                });
+            }
             //总数
             finalTotal = vvinGroup.stream().map(VvinGroupQuery::getDataCount).reduce(0, (n1, n2) -> n1 + n2);
             page.setRecords(vlmsDocs);
@@ -613,6 +635,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         //正常情况处理
         finalTotal = countDocsList(queryCriteria);
         List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+        if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+            dwmVlmsDocs.forEach(item -> {
+                if (Objects.nonNull(item.getVysfs())){
+                    item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                }
+            });
+        }
         page.setRecords(dwmVlmsDocs);
         page.setTotal(finalTotal);
 

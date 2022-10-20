@@ -76,6 +76,11 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "配板单号")
 	private String cpzdbh;
 
+	/**配板单号*/
+	@Excel(name = "运输方式", width = 15)
+	@ApiModelProperty(value = "配板单号")
+	private String vysfs;
+
 	/**指派日期*/
 	@Excel(name = "指派日期", width = 15)
 	@ApiModelProperty(value = "指派日期")

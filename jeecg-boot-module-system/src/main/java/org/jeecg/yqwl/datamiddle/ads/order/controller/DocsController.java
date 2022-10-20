@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Api(tags = "一单到底")
 @RestController
-@RequestMapping("/ads/order/dwmVlmsOneOrderToEnd")
+@RequestMapping("/ads/order/docsSearch")
 public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVlmsOneOrderToEndService> {
 
     @Autowired
@@ -249,7 +249,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         row.setHeight((short) (22.50 * 20));
         // 获取表头
         String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
-                "计划下达日期", "配板单号", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
+                "计划下达日期", "配板单号","运输方式", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;
         // 循环遍历表头,作为sheet页的第一行数据
@@ -350,6 +350,13 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 // Cpzdbh  配板单号
                 SXSSFCell cell9 = row1.createCell(j++);
                 cell9.setCellValue(item.getCpzdbh());
+                //运输方式
+                SXSSFCell cellTen = row1.createCell(j++);
+                if (Objects.nonNull(item.getVysfs())){
+                    cellTen.setCellValue(item.getVysfs());
+                } else {
+                    cellTen.setCellValue("");
+                }
                 // assignTime  指派日期
                 if (item.getAssignTime() != 0) {
                     SXSSFCell cell10 = row1.createCell(j++);

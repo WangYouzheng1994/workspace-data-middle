@@ -265,7 +265,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
 
     /**
      * 获取地图数据
-     * @param query
+     * @param query 查询参数
      * @author dabao
      * @date 2022/10/13
      * @return {@link Result<ConvertDataVo>}
@@ -280,7 +280,7 @@ public class DwmVlmsSptb02Controller extends JeecgController<DwmVlmsSptb02, IDwm
      * @param query 查询参数
      * @author dabao
      * @date 2022/10/19
-     * @return {@link Result< List< List< TopTenDataVo>>>}
+     * @return {@link Result<List<List<TopTenDataVo>>>}
      */
     @PostMapping("getTopTenData")
     public Result<List<List<TopTenDataVo>>> getTopTenData(@RequestBody GetBaseBrandTime query){
