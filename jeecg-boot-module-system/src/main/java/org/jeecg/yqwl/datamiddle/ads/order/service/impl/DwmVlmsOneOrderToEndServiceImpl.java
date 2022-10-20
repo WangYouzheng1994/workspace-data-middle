@@ -334,23 +334,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return count == null ? 0 : count;
     }
 
-    /**
-     * DOCS 列表页查询
-     *
-     * @param queryCriteria
-     * @return
-     */
-    @Deprecated
-    @Override
-    public List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria) {
-        if (queryCriteria.getPageNo() != null) {
-            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
-            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
-        }
-        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
-
-        return dwmVlmsDocs;
-    }
 
     /**
      * 列表查询优化
@@ -359,7 +342,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @return
      */
     @Override
-    public List<DwmVlmsDocs> selectDocsList2(GetQueryCriteria queryCriteria) {
+    public List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria) {
         if (queryCriteria.getPageNo() != null) {
             queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
@@ -538,41 +521,6 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return dwmVlmsDocsList;
     }
 
-
-    /**
-     * docs车型列表页计数
-     *
-     * @param queryCriteria
-     * @return
-     */
-    @Override
-    public Integer countDocsCcxdlList(GetQueryCriteria queryCriteria) {
-        Integer num = dwmVlmsSptb02Mapper.countDocsCcxdlList(queryCriteria);
-        return num == null ? 0 : num;
-    }
-
-    /**
-     * docs车型列表页查询
-     *
-     * @param queryCriteria
-     * @return
-     */
-    @Override
-    public List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria) {
-        if (queryCriteria.getPageNo() != null) {
-            queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
-            queryCriteria.setLimitEnd(queryCriteria.getPageSize());
-        }
-        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsCcxdlList(queryCriteria);
-        Map<String, Integer> listMap = new HashMap<>();
-        DwmVlmsDocs params = null;
-        for (int i = 0; i < dwmVlmsDocs.size(); i++) {
-            params = dwmVlmsDocs.get(i);
-            listMap.put(params.getVvin(), i);
-//            this.docsFormatTime(params);
-        }
-        return dwmVlmsDocs;
-    }
 
     /**
      * 按照Vin码去查询总数

@@ -43,13 +43,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      */
     Integer countDocsList(GetQueryCriteria queryCriteria);
 
-    /**
-     * DOCS 列表页查询
-     *
-     * @param queryCriteria
-     * @return
-     */
-    List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria);
 
     /**
      *  优化查询
@@ -58,7 +51,7 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
      * @date 2022/8/25
      * @return {@link List< DwmVlmsDocs>}
      */
-    List<DwmVlmsDocs> selectDocsList2(GetQueryCriteria queryCriteria);
+    List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria);
 
     /**
      * 分片查总数
@@ -70,22 +63,6 @@ public interface IDwmVlmsOneOrderToEndService extends IService<DwmVlmsOneOrderTo
     Integer selectDocsCount(GetQueryCriteria queryCriteria);
 
 
-
-    /**
-     * DOCSCcxdl count计数
-     *
-     * @param queryCriteria
-     * @return
-     */
-    Integer countDocsCcxdlList(GetQueryCriteria queryCriteria);
-
-    /**
-     * DOCSCcxdl 列表页查询
-     *
-     * @param queryCriteria
-     * @return
-     */
-    List<DwmVlmsDocs> selectDocsCcxdlList(GetQueryCriteria queryCriteria);
 
     /**
      * 按照Vin码去查询总数
