@@ -196,6 +196,11 @@ public class GetQueryCriteria implements Cloneable{
      */
     private Boolean isSearch;
 
+    /**
+     * 用于查询字符串的前几位的通用对象
+     */
+    private String subStr;
+
     @Override
     public Object clone(){
         GetQueryCriteria getQueryCriteria = null;

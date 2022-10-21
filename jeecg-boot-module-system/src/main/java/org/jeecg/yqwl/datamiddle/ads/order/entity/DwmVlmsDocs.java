@@ -135,6 +135,11 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "汽车品牌名")
 	private String brandName;
 
+	/**运输方式*/
+	@Excel(name = "运输方式", width = 15)
+	@ApiModelProperty(value = "运输方式")
+	private String trafficType;
+
 	/**
 	 * 是否为源库数据 - 用于质量菜单详情页展示
 	 */

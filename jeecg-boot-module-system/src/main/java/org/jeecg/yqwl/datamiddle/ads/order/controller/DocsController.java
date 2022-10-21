@@ -62,8 +62,8 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
      * @param queryCriteria
      * @return
      */
-    @AutoLog(value = "一单到底-DOCS查询")
-    @ApiOperation(value = "一单到底-DOCS查询", notes = "一单到底-DOCS查询")
+    @AutoLog(value = "可视化检索-DOCS查询")
+    @ApiOperation(value = "可视化检索-DOCS查询", notes = "可视化检索-DOCS查询")
     @PostMapping("/selectDocsList")
     public Result<Page<DwmVlmsDocs>> selectDocsList(@RequestBody GetQueryCriteria queryCriteria) {
         // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
@@ -87,6 +87,26 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
      * DOCS 移库检索
      *
      */
+    @AutoLog(value = "可视化检索-DOCS移库检索")
+    @ApiOperation(value = "可视化检索-DOCS移库检索", notes = "可视化检索-DOCS移库检索")
+    @PostMapping("/selectDocsY90List")
+    public Result<Page<DwmVlmsDocs>> selectDocsY90List(@RequestBody GetQueryCriteria queryCriteria) {
+        // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
+        String vvin = queryCriteria.getVvin();
+        if ( StringUtils.isNotBlank(vvin)) {
+            if (StringUtils.contains(vvin, ",") && StringUtils.contains(vvin, "\n")) {
+                return Result.error("vin码批量查询，分割模式只可以用英文逗号或者回车换行一种模式，不可混搭，请检查vin码查询条件", null);
+            }
+            // vin码批量模式： 0 逗号， 1 回车换行
+            if ( StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
+            } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
+                queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
+            }
+        }
+
+        return Result.OK(dwmVlmsOneOrderToEndService.selectDocsPage(queryCriteria));
+    }
 
     /**
      * DOCS ID车型检索列表页查询
@@ -94,8 +114,8 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
      * @param queryCriteria
      * @return
      */
-    @AutoLog(value = "一单到底-DOCS ID车型")
-    @ApiOperation(value = "一单到底-DOCS ID车型", notes = "一单到底-DOCS ID车型")
+    @AutoLog(value = "可视化检索-DOCS ID车型")
+    @ApiOperation(value = "可视化检索-DOCS ID车型", notes = "可视化检索-DOCS ID车型")
     @PostMapping("/selectDocsCcxdlList")
     public Result<Page<DwmVlmsDocs>> selectDocsCcxdlList(@RequestBody GetQueryCriteria queryCriteria) {
         // Add By WangYouzheng 2022年6月9日17:39:33 新增vin码批量查询功能。 根据英文逗号或者回车换行分割，只允许一种情况 --- START
@@ -525,6 +545,202 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 intervalFlag = false;
             }
         } while (intervalFlag);
+        // 设置内容类型
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
+        OutputStream outputStream = response.getOutputStream();
+        response.setHeader("Content-disposition", "attachment;filename=trainingRecord.xls");
+        wb.write(outputStream);
+        outputStream.flush();
+        outputStream.close();
+    }
+
+    /**
+     * docs 移库查询 页面导出
+     * @param queryCriteria
+     * @param response
+     * @throws IOException
+     */
+    @AutoLog(value = "docs")
+    @ApiOperation(value = "docs", notes = "docs")
+    @PostMapping(value = "/exportXlsMobileInventoryVehicleList")
+    public void exportXlsMobileInventoryVehicleList(@RequestBody GetQueryCriteria queryCriteria, HttpServletResponse response) throws IOException {
+        // 创建工作簿
+        SXSSFWorkbook wb = new SXSSFWorkbook();
+        // 在工作簿中创建sheet页
+        SXSSFSheet sheet = wb.createSheet("sheet1");
+        // 创建行,从0开始
+        SXSSFRow row = sheet.createRow(0);
+        // 设置表头行高
+        row.setHeight((short) (22.50 * 20));
+        // 获取表头
+        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
+                "计划下达日期", "配板单号","运输方式", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
+                "经销商确认到货时间"};
+        int i = 0;
+        // 循环遍历表头,作为sheet页的第一行数据
+        for (String header : headers) {
+            // 获取表头列
+            SXSSFCell cell = row.createCell(i++);
+            // 为单元格赋值
+            cell.setCellValue(header);
+        }
+
+        String vvin = queryCriteria.getVvin();
+        // vin码批量模式： 0 逗号， 1 回车换行
+        if (StringUtil.length(vvin) > 2 && StringUtils.contains(vvin, ",")) {
+            queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, ",")));
+        } else if (StringUtils.length(vvin) > 2 && StringUtils.contains(vvin, "\n")) {
+            queryCriteria.setVvinList(Arrays.asList(StringUtils.split(vvin, "\n")));
+        }
+
+
+        // 过滤选中的数据
+        String selections = queryCriteria.getSelections();
+        if (StringUtil.length(selections) > 2) {
+            queryCriteria.setVvinList(Arrays.asList(StringUtils.split(selections, ",")));
+        }
+
+
+        Integer integer = dwmVlmsOneOrderToEndService.selectDocsCount(queryCriteria);
+        if (integer > 150000) {
+            this.responseJsonString(response, JSONObject.toJSONString(Result.error("超出导出数量限制！")));
+            return;
+        }
+
+        Integer pageNo = 1;
+        Integer pageSize = 5000;
+
+        boolean intervalFlag = true;
+        queryCriteria.setPageSize(pageSize);
+
+        List<DwmVlmsDocs> pageList = null;
+
+        // 转换时间格式,将Long类型转换成date类型
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // 设置新增数据行,从第一行开始
+        int rowNum = 1;
+
+        Integer maxSize = 150000;
+
+        SXSSFRow row1 = null;
+        do {
+            queryCriteria.setPageNo(pageNo);
+
+            // 获取查询数据
+            pageList = dwmVlmsOneOrderToEndService.selectDocsList(queryCriteria);
+            for (DwmVlmsDocs item : pageList) {
+                // 时间字段转换成年月日时分秒类型
+                row1 = sheet.createRow(rowNum);
+                int j = 0;
+                // VVIN  底盘号
+                SXSSFCell cell = row1.createCell(j++);
+                cell.setCellValue(item.getVvin());
+                // HostComCode  品牌
+                SXSSFCell cell1 = row1.createCell(j++);
+                cell1.setCellValue(item.getBrandName());
+                // baseName  基地
+                SXSSFCell cell2 = row1.createCell(j++);
+                cell2.setCellValue(item.getBaseName());
+                // vehicleCode  车型代码
+                SXSSFCell cellvehicleCode = row1.createCell(j++);
+                cellvehicleCode.setCellValue(item.getVehicleCode());
+                // vehicleName  车型
+                SXSSFCell cell3 = row1.createCell(j++);
+                cell3.setCellValue(item.getVehicleName());
+                // startCityName  始发城市
+                SXSSFCell cell4 = row1.createCell(j++);
+                cell4.setCellValue(item.getStartCityName());
+                // endCityName   经销商目标城市
+                SXSSFCell cell5 = row1.createCell(j++);
+                cell5.setCellValue(item.getEndCityName());
+                // vdwdm  经销商代码
+                SXSSFCell cell6 = row1.createCell(j++);
+                cell6.setCellValue(item.getVdwdm());
+                //  DEALER_NAME   经销商名称
+                SXSSFCell cell7 = row1.createCell(j++);
+                cell7.setCellValue(item.getDealerName());
+                // ddjrq 计划下达日期
+                if (item.getDdjrqR3() != 0 ) {
+                    SXSSFCell cell8 = row1.createCell(j++);
+                    cell8.setCellValue(sdf.format(item.getDdjrqR3()));
+                }else{
+                    SXSSFCell cell8 = row1.createCell(j++);
+                    cell8.setCellValue("");
+                }
+                // Cpzdbh  配板单号
+                SXSSFCell cell9 = row1.createCell(j++);
+                cell9.setCellValue(item.getCpzdbh());
+                // 运输方式
+                SXSSFCell cellTen = row1.createCell(j++);
+                if (Objects.nonNull(item.getTrafficType())){
+                    cellTen.setCellValue(item.getTrafficType());
+                } else {
+                    cellTen.setCellValue("");
+                }
+                // assignTime  指派日期
+                if (item.getAssignTime() != 0) {
+                    SXSSFCell cell10 = row1.createCell(j++);
+                    cell10.setCellValue(sdf.format(item.getAssignTime()));
+                } else {
+                    SXSSFCell cell10 = row1.createCell(j++);
+                    cell10.setCellValue("");
+                }
+                // TRANSPORT_NAME 指派承运商名称
+                SXSSFCell cell11 = row1.createCell(j++);
+                cell11.setCellValue(item.getTransportName());
+                // actualOutTime  出库日期
+                if (item.getActualOutTime() != 0) {
+                    SXSSFCell cell12 = row1.createCell(j++);
+                    cell12.setCellValue(sdf.format(item.getActualOutTime()));
+                }else{
+                    SXSSFCell cell12 = row1.createCell(j++);
+                    cell12.setCellValue("");
+                }
+                // shipmentTime  起运日期
+                if (item.getShipmentTime() != 0) {
+                    SXSSFCell cell13 = row1.createCell(j++);
+                    cell13.setCellValue(sdf.format(item.getShipmentTime()));
+                }else{
+                    SXSSFCell cell13 = row1.createCell(j++);
+                    cell13.setCellValue("");
+                }
+                // VJSYDM 运输车号
+                SXSSFCell cell14 = row1.createCell(j++);
+                cell14.setCellValue(item.getVjsydm());
+                //  samePlateNum 同板数量
+                SXSSFCell cell15 = row1.createCell(j++);
+                cell15.setCellValue(item.getSamePlateNum());
+                // Dtvsdhsj  DCS到货时间
+                if (item.getDtvsdhsj() != 0) {
+                    SXSSFCell cell16 = row1.createCell(j++);
+                    cell16.setCellValue(sdf.format(item.getDtvsdhsj()));
+                }else{
+                    SXSSFCell cell16 = row1.createCell(j++);
+                    cell16.setCellValue("");
+                }
+                // finalSiteTime   经销商确认到货时间
+                if (item.getFinalSiteTime() != 0) {
+                    SXSSFCell cell17 = row1.createCell(j++);
+                    cell17.setCellValue(sdf.format(item.getFinalSiteTime()));
+                }else{
+                    SXSSFCell cell17 = row1.createCell(j++);
+                    cell17.setCellValue("");
+                }
+                rowNum++;
+            }
+
+            // 如果没有查询到数据  或者 分页查询的数量不符合pageSize 那么终止循环
+            if ( CollectionUtils.isEmpty(pageList) || CollectionUtils.size(pageList) < pageSize) {
+                intervalFlag = false;
+            } else {
+                pageNo++;
+            }
+
+            if (rowNum >= maxSize) {
+                intervalFlag = false;
+            }
+        } while (intervalFlag);
+
         // 设置内容类型
         response.setContentType("application/vnd.ms-excel;charset=utf-8");
         OutputStream outputStream = response.getOutputStream();

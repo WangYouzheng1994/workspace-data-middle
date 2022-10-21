@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
+import org.jeecg.yqwl.datamiddle.ads.order.enums.TrafficTypeEnums;
 import org.jeecg.yqwl.datamiddle.ads.order.enums.VysfsEnums;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsOneOrderToEndMapper;
 import org.jeecg.yqwl.datamiddle.ads.order.mapper.DwmVlmsSptb02Mapper;
@@ -343,6 +344,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     @Override
     public List<DwmVlmsDocs> selectDocsList(GetQueryCriteria queryCriteria) {
+        List<DwmVlmsDocs> dwmVlmsDocs;
         if (queryCriteria.getPageNo() != null) {
             queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
@@ -372,14 +374,29 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             return vlmsDocs;
         }
         //没有大批量vin码的情况
-        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
-        if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
-            dwmVlmsDocs.forEach(item -> {
-                if (Objects.nonNull(item.getVysfs())){
-                    item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
-                }
-            });
+        // 判断是否是查询移库
+        String subSTr = queryCriteria.getSubStr();
+        if (StringUtils.isNotBlank(subSTr)){
+            dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
+            if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+                dwmVlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getTrafficType())){
+                        item.setTrafficType(TrafficTypeEnums.getNameByCode(item.getTrafficType()));
+                    }
+                });
+            }
+        }else {
+            dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+            if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+                dwmVlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getVysfs())){
+                        item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                    }
+                });
+            }
         }
+
+
         return dwmVlmsDocs;
     }
 
@@ -484,6 +501,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      * @return List<DwmVlmsDocs> 最总结果
      */
     private List<DwmVlmsDocs> buildNewQuery(GetQueryCriteria queryCriteria, List<VvinGroupQuery> vvinGroupQueries) {
+        List<DwmVlmsDocs> dwmVlmsDocs;
         List<DwmVlmsDocs> dwmVlmsDocsList = new ArrayList<>();
         //页码
         BigDecimal pageNo = BigDecimal.valueOf(queryCriteria.getPageNo());
@@ -511,7 +529,13 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             queryCriteria.setLimitStart(limitStart);
             queryCriteria.setLimitEnd(limitEnd);
             queryCriteria.setVvinList(item.getVvinList());
-            List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+            // 判断是否是查询移库
+            String subSTr = queryCriteria.getSubStr();
+            if (StringUtils.isNotBlank(subSTr)){
+                dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
+            }else {
+                dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+            }
             dwmVlmsDocsList.addAll(dwmVlmsDocs);
             //判断数据是否取够
             if (dwmVlmsDocsList.size() >= pageSize.intValue()) {
@@ -546,6 +570,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
      */
     @Override
     public Page<DwmVlmsDocs> selectDocsPage(GetQueryCriteria queryCriteria) {
+        List<DwmVlmsDocs> dwmVlmsDocs;
         if (queryCriteria.getPageNo() != null) {
             queryCriteria.setLimitStart((queryCriteria.getPageNo() - 1) * queryCriteria.getPageSize());
             queryCriteria.setLimitEnd(queryCriteria.getPageSize());
@@ -582,14 +607,31 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         }
         //正常情况处理
         finalTotal = countDocsList(queryCriteria);
-        List<DwmVlmsDocs> dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
-        if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
-            dwmVlmsDocs.forEach(item -> {
-                if (Objects.nonNull(item.getVysfs())){
-                    item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
-                }
-            });
+
+        // 判断是否是查询移库
+        String subSTr = queryCriteria.getSubStr();
+        if (StringUtils.isNotBlank(subSTr)){
+            dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
+            if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+                dwmVlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getTrafficType())){
+                        item.setTrafficType(TrafficTypeEnums.getNameByCode(item.getTrafficType()));
+                    }
+                });
+            }
+        }else {
+            dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
+            if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+                dwmVlmsDocs.forEach(item -> {
+                    if (Objects.nonNull(item.getVysfs())){
+                        item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                    }
+                });
+            }
         }
+
+
+
         page.setRecords(dwmVlmsDocs);
         page.setTotal(finalTotal);
 

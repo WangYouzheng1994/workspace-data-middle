@@ -126,10 +126,18 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     List<DwmVlmsSptb02> getSptbTrafficTypeByVin(List<String> vins);
 
     /**
-     * 一单到底---DOCS
+     * 可视化检索---DOCS
      * @return
      */
     List<DwmVlmsDocs> selectDocsList(@Param("params") GetQueryCriteria queryCriteria);
+
+    /**
+     * 可视化检索---DOCS 移库检索
+     * @param queryCriteria
+     * @return
+     */
+    List<DwmVlmsDocs> selectDocsMobileInventoryVehicleList(@Param("params") GetQueryCriteria queryCriteria);
+
 
     /**
      *
@@ -139,7 +147,7 @@ public interface DwmVlmsSptb02Mapper extends BaseMapper<DwmVlmsSptb02> {
     Integer countDocsList(@Param("params") GetQueryCriteria queryCriteria);
 
     /**
-     * 一单到底---DOCS
+     * 可视化检索---DOCS
      * @return
      */
     List<DwmVlmsDocs> selectDocsCcxdlList(@Param("params") GetQueryCriteria queryCriteria);
