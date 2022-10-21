@@ -48,6 +48,8 @@ public class OneOrderToEndDwmAppSPTB02 {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子拒绝合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
         // 设置CK相关参数
         CheckpointConfig ck = env.getCheckpointConfig();
@@ -89,8 +91,19 @@ public class OneOrderToEndDwmAppSPTB02 {
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
                 // DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 Long ddjrq1 = dwmSptb02.getDDJRQ();
-                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0) {
-                    if (ddjrq1 >= START && ddjrq1 <= END) {
+                // CPZDBH 前缀为 Y90 移库的运单不进入全节点 20221020 白工提
+                String cpzdbh1 = dwmSptb02.getCPZDBH();
+                // 1.要求null,""的运单可以进入
+                // 2.要求为"Y90"的不可以进入
+                // 感谢大宝亲情赞助下面的flag代码
+                Boolean flag = true;
+                if (StringUtils.isNotBlank(cpzdbh1) && cpzdbh1.length() > 3){
+                    String subCpz = cpzdbh1.substring(0,3);
+                    if ("Y90".equals(subCpz)){
+                        flag = false;
+                    }
+                }
+                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= START && ddjrq1 <= END && flag) {
                         OotdTransition ootdTransition = new OotdTransition();
                         String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
                         String vvin = dwmSptb02.getVVIN();                                      // 底盘号
@@ -362,7 +375,6 @@ public class OneOrderToEndDwmAppSPTB02 {
                         OotdTransition bean = JsonPartUtil.getBean(ootdTransition);
                         out.collect(bean);
                     }
-                }
             }
         }).uid("OneOrderToEndDwmAppSPTB02UpdateProcess").name("OneOrderToEndDwmAppSPTB02UpdateProcess");
 
