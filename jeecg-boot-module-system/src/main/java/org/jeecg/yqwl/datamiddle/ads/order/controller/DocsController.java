@@ -573,7 +573,7 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
         // 设置表头行高
         row.setHeight((short) (22.50 * 20));
         // 获取表头
-        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "经销商目标城市", "经销商代码", "经销商名称",
+        String[] headers = new String[]{"底盘号", "品牌", "基地","车型代码", "车型", "始发城市", "目的城市", "中转站代码", "中转库名称",
                 "计划下达日期", "配板单号","运输方式", "指派日期", "指派承运商名称", "出库日期", "起运日期", "运输车号", "同板数量", "DCS到货时间",
                 "经销商确认到货时间"};
         int i = 0;

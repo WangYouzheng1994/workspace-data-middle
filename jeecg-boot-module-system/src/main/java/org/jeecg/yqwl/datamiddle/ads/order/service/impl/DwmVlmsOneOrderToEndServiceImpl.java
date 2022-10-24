@@ -382,11 +382,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         if (StringUtils.isNotBlank(subSTr)){
             dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
             if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
-                dwmVlmsDocs.forEach(item -> {
-                    if (Objects.nonNull(item.getTrafficType())){
-                        item.setTrafficType(TrafficTypeEnums.getNameByCode(item.getTrafficType()));
-                    }
-                });
+                buildMoveList(dwmVlmsDocs);
             }
         }else {
             dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
@@ -646,10 +642,12 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
             dwmVlmsDocs.forEach(item -> {
                 if (Objects.nonNull(item.getTrafficType())){
                     if (TrafficTypeEnums.SHIPPING_METHOD_G.getCode().equals(item.getTrafficType())){
+                        // 公路取 endCityName为目的城市， vdwdm为中转站代码， endCityName为中转站城市
                         item.setTargetCity(item.getEndCityName());
                         item.setTransferStationCode(item.getVdwdm());
                         item.setTransferStationName(item.getEndCityName());
                     }else {
+                        // 公路取 endCityName为目的城市，Vsczt为中转站代码， VscztName为中转站城市
                         item.setTargetCity(item.getEndCityName());
                         item.setTransferStationName(item.getVscztName());
                         item.setTransferStationCode(item.getVsczt());
