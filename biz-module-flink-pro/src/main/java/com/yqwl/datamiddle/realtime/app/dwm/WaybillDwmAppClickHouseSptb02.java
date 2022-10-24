@@ -78,7 +78,7 @@ public class WaybillDwmAppClickHouseSptb02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .serverId("5417-5420")
                 .build();

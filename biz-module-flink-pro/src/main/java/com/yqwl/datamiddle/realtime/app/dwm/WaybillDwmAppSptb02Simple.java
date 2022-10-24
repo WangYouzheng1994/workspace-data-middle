@@ -356,7 +356,7 @@ public class WaybillDwmAppSptb02Simple {
                                 }
                             }
 
-                            /** 收车站台的相关字段赋值
+                            /** 发车站台的相关字段赋值
                              *  处理 vfczt的 VFCZT_PROVINCE_CODE  VFCZT_CITY_CODE 给这俩字段赋值
                              *  inner join sptc34 b on a.vwlckdm = b.VFCZT
                              */
@@ -373,7 +373,7 @@ public class WaybillDwmAppSptb02Simple {
                                 }
                             }
 
-                            /** 发车站台的相关字段赋值
+                            /** 收车站台的相关字段赋值
                              *  处理 vsczt的 VSCZT_PROVINCE_CODE  VSCZT_CITY_CODE 给这俩字段赋值
                              *  inner join sptc34 b on a.vwlckdm = b.VSCZT
                              */
