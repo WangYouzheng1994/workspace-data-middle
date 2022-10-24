@@ -269,6 +269,26 @@ public class WaybillDwmAppSptb02Simple {
                             }
 
                             /**
+                             * 处理收发车站台
+                             */
+                            String sptb02VSCZT = dwmSptb02.getVSCZT();
+                            if (StringUtils.isNotBlank(sptb02VSCZT)){
+                                String vscztNameSql = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + sptb02VSCZT + "' limit 1 ";
+                                JSONObject jsonVscztName = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, vscztNameSql, sptb02VSCZT + "(VSCZT)");
+                                if (Objects.nonNull(jsonVscztName)){
+                                    dwmSptb02.setVSCZT_NAME(jsonVscztName.getString("VWLCKMC"));
+                                }
+                            }
+                            String sptb02VFCZT = dwmSptb02.getVFCZT();
+                            if (StringUtils.isNotBlank(sptb02VFCZT)){
+                                String vfcztNameSql = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + sptb02VFCZT + "' limit 1 ";
+                                JSONObject jsonVfcztName = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34, vfcztNameSql, sptb02VFCZT + "(VFCZT)");
+                                if (Objects.nonNull(jsonVfcztName)){
+                                    dwmSptb02.setVFCZT_NAME(jsonVfcztName.getString("VWLCKMC"));
+                                }
+                            }
+
+                            /**
                              * 处理 运输商名称
                              * nvl(y.vcydjc,y.vcydmc) 运输商,
                              * inner join mdac52 y on a.cyssdm = y.ccyddm

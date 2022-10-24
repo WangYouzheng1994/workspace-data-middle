@@ -605,10 +605,20 @@ public class DwmSptb02No8TimeFields implements Serializable {
     private String VFCZT;
 
     /**
+     * 发车站台的名字 取自SPTC34.VWLCKMC 20221024新增
+     */
+    private String VFCZT_NAME;
+
+    /**
      * 收车站台
      */
 
     private String VSCZT;
+
+    /**
+     * 收车站台的名字 取自SPTC34.VWLCKMC 20221024新增
+     */
+    private String VSCZT_NAME;
 
     /**
      * 区位号。0431、022、027、028、0757表示生产的基地（2013-10-12储运部会议上确定）

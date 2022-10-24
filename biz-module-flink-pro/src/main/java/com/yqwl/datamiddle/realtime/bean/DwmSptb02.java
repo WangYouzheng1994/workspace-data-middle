@@ -1393,6 +1393,17 @@ public class DwmSptb02 implements Serializable {
     private String BRAND_NAME;
 
     /**
+     * 收车站台的名字 取自SPTC34.VWLCKMC 20221024新增
+     */
+    private String VSCZT_NAME;
+
+
+    /**
+     * 发车站台的名字 取自SPTC34.VWLCKMC 20221024新增
+     */
+    private String VFCZT_NAME;
+
+    /**
      * 逻辑删除字段,0表示未删除,1表示已删除
      * 20220906 此字段暂时搁置添加，后续上线此字段。
      * ALTER TABLE `data_middle_flink`.`dwm_vlms_sptb02`
