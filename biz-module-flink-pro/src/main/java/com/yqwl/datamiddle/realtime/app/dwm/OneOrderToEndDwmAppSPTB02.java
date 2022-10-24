@@ -582,7 +582,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_START_PLATFORM_TIME        = VALUES(IN_START_PLATFORM_TIME), OUT_START_PLATFORM_TIME = VALUES(OUT_START_PLATFORM_TIME), " +
                         " IN_END_PLATFORM_TIME          = VALUES(IN_END_PLATFORM_TIME), UNLOAD_RAILWAY_TIME = VALUES(UNLOAD_RAILWAY_TIME),  " +
                         " BASE_CODE                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
-                        " BASE_NAME                    = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
+                        " BASE_NAME                     = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
                         " VEHICLE_NUM                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), " +
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), " +
