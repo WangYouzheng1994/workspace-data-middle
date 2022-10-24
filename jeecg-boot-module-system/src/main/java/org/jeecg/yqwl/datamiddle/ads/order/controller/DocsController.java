@@ -650,15 +650,15 @@ public class DocsController extends JeecgController<DwmVlmsOneOrderToEnd, IDwmVl
                 // startCityName  始发城市
                 SXSSFCell cell4 = row1.createCell(j++);
                 cell4.setCellValue(item.getStartCityName());
-                // endCityName   经销商目标城市
+                // targetCity   目的城市
                 SXSSFCell cell5 = row1.createCell(j++);
-                cell5.setCellValue(item.getEndCityName());
-                // vdwdm  经销商代码
+                cell5.setCellValue(item.getTargetCity());
+                // TransferStationCode  中转站代码
                 SXSSFCell cell6 = row1.createCell(j++);
-                cell6.setCellValue(item.getVdwdm());
-                //  DEALER_NAME   经销商名称
+                cell6.setCellValue(item.getTransferStationCode());
+                // TransferStationName  中转站名称
                 SXSSFCell cell7 = row1.createCell(j++);
-                cell7.setCellValue(item.getDealerName());
+                cell7.setCellValue(item.getTransferStationName());
                 // ddjrq 计划下达日期
                 if (item.getDdjrqR3() != 0 ) {
                     SXSSFCell cell8 = row1.createCell(j++);

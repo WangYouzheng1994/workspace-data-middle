@@ -2,9 +2,11 @@ package org.jeecg.yqwl.datamiddle.ads.order.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.netty.util.internal.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jeecg.common.api.vo.Result;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsDocs;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsOneOrderToEnd;
 import org.jeecg.yqwl.datamiddle.ads.order.entity.DwmVlmsSptb02;
@@ -323,6 +325,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         return countOneOrderToEndList(queryCriteria);
     }
 
+
     /**
      * DOCS count计数
      *
@@ -593,11 +596,17 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
 
             List<DwmVlmsDocs> vlmsDocs = buildNewQuery(queryCriteria, vvinGroup);
             if (CollectionUtils.isNotEmpty(vlmsDocs)) {
-                vlmsDocs.forEach(item -> {
-                    if (Objects.nonNull(item.getVysfs())){
-                        item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
-                    }
-                });
+                String subStr = queryCriteria.getSubStr();
+                if (StringUtils.isNotBlank(subStr)){
+                    dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
+                    buildMoveList(dwmVlmsDocs);
+                } else {
+                    vlmsDocs.forEach(item -> {
+                        if (Objects.nonNull(item.getVysfs())){
+                            item.setVysfs(VysfsEnums.getNameByCode(item.getVysfs()));
+                        }
+                    });
+                }
             }
             // 总数
             finalTotal = vvinGroup.stream().map(VvinGroupQuery::getDataCount).reduce(0, (n1, n2) -> n1 + n2);
@@ -612,13 +621,7 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         String subSTr = queryCriteria.getSubStr();
         if (StringUtils.isNotBlank(subSTr)){
             dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsMobileInventoryVehicleList(queryCriteria);
-            if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
-                dwmVlmsDocs.forEach(item -> {
-                    if (Objects.nonNull(item.getTrafficType())){
-                        item.setTrafficType(TrafficTypeEnums.getNameByCode(item.getTrafficType()));
-                    }
-                });
-            }
+            buildMoveList(dwmVlmsDocs);
         }else {
             dwmVlmsDocs = dwmVlmsSptb02Mapper.selectDocsList(queryCriteria);
             if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
@@ -636,6 +639,26 @@ public class DwmVlmsOneOrderToEndServiceImpl extends ServiceImpl<DwmVlmsOneOrder
         page.setTotal(finalTotal);
 
         return page;
+    }
+
+    private void buildMoveList(List<DwmVlmsDocs> dwmVlmsDocs){
+        if (CollectionUtils.isNotEmpty(dwmVlmsDocs)) {
+            dwmVlmsDocs.forEach(item -> {
+                if (Objects.nonNull(item.getTrafficType())){
+                    if (TrafficTypeEnums.SHIPPING_METHOD_G.getCode().equals(item.getTrafficType())){
+                        item.setTargetCity(item.getEndCityName());
+                        item.setTransferStationCode(item.getVdwdm());
+                        item.setTransferStationName(item.getEndCityName());
+                    }else {
+                        item.setTargetCity(item.getEndCityName());
+                        item.setTransferStationName(item.getVscztName());
+                        item.setTransferStationCode(item.getVsczt());
+                    }
+                    item.setTrafficType(TrafficTypeEnums.getNameByCode(item.getTrafficType()));
+
+                }
+            });
+        }
     }
 
     /**

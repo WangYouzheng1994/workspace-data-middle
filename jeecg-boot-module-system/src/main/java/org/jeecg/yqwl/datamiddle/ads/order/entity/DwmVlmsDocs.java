@@ -56,6 +56,18 @@ public class DwmVlmsDocs {
 	@ApiModelProperty(value = "经销商目标城市")
 	private String endCityName;
 
+	@Excel(name = "目的城市", width = 15)
+	@ApiModelProperty(value = "目的城市")
+	private String targetCity;
+
+	@Excel(name = "中转站代码", width = 15)
+	@ApiModelProperty(value = "中转站代码")
+	private String transferStationCode;
+
+	@Excel(name = "中转站名称", width = 15)
+	@ApiModelProperty(value = "中转站名称")
+	private String transferStationName;
+
 	/**经销商代码*/
 	@Excel(name = "经销商代码", width = 15)
 	@ApiModelProperty(value = "经销商代码")
@@ -144,6 +156,10 @@ public class DwmVlmsDocs {
 	 * 是否为源库数据 - 用于质量菜单详情页展示
 	 */
 	private Byte source;
+
+	private String vscztName;
+
+	private String vsczt;
 
 
 }
