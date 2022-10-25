@@ -89,10 +89,20 @@ public class OneOrderToEndDwmAppSPTB02 {
             @Override
             public void processElement(String value, Context ctx, Collector<OotdTransition> out) throws Exception {
                 DwmSptb02 dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02.class);
-                // DwmSptb02 dwmSptb02 = JSON.parseObject(value, DwmSptb02.class);
                 Long ddjrq1 = dwmSptb02.getDDJRQ();
-                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0) {
-                    if (ddjrq1 >= START && ddjrq1 <= END) {
+                // CPZDBH 前缀为 Y90 移库的运单不进入全节点 20221020 白工提
+                String cpzdbh1 = dwmSptb02.getCPZDBH();
+                // 1.要求null,""的运单可以进入
+                // 2.要求为"Y90"的不可以进入
+                // 感谢大宝亲情赞助下面的flag代码
+                Boolean flag = true;
+                if (StringUtils.isNotBlank(cpzdbh1) && cpzdbh1.length() > 3){
+                    String subCpz = cpzdbh1.substring(0,3);
+                    if ("Y90".equals(subCpz)){
+                        flag = false;
+                    }
+                }
+                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= START && ddjrq1 <= END && flag) {
                         OotdTransition ootdTransition = new OotdTransition();
                         String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
                         String vvin = dwmSptb02.getVVIN();                                      // 底盘号
@@ -146,225 +156,224 @@ public class OneOrderToEndDwmAppSPTB02 {
                         String brand_name = dwmSptb02.getBRAND_NAME();                          // 汽车品牌名字 mdac10.vppsm 20220826
                         String cqrr = dwmSptb02.getCQRR();                                      // 存储区域公司 原生字段 用作识别'分拨中心'
 
-                        if (StringUtils.isNotBlank(cjsdbh)) {
-                            ootdTransition.setCJSDBH(cjsdbh);
-                        }
-                        if (StringUtils.isNotBlank(cqrr)){
-                            ootdTransition.setCQRR(cqrr);
-                        }
-
-                        // 第一个运单的落值情况
-                        if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S") && !StringUtils.equals(cqrr,"分拨中心") ) {
-                            if (StringUtils.isNotBlank(vehicle_code)) {
-                                ootdTransition.setVEHICLE_CODE(vehicle_code);
-                            }
-                            // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
-                            if (StringUtils.isNotBlank(vehicle_name)){
-                                ootdTransition.setVEHICLE_NAME(vehicle_name);
-                            }
-                            if (StringUtils.isNotBlank(brand_name)){
-                                ootdTransition.setBRAND_NAME(brand_name);
-                            }
-                            if (StringUtils.isNotBlank(base_code)) {
-                                ootdTransition.setBASE_CODE(base_code);
-                            }
-                            if (StringUtils.isNotBlank(base_name)) {
-                                ootdTransition.setBASE_NAME(base_name);
-                            }
-                            if (ddjrq != null) {
-                                ootdTransition.setDDJRQ(ddjrq);
-                            }
-                            if (ddjrq_r3 != null){
-                                ootdTransition.setVEHICLE_PLATE_ISSUED_TIME_R3(ddjrq_r3);
-                            }
-                            if (StringUtils.isNotBlank(cjhdh)) {
-                                ootdTransition.setCJHDH(cjhdh);
-                            }
-                            if (dphscsj != null) {
-                                ootdTransition.setDPZRQ(dphscsj);
-                            }
-                            if (StringUtils.isNotBlank(vph)) {
-                                ootdTransition.setVPH(vph);
-                            }
-                            if (assign_time != null) {
-                                ootdTransition.setASSIGN_TIME(assign_time);
-                            }
-                            if (StringUtils.isNotBlank(transportName)) {
-                                ootdTransition.setASSIGN_NAME(transportName);
-                            }
-                            if (actual_out_time != null) {
-                                ootdTransition.setACTUAL_OUT_TIME(actual_out_time);
-                            }
-                            if (shipment_time != null) {
-                                ootdTransition.setSHIPMENT_TIME(shipment_time);
-                            }
-                            // 运输车车牌号
-                            if (StringUtils.isNotBlank(vjsydm)) {
-                                ootdTransition.setVJSYDM(vjsydm);
-                            }
-                            if (StringUtils.isNotBlank(start_city_name)) {
-                                // 改动: 为了避免删单造成的基地为空和始发城市为空的情况出现，默认就是只要是查到 基地/始发城市 为空就从当前的运单去取值 赋值，除了末端单子以外。 20221024 白
-                                ootdTransition.setSTART_CITY_NAME(start_city_name);
-                            }
-                            if (StringUtils.isNotBlank(end_city_name)) {
-                                ootdTransition.setEND_CITY_NAME(end_city_name);
-                            }
-                            // 经销商代码
-                            if (StringUtils.isNotBlank(vdwdm)) {
-                                ootdTransition.setVDWDM(vdwdm);
-                            }
-                            // 经销商名称: DWD层sptb02.vdwdm  取自 mdac22.CJXSDM 优先去经销商简称 jxsjc 如果为空,取 jxsmc
-                            if (StringUtils.isNotBlank(dealer_name)) {
-                                ootdTransition.setDEALER_NAME(dealer_name);
-                            }
-                            if (StringUtils.isNotBlank(host_com_code)) {
-                                ootdTransition.setBRAND(host_com_code);
-                            }
-                            // 轿运车乘位数 : mdac33.NCYDE 承运定额  使用sptb02.vyscdm关联 mdac33.vyscdm
-                            if (StringUtils.isNotBlank(vyscdm)) {
-                                String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
-                                JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
-                                if (mdac33 != null) {
-                                    ootdTransition.setJYCCWS(mdac33.getInteger("NCYDE"));
-                                }
-                            }
-                            // Y号 (配载单号) 20220712新增字段
-                            if (StringUtils.isNotBlank(cpzdbh)){
-                                ootdTransition.setCPZDBH(cpzdbh);
-                            }
-                            // 末端配送-DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
-                            // 在此处也更新的Dcs到货时间的原因是: 有些距离短不值得再下一个末端配送的单子的时候,但是还是会送到经销商手中,就会在S/T之间更新这个时间。
-                            if (dtvsdhsj !=null && !StringUtils.equals("J",vysfs)){
-                                ootdTransition.setDTVSDHSJ(dtvsdhsj);
-                            }
-
-                        }
-                        // 同城异地赋值
-                        if (type_tc != null){
-                            ootdTransition.setTYPE_TC(type_tc);
-                        }
-                        // 干线公路运单的起运时间
-                        if ("G".equals(traffic_type) && "T1".equals(highwayWarehouseType) && !StringUtils.equals(cqrr,"分拨中心")){
-                            if (shipment_time != null) {
-                                ootdTransition.setSHIPMENT_G_TIME(shipment_time);
-                            }
-                            ootdTransition.setTYPE_G(1);
-                        }
-
-                        //=====================================铁水运单处理=====================================================//
-                        if (StringUtils.isNotBlank(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
-                            // 铁路运输方式
-                            if ("T".equals(traffic_type) || "L1".equals(traffic_type)) {
-                                // 开始站台仓库名称
-                                if (StringUtils.isNotBlank(start_warehouse_name)) {
-                                    ootdTransition.setSTART_PLATFORM_NAME(start_warehouse_name);
-                                }
-                                // 到达站台仓库名称
-                                if (StringUtils.isNotBlank(end_warehouse_name)) {
-                                    ootdTransition.setEND_PLATFORM_NAME(end_warehouse_name);
-                                }
-                                // 铁路的入开始站台时间
-                                if (in_start_platform_time != null) {
-                                    ootdTransition.setIN_START_PLATFORM_TIME(in_start_platform_time);
-                                }
-                                // 铁路的出开始站台时间 + 兜底 默认取的是物流溯源节点来更新
-                                if (out_start_platform_time != null && out_start_platform_time != 0) {
-                                    ootdTransition.setOUT_START_PLATFORM_TIME(out_start_platform_time);
-                                } else if (dsjcfsj != null){
-                                    // 兜底: 取的是sptb02的实际出发时间
-                                    ootdTransition.setOUT_START_PLATFORM_TIME(dsjcfsj);
-                                }
-                                // 铁路的入目的站台时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
-                                if (in_end_platform_time != null && in_end_platform_time!=0) {
-                                    ootdTransition.setIN_END_PLATFORM_TIME(dgpsdhsj);
-                                }
-                                // 中铁卸车时间 + 兜底  默认取的是物流溯源节点来更新
-                                if (unload_railway_time != null && unload_railway_time != 0){
-                                    ootdTransition.setUNLOAD_RAILWAY_TIME(unload_railway_time);
-                                }else if (dztxcsj != null ){
-                                    // 兜底: 取的是sptb02的DZTXCSJ (中铁卸车时间)
-                                    ootdTransition.setUNLOAD_RAILWAY_TIME(dztxcsj);
-                                }
-                                ootdTransition.setTYPE_T(1);
-                            }
-                            // 水路运输方式
-                            if ("S".equals(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
-                                // 开始站台仓库名称
-                                if (StringUtils.isNotBlank(start_warehouse_name)) {
-                                    ootdTransition.setSTART_WATERWAY_NAME(start_warehouse_name);
-                                }
-                                // 到达站台仓库名称
-                                if (StringUtils.isNotBlank(end_warehouse_name)) {
-                                    ootdTransition.setEND_WATERWAY_NAME(end_warehouse_name);
-                                }
-                                // 水路的入开始港口时间
-                                if (in_start_waterway_time != null) {
-                                    ootdTransition.setIN_START_WATERWAY_TIME(in_start_waterway_time);
-                                }
-                                // 水路的出开始港口时间 + 兜底 默认取的是物流溯源节点来更新
-                                if (end_start_waterway_time != null && end_start_waterway_time !=0) {
-                                    ootdTransition.setEND_START_WATERWAY_TIME(end_start_waterway_time);
-                                } else if(dsjcfsj != null){
-                                    // 兜底: 取的是sptb02的实际出发时间
-                                    ootdTransition.setEND_START_WATERWAY_TIME(dsjcfsj);
-                                }
-                                // 水路的入目的港口时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
-                                if (in_end_waterway_time != null && in_end_waterway_time != 0) {
-                                    ootdTransition.setIN_END_WATERWAY_TIME(dgpsdhsj);
-                                }
-                                // 水路的卸船时间
-                                if (unload_ship_time != null) {
-                                    ootdTransition.setUNLOAD_SHIP_TIME(unload_ship_time);
-                                }
-                                ootdTransition.setTYPE_S(1);
-                            }
-                        }
-
-                        //====================================末端配送==============================================//
-                        if ("G".equals(traffic_type) && "T2".equals(highwayWarehouseType) && StringUtils.isNotBlank(cjsdbh) || StringUtils.equals(cqrr,"分拨中心")) {
-
-                            // 配板时间
-                            ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());
-                            // 出库时间
-                            ootdTransition.setOUT_DISTRIBUTE_TIME(dwmSptb02.getACTUAL_OUT_TIME());
-                            // 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
-                            ootdTransition.setDISTRIBUTE_CPZDBH(dwmSptb02.getCPZDBH());
-                            // 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
-                            ootdTransition.setDISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3(dwmSptb02.getDDJRQ_R3());
-                            // 指派时间
-                            ootdTransition.setDISTRIBUTE_ASSIGN_TIME(dwmSptb02.getASSIGN_TIME());
-                            // 承运商名称
-                            ootdTransition.setDISTRIBUTE_CARRIER_NAME(dwmSptb02.getTRANSPORT_NAME());
-                            // 承运车车牌号
-                            ootdTransition.setDISTRIBUTE_VEHICLE_NO(dwmSptb02.getVJSYDM());
-                            // 起运时间
-                            ootdTransition.setDISTRIBUTE_SHIPMENT_TIME(dwmSptb02.getSHIPMENT_TIME());
-                            // 分拨中心 轿运车位数
-                            if (StringUtils.isNotBlank(vyscdm)) {
-                                String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
-                                JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
-                                if (mdac33 != null) {
-                                    ootdTransition.setDISTRIBUTE_VEHICLE_NUM(mdac33.getInteger("NCYDE"));
-                                }
-                            }
-                            // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
-                            if (dtvsdhsj !=null && !StringUtils.equals("J",vysfs)){
-                                ootdTransition.setDTVSDHSJ(dtvsdhsj);
-                            }
-                            ootdTransition.setTYPE_G(1);
-                        }
-                        // 打点到货
-                        if (dot_site_time != null && dot_site_time != 0) {
-                            ootdTransition.setDOT_SITE_TIME(dwmSptb02.getDOT_SITE_TIME());
-                        }
-                        // 最终到货时间
-                        if (final_site_time != null && final_site_time != 0 ) {
-                            ootdTransition.setFINAL_SITE_TIME(dwmSptb02.getFINAL_SITE_TIME());
-                        }
-                        // 对象null值进行默认值赋值
-                        OotdTransition bean = JsonPartUtil.getBean(ootdTransition);
-                        out.collect(bean);
+                    if (StringUtils.isNotBlank(cjsdbh)) {
+                        ootdTransition.setCJSDBH(cjsdbh);
                     }
+                    if (StringUtils.isNotBlank(cqrr)) {
+                        ootdTransition.setCQRR(cqrr);
+                    }
+
+                    // 第一个运单的落值情况
+                    if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S") && !StringUtils.equals(cqrr, "分拨中心")) {
+                        if (StringUtils.isNotBlank(vehicle_code)) {
+                            ootdTransition.setVEHICLE_CODE(vehicle_code);
+                        }
+                        // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
+                        if (StringUtils.isNotBlank(vehicle_name)) {
+                            ootdTransition.setVEHICLE_NAME(vehicle_name);
+                        }
+                        if (StringUtils.isNotBlank(brand_name)) {
+                            ootdTransition.setBRAND_NAME(brand_name);
+                        }
+                        if (StringUtils.isNotBlank(base_code)) {
+                            ootdTransition.setBASE_CODE(base_code);
+                        }
+                        if (StringUtils.isNotBlank(base_name)) {
+                            ootdTransition.setBASE_NAME(base_name);
+                        }
+                        if (ddjrq != null) {
+                            ootdTransition.setDDJRQ(ddjrq);
+                        }
+                        if (ddjrq_r3 != null) {
+                            ootdTransition.setVEHICLE_PLATE_ISSUED_TIME_R3(ddjrq_r3);
+                        }
+                        if (StringUtils.isNotBlank(cjhdh)) {
+                            ootdTransition.setCJHDH(cjhdh);
+                        }
+                        if (dphscsj != null) {
+                            ootdTransition.setDPZRQ(dphscsj);
+                        }
+                        if (StringUtils.isNotBlank(vph)) {
+                            ootdTransition.setVPH(vph);
+                        }
+                        if (assign_time != null) {
+                            ootdTransition.setASSIGN_TIME(assign_time);
+                        }
+                        if (StringUtils.isNotBlank(transportName)) {
+                            ootdTransition.setASSIGN_NAME(transportName);
+                        }
+                        if (actual_out_time != null) {
+                            ootdTransition.setACTUAL_OUT_TIME(actual_out_time);
+                        }
+                        if (shipment_time != null) {
+                            ootdTransition.setSHIPMENT_TIME(shipment_time);
+                        }
+                        // 运输车车牌号
+                        if (StringUtils.isNotBlank(vjsydm)) {
+                            ootdTransition.setVJSYDM(vjsydm);
+                        }
+                        if (StringUtils.isNotBlank(start_city_name)) {
+                            // 改动: 为了避免删单造成的基地为空和始发城市为空的情况出现，默认就是只要是查到 基地/始发城市 为空就从当前的运单去取值 赋值，除了末端单子以外。 20221024 白
+                            ootdTransition.setSTART_CITY_NAME(start_city_name);
+                        }
+                        if (StringUtils.isNotBlank(end_city_name)) {
+                            ootdTransition.setEND_CITY_NAME(end_city_name);
+                        }
+                        // 经销商代码
+                        if (StringUtils.isNotBlank(vdwdm)) {
+                            ootdTransition.setVDWDM(vdwdm);
+                        }
+                        // 经销商名称: DWD层sptb02.vdwdm  取自 mdac22.CJXSDM 优先去经销商简称 jxsjc 如果为空,取 jxsmc
+                        if (StringUtils.isNotBlank(dealer_name)) {
+                            ootdTransition.setDEALER_NAME(dealer_name);
+                        }
+                        if (StringUtils.isNotBlank(host_com_code)) {
+                            ootdTransition.setBRAND(host_com_code);
+                        }
+                        // 轿运车乘位数 : mdac33.NCYDE 承运定额  使用sptb02.vyscdm关联 mdac33.vyscdm
+                        if (StringUtils.isNotBlank(vyscdm)) {
+                            String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
+                            JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
+                            if (mdac33 != null) {
+                                ootdTransition.setJYCCWS(mdac33.getInteger("NCYDE"));
+                            }
+                        }
+                        // Y号 (配载单号) 20220712新增字段
+                        if (StringUtils.isNotBlank(cpzdbh)) {
+                            ootdTransition.setCPZDBH(cpzdbh);
+                        }
+                        // 末端配送-DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
+                        // 在此处也更新的Dcs到货时间的原因是: 有些距离短不值得再下一个末端配送的单子的时候,但是还是会送到经销商手中,就会在S/T之间更新这个时间。
+                        if (dtvsdhsj != null && !StringUtils.equals("J", vysfs)) {
+                            ootdTransition.setDTVSDHSJ(dtvsdhsj);
+                        }
+
+                    }
+                    // 同城异地赋值
+                    if (type_tc != null) {
+                        ootdTransition.setTYPE_TC(type_tc);
+                    }
+                    // 干线公路运单的起运时间
+                    if ("G".equals(traffic_type) && "T1".equals(highwayWarehouseType) && !StringUtils.equals(cqrr, "分拨中心")) {
+                        if (shipment_time != null) {
+                            ootdTransition.setSHIPMENT_G_TIME(shipment_time);
+                        }
+                        ootdTransition.setTYPE_G(1);
+                    }
+
+                    //=====================================铁水运单处理=====================================================//
+                    if (StringUtils.isNotBlank(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
+                        // 铁路运输方式
+                        if ("T".equals(traffic_type) || "L1".equals(traffic_type)) {
+                            // 开始站台仓库名称
+                            if (StringUtils.isNotBlank(start_warehouse_name)) {
+                                ootdTransition.setSTART_PLATFORM_NAME(start_warehouse_name);
+                            }
+                            // 到达站台仓库名称
+                            if (StringUtils.isNotBlank(end_warehouse_name)) {
+                                ootdTransition.setEND_PLATFORM_NAME(end_warehouse_name);
+                            }
+                            // 铁路的入开始站台时间
+                            if (in_start_platform_time != null) {
+                                ootdTransition.setIN_START_PLATFORM_TIME(in_start_platform_time);
+                            }
+                            // 铁路的出开始站台时间 + 兜底 默认取的是物流溯源节点来更新
+                            if (out_start_platform_time != null && out_start_platform_time != 0) {
+                                ootdTransition.setOUT_START_PLATFORM_TIME(out_start_platform_time);
+                            } else if (dsjcfsj != null) {
+                                // 兜底: 取的是sptb02的实际出发时间
+                                ootdTransition.setOUT_START_PLATFORM_TIME(dsjcfsj);
+                            }
+                            // 铁路的入目的站台时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
+                            if (in_end_platform_time != null && in_end_platform_time != 0) {
+                                ootdTransition.setIN_END_PLATFORM_TIME(dgpsdhsj);
+                            }
+                            // 中铁卸车时间 + 兜底  默认取的是物流溯源节点来更新
+                            if (unload_railway_time != null && unload_railway_time != 0) {
+                                ootdTransition.setUNLOAD_RAILWAY_TIME(unload_railway_time);
+                            } else if (dztxcsj != null) {
+                                // 兜底: 取的是sptb02的DZTXCSJ (中铁卸车时间)
+                                ootdTransition.setUNLOAD_RAILWAY_TIME(dztxcsj);
+                            }
+                            ootdTransition.setTYPE_T(1);
+                        }
+                        // 水路运输方式
+                        if ("S".equals(traffic_type) && StringUtils.isNotBlank(cjsdbh)) {
+                            // 开始站台仓库名称
+                            if (StringUtils.isNotBlank(start_warehouse_name)) {
+                                ootdTransition.setSTART_WATERWAY_NAME(start_warehouse_name);
+                            }
+                            // 到达站台仓库名称
+                            if (StringUtils.isNotBlank(end_warehouse_name)) {
+                                ootdTransition.setEND_WATERWAY_NAME(end_warehouse_name);
+                            }
+                            // 水路的入开始港口时间
+                            if (in_start_waterway_time != null) {
+                                ootdTransition.setIN_START_WATERWAY_TIME(in_start_waterway_time);
+                            }
+                            // 水路的出开始港口时间 + 兜底 默认取的是物流溯源节点来更新
+                            if (end_start_waterway_time != null && end_start_waterway_time != 0) {
+                                ootdTransition.setEND_START_WATERWAY_TIME(end_start_waterway_time);
+                            } else if (dsjcfsj != null) {
+                                // 兜底: 取的是sptb02的实际出发时间
+                                ootdTransition.setEND_START_WATERWAY_TIME(dsjcfsj);
+                            }
+                            // 水路的入目的港口时间 取的是sptb02的gps到货时间 20220728更改: 由溯源改为运单的dgpsdhsj
+                            if (in_end_waterway_time != null && in_end_waterway_time != 0) {
+                                ootdTransition.setIN_END_WATERWAY_TIME(dgpsdhsj);
+                            }
+                            // 水路的卸船时间
+                            if (unload_ship_time != null) {
+                                ootdTransition.setUNLOAD_SHIP_TIME(unload_ship_time);
+                            }
+                            ootdTransition.setTYPE_S(1);
+                        }
+                    }
+
+                    //====================================末端配送==============================================//
+                    if ("G".equals(traffic_type) && "T2".equals(highwayWarehouseType) && StringUtils.isNotBlank(cjsdbh) || StringUtils.equals(cqrr, "分拨中心")) {
+
+                        // 配板时间
+                        ootdTransition.setDISTRIBUTE_BOARD_TIME(dwmSptb02.getDPHSCSJ());
+                        // 出库时间
+                        ootdTransition.setOUT_DISTRIBUTE_TIME(dwmSptb02.getACTUAL_OUT_TIME());
+                        // 末端分拨中心 配载单编号 sptb02.cpzdbh 2022.10.10新增
+                        ootdTransition.setDISTRIBUTE_CPZDBH(dwmSptb02.getCPZDBH());
+                        // 末端分拨中心 计划下达时间 SPTB01C.DDJRQ 2022.10.10新增
+                        ootdTransition.setDISTRIBUTE_VEHICLE_PLATE_ISSUED_TIME_R3(dwmSptb02.getDDJRQ_R3());
+                        // 指派时间
+                        ootdTransition.setDISTRIBUTE_ASSIGN_TIME(dwmSptb02.getASSIGN_TIME());
+                        // 承运商名称
+                        ootdTransition.setDISTRIBUTE_CARRIER_NAME(dwmSptb02.getTRANSPORT_NAME());
+                        // 承运车车牌号
+                        ootdTransition.setDISTRIBUTE_VEHICLE_NO(dwmSptb02.getVJSYDM());
+                        // 起运时间
+                        ootdTransition.setDISTRIBUTE_SHIPMENT_TIME(dwmSptb02.getSHIPMENT_TIME());
+                        // 分拨中心 轿运车位数
+                        if (StringUtils.isNotBlank(vyscdm)) {
+                            String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
+                            JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
+                            if (mdac33 != null) {
+                                ootdTransition.setDISTRIBUTE_VEHICLE_NUM(mdac33.getInteger("NCYDE"));
+                            }
+                        }
+                        // DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
+                        if (dtvsdhsj != null && !StringUtils.equals("J", vysfs)) {
+                            ootdTransition.setDTVSDHSJ(dtvsdhsj);
+                        }
+                        ootdTransition.setTYPE_G(1);
+                    }
+                    // 打点到货
+                    if (dot_site_time != null && dot_site_time != 0) {
+                        ootdTransition.setDOT_SITE_TIME(dwmSptb02.getDOT_SITE_TIME());
+                    }
+                    // 最终到货时间
+                    if (final_site_time != null && final_site_time != 0) {
+                        ootdTransition.setFINAL_SITE_TIME(dwmSptb02.getFINAL_SITE_TIME());
+                    }
+                    // 对象null值进行默认值赋值
+                    OotdTransition bean = JsonPartUtil.getBean(ootdTransition);
+                    out.collect(bean);
                 }
             }
         }).uid("OneOrderToEndDwmAppSPTB02UpdateProcess").name("OneOrderToEndDwmAppSPTB02UpdateProcess");
@@ -582,7 +591,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_START_PLATFORM_TIME        = VALUES(IN_START_PLATFORM_TIME), OUT_START_PLATFORM_TIME = VALUES(OUT_START_PLATFORM_TIME), " +
                         " IN_END_PLATFORM_TIME          = VALUES(IN_END_PLATFORM_TIME), UNLOAD_RAILWAY_TIME = VALUES(UNLOAD_RAILWAY_TIME),  " +
                         " BASE_CODE                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
-                        " BASE_NAME                     = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
+                        " BASE_NAME                    = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
                         " VEHICLE_NUM                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), " +
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), " +
@@ -706,7 +715,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         .withMaxRetries(5)
                         .build(),
                 PropertiesUtil.getMysqlJDBCConnection()
-            )).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlT").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlT");
+        )).uid("OneOrderToEndDwmAppSPTB02AddSinkMysqlT").name("OneOrderToEndDwmAppSPTB02AddSinkMysqlT");
 
         //--------------------------------------------------------------------水路运单插入------------------------------------------------------------------------------------------------//
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterS = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
