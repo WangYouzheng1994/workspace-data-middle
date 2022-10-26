@@ -12,7 +12,8 @@ import java.util.Properties;
  */
 public class KafkaProduceUtil {
     //public static final String KAFKA_SERVER = "10.123.175.195:9092,10.123.175.196:9092,10.123.175.197:9092";
-    public static final String KAFKA_SERVER = "192.168.3.195:9092,192.168.3.96:9092,192.168.3.97:9092";
+    //public static final String KAFKA_SERVER = "192.168.3.195:9092,192.168.3.96:9092,192.168.3.97:9092";
+    public static final String KAFKA_SERVER =PropertiesUtil.getProps().getStr("kafka.hostname");
     private static final String DEFAULT_TOPIC = "DEFAULT_DATA";
 
     /**
@@ -23,6 +24,7 @@ public class KafkaProduceUtil {
      * @return
      */
     public static <K, T> KafkaProducer<K, T> getKafkaProductBySchema(String topic) {
+        //String KAFKA_SERVER = PropertiesUtil.getProps().getStr("kafka.hostname");
         Properties props = new Properties();
         props.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_SERVER);
         props.setProperty(ProducerConfig.RETRIES_CONFIG, "5");
