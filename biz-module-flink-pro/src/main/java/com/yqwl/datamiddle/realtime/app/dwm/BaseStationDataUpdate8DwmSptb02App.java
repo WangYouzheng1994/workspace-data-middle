@@ -49,7 +49,7 @@ public class BaseStationDataUpdate8DwmSptb02App {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA)
                 .setGroupId(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_GROUP_1)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 

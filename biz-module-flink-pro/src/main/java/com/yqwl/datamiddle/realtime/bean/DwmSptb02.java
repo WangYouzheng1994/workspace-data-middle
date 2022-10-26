@@ -1404,6 +1404,11 @@ public class DwmSptb02 implements Serializable {
     private String VFCZT_NAME;
 
     /**
+     * 集港的 目的入港入站时间  集港集站计划(vsyfs为J)的显示发车站台(vfczt)的溯源入库时间 20221026 新增
+     */
+    private Long IN_END_J_TIME;
+
+    /**
      * 逻辑删除字段,0表示未删除,1表示已删除
      * 20220906 此字段暂时搁置添加，后续上线此字段。
      * ALTER TABLE `data_middle_flink`.`dwm_vlms_sptb02`
