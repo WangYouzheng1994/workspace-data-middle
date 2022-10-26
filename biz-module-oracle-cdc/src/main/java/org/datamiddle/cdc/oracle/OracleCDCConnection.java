@@ -1,11 +1,14 @@
 package org.datamiddle.cdc.oracle;
 
+import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.datamiddle.cdc.oracle.bean.LogFile;
 import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.RecordLog;
@@ -18,7 +21,10 @@ import org.datamiddle.cdc.oracle.constants.ConstantValue;
 import java.io.*;
 import java.math.BigInteger;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +70,8 @@ public class OracleCDCConnection {
     private int identification=0;
     //V$LOGMNR_CONTENTS 的唯一值
     private String  rs_id;
-
+    //记录当前要执行的日志
+    private LogFile LogFileExecute=null;
     public OracleCDCConnection() {
     }
 
@@ -354,12 +361,15 @@ public class OracleCDCConnection {
             // break;
         } else {
             // 找到最小的nextSCN 结束偏移量
-            BigInteger minNextScn =
-                    tempList.stream()
-                            .sorted(Comparator.comparing(LogFile::getNextChange))
-                            .collect(Collectors.toList())
-                            .get(0)
-                            .getNextChange();
+            BigInteger minNextScn=null;
+            //最小偏移量的数据
+            LogFile logFile = tempList.stream()
+                    .sorted(Comparator.comparing(LogFile::getNextChange))
+                    .collect(Collectors.toList())
+                    .get(0);
+            //赋值
+            LogFileExecute = logFile;
+            minNextScn = logFile.getNextChange();
 
             for (LogFile logFile1 : tempList) {
                 if (logFile1.getFirstChange().compareTo(minNextScn) < 0) {
@@ -384,7 +394,7 @@ public class OracleCDCConnection {
         if (CollectionUtils.isEmpty(logFiles)) {
             return Pair.of(null, loadRedoLog);
         }
-
+        //writeTxtFG("读取日志："+LogFileExecute.getFirstChange()+"|"+LogFileExecute.getNextChange()+"|"+LogFileExecute.getFileName(),"D://cdc/aaa.txt");
         log.info(
                 "getEndScn success,startScn:{},endScn:{}, loadRedoLog:{}",
                 startScn,
@@ -403,17 +413,16 @@ public class OracleCDCConnection {
     public String buildSelectSql(
             String listenerOptions, String listenerTables, boolean isCdb) {
         StringBuilder sqlBuilder = new StringBuilder(SqlUtil.SQL_SELECT_DATA);
+        sqlBuilder.append(" WHERE ");
+        if (StringUtils.isNotEmpty(listenerTables)) {
+            sqlBuilder.append("  ( ").append(buildSchemaTableFilter(listenerTables, isCdb));
+        } else {
+            sqlBuilder.append("  ( ").append(buildExcludeSchemaFilter());
+        }
         //判断异常类型
         if(this.identification==4||this.identification==1){
             sqlBuilder.append(" and ").append(" rs_id > '"+this.rs_id+"'");
         }
-
-        if (StringUtils.isNotEmpty(listenerTables)) {
-            sqlBuilder.append(" and ( ").append(buildSchemaTableFilter(listenerTables, isCdb));
-        } else {
-            sqlBuilder.append(" and ( ").append(buildExcludeSchemaFilter());
-        }
-
         if (StringUtils.isNotEmpty(listenerOptions)) {
             sqlBuilder.append(" and ").append(buildOperationFilter(listenerOptions));
         }
@@ -539,7 +548,7 @@ public class OracleCDCConnection {
             if (autoaddLog) {
                 startSql = SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG;
             } else {
-                startSql = SqlUtil.SQL_START_LOGMINER;
+                startSql = SqlUtil.SQL_LOGMINER_DEBEZIUM;
             }
 
             // 重置，清空preparestatement，重新简历logminer连接
@@ -551,6 +560,7 @@ public class OracleCDCConnection {
             } else {
                 logMinerStartStmt.setString(1, this.startScn.toString());
                 logMinerStartStmt.setString(2, this.endScn.toString());
+                //logMinerStartStmt.setString(3, this.LogFileExecute.getFileName());
             }
 
             logMinerStartStmt.execute();
@@ -607,8 +617,8 @@ public class OracleCDCConnection {
 
             // 3000一批次。
             logMinerSelectStmt.setFetchSize(10000);
-            logMinerSelectStmt.setString(1, startScn.toString());
-            logMinerSelectStmt.setString(2, endScn.toString());
+            //logMinerSelectStmt.setString(1, startScn.toString());
+            //logMinerSelectStmt.setString(2, endScn.toString());
             long before = System.currentTimeMillis();
            /* if(("83743364".equals(startScn.toString()))){
                 //scn大于固定值
@@ -675,6 +685,9 @@ public class OracleCDCConnection {
             }
             BigInteger scn = new BigInteger(logMinerData.getString(LogminerKeyConstants.KEY_SCN));
             String operation = logMinerData.getString(LogminerKeyConstants.KEY_OPERATION);
+            if(StringUtils.isNoneBlank(operation)){
+                operation=operation.toLowerCase();
+            }
             String RS_ID = logMinerData.getString(LogminerKeyConstants.RS_ID);
             int operationCode = logMinerData.getInt(LogminerKeyConstants.KEY_OPERATION_CODE);
             String tableName = logMinerData.getString(LogminerKeyConstants.KEY_TABLE_NAME);
@@ -1027,5 +1040,93 @@ public class OracleCDCConnection {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+   //初始化init All
+    public void initOracleAllDataConnect(Connection connection, BigInteger currentMaxScn, KafkaProducer<Object, Object> producer,String KafkaTopicName,String schema,String tableName) {
+        PreparedStatement preparedStatement = null;
+        ResultSet rs= null;
+        try {
+            String sql = "SELECT * FROM "+tableName+" AS OF SCN "+currentMaxScn;
+            preparedStatement = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            preparedStatement.setFetchSize(10000);
+            //增加参数
+            //preparedStatement.setString(1,tableName);
+            //preparedStatement.setInt(2,currentMaxScn.intValue());
+            //执行
+            rs= preparedStatement.executeQuery();
+            //检索列名列表
+            ResultSetMetaData rsMetaData = rs.getMetaData();
+            int count = rsMetaData.getColumnCount();
+            //封装数据，如果是date类型额外处理
+            List<String>  columnList = new ArrayList<>();
+            List<String>  typeList = new ArrayList<>();
+            for(int i = 1; i<=count; i++) {
+                typeList.add(rsMetaData.getColumnTypeName(i));
+                columnList.add(rsMetaData.getColumnName(i));
+            }
+            //取数据
+            //int j=0;
+            Map<String,String> map = null;
+            Map<String,Object> kafkaData = new HashMap<>();
+            while(rs.next()) {
+                //System.out.println(j++);
+                map= new HashMap<>();
+                //遍历拼接数据
+                for (int i =0;i<columnList.size();i++) {
+                    String colum = columnList.get(i);
+                    String value = rs.getString(colum);
+                    //判断如果是日期类型
+                    if("DATE".equals(typeList.get(i))){
+                        //格式化时间
+                        if(StringUtils.isNoneBlank(value))
+                         value = dateToStamp(value);
+                    }
+                    if("TIMESTAMP".equals(typeList.get(i))){
+                        //格式化时间
+                        if(StringUtils.isNoneBlank(value))
+                            value = dateToStamp(value);
+                    }
+                    map.put(colum,value);
+                }
+                //封装kafkaDate数据
+                kafkaData.put("after",map);
+                kafkaData.put("before","");
+                kafkaData.put("database",schema);
+                kafkaData.put("scn",currentMaxScn);
+                kafkaData.put("tableName",tableName.split("\\.")[1]);
+                kafkaData.put("ts",System.currentTimeMillis());
+                kafkaData.put("type","insert");
+                //json格式输出数据
+                String kafkaStr = JSON.toJSONString(kafkaData);
+                //推送kafka
+                producer.send(new ProducerRecord<>(KafkaTopicName, kafkaStr));
+            }
+        } catch (SQLException e) {
+            log.info("初始化数据ing失败");
+            e.printStackTrace();
+        }finally {
+            try {
+                preparedStatement.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*
+     * 将时间转换为时间戳
+     */
+    public static String dateToStamp(String s) {
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = simpleDateFormat.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long ts = date.getTime();
+        res = String.valueOf(ts);
+        return res;
     }
 }

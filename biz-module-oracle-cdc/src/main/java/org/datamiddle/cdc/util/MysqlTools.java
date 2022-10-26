@@ -1,13 +1,20 @@
 package org.datamiddle.cdc.util;
 
+import cn.hutool.setting.dialect.Props;
 import org.datamiddle.cdc.oracle.bean.MemcacheConfEntity;
+import org.jeecgframework.boot.DateUtil;
+import org.jeecgframework.boot.IdWorker;
 
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -23,14 +30,15 @@ public class MysqlTools {
         MemcacheConfEntity memcacheConfEntity = null;
         try {
             //1.读取配置文件中的4个基本信息
-            InputStream inputStream = MysqlTools.class.getClassLoader().getResourceAsStream("application.properties");
+           /* InputStream inputStream = MysqlTools.class.getClassLoader().getResourceAsStream("application.properties");
             Properties properties = new Properties();
-            properties.load(inputStream);
+            properties.load(inputStream);*/
+            Props props = PropertiesUtil.getProps();
 
-            String user = properties.getProperty("user");
-            String password = properties.getProperty("password");
-            String url = properties.getProperty("url");
-            String driverClass = properties.getProperty("driverClass");
+            String user = props.getStr("user");
+            String password = props.getStr("password");
+            String url = props.getStr("url");
+            String driverClass = props.getStr("driverClass");
             //2.加载驱动
             Class.forName(driverClass);
             //3.获取连接
@@ -83,7 +91,49 @@ public class MysqlTools {
         }
         //  MemcacheConfEntity connection = MysqlTools.getConnection();
        // System.out.println(connection.toString());
+        //long time = new Date().getTime();
+        //System.out.println(time);
+        //System.out.println(System.currentTimeMillis());
+        System.out.println(dateToStamp("1665309008610"));
+        System.out.println(dateToStamp("1665313048135"));
 
+        System.out.println(dateToStamp("1665316190522"));
+        System.out.println(dateToStamp2("2021-12-19 18:07:06"));
+
+        //IdWorker idWorker = new IdWorker(1, 1, 1);
+        /*BigInteger currentStartScn =BigInteger.valueOf(16948905185114l);
+        int scnScope = 100000;
+        BigInteger endScn = BigInteger.valueOf(16948905194023l);
+        BigInteger subtract = endScn.subtract(currentStartScn);
+        //每次查询10w的数据量
+        BigInteger divide = subtract.divide(BigInteger.valueOf(scnScope));
+        System.out.println(divide);
+        BigInteger remainder = endScn.remainder(currentStartScn);
+        System.out.println(remainder);*/
+    }
+    public static String dateToStamp(String s) throws ParseException {
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        long lt = new Long(s);
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+    /*
+     * 将时间转换为时间戳
+     */
+    public static String dateToStamp2(String s) {
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = simpleDateFormat.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long ts = date.getTime();
+        res = String.valueOf(ts);
+        return res;
     }
 
 }

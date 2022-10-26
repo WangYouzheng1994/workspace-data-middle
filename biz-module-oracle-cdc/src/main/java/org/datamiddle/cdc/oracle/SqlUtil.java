@@ -34,7 +34,10 @@ public class SqlUtil {
 
     // 获取当前的SCN偏移量
     public static final String SQL_GET_CURRENT_SCN = "select min(CURRENT_SCN) CURRENT_SCN from gv$database";
-
+    //关闭logminer
+    static final String END_LOGMNR = "BEGIN SYS.DBMS_LOGMNR.END_LOGMNR(); END;";
+    //获取当前scn之前的闪回数据
+    public static final String feedbackSearchSql  ="SELECT * FROM ? AS OF SCN  ?";
     // ------------------- 查询log ------
 
     public static final String SQL_QUERY_LOG_FILE =
@@ -135,10 +138,10 @@ public class SqlUtil {
                     + "    csf,\n"
                     +"     rs_id\n"
                     + "FROM\n"
-                    + "    v$logmnr_contents\n"
-                    + "WHERE\n"
-                    + "    scn >= ? \n"
-                    + "    AND scn < ? \n";
+                    + "    v$logmnr_contents\n";
+                   // + "WHERE\n";
+                    //+ "    scn >= ? \n"
+                   // + "    AND scn < ? \n";
 
     /** 加载包含startSCN和endSCN之间日志的日志文件 */
     public static final String SQL_START_LOGMINER =
@@ -180,7 +183,40 @@ public class SqlUtil {
                     + "  SYS.DBMS_LOGMNR.start_logmnr(       options =>          SYS.DBMS_LOGMNR.skip_corruption        + SYS.DBMS_LOGMNR.no_sql_delimiter        + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n"
                     + "  + SYS.DBMS_LOGMNR.dict_from_online_catalog    );\n"
                     + "   end;";
-
+    //根据SCN 开启start_logmnr
+    public static final String SQL_START_LOGMINE_BYSCN =
+            " DECLARE\n" +
+                    "  start_scn   NUMBER := ?;\n" +
+                    "  end_Scn   NUMBER := ?;\n" +
+                    "  logfileName varchar2(2000) := ?;\n" +
+                    "  begin\n" +
+                    "    SYS.DBMS_LOGMNR.add_logfile(logfileName, SYS.DBMS_LOGMNR.new);\n" +
+                    "  \n" +
+                    "    SYS.DBMS_LOGMNR.start_logmnr(\n" +
+                    "            startScn =>start_scn,\n" +
+                    "            endScn=> end_Scn,\n" +
+                    "              options =>\n" +
+                    "                     SYS.DBMS_LOGMNR.skip_corruption\n" +
+                    "                    + SYS.DBMS_LOGMNR.no_sql_delimiter                 \n" +
+                    "                    + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n" +
+                    "                    + SYS.DBMS_LOGMNR.dict_from_online_catalog\n" +
+                    "             );\n" +
+                    "           end;";
+    //红帽开启逻辑
+    public static final String SQL_LOGMINER_DEBEZIUM=" DECLARE\n" +
+            "  start_scn   NUMBER := ?;\n" +
+            "  end_Scn   NUMBER := ? ;\n" +
+            "  begin\n" +
+            "  \n" +
+            "    SYS.DBMS_LOGMNR.start_logmnr(\n" +
+            "            startScn =>start_scn,\n" +
+            "            endScn=> end_Scn,\n" +
+            "              options =>\n" +
+            "                    SYS.DBMS_LOGMNR.no_rowid_in_stmt\n" +
+            "                    +DBMS_LOGMNR.CONTINUOUS_MINE\n" +
+            "                    + SYS.DBMS_LOGMNR.dict_from_online_catalog\n" +
+            "             );\n" +
+            "           end;";
     /**
      * 启动logminer，以自动添加日志的模式
      */

@@ -5,3 +5,9 @@
                     INSTALL PLUGIN daemon_memcached soname "libmemcached.so";
 4.innodb_memcache.containers 表中的value_columns字段 中用| 问题： 数据中不能存在 |
   ，否则mysql自动截取会缺失数据 ,解决方式：修改innodb_memcache.config_oppions表中的separator字段
+  
+  
+1.全量运行：org.datamiddle.cdc.oracle.OracleSource
+2.断点运行：org.datamiddle.cdc.oracle.OracleContinueTask
+3.测试消费：
+4.运行方式：java -cp xx.jar org.datamiddle.cdc.oracle.OracleSource  

@@ -13,10 +13,12 @@ import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.update.Update;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.table.data.RowData;
 import org.datamiddle.cdc.oracle.bean.LogData;
 import org.datamiddle.cdc.oracle.converter.AbstractCDCRowConverter;
 import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
+import org.jeecgframework.boot.DateUtil;
 import org.jeecgframework.boot.IdWorker;
 import org.datamiddle.cdc.oracle.bean.EventRow;
 import org.datamiddle.cdc.oracle.bean.EventRowData;
@@ -26,6 +28,8 @@ import org.datamiddle.cdc.oracle.bean.element.ColumnRowData;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -62,8 +66,9 @@ public class LogminerHandler {
         if (str.startsWith("\"") && str.endsWith("\"") && str.length() != 1) {
             str = str.substring(1, str.length() - 1);
         }
-
-        return str.replace("IS NULL", "= NULL").trim();
+         //生产数据会有很多带空格的数据  不能trim（）
+       // return str.replace("IS NULL", "= NULL").trim();
+        return str.replace("IS NULL", "= NULL");
     }
 
     private static void parseInsertStmt(
@@ -78,7 +83,13 @@ public class LogminerHandler {
         int i = 0;
         for (String key : columnLists) {
             String value = cleanString(valueList.get(i).toString());
-            afterData.add(new EventRowData(key, value, Objects.isNull(value)));
+            String newValue = null;
+            if(StringUtils.isBlank(value)){
+                newValue = value;
+            }else{
+                newValue =parseTime(value);
+            }
+            afterData.add(new EventRowData(key, newValue, Objects.isNull(newValue)));
             beforeData.add(new EventRowData(key, null, true));
             i++;
         }
@@ -92,11 +103,17 @@ public class LogminerHandler {
         Iterator<Expression> iterator = update.getExpressions().iterator();
         HashSet<String> columns = new HashSet<>(32);
         for (Column c : update.getColumns()) {
-            String value = cleanString(iterator.next().toString());
+            String valueold = cleanString(iterator.next().toString());
+            String newValue = null;
+            if(StringUtils.isBlank(valueold)){
+                newValue = valueold;
+            }else{
+                newValue =parseTime(valueold);
+            }
             String columnName = cleanString(c.getColumnName());
-            boolean isNull = Objects.isNull(value) || value.equalsIgnoreCase("= NULL");
+            boolean isNull = Objects.isNull(newValue) || newValue.equalsIgnoreCase("= NULL");
 
-            afterData.add(new EventRowData(columnName, isNull ? null : value, isNull));
+            afterData.add(new EventRowData(columnName, isNull ? null : newValue, isNull));
             columns.add(columnName);
         }
 
@@ -107,18 +124,23 @@ public class LogminerHandler {
                                 @Override
                                 public void visit(final EqualsTo expr) {
                                     String col = cleanString(expr.getLeftExpression().toString());
-                                    String value =
+                                    String valueold =
                                             cleanString(expr.getRightExpression().toString());
-
+                                    String newValue = null;
+                                    if(StringUtils.isBlank(valueold)){
+                                        newValue = valueold;
+                                    }else{
+                                        newValue =parseTime(valueold);
+                                    }
                                     boolean isNull =
-                                            Objects.isNull(value)
-                                                    || value.equalsIgnoreCase("= NULL");
+                                            Objects.isNull(newValue)
+                                                    || newValue.equalsIgnoreCase("= NULL");
                                     beforeData.add(
-                                            new EventRowData(col, isNull ? null : value, isNull));
+                                            new EventRowData(col, isNull ? null : newValue, isNull));
                                     if (!columns.contains(col)) {
                                         afterData.add(
                                                 new EventRowData(
-                                                        col, isNull ? null : value, isNull));
+                                                        col, isNull ? null : newValue, isNull));
                                     }
                                 }
                             });
@@ -138,16 +160,37 @@ public class LogminerHandler {
                             @Override
                             public void visit(final EqualsTo expr) {
                                 String col = cleanString(expr.getLeftExpression().toString());
-                                String value = cleanString(expr.getRightExpression().toString());
+                                String valueold = cleanString(expr.getRightExpression().toString());
+                                String newValue = null;
+                                if(StringUtils.isBlank(valueold)){
+                                    newValue = valueold;
+                                }else{
+                                    newValue =parseTime(valueold);
+                                }
                                 boolean isNull =
-                                        Objects.isNull(value) || value.equalsIgnoreCase("= NULL");
+                                        Objects.isNull(newValue) || newValue.equalsIgnoreCase("= NULL");
                                 beforeData.add(
-                                        new EventRowData(col, isNull ? null : value, isNull));
+                                        new EventRowData(col, isNull ? null : newValue, isNull));
                                 afterData.add(new EventRowData(col, null, true));
                             }
                         });
     }
-
+    /*
+     * 将时间转换为时间戳
+     */
+    public static String dateToStamp(String s) {
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try {
+            date = simpleDateFormat.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long ts = date.getTime();
+        res = String.valueOf(ts);
+        return res;
+    }
     /**
      * parse time type data
      *
@@ -158,15 +201,20 @@ public class LogminerHandler {
         if (!value.endsWith("')")) {
             return value;
         }
-
+        //增加转换为时间戳
         // DATE类型
         if (value.startsWith("TO_DATE('")) {
-            return value.substring(9, value.length() - 27);
+            return  dateToStamp(value.substring(9, value.length() - 27));
         }
-
+        ////增加转换为时间戳
         // TIMESTAMP类型
         if (value.startsWith("TO_TIMESTAMP('")) {
-            return value.substring(14, value.length() - 2);
+            return dateToStamp(value.substring(14, value.length() - 2));
+        }
+        ////增加转换为时间戳
+        // TIMESTAMP类型
+        if (value.startsWith("TIMESTAMP '")) {
+            return dateToStamp(value.substring(12, value.length() - 1));
         }
 
         // TIMESTAMP WITH LOCAL TIME ZONE
@@ -240,7 +288,9 @@ public class LogminerHandler {
             parseDeleteStmt((Delete) stmt, EventRowDataList, afterEventRowDataList);
         }
 
-        Long ts = idWorker.nextId();
+        //Long ts = idWorker.nextId();
+        //ts 需要与红帽组件都是13位  ， 此处修改为当前时间， 即获取数据的时间
+        Long ts = System.currentTimeMillis();
 
         /*if (log.isDebugEnabled()) {
             printDelay(pair.getScn(), ts, timestamp);
