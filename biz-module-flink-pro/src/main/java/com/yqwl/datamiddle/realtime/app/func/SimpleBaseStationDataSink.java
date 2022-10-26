@@ -126,9 +126,21 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
                             + " SET d1.UNLOAD_SHIP_TIME= " + data.getSAMPLE_U_T_C() + " ;"
                     );
                 }
+
                 // 3.将库房类型WAREHOUSE_TYPE更新到dwm_sptb02中去  前置条件: 仓库种类不为空,物理仓库代码不为空,vin码不为空,出入库类型为出库.
                 if (StringUtils.isNotBlank(warehouse_type) && StringUtils.isNotBlank(physical_code) && StringUtils.isNotBlank(vin) && StringUtils.equals(operate_type, "OutStock")) {
                     sb.append("UPDATE dwm_vlms_sptb02 SET HIGHWAY_WAREHOUSE_TYPE= '" + warehouse_type + "' WHERE  VYSFS = 'G' AND VWLCKDM = '" + physical_code + "' AND VVIN ='" + vin + "';");
+                }
+
+                // 4.更新VYSFS为 "J"的 入库时间作为 目的入站入港时间
+                if (IN_STORE.equals(operateType)) {
+                    sb.append(" UPDATE dwm_vlms_sptb02 d1 " +
+                            " JOIN dim_vlms_warehouse_rs d2 ON d1.VVIN = '" + vin
+                            + "' AND d2.WAREHOUSE_CODE = '" + shop_no
+                            + "' AND d1.START_PHYSICAL_CODE = d2.VWLCKDM AND d2.WAREHOUSE_TYPE in ('T3','T4') AND d1.VYSFS = 'J' "
+                            + " AND  ( IN_END_J_TIME = 0 OR IN_END_J_TIME > " + data.getSAMPLE_U_T_C() + " ) "
+                            + " SET d1.IN_END_J_TIME= " + data.getSAMPLE_U_T_C() + " ;"
+                    );
                 }
             }
 
