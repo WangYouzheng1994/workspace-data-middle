@@ -107,7 +107,7 @@ public class OracleSource {
     //.scn 最小的区间
     private static Integer scnScopeMin;
     //最终确定scn范围
-    private Integer lastScnScope;
+    private static Integer lastScnScope;
     //kafka topic name
     private static String KafkaTopicName = "test_oracle_cdc_custom";
     //定义时间区间
@@ -527,6 +527,7 @@ public class OracleSource {
         endTimeAfter = props.getStr("endtimeafter");
         scnScope = Integer.valueOf(scnstr);
         scnScopeMin = Integer.valueOf(scnstrmin);
+        lastScnScope = scnScope;
         try {
             sourceTableList = getSourceTableList();
             //sourceTableList = new ArrayList<>();
