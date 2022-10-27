@@ -410,8 +410,8 @@ public class OracleSource {
                 if (connecUtil.hasNext()) {
                     // 获取解析Logminer结果
                     List<QueueData> result = connecUtil.getResult();
-                    log.info("开始推送数据");
                     if(null!=result&&result.size()>0){
+                        log.info("开始推送数据");
                         for (int i = 0; i <result.size() ; i++) {
                             QueueData queueData = result.get(i);
 
