@@ -17,6 +17,7 @@ import org.datamiddle.cdc.oracle.bean.element.ColumnRowData;
 import org.datamiddle.cdc.oracle.bean.element.column.StringColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.TimestampColumn;
 import org.datamiddle.cdc.oracle.constants.ConstantValue;
+import org.jeecgframework.boot.DateUtil;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -1053,7 +1054,9 @@ public class OracleCDCConnection {
             //preparedStatement.setString(1,tableName);
             //preparedStatement.setInt(2,currentMaxScn.intValue());
             //执行
+            log.info("表："+tableName+",开始查询");
             rs= preparedStatement.executeQuery();
+            log.info("表："+tableName+",查询结束");
             //检索列名列表
             ResultSetMetaData rsMetaData = rs.getMetaData();
             int count = rsMetaData.getColumnCount();
