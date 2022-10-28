@@ -512,4 +512,7 @@ public class LogminerConverter extends AbstractCDCRowConverter<EventRow, String>
     public void setConnection(Connection connection) {
         this.connection = connection;
     }
+    public Connection  getConnection() {
+        return this.connection;
+    }
 }

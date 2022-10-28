@@ -990,19 +990,21 @@ public class OracleCDCConnection {
      */
     public static Pair<List<String>, List<String>> getTableMetaData(
             String cataLog, String schema, String tableName, Connection dbConn) {
+        ResultSet tableRs= null;
+        ResultSet rs = null;
         try {
             // check table exists
             if ("*".equalsIgnoreCase(tableName.trim())) {
                 return Pair.of(new LinkedList<>(), new LinkedList<>());
             }
 
-            ResultSet tableRs = dbConn.getMetaData().getTables(cataLog, schema, tableName, null);
+            tableRs = dbConn.getMetaData().getTables(cataLog, schema, tableName, null);
             if (!tableRs.next()) {
                 String tableInfo = schema == null ? tableName : schema + "." + tableName;
                 throw new RuntimeException(String.format("table %s not found.", tableInfo));
             }
 
-            ResultSet rs = dbConn.getMetaData().getColumns(cataLog, schema, tableName, null);
+            rs = dbConn.getMetaData().getColumns(cataLog, schema, tableName, null);
             List<String> fullColumnList = new LinkedList<>();
             List<String> fullColumnTypeList = new LinkedList<>();
             while (rs.next()) {
@@ -1011,11 +1013,17 @@ public class OracleCDCConnection {
                 // TYPE_NAME
                 fullColumnTypeList.add(rs.getString(6));
             }
-            rs.close();
             return Pair.of(fullColumnList, fullColumnTypeList);
         } catch (SQLException e) {
             throw new RuntimeException(
                     String.format("error to get meta from [%s.%s]", schema, tableName), e);
+        }finally {
+            try {
+                tableRs.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 

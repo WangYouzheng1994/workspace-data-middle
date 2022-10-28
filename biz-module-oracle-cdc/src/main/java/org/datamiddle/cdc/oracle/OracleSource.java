@@ -153,10 +153,8 @@ public class OracleSource {
         String jdbcUrl = oracleCDCConfig.getJdbcUrl();
         String username = oracleCDCConfig.getUsername();
         String password = oracleCDCConfig.getPassword();
-        // String driverClass = oracleCDCConfig.getDriverClass();
-        Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
+            Connection connection = DriverManager.getConnection(
                     jdbcUrl,
                     username,
                     password);
@@ -165,13 +163,21 @@ public class OracleSource {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
         // 初始化Logminer
         payLoad(oracleCDCConnect);
         // 读取Log日志
-
         // 一直沿用这个流程去处理
         while (runningFlag) {
+            try {
+                Connection validConnection = getValidConnection(
+                        jdbcUrl,
+                        username,
+                        password, logminerConverter.getConnection());
+                logminerConverter.setConnection(validConnection);
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
             running(oracleCDCConnect);
         }
     }
@@ -651,10 +657,8 @@ public class OracleSource {
         String jdbcUrl = oracleCDCConfig.getJdbcUrl();
         String username = oracleCDCConfig.getUsername();
         String password = oracleCDCConfig.getPassword();
-        // String driverClass = oracleCDCConfig.getDriverClass();
-        Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
+            Connection connection = DriverManager.getConnection(
                     jdbcUrl,
                     username,
                     password);
@@ -663,13 +667,23 @@ public class OracleSource {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
+        // String driverClass = oracleCDCConfig.getDriverClass();
         // 初始化Logminer
         payLoad(oracleCDCConnect);
         // 如果当前的id = 4 ;需要将此数据修改为0
         oracleCDCConnect.setIdentification(0);
         // 一直沿用这个流程去处理
         while (runningFlag) {
+            try {
+                Connection validConnection = getValidConnection(
+                        jdbcUrl,
+                        username,
+                        password, logminerConverter.getConnection());
+                logminerConverter.setConnection(validConnection);
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
             running(oracleCDCConnect);
         }
     }
@@ -690,5 +704,39 @@ public class OracleSource {
             }
         }
         return sourceTable;
+    }
+    /**
+     * <pre>
+     * Date:2011-12-29
+     * 防止发生异常：nested exception is java.sql.SQLRecoverableException: IO Error: Broken pipe
+     * 原因：连接池链接一段时间之后，会被oracle在服务器端中断，而连接池并不知道自己的链接被中断，照旧进行连接操作，发生异常
+     * @param oldConn
+     * @return
+     * @throws SQLException
+     * </pre>
+     */
+    private static Connection getValidConnection(String jdbcUrl, String username,String password,Connection oldConn) throws SQLException {
+        //get the connection from the datasource
+        Connection conn = oldConn;
+        int commonTimeout = 150;
+
+        //check the connection, if the connection is not suitable, then get the new connection and check it again
+        while(null == conn || conn.isClosed() || !conn.isValid(commonTimeout)) {
+            try {
+                if(null != conn && !conn.isClosed()) {
+                    //close the connection
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error("Can not close connection :\t"+e.getMessage(),e);
+            }
+            //get the new connection
+            conn  = DriverManager.getConnection(
+                    jdbcUrl,
+                    username,
+                    password);
+        }
+        //return the valid connection
+        return conn;
     }
 }
