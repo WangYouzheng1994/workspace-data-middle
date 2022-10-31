@@ -1414,6 +1414,11 @@ public class DwmSptb02 implements Serializable {
     private Long ACCOUNTING_TIME;
 
     /**
+     * 溯源入库名称
+     */
+    private String IN_WAREHOUSE_NAME;
+
+    /**
      * 逻辑删除字段,0表示未删除,1表示已删除
      * 20220906 此字段暂时搁置添加，后续上线此字段。
      * ALTER TABLE `data_middle_flink`.`dwm_vlms_sptb02`
