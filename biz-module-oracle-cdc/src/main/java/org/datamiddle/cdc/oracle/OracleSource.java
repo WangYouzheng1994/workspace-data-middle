@@ -454,6 +454,54 @@ public class OracleSource {
                 log.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
+        }else{
+             //根据当前得scn 重新启动程序
+            Props props = PropertiesUtil.getProps();
+            String host = props.getStr("cdc.oracle.hostname");
+            String port = props.getStr("cdc.oracle.port");
+            String tableArray = props.getStr("cdc.oracle.table.list");
+            String user = props.getStr("cdc.oracle.username");
+            String pwd = props.getStr("cdc.oracle.password");
+            String oracleServer = props.getStr("cdc.oracle.database");
+            KafkaTopicName = props.getStr("kafka.topic");
+            schema = props.getStr("cdc.oracle.schema.list");
+            String scnstr = props.getStr("cdc.scnscope");
+            String scnstrmin = props.getStr("cdc.scnscopemin");
+            List<String> sourceTableList = null;
+            startTime = props.getStr("starttime");
+            endTime = props.getStr("endtime");
+            startTimeAfter = props.getStr("startimeafter");
+            endTimeAfter = props.getStr("endtimeafter");
+            scnScope = Integer.valueOf(scnstr);
+            scnScopeMin = Integer.valueOf(scnstrmin);
+            lastScnScope = scnScope;
+            try {
+                sourceTableList = getSourceTableList();
+                //sourceTableList = new ArrayList<>();
+                //sourceTableList.add("TDS_LJ.SPTB02");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            log.info("重启启动抽取程序@@@@@@@@@@@@@@");
+            //当前死掉得scn
+            String scn = currentStartScn.toString();
+            String rs_id = "a";
+            OracleCDCConfig build = OracleCDCConfig.builder()
+                    .startSCN(scn)
+                    .endSCN(scn)
+                    .identification(4)
+                    .rs_id(" " + rs_id + " ") //空格不能删
+                    .readPosition("ALL")
+                    .driverClass("oracle.jdbc.OracleDriver")
+                    // .table(Arrays.asList(tableArray))
+                    .table(sourceTableList)
+                    .username(user)
+                    .password(pwd).jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
+                            host + ")(PORT=" +
+                            port + ")))(CONNECT_DATA=(SID=" +
+                            oracleServer + ")))").build();
+            new OracleSource().reStart(build);
+
         }
     }
 

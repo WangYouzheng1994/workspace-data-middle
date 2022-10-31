@@ -603,6 +603,8 @@ public class OracleCDCConnection {
     /** 从LogMiner视图查询数据 */
     public boolean queryData(String logMinerSelectSql,BigInteger startScnPosition,BigInteger currentSinkPosition) {
 
+        boolean returnFlag = true;
+
         try {
 /*
             this.CURRENT_STATE.set(STATE.LOADING);
@@ -636,7 +638,7 @@ public class OracleCDCConnection {
             //         startScn,
             //         endScn,
             //         timeConsuming);
-            return true;
+            return returnFlag;
         } catch (Exception e) {
             // this.CURRENT_STATE.set(STATE.FAILED);
             // this.exception = e;
@@ -646,7 +648,12 @@ public class OracleCDCConnection {
             //                 logMinerSelectSql, ExceptionUtil.getErrorMessage(e));
             //writeTxtFG("断点续传记录SCN，开始SCN="+startScnPosition+",消费SCN="+currentSinkPosition+"Identification = 3","D://cdc/mysqlRecord.txt");
             log.error(e.getMessage(), e);
+            if(e.getMessage().contains("ORA-16241")||e.getMessage().contains("ORA-01291")){
+                returnFlag = false;
+            }
             throw new RuntimeException(e.getMessage(), e);
+        }finally {
+            return  returnFlag;
         }
     }
 
