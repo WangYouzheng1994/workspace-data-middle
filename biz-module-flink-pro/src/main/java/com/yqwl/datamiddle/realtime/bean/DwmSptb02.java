@@ -1150,7 +1150,7 @@ public class DwmSptb02 implements Serializable {
     private Long THEORY_SITE_TIME;
 
     /**
-     * dwm新增-实际出库时间
+     * dwm新增-实际出库时间 系统出库时间 (非溯源出库时间)
      * 源:{@link Sptb02#DCKRQ}
      */
     private Long ACTUAL_OUT_TIME;
