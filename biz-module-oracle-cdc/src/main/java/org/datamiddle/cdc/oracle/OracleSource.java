@@ -1,5 +1,6 @@
 package org.datamiddle.cdc.oracle;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -15,7 +16,6 @@ import org.datamiddle.cdc.oracle.bean.QueueData;
 import org.datamiddle.cdc.oracle.bean.TransactionManager;
 import org.datamiddle.cdc.oracle.converter.oracle.LogminerConverter;
 import org.datamiddle.cdc.util.*;
-import org.jeecgframework.boot.DateUtil;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -103,8 +104,18 @@ public class OracleSource {
     private String rs_id;
     //scn 间隔范围
     private static Integer scnScope;
+    //.scn 最小的区间
+    private static Integer scnScopeMin;
+    //最终确定scn范围
+    private static Integer lastScnScope;
     //kafka topic name
     private static String KafkaTopicName = "test_oracle_cdc_custom";
+    //定义时间区间
+    private static String startTimeAfter="00:00:00";
+    private static String endTimeAfter="02:00:00";
+    private static String startTime="11:59:00";
+    private static String endTime="15:00:00";
+
     /**
      * 转换日志生产
      */
@@ -142,10 +153,8 @@ public class OracleSource {
         String jdbcUrl = oracleCDCConfig.getJdbcUrl();
         String username = oracleCDCConfig.getUsername();
         String password = oracleCDCConfig.getPassword();
-        // String driverClass = oracleCDCConfig.getDriverClass();
-        Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
+            Connection connection = DriverManager.getConnection(
                     jdbcUrl,
                     username,
                     password);
@@ -154,13 +163,21 @@ public class OracleSource {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
         // 初始化Logminer
         payLoad(oracleCDCConnect);
         // 读取Log日志
-
         // 一直沿用这个流程去处理
         while (runningFlag) {
+            try {
+                Connection validConnection = getValidConnection(
+                        jdbcUrl,
+                        username,
+                        password, logminerConverter.getConnection());
+                logminerConverter.setConnection(validConnection);
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
             running(oracleCDCConnect);
         }
     }
@@ -199,7 +216,45 @@ public class OracleSource {
         log.info("One Round Start， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
         // 设置任務持续运转状态下的偏移量~
         this.endScn = oracleCDCConnect.getEndScn();
-
+        //错峰读取数据
+        String format = "HH:mm:ss";
+        //获取当前时间
+        try{
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+            String format1 = simpleDateFormat.format(new Date());
+            Date nowDate = simpleDateFormat.parse(format1);
+            Date date = new Date();
+            SimpleDateFormat df = new SimpleDateFormat("HH");
+            String str = df.format(date);
+            int a = Integer.parseInt(str);
+            if (a >= 0&&a<12 ) {
+                //凌晨
+                //范围开始时间
+                Date startTimeDateAfter = new SimpleDateFormat(format).parse(startTimeAfter);
+                //范围结束时间
+                Date endTimeDateAfter = new SimpleDateFormat(format).parse(endTimeAfter);
+                boolean inAfter = DateUtil.isIn(nowDate, startTimeDateAfter, endTimeDateAfter);
+                if(inAfter){
+                    lastScnScope=scnScopeMin;
+                }else{
+                    lastScnScope =scnScope;
+                }
+            }else{
+                //范围开始时间
+                Date startTimeDate = new SimpleDateFormat(format).parse(startTime);
+                //范围结束时间
+                Date endTimeDate = new SimpleDateFormat(format).parse(endTime);
+                boolean in = DateUtil.isIn(nowDate, startTimeDate, endTimeDate);
+                if(in){
+                    lastScnScope=scnScopeMin;
+                }else{
+                    lastScnScope =scnScope;
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        log.info("One Round， scn范围:{}", lastScnScope);
         payLoad(oracleCDCConnect);
 
         log.info("One Round End， currentSinkPosition:{}, startSCN:{}, endSCN:{}", this.currentSinkPosition, this.startScn, this.endScn);
@@ -270,15 +325,15 @@ public class OracleSource {
                 }
                 BigInteger subtract = this.endScn.subtract(currentStartScn);
                 //计算余数
-                BigInteger remainder = this.endScn.remainder(BigInteger.valueOf(scnScope));
+                BigInteger remainder = this.endScn.remainder(BigInteger.valueOf(lastScnScope));
                 //每次查询10w的数据量 循环次数
-                BigInteger divide = subtract.divide(BigInteger.valueOf(scnScope));
+                BigInteger divide = subtract.divide(BigInteger.valueOf(lastScnScope));
                 //循环计算startlogminer 的开始scn 和结束scn
                 for (int i = 0; i <divide.intValue() ; i++) {
                     //开始scn
-                    BigInteger startScn = currentStartScn.add(BigInteger.valueOf(scnScope).multiply(BigInteger.valueOf(i)));
+                    BigInteger startScn = currentStartScn.add(BigInteger.valueOf(lastScnScope).multiply(BigInteger.valueOf(i)));
                     //结束scn
-                    BigInteger endScnLast = currentStartScn.add(BigInteger.valueOf(scnScope).multiply(BigInteger.valueOf(i + 1)));
+                    BigInteger endScnLast = currentStartScn.add(BigInteger.valueOf(lastScnScope).multiply(BigInteger.valueOf(i + 1)));
                     log.info("单个日志中的scn： 开始scn{},结束scn{}",startScn,endScnLast);
                     //执行程序
                     executeSQL(connecUtil,startScn,endScnLast);
@@ -286,7 +341,7 @@ public class OracleSource {
                 //如果是0 被整除了
                 if(BigInteger.ZERO.compareTo(remainder)!=0) {
                     //计算
-                    BigInteger startScn = currentStartScn.add(BigInteger.valueOf(scnScope).multiply(divide));
+                    BigInteger startScn = currentStartScn.add(BigInteger.valueOf(lastScnScope).multiply(divide));
                     log.info("单个日志中的scn： 开始scn{},结束scn{}", startScn, this.endScn);
                     //执行程序
                     executeSQL(connecUtil, startScn, this.endScn);
@@ -361,8 +416,8 @@ public class OracleSource {
                 if (connecUtil.hasNext()) {
                     // 获取解析Logminer结果
                     List<QueueData> result = connecUtil.getResult();
-                    log.info("开始推送数据");
                     if(null!=result&&result.size()>0){
+                        log.info("开始推送数据");
                         for (int i = 0; i <result.size() ; i++) {
                             QueueData queueData = result.get(i);
 
@@ -399,6 +454,54 @@ public class OracleSource {
                 log.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
+        }else{
+             //根据当前得scn 重新启动程序
+            Props props = PropertiesUtil.getProps();
+            String host = props.getStr("cdc.oracle.hostname");
+            String port = props.getStr("cdc.oracle.port");
+            String tableArray = props.getStr("cdc.oracle.table.list");
+            String user = props.getStr("cdc.oracle.username");
+            String pwd = props.getStr("cdc.oracle.password");
+            String oracleServer = props.getStr("cdc.oracle.database");
+            KafkaTopicName = props.getStr("kafka.topic");
+            schema = props.getStr("cdc.oracle.schema.list");
+            String scnstr = props.getStr("cdc.scnscope");
+            String scnstrmin = props.getStr("cdc.scnscopemin");
+            List<String> sourceTableList = null;
+            startTime = props.getStr("starttime");
+            endTime = props.getStr("endtime");
+            startTimeAfter = props.getStr("startimeafter");
+            endTimeAfter = props.getStr("endtimeafter");
+            scnScope = Integer.valueOf(scnstr);
+            scnScopeMin = Integer.valueOf(scnstrmin);
+            lastScnScope = scnScope;
+            try {
+                sourceTableList = getSourceTableList();
+                //sourceTableList = new ArrayList<>();
+                //sourceTableList.add("TDS_LJ.SPTB02");
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            log.info("重启启动抽取程序@@@@@@@@@@@@@@");
+            //当前死掉得scn
+            String scn = currentStartScn.toString();
+            String rs_id = "a";
+            OracleCDCConfig build = OracleCDCConfig.builder()
+                    .startSCN(scn)
+                    .endSCN(scn)
+                    .identification(4)
+                    .rs_id(" " + rs_id + " ") //空格不能删
+                    .readPosition("ALL")
+                    .driverClass("oracle.jdbc.OracleDriver")
+                    // .table(Arrays.asList(tableArray))
+                    .table(sourceTableList)
+                    .username(user)
+                    .password(pwd).jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
+                            host + ")(PORT=" +
+                            port + ")))(CONNECT_DATA=(SID=" +
+                            oracleServer + ")))").build();
+            new OracleSource().reStart(build);
+
         }
     }
 
@@ -469,9 +572,16 @@ public class OracleSource {
         String oracleServer = props.getStr("cdc.oracle.database");
         KafkaTopicName = props.getStr("kafka.topic");
         schema = props.getStr("cdc.oracle.schema.list");
-        List<String> sourceTableList = null;
         String scnstr = props.getStr("cdc.scnscope");
+        String scnstrmin = props.getStr("cdc.scnscopemin");
+        List<String> sourceTableList = null;
+        startTime = props.getStr("starttime");
+        endTime = props.getStr("endtime");
+        startTimeAfter = props.getStr("startimeafter");
+        endTimeAfter = props.getStr("endtimeafter");
         scnScope = Integer.valueOf(scnstr);
+        scnScopeMin = Integer.valueOf(scnstrmin);
+        lastScnScope = scnScope;
         try {
             sourceTableList = getSourceTableList();
             //sourceTableList = new ArrayList<>();
@@ -595,10 +705,8 @@ public class OracleSource {
         String jdbcUrl = oracleCDCConfig.getJdbcUrl();
         String username = oracleCDCConfig.getUsername();
         String password = oracleCDCConfig.getPassword();
-        // String driverClass = oracleCDCConfig.getDriverClass();
-        Connection connection = null;
         try {
-            connection = DriverManager.getConnection(
+            Connection connection = DriverManager.getConnection(
                     jdbcUrl,
                     username,
                     password);
@@ -607,13 +715,23 @@ public class OracleSource {
             log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
-
+        // String driverClass = oracleCDCConfig.getDriverClass();
         // 初始化Logminer
         payLoad(oracleCDCConnect);
         // 如果当前的id = 4 ;需要将此数据修改为0
         oracleCDCConnect.setIdentification(0);
         // 一直沿用这个流程去处理
         while (runningFlag) {
+            try {
+                Connection validConnection = getValidConnection(
+                        jdbcUrl,
+                        username,
+                        password, logminerConverter.getConnection());
+                logminerConverter.setConnection(validConnection);
+            } catch (SQLException e) {
+                log.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
             running(oracleCDCConnect);
         }
     }
@@ -634,5 +752,39 @@ public class OracleSource {
             }
         }
         return sourceTable;
+    }
+    /**
+     * <pre>
+     * Date:2011-12-29
+     * 防止发生异常：nested exception is java.sql.SQLRecoverableException: IO Error: Broken pipe
+     * 原因：连接池链接一段时间之后，会被oracle在服务器端中断，而连接池并不知道自己的链接被中断，照旧进行连接操作，发生异常
+     * @param oldConn
+     * @return
+     * @throws SQLException
+     * </pre>
+     */
+    private static Connection getValidConnection(String jdbcUrl, String username,String password,Connection oldConn) throws SQLException {
+        //get the connection from the datasource
+        Connection conn = oldConn;
+        int commonTimeout = 150;
+
+        //check the connection, if the connection is not suitable, then get the new connection and check it again
+        while(null == conn || conn.isClosed() || !conn.isValid(commonTimeout)) {
+            try {
+                if(null != conn && !conn.isClosed()) {
+                    //close the connection
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error("Can not close connection :\t"+e.getMessage(),e);
+            }
+            //get the new connection
+            conn  = DriverManager.getConnection(
+                    jdbcUrl,
+                    username,
+                    password);
+        }
+        //return the valid connection
+        return conn;
     }
 }

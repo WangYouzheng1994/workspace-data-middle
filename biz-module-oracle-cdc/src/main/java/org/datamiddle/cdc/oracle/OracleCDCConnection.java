@@ -17,6 +17,7 @@ import org.datamiddle.cdc.oracle.bean.element.ColumnRowData;
 import org.datamiddle.cdc.oracle.bean.element.column.StringColumn;
 import org.datamiddle.cdc.oracle.bean.element.column.TimestampColumn;
 import org.datamiddle.cdc.oracle.constants.ConstantValue;
+import org.jeecgframework.boot.DateUtil;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -602,6 +603,8 @@ public class OracleCDCConnection {
     /** 从LogMiner视图查询数据 */
     public boolean queryData(String logMinerSelectSql,BigInteger startScnPosition,BigInteger currentSinkPosition) {
 
+        boolean returnFlag = true;
+
         try {
 /*
             this.CURRENT_STATE.set(STATE.LOADING);
@@ -635,7 +638,7 @@ public class OracleCDCConnection {
             //         startScn,
             //         endScn,
             //         timeConsuming);
-            return true;
+            return returnFlag;
         } catch (Exception e) {
             // this.CURRENT_STATE.set(STATE.FAILED);
             // this.exception = e;
@@ -645,7 +648,12 @@ public class OracleCDCConnection {
             //                 logMinerSelectSql, ExceptionUtil.getErrorMessage(e));
             //writeTxtFG("断点续传记录SCN，开始SCN="+startScnPosition+",消费SCN="+currentSinkPosition+"Identification = 3","D://cdc/mysqlRecord.txt");
             log.error(e.getMessage(), e);
+            if(e.getMessage().contains("ORA-16241")||e.getMessage().contains("ORA-01291")){
+                returnFlag = false;
+            }
             throw new RuntimeException(e.getMessage(), e);
+        }finally {
+            return  returnFlag;
         }
     }
 
@@ -989,19 +997,21 @@ public class OracleCDCConnection {
      */
     public static Pair<List<String>, List<String>> getTableMetaData(
             String cataLog, String schema, String tableName, Connection dbConn) {
+        ResultSet tableRs= null;
+        ResultSet rs = null;
         try {
             // check table exists
             if ("*".equalsIgnoreCase(tableName.trim())) {
                 return Pair.of(new LinkedList<>(), new LinkedList<>());
             }
 
-            ResultSet tableRs = dbConn.getMetaData().getTables(cataLog, schema, tableName, null);
+            tableRs = dbConn.getMetaData().getTables(cataLog, schema, tableName, null);
             if (!tableRs.next()) {
                 String tableInfo = schema == null ? tableName : schema + "." + tableName;
                 throw new RuntimeException(String.format("table %s not found.", tableInfo));
             }
 
-            ResultSet rs = dbConn.getMetaData().getColumns(cataLog, schema, tableName, null);
+            rs = dbConn.getMetaData().getColumns(cataLog, schema, tableName, null);
             List<String> fullColumnList = new LinkedList<>();
             List<String> fullColumnTypeList = new LinkedList<>();
             while (rs.next()) {
@@ -1010,11 +1020,17 @@ public class OracleCDCConnection {
                 // TYPE_NAME
                 fullColumnTypeList.add(rs.getString(6));
             }
-            rs.close();
             return Pair.of(fullColumnList, fullColumnTypeList);
         } catch (SQLException e) {
             throw new RuntimeException(
                     String.format("error to get meta from [%s.%s]", schema, tableName), e);
+        }finally {
+            try {
+                tableRs.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -1053,7 +1069,9 @@ public class OracleCDCConnection {
             //preparedStatement.setString(1,tableName);
             //preparedStatement.setInt(2,currentMaxScn.intValue());
             //执行
+            log.info("表："+tableName+",开始查询");
             rs= preparedStatement.executeQuery();
+            log.info("表："+tableName+",查询结束");
             //检索列名列表
             ResultSetMetaData rsMetaData = rs.getMetaData();
             int count = rsMetaData.getColumnCount();
