@@ -1409,7 +1409,7 @@ public class DwmSptb02 implements Serializable {
     private Long IN_END_J_TIME;
 
     /**
-     * 核算到货时间
+     * 核实到货时间
      */
     private Long ACCOUNTING_TIME;
 
