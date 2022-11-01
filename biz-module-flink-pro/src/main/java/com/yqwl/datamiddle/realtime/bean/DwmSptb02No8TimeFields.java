@@ -1391,13 +1391,13 @@ public class DwmSptb02No8TimeFields implements Serializable {
 
 
     /**
-     * 溯源入库名称
+     * 溯源 入库名称
      */
     private String IN_WAREHOUSE_NAME;
 
 
     /**
-     * 入库时间 表中没有此字段
+     * 溯源 入库时间
      */
     @TransientSink
     private Long IN_SITE_TIME;
