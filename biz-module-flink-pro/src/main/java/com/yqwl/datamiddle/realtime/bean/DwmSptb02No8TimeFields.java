@@ -1389,6 +1389,13 @@ public class DwmSptb02No8TimeFields implements Serializable {
      */
     private Long ACCOUNTING_TIME;
 
+
+    /**
+     * 溯源入库名称
+     */
+    private String IN_WAREHOUSE_NAME;
+
+
     /**
      * 入库时间 表中没有此字段
      */
