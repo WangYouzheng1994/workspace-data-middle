@@ -543,11 +543,11 @@ public class WaybillDwmAppSptb02Simple {
                                 dwmSptb02.setACCOUNTING_TIME(dztxcsjDrkrqDiffer);
                             }
                             //3
-                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.contains("Y90") || cpzdbh.contains("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj >= 0)) {
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.startsWith("Y90") || cpzdbh.startsWith("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj >= 0)) {
                                 dwmSptb02.setACCOUNTING_TIME(sdsj);
                             }
                             //4
-                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.contains("Y90") || cpzdbh.contains("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj < 0)) {
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.startsWith("Y90") || cpzdbh.startsWith("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj < 0)) {
                                 dwmSptb02.setACCOUNTING_TIME(dgpsdhsjDrkrqDiffer);
                             }
                             //5
