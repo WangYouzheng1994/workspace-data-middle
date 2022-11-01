@@ -2,6 +2,7 @@ package com.yqwl.datamiddle.realtime.bean;
 
 import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
 import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -1387,6 +1388,12 @@ public class DwmSptb02No8TimeFields implements Serializable {
      * 核实到货时间
      */
     private Long ACCOUNTING_TIME;
+
+    /**
+     * 入库时间 表中没有此字段
+     */
+    @TransientSink
+    private Long IN_SITE_TIME;
 
     /**
      * 逻辑删除字段,0表示未删除,1表示已删除

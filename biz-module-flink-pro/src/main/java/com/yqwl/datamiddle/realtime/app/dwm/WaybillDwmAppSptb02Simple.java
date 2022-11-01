@@ -99,6 +99,8 @@ public class WaybillDwmAppSptb02Simple {
                         String vvin = sptb02d1.getString("VVIN");
                         //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
                         if (StringUtils.isNotBlank(vvin)) {
+                            //当前时间
+                            long currentTime = System.currentTimeMillis();
                             String vfczt = dwmSptb02.getVFCZT();
                             String vsczt = dwmSptb02.getVSCZT();
                             dwmSptb02.setSTART_PHYSICAL_CODE(vfczt);
@@ -495,7 +497,85 @@ public class WaybillDwmAppSptb02Simple {
                                     dwmSptb02.setDDJRQ_R3(ddjrqR3);
                                 }
                             }
-                            dwmSptb02.setWAREHOUSE_UPDATETIME(System.currentTimeMillis());
+
+                            /**
+                             * 逻辑处理核实到货时间
+                             * 核实到货时间取值比较复杂，具体要参考PKC_FAWL_VW_DH存储过程54-63行的逻辑
+                             *  case
+                             * 1.when istc = 'NO' and VYSFS_SHOW = '铁路' and least(nvl(a1.dztxcsj+1,sysdate),nvl(k.drkrq,sysdate)) >= nvl(i.sd_date,sysdate) then least(SDSJ,i.sd_date)
+                             * 2.when istc = 'NO' and VYSFS_SHOW = '铁路' and least(nvl(a1.dztxcsj+1,sysdate),nvl(k.drkrq,sysdate)) < nvl(i.sd_date,sysdate) then least(nvl(a1.dztxcsj+1,sysdate),nvl(k.drkrq,sysdate))
+                             * 3.when ((istc = 'NO' and VYSFS_SHOW = '水运') or (a.vysfs in ('T','L1') and (a.cpzdbh like 'Y90%' or a.cpzdbh like 'Y00%'))) and least(nvl(a1.dgpsdhsj+1,sysdate),nvl(sd.drkrq,sysdate)) >= nvl(i.sd_date,sysdate) then least(nvl(SDSJ,sysdate),nvl(i.sd_date,sysdate))
+                             * 4.when ((istc = 'NO' and VYSFS_SHOW = '水运') or (a.vysfs in ('T','L1') and (a.cpzdbh like 'Y90%' or a.cpzdbh like 'Y00%'))) and least(nvl(a1.dgpsdhsj+1,sysdate),nvl(sd.drkrq,sysdate)) < nvl(i.sd_date,sysdate) then least(nvl(a1.dgpsdhsj+1,sysdate),nvl(sd.drkrq,sysdate))--sd.drkrq
+                             * 5.when istc = 'NO' and a.VYSFS = 'G' and nvl(DXXDHRQ,sysdate) >= nvl(i.sd_date,sysdate) then least(i.sd_date,a1.dtvsdhsj)
+                             * 6.when istc = 'NO' and a.VYSFS = 'G' and nvl(DXXDHRQ,sysdate) < nvl(i.sd_date,sysdate) then least(DXXDHRQ,a1.dtvsdhsj)
+                             * 7.when a.vysfs = 'J' then jsd.drkrq
+                             * 8.when istc = 'YES' and nvl(DXXDHRQ,sysdate) >= nvl(i.sd_date,sysdate) then least(i.sd_date,a1.dtvsdhsj)
+                             * 9.when istc = 'YES' and nvl(DXXDHRQ,sysdate) < nvl(i.sd_date,sysdate) then least(DXXDHRQ,a1.dtvsdhsj) end
+                             *
+                             * drkrq      ==> 入库时间         IN_SITE_TIME
+                             * DXXDHRQ    ==>大众到货时间       DDHSJ
+                             */
+                            //是否同城 1同城 2异地 默认值为0
+                            Integer typeTc = dwmSptb02.getTYPE_TC();
+                            String vysfs1 = dwmSptb02.getVYSFS();
+                            //运单运输类型
+                            String trafficType = dwmSptb02.getTRAFFIC_TYPE();
+                            //配载单编号
+                            String cpzdbh = dwmSptb02.getCPZDBH();
+                            Long dztxcsj = (Objects.nonNull(dwmSptb02.getDZTXCSJ()) && dwmSptb02.getDZTXCSJ() > 0) ? DateTimeUtil.getDateAddDays(dwmSptb02.getDZTXCSJ(), 1) : currentTime;
+                            Long dgpsdhsj = (Objects.nonNull(dwmSptb02.getDGPSDHSJ()) && dwmSptb02.getDGPSDHSJ() > 0) ? DateTimeUtil.getDateAddDays(dwmSptb02.getDGPSDHSJ(), 1) : currentTime;
+                            Long drkrq = (Objects.nonNull(dwmSptb02.getIN_SITE_TIME()) && dwmSptb02.getIN_SITE_TIME() > 0) ? dwmSptb02.getIN_SITE_TIME() : currentTime;
+                            Long dxxdhrq = (Objects.nonNull(dwmSptb02.getDDHSJ()) && dwmSptb02.getDDHSJ() > 0) ? dwmSptb02.getDDHSJ() : currentTime;
+                            //least(nvl(a1.dztxcsj+1,sysdate),nvl(k.drkrq,sysdate)) 的逻辑翻译
+                            Long dztxcsjDrkrqDiffer = DateTimeUtil.getLeastDate(dztxcsj, drkrq);
+                            //least(nvl(a1.dgpsdhsj+1,sysdate),nvl(sd.drkrq,sysdate)) 的逻辑翻译
+                            Long dgpsdhsjDrkrqDiffer = DateTimeUtil.getLeastDate(dgpsdhsj, drkrq);
+                            //获取SDSJ时间
+                            String sptb02ImportSql = "select SD_DATE from " + KafkaTopicConst.ODS_VLMS_SPTB02_STD_IMPORT + " where CJSDBH = '" + cjsdbhSource + "' and TYPE = 'SD' limit 1 ";
+                            JSONObject sptb02ImportObj  = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02_STD_IMPORT, sptb02ImportSql, cjsdbhSource);
+                            Long sdsj = (Objects.nonNull(sptb02ImportObj) && Objects.nonNull(sptb02ImportObj.getLong("SD_DATE"))) ? sptb02ImportObj.getLong("SD_DATE") : currentTime;
+                            //1
+                            if (Objects.nonNull(typeTc) && typeTc == 2 && "T".equals(trafficType) && (dztxcsjDrkrqDiffer - sdsj >= 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(sdsj);
+                            }
+                            //2
+                            else if (Objects.nonNull(typeTc) && typeTc == 2 && "T".equals(trafficType) && (dztxcsjDrkrqDiffer - sdsj < 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(dztxcsjDrkrqDiffer);
+                            }
+                            //3
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.contains("Y90") || cpzdbh.contains("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj >= 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(sdsj);
+                            }
+                            //4
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "S".equals(trafficType)) || ("T".equals(trafficType) && (cpzdbh.contains("Y90") || cpzdbh.contains("Y00"))) && (dgpsdhsjDrkrqDiffer - sdsj < 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(dgpsdhsjDrkrqDiffer);
+                            }
+                            //5
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "G".equals(vysfs1)) && (dxxdhrq - sdsj >= 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(sdsj, dwmSptb02.getDTVSDHSJ()));
+                            }
+                            //6
+                            else if ((Objects.nonNull(typeTc) && typeTc == 2 && "G".equals(vysfs1)) && (dxxdhrq - sdsj < 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(dxxdhrq, dwmSptb02.getDTVSDHSJ()));
+                            }
+                            //7
+                            else if ("J".equals(vysfs1)) {
+                                dwmSptb02.setACCOUNTING_TIME(drkrq);
+                            }
+                            //8
+                            else if (Objects.nonNull(typeTc) && typeTc == 1 && (dxxdhrq - sdsj >= 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(sdsj, dwmSptb02.getDTVSDHSJ()));
+                            }
+                            //9
+                            else if (Objects.nonNull(typeTc) && typeTc == 1 && (dxxdhrq - sdsj < 0)) {
+                                dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(dxxdhrq, dwmSptb02.getDTVSDHSJ()));
+                            }
+                            //兜底
+                            else {
+                                dwmSptb02.setACCOUNTING_TIME(currentTime);
+                            }
+
+                            dwmSptb02.setWAREHOUSE_UPDATETIME(currentTime);
 
                             // 实体类中null值进行默认值赋值
                             DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
