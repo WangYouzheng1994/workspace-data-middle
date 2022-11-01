@@ -1069,9 +1069,9 @@ public class OracleCDCConnection {
             //preparedStatement.setString(1,tableName);
             //preparedStatement.setInt(2,currentMaxScn.intValue());
             //执行
-            log.info("表："+tableName+",开始查询");
+            //log.info("表："+tableName+",开始查询");
             rs= preparedStatement.executeQuery();
-            log.info("表："+tableName+",查询结束");
+            //log.info("表："+tableName+",查询结束");
             //检索列名列表
             ResultSetMetaData rsMetaData = rs.getMetaData();
             int count = rsMetaData.getColumnCount();
@@ -1122,6 +1122,8 @@ public class OracleCDCConnection {
         } catch (SQLException e) {
             log.info("初始化数据ing失败");
             e.printStackTrace();
+            //初始化失败
+            throw new RuntimeException(e);
         }finally {
             try {
                 preparedStatement.close();
