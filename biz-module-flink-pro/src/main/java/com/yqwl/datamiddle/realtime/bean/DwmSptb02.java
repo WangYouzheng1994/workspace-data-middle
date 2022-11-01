@@ -1082,7 +1082,7 @@ public class DwmSptb02 implements Serializable {
 
     /**
      * dwd新增-起运时间 公路-取DTVSCFSJ(TVS出发时间)的值;铁水-取DSJCFSJ(实际离长时间)的值
-     * 公路取sptb02.dtvscfsj : 
+     * 公路取sptb02.dtvscfsj :
      * {@link Sptb02#DYSSZPSJ}
      * 铁水取sptb02取DSJCFSJ(实际离长时间)的值
      * {@link Sptb02#DSJCFSJ}
@@ -1150,7 +1150,7 @@ public class DwmSptb02 implements Serializable {
     private Long THEORY_SITE_TIME;
 
     /**
-     * dwm新增-实际出库时间
+     * dwm新增-实际出库时间 系统出库时间 (非溯源出库时间)
      * 源:{@link Sptb02#DCKRQ}
      */
     private Long ACTUAL_OUT_TIME;
@@ -1407,6 +1407,16 @@ public class DwmSptb02 implements Serializable {
      * 集港的 目的入港入站时间  集港集站计划(vsyfs为J)的显示发车站台(vfczt)的溯源入库时间 20221026 新增
      */
     private Long IN_END_J_TIME;
+
+    /**
+     * 核实到货时间
+     */
+    private Long ACCOUNTING_TIME;
+
+    /**
+     * 溯源入库名称
+     */
+    private String IN_WAREHOUSE_NAME;
 
     /**
      * 逻辑删除字段,0表示未删除,1表示已删除
