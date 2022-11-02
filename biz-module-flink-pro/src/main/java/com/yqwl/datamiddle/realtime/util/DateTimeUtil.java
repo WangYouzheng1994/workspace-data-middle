@@ -1,5 +1,8 @@
 package com.yqwl.datamiddle.realtime.util;
 
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,9 +25,16 @@ public class DateTimeUtil {
     public static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) {
-        System.out.println(System.currentTimeMillis());
-        System.out.println(timestampRound(System.currentTimeMillis()));
-        System.out.println(ZoneId.systemDefault());
+        //System.out.println(System.currentTimeMillis());
+        //System.out.println(timestampRound(System.currentTimeMillis()));
+        //System.out.println(ZoneId.systemDefault());
+
+        Date date = new Date();
+        System.out.println(date);
+        System.out.println(getDateAddDays(date.getTime(), 2));
+
+
+
     }
 
     /**
@@ -161,5 +171,43 @@ public class DateTimeUtil {
         Date date = new Date(time);
         return dfDate.format(date);
     }
+
+
+    /**
+     * 获取两个时间戳之间最小的一个
+     *
+     * @param time1
+     * @param time2
+     * @return
+     */
+    public static Long getLeastDate(Long time1, Long time2) {
+        Long differVal = time1 - time2;
+        if (differVal > 0) {
+            return time2;
+        } else if (differVal < 0) {
+            return time1;
+        } else {
+            return time1;
+        }
+    }
+
+
+    /**
+     * 对某个时间增加几天
+     * @param time
+     * @param days
+     * @return
+     */
+    public static Long getDateAddDays(Long time, int days){
+        Date outSiteDate = new Date(time);
+        // 格式化时间
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formatDate = formatter.format(outSiteDate);
+        DateTime parse = DateUtil.parse(formatDate);
+        DateTime newStepTime = DateUtil.offsetDay(parse, days);
+        return newStepTime.getTime();
+
+    }
+
 
 }

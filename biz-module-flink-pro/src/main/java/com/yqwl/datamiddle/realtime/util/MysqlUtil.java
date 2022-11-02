@@ -288,7 +288,7 @@ public class MysqlUtil {
             timeLists.clear();
         }*/
         if (resultTime > 15) {
-            log.error("出现了慢sql:{}" + sql);
+            log.error("出现了慢sql:{}", sql);
             log.error("花费的时间为:{}", resultTime);
         }
         return dimJsonObj;

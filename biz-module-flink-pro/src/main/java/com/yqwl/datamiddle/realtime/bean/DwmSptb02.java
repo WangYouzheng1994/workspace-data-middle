@@ -2,10 +2,9 @@ package com.yqwl.datamiddle.realtime.bean;
 
 import com.yqwl.datamiddle.realtime.enums.CamelUnderline;
 import com.yqwl.datamiddle.realtime.enums.TableName;
+import com.yqwl.datamiddle.realtime.enums.TransientSink;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
 
@@ -1414,9 +1413,15 @@ public class DwmSptb02 implements Serializable {
     private Long ACCOUNTING_TIME;
 
     /**
-     * 溯源入库名称
+     * 溯源 入库名称
      */
     private String IN_WAREHOUSE_NAME;
+
+    /**
+     * 溯源 入库时间
+     */
+    @TransientSink
+    private Long IN_SITE_TIME;
 
     /**
      * 逻辑删除字段,0表示未删除,1表示已删除
