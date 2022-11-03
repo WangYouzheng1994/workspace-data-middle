@@ -1219,9 +1219,24 @@ public class DwdSptb02 implements Serializable {
     private String HIGHWAY_WAREHOUSE_TYPE;
 
     /**
+     * 车架号 以sptb02.CJSDBH 取自SPTB02D1.VVIN
+     */
+    private String VVIN;
+
+    /**
+     * 溯源发运仓库名称 取自site_warehouse.vwlckdm
+     */
+    private String IN_WAREHOUSE_NAME;
+
+    /**
      * 溯源入库时间
      */
     private Long IN_SITE_TIME;
+
+    /**
+     * 溯源入库时间
+     */
+    private Long OUT_SITE_TIME;
 
     /**
      * 是否同城异地 0无 1同城 2异地
@@ -1229,10 +1244,6 @@ public class DwdSptb02 implements Serializable {
      */
     private Integer TYPE_TC;
 
-    /**
-     * 车架号 以sptb02.CJSDBH 取自SPTB02D1.VVIN
-     */
-    private String VVIN;
 
 
 
