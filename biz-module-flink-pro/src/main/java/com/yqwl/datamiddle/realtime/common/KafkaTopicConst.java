@@ -33,9 +33,13 @@ public class KafkaTopicConst {
     public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
     public static final String CDC_VLMS_UNITE_ORACLE_ALL_0712 = "cdc_vlms_unite_oracle_all_0712";
     public static final String CDC_VLMS_UNITE_ORACLE_Latest_0804 = "cdc_vlms_unite_oracle_Latest_0804";
+    public static final String CDC_VLMS_UNITE_ORACLE_Latest_1031 = "cdc_vlms_unite_oracle_Latest_1031";
+    public static final String CDC_VLMS_UNITE_ORACLE_LCKCS_MDAC12 = "lckcs_mdac12";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP = "cdc_vlms_unite_oracle_group";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712 = "cdc_vlms_unite_oracle_group_all_0712";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804 = "cdc_vlms_unite_oracle_Latest_0804";
+    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_Latest_1031 = "cdc_vlms_unite_oracle_Latest_1031";
+    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_LCKCS_MDAC12 = "cdc_vlms_unite_oracle_Latest_1031";
     //source 表sysc07 cdc kafka topic name
     public static final String ODS_VLMS_SPTB02 = "ods_vlms_sptb02";
     public static final String ODS_VLMS_SPTB02_LATEST_0701 = "ods_vlms_sptb02_latest_0701";

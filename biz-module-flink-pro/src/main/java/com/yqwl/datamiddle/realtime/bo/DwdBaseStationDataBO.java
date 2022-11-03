@@ -217,6 +217,7 @@ public class DwdBaseStationDataBO {
 
     /**
      * 入库仓库代码
+     * site_warehouse.warehouse_code
      */
     private String IN_WAREHOUSE_CODE;
 
@@ -254,5 +255,10 @@ public class DwdBaseStationDataBO {
      * dwm_vlms_sptb02的TRAFFIC_TYPE
      */
     private String TRAFFIC_TYPEOfSPTB02;
+
+    /**
+     * site_warehouse表中的vwlckdm
+     */
+    private String vwlckdm;
 
 }

@@ -240,9 +240,18 @@ public class DwdBaseStationData  {
     private String WAREHOUSE_TYPE;
 
     /**
-     * 物理仓库代码
+     * 物理仓库代码 取自site_warehouse.VWLCKDM  发运仓库的站点代码
      */
 
     private String PHYSICAL_CODE;
 
+    /**
+     * 站点名称 取自site_warehouse.vwlckdm 新增字段 发运仓库的站点名称
+     */
+    private String PHYSICAL_NAME;
+
+    /**
+     * site_warehouse表中的vwlckdm
+     */
+    private String VWLCKDM;
 }
