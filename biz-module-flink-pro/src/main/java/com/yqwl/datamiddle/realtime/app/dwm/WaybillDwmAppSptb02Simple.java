@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,37 +68,80 @@ public class WaybillDwmAppSptb02Simple {
         // 设置savepoint点二级目录位置
         // env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("waybill_dwm_sptb02_simple"));
         log.info("checkpoint设置完成");
+        // mysql 消费源相关参数配
+        Properties properties = new Properties();
+        // 遇到错误跳过
+        properties.setProperty("debezium.inconsistent.schema.handing.mode","warn");
+        properties.setProperty("debezium.event.deserialization.failure.handling.mode","warn");
 
         // mysql消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         // kafka消费源相关参数配置
-        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
-                .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.DWD_VLMS_SPTB02)
-                .setGroupId(KafkaTopicConst.DWD_VLMS_SPTB02_GROUP)
-                .setStartingOffsets(OffsetsInitializer.latest())
-                .setValueOnlyDeserializer(new SimpleStringSchema())
-                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
+        MySqlSource<String> mySqlSource = MySqlSource.<String>builder()
+                .hostname(props.getStr("cdc.mysql.hostname"))
+                .port(props.getInt("cdc.mysql.port"))
+                .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
+                .tableList("data_flink.dwm_vlms_sptb02")
+                // .tableList("data_middle_flink.dwd_vlms_sptb02")
+                .username(props.getStr("cdc.mysql.username"))
+                .password(props.getStr("cdc.mysql.password"))
+                .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
+                .debeziumProperties(properties)
+                .distributionFactorUpper(10.0d)   //针对cdc的错误算法的更改
                 .build();
 
-        // 1.将mysql中的源数据转化成 DataStream
-        SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppSptb02SimpleMysqlSource").uid("WaybillDwmAppSptb02SimpleMysqlSourceStream").name("WaybillDwmAppSptb02SimpleMysqlSourceStream");
+        //1.将mysql中的源数据转化成 DataStream
+        SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppSPTB02MysqlSource").uid("OneOrderToEndDwmAppSPTB02MysqlSourceStream").name("OneOrderToEndDwmAppSPTB02MysqlSourceStream");
 
-        SingleOutputStreamOperator<DwmSptb02No8TimeFields> dwmSptb02Process = mysqlSource.process(new ProcessFunction<String, DwmSptb02No8TimeFields>() {
+        SingleOutputStreamOperator<DwmSptb02No8TimeFields> dwmSptb02Process = mysqlSourceStream.process(new ProcessFunction<String, DwmSptb02No8TimeFields>() {
             @Override
             public void processElement(String value, Context ctx, Collector<DwmSptb02No8TimeFields> out) throws Exception {
                 //获取真实数据
-                DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
+                DwmSptb02No8TimeFields dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02No8TimeFields.class);
+                // DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 Long ddjrq = dwmSptb02.getDDJRQ();
                 if (ddjrq != null && ddjrq >= START && ddjrq <= END) {
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {
-                    String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbhSource + "' limit 1 ";
+                    String sptb02d1Sql = "select CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbhSource + "' limit 1 ";
                     JSONObject sptb02d1 = MysqlUtil.queryNoRedis(sptb02d1Sql);
                     if (sptb02d1 != null) {
-                        String vvin = sptb02d1.getString("VVIN");
+                        // 车型代码
+                        String vehicle_code = sptb02d1.getString("CCPDM");
+                        dwmSptb02.setVEHICLE_CODE(vehicle_code);
+                        if (StringUtils.isNotBlank(vehicle_code)) {
+                            /**
+                             * 1.按照车型代码获取车型名称
+                             * 按照车型代码去关联mdac12 获得 CCXDL
+                             *  SELECT CCXDL FROM ods_vlms_mdac12 WHERE CCPDM = '4F80NL 4Z4ZMC 1909';
+                             */
+                            String mdac12Sql = "select VCPMC ,CCXDL  from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
+                            JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
+                            if (mdac12 != null) {
+                                dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
+                                dwmSptb02.setCCXDL(mdac12.getString("CCXDL"));
+                            }
+                            /**
+                             * select b.vvin,d.vppsm
+                             * from sptb02 a
+                             * inner join sptb02d1 b on a.cjsdbh=b.cjsdbh
+                             * inner join mdac12 v on b.ccpdm = v.ccpdm
+                             * inner  join mdac10 d on v.cpp = d.cpp
+                             * where b.vvin = 'LFVVB9G35N5130282';
+                             */
+                            String mdac1210Sql = "SELECT VPPSM FROM "+ KafkaTopicConst.DIM_VLMS_MDAC1210 +" dim_vlms_mdac1210 WHERE CCPDM='" + vehicle_code +"' limit 1";
+                            JSONObject mdac1210 = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_MDAC1210, mdac1210Sql, vehicle_code);
+                            if (mdac1210 != null){
+                                String vppsm = mdac1210.getString("VPPSM");
+                                if (StringUtils.isNotBlank(vppsm)){
+                                    dwmSptb02.setBRAND_NAME(vppsm);
+                                }
+                            }
+                        }
+                    }
+                        String vvin = dwmSptb02.getVVIN();
                         //-----------------------------------只让vvin与sptb02表能匹配上的的进数-------------------------------------------//
                         if (StringUtils.isNotBlank(vvin)) {
                             //当前时间
@@ -105,40 +150,8 @@ public class WaybillDwmAppSptb02Simple {
                             String vsczt = dwmSptb02.getVSCZT();
                             dwmSptb02.setSTART_PHYSICAL_CODE(vfczt);
                             dwmSptb02.setEND_PHYSICAL_CODE(vsczt);
-                            // 车型代码
-                            String vehicle_code = sptb02d1.getString("CCPDM");
-                            // 车架号 vin码
-                            dwmSptb02.setVVIN(vvin);
-                            dwmSptb02.setVEHICLE_CODE(vehicle_code);
-                            if (StringUtils.isNotBlank(vehicle_code)) {
-                                /**
-                                 * 1.按照车型代码获取车型名称
-                                 * 按照车型代码去关联mdac12 获得 CCXDL
-                                 *  SELECT CCXDL FROM ods_vlms_mdac12 WHERE CCPDM = '4F80NL 4Z4ZMC 1909';
-                                 */
-                                String mdac12Sql = "select VCPMC ,CCXDL  from " + KafkaTopicConst.ODS_VLMS_MDAC12 + " where CCPDM = '" + vehicle_code + "' limit 1 ";
-                                JSONObject mdac12 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC12, mdac12Sql, vehicle_code);
-                                if (mdac12 != null) {
-                                    dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
-                                    dwmSptb02.setCCXDL(mdac12.getString("CCXDL"));
-                                }
-                                /**
-                                 * select b.vvin,d.vppsm
-                                 * from sptb02 a
-                                 * inner join sptb02d1 b on a.cjsdbh=b.cjsdbh
-                                 * inner join mdac12 v on b.ccpdm = v.ccpdm
-                                 * inner  join mdac10 d on v.cpp = d.cpp
-                                 * where b.vvin = 'LFVVB9G35N5130282';
-                                 */
-                                String mdac1210Sql = "SELECT VPPSM FROM "+ KafkaTopicConst.DIM_VLMS_MDAC1210 +" dim_vlms_mdac1210 WHERE CCPDM='" + vehicle_code +"' limit 1";
-                                JSONObject mdac1210 = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_MDAC1210, mdac1210Sql, vehicle_code);
-                                if (mdac1210 != null){
-                                    String vppsm = mdac1210.getString("VPPSM");
-                                    if (StringUtils.isNotBlank(vppsm)){
-                                        dwmSptb02.setBRAND_NAME(vppsm);
-                                    }
-                                }
-                            }
+
+
 
                             /**
                              //理论起运时间 和 理论出库时间
@@ -420,7 +433,7 @@ public class WaybillDwmAppSptb02Simple {
                                 String traffic_type = dwmSptb02.getTRAFFIC_TYPE();
                                 //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
                                 String provincesEnd = endProvinceCode + endCityCode;
-                                //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
+/*                                 //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
                                 if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode) && StringUtils.equals("G", traffic_type)) {
                                     // 公路的省市县代码
                                     String provincesG = startProvinceCode + startCityCode;
@@ -429,7 +442,7 @@ public class WaybillDwmAppSptb02Simple {
                                     } else {
                                         dwmSptb02.setTYPE_TC(2);
                                     }
-                                }
+                                } */
                                 //-----------------开始比较: 铁 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'T' ----------------------------------------------------------//
                                 String vsczt_province_code = dwmSptb02.getVSCZT_PROVINCE_CODE();
                                 String vsczt_city_code = dwmSptb02.getVSCZT_CITY_CODE();
@@ -581,7 +594,7 @@ public class WaybillDwmAppSptb02Simple {
                             DwmSptb02No8TimeFields bean = JsonPartUtil.getBean(dwmSptb02);
                             out.collect(bean);
                         }
-                    }
+
                 }
             }                                                                                                                 // 算子不合并
             }
