@@ -57,7 +57,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("base_station_data_epc_dwd_app_bsd"));
         // 设置savepoint点二级目录位置
