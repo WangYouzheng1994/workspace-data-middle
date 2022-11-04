@@ -57,7 +57,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "yunding");
+        System.setProperty("HADOOP_USER_NAME", "root");
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("base_station_data_epc_dwd_app_bsd"));
         // 设置savepoint点二级目录位置
@@ -65,30 +65,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
 
         log.info("checkpoint设置完成");
 
-        //读取oracle连接配置属性
-        /*        Props props = PropertiesUtil.getProps();
-        //oracle cdc 相关配置
-        Properties properties = new Properties();
-        properties.put("database.tablename.case.insensitive", "false");
-        properties.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
-        properties.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
-        properties.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
-        //properties.put("database.serverTimezone", "UTC");
-        //properties.put("database.serverTimezone", "Asia/Shanghai");
-        properties.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=1521)))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
-
-                SourceFunction<String> oracleSource = OracleSource.<String>builder()
-                .hostname(props.getStr("cdc.oracle.hostname"))
-                .port(props.getInt("cdc.oracle.port"))
-                .database(props.getStr("cdc.oracle.database"))
-                .schemaList(StrUtil.getStrList(props.getStr("cdc.oracle.schema.list"), ","))
-                .tableList("TDS_LJ.BASE_STATION_DATA")
-                .username(props.getStr("cdc.oracle.username"))
-                .password(props.getStr("cdc.oracle.password"))
-                .deserializer(new CustomerDeserialization())
-                .startupOptions(StartupOptions.initial())
-                .debeziumProperties(properties)
-                .build();*/
+        // todo: 加字段 VWLCKDM 加V-的仓库名称字段
 
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
@@ -96,7 +73,7 @@ public class BaseStationDataAndEpcDwdAppBsd {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701)
                 .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701_GROUP)
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -147,8 +124,11 @@ public class BaseStationDataAndEpcDwdAppBsd {
                     String warehouse_code = "";
                     String warehouse_type = "";
                     String warehouse_name = "";
-                    // 出入库类型
-                    String PHYSICAL_CODE = "";
+                    String vlwckmc        = "";
+                    // 出入库代码 site_warehosue/sptb02.VWLCKDM
+                    String physical_code = "";
+                    // 出入库名称 site_warehosue/sptb02.VWLCKMC
+                    String physical_name = "";
                     if (StringUtils.isNotBlank(shop_no)) {
                         String bdsSql = "select * from " + KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS + " where WAREHOUSE_CODE = '" + shop_no + "' limit 1";
                         JSONObject bdsResult = MysqlUtil.querySingle(KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS, bdsSql, shop_no);
@@ -160,7 +140,9 @@ public class BaseStationDataAndEpcDwdAppBsd {
                             // 库房名称
                             warehouse_name = bdsResult.getString("WAREHOUSE_NAME");
                             // VWLCKDM 物理仓库代码
-                            PHYSICAL_CODE = bdsResult.getString("VWLCKDM");
+                            physical_code = bdsResult.getString("VWLCKDM");
+                            // VWLCKMC
+                            physical_name = bdsResult.getString("VWLCKMC");
                             if (StringUtils.isNotBlank(warehouse_type)) {
                                 dwdBaseStationData.setWAREHOUSE_TYPE(warehouse_type);
                             }
@@ -170,8 +152,11 @@ public class BaseStationDataAndEpcDwdAppBsd {
                             if (StringUtils.isNotBlank(warehouse_name)) {
                                 dwdBaseStationData.setIN_WAREHOUSE_NAME(warehouse_name);
                             }
-                            if (StringUtils.isNotBlank(PHYSICAL_CODE)) {
-                                dwdBaseStationData.setPHYSICAL_CODE(PHYSICAL_CODE);
+                            if (StringUtils.isNotBlank(physical_code)) {
+                                dwdBaseStationData.setPHYSICAL_CODE(physical_code);
+                            }
+                            if (StringUtils.isNotBlank(physical_name)) {
+                                dwdBaseStationData.setPHYSICAL_NAME(physical_name);
                             }
                         }
                     }

@@ -93,41 +93,24 @@ public class WaybillDwdAppSptb02Simple {
                 JSONObject jsonObject = JSON.parseObject(value);
                 String after = jsonObject.getString("after");
                 Sptb02 sptb02 = JSON.parseObject(after, Sptb02.class);
-                if (Objects.nonNull(sptb02) && StringUtils.isNotBlank(sptb02.getCJSDBH())) {
+                String cjsdbh = sptb02.getCJSDBH();
+                if (StringUtils.isNotBlank(cjsdbh)) {
                     Long ddjrq = sptb02.getDDJRQ();
                     if (ddjrq >= START && ddjrq <= END) {
                         // 处理实体类 将数据copy到dwdSptb02
                         DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
-                        // 获取原数据的运输方式
-                        String vysfs = sptb02.getVYSFS();
-                        log.info("运单运输方式数据:{}", vysfs);
-                        if (StringUtils.isNotEmpty(vysfs)) {
-                            // 1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
-                            // ('J','TD','SD','G')='G'
-                            if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
-                                dwdSptb02.setTRAFFIC_TYPE("G");
-                                // 运输方式 适配 lc_spec_config
-                                dwdSptb02.setTRANS_MODE_CODE("1");
-                            }
-                            // (''L1'','T') ='T'
-                            if (vysfs.equals("L1") || vysfs.equals("T")) {
-                                dwdSptb02.setTRAFFIC_TYPE("T");
-                                dwdSptb02.setTRANS_MODE_CODE("2");
-                            }
-                            // ('S') ='S'
-                            if (vysfs.equals("S")) {
-                                dwdSptb02.setTRAFFIC_TYPE("S");
-                                dwdSptb02.setTRANS_MODE_CODE("3");
-                            }
-                            // 2.处理 起运时间
-                            // 公路取sptb02.dtvscfsj，铁水取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
-                            if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
-                                dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
-                            }
-                            if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDSJCFSJ())) {
-                                dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
-                            }
-                        }
+                        //  2.   将 dwd->dwmsptb02是否为同城的判断逻辑提在这里
+                        String sptb02d1Sql = "select VVIN, CCPDM from " + KafkaTopicConst.ODS_VLMS_SPTB02D1 + " where CJSDBH = '" + cjsdbh + "' limit 1 ";
+                        JSONObject sptb02d1 = MysqlUtil.queryNoRedis(sptb02d1Sql);
+                        if (sptb02d1 != null){
+                        String vvin = sptb02d1.getString("VVIN");
+                        // sptb02d1对应的VVIN码不为null才可以进入后续的逻辑
+                        if (StringUtils.isNotBlank(vvin)) {
+                            long currentTime = System.currentTimeMillis();
+                            // 车架号 vin码
+                            dwdSptb02.setVVIN(vvin);
+                            dwdSptb02.setWAREHOUSE_UPDATETIME(currentTime);
+
                         // 3.处理 计划下达时间
                         if (Objects.nonNull(sptb02.getDPZRQ())) {
                             dwdSptb02.setPLAN_RELEASE_TIME(sptb02.getDPZRQ());
@@ -241,6 +224,62 @@ public class WaybillDwdAppSptb02Simple {
                                 dwdSptb02.setEND_CITY_CODE(mdac32.getString("CSXDM"));
                             }
                         }
+                            // 获取原数据的运输方式
+                            String vysfs = sptb02.getVYSFS();
+                            log.info("运单运输方式数据:{}", vysfs);
+                            if (StringUtils.isNotEmpty(vysfs)) {
+                                // 1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
+                                // ('J','TD','SD','G')='G'
+                                if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
+                                    dwdSptb02.setTRAFFIC_TYPE("G");
+                                    // 运输方式 适配 lc_spec_config
+                                    dwdSptb02.setTRANS_MODE_CODE("1");
+                                }
+                                // (''L1'','T') ='T'
+                                if (vysfs.equals("L1") || vysfs.equals("T")) {
+                                    dwdSptb02.setTRAFFIC_TYPE("T");
+                                    dwdSptb02.setTRANS_MODE_CODE("2");
+                                }
+                                // ('S') ='S'
+                                if (vysfs.equals("S")) {
+                                    dwdSptb02.setTRAFFIC_TYPE("S");
+                                    dwdSptb02.setTRANS_MODE_CODE("3");
+                                }
+                                // 2.处理 起运时间
+                                // 公路取sptb02.dtvscfsj，铁水取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
+                                if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
+                                    dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
+                                }
+                                if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDSJCFSJ())) {
+                                    dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
+                                }
+
+                                //-----------------------------------------------此处处理是否同城字段_Start--------------------------------------------------------//
+                                /**
+                                 * 铁水的 cdhddm组成的 END_PROVINCE_CODE + END_CITY_CODE 与 其他 I.公路(vwlckdm) II.铁水(vsczt)作比较
+                                 * 若相等 则为同城 1 否则为异地 2 默认为 0
+                                 */
+                                //  获取运单类型
+                                String traffic_type = dwdSptb02.getTRAFFIC_TYPE();
+                                String start_city_code = dwdSptb02.getSTART_CITY_CODE();
+                                String start_province_code = dwdSptb02.getSTART_PROVINCE_CODE();
+                                String end_province_code = dwdSptb02.getEND_PROVINCE_CODE();
+                                String end_city_code = dwdSptb02.getEND_CITY_CODE();
+                                //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
+                                String provincesEnd = end_province_code + end_city_code;
+                                //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
+                                if (StringUtils.isNotBlank(start_province_code) && StringUtils.isNotBlank(start_city_code) && StringUtils.equals("G", traffic_type)) {
+                                    // 公路的省市县代码
+                                    String provincesG = start_province_code + start_city_code;
+                                    if (StringUtils.equals(provincesEnd, provincesG)) {
+                                        dwdSptb02.setTYPE_TC(1);
+                                    } else {
+                                        dwdSptb02.setTYPE_TC(2);
+                                    }
+                                }
+                                //-----------------------------------------------此处处理是否同城字段_End--------------------------------------------------------//
+                            }
+
                         /**
                          *  处理 发车站台 对应的仓库代码 仓库名称
                          *  from sptb02 a
@@ -309,6 +348,8 @@ public class WaybillDwdAppSptb02Simple {
                         // 实际保存的值为after里的值
                         collector.collect(bean);
                         dwdSptb02 = null;
+                        }
+                        }
                     }
                 }
             }
