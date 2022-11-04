@@ -677,6 +677,15 @@ public class OracleSource {
         Props props = PropertiesUtil.getProps();
         KafkaTopicName = props.getStr("kafka.topic");
 
+        String scnstr = props.getStr("cdc.scnscope");
+        String scnstrmin = props.getStr("cdc.scnscopemin");
+        startTime = props.getStr("starttime");
+        endTime = props.getStr("endtime");
+        startTimeAfter = props.getStr("startimeafter");
+        endTimeAfter = props.getStr("endtimeafter");
+        scnScope = Integer.valueOf(scnstr);
+        scnScopeMin = Integer.valueOf(scnstrmin);
+        lastScnScope = scnScope;
         // 初始化连接池
         connectionExecutor = new ThreadPoolExecutor(
                 20, 20, 300, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(Integer.MAX_VALUE));
@@ -700,7 +709,7 @@ public class OracleSource {
         startScn = getStartSCN(oracleCDCConnect, startScn);
         // 读取的位置 从startSCN偏移量开始
         this.currentSinkPosition = startScn;
-
+        lastScnScope =Integer.valueOf(scnstr);
         // 给转换器设置一个Connection，查询metaData信息。
         String jdbcUrl = oracleCDCConfig.getJdbcUrl();
         String username = oracleCDCConfig.getUsername();
