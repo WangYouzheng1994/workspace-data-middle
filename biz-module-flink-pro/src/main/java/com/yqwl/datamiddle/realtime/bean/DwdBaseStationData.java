@@ -250,8 +250,8 @@ public class DwdBaseStationData  {
      */
     private String PHYSICAL_NAME;
 
-    /**
-     * site_warehouse表中的vwlckdm
-     */
-    private String VWLCKDM;
+    // /**
+    //  * site_warehouse表中的vwlckdm
+    //  */
+    // private String VWLCKDM;
 }
