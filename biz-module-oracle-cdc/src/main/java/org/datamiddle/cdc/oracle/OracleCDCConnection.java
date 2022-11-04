@@ -73,6 +73,8 @@ public class OracleCDCConnection {
     private String  rs_id;
     //记录当前要执行的日志
     private LogFile LogFileExecute=null;
+    //记录当前最小的线程下的log
+    private  List<LogFile> LogFileExecuteList=null;
     public OracleCDCConnection() {
     }
 
@@ -357,6 +359,8 @@ public class OracleCDCConnection {
                 }
             }
         }
+        //LogFileExecuteList = new ArrayList<>();
+        //tempList.addAll(LogFileExecuteList);
         // 如果为空 代表没有可以加载的日志文件 结束循环
         if (CollectionUtils.isEmpty(tempList)) {
             // break;
@@ -414,16 +418,16 @@ public class OracleCDCConnection {
     public String buildSelectSql(
             String listenerOptions, String listenerTables, boolean isCdb) {
         StringBuilder sqlBuilder = new StringBuilder(SqlUtil.SQL_SELECT_DATA);
-        sqlBuilder.append(" WHERE ");
+        sqlBuilder.append(" where ");
         if (StringUtils.isNotEmpty(listenerTables)) {
             sqlBuilder.append("  ( ").append(buildSchemaTableFilter(listenerTables, isCdb));
         } else {
             sqlBuilder.append("  ( ").append(buildExcludeSchemaFilter());
         }
         //判断异常类型
-        if(this.identification==4||this.identification==1){
+        /*if(this.identification==4||this.identification==1){
             sqlBuilder.append(" and ").append(" rs_id > '"+this.rs_id+"'");
-        }
+        }*/
         if (StringUtils.isNotEmpty(listenerOptions)) {
             sqlBuilder.append(" and ").append(buildOperationFilter(listenerOptions));
         }
@@ -549,7 +553,7 @@ public class OracleCDCConnection {
             if (autoaddLog) {
                 startSql = SqlUtil.SQL_START_LOG_MINER_AUTO_ADD_LOG;
             } else {
-                startSql = SqlUtil.SQL_LOGMINER_DEBEZIUM;
+                startSql = SqlUtil.SQL_START_LOGMINER;
             }
 
             // 重置，清空preparestatement，重新简历logminer连接

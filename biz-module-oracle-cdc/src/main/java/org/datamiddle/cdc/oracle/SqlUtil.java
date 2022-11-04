@@ -139,9 +139,35 @@ public class SqlUtil {
                     +"     rs_id\n"
                     + "FROM\n"
                     + "    v$logmnr_contents\n";
-                   // + "WHERE\n";
+                    //+ "WHERE\n"
                     //+ "    scn >= ? \n"
-                   // + "    AND scn < ? \n";
+                    //+ "    AND scn < ? \n";
+public static final String SQL_SELECT_DATA_SCN =
+    ""
+            + "SELECT\n"
+            + "    scn,\n"
+            +
+            // oracle 10 没有该字段
+            //            "    commit_scn,\n" +
+            "    timestamp,\n"
+            + "    operation,\n"
+            + "    operation_code,\n"
+            + "    seg_owner,\n"
+            + "    table_name,\n"
+            + "    sql_redo,\n"
+            + "    sql_undo,\n"
+            + "    xidusn,\n"
+            + "    xidslt,\n"
+            + "    xidsqn,\n"
+            + "    row_id,\n"
+            + "    rollback,\n"
+            + "    csf,\n"
+            +"     rs_id\n"
+            + "FROM\n"
+            + "    v$logmnr_contents\n"
+            + "WHERE\n"
+            + "    scn >= ? \n"
+            + "    AND scn < ? \n";
 
     /** 加载包含startSCN和endSCN之间日志的日志文件 */
     public static final String SQL_START_LOGMINER =
@@ -180,7 +206,8 @@ public class SqlUtil {
                     + "  SYS.DBMS_LOGMNR.add_logfile(l_log_rec.name); \n"
                     + "  END IF; \n"
                     + "  END LOOP;\n"
-                    + "  SYS.DBMS_LOGMNR.start_logmnr(       options =>          SYS.DBMS_LOGMNR.skip_corruption        + SYS.DBMS_LOGMNR.no_sql_delimiter        + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n"
+                    + "  SYS.DBMS_LOGMNR.start_logmnr(   startScn =>start_scn,\n" +
+                    "              endScn=>endScn,    options =>          SYS.DBMS_LOGMNR.skip_corruption        + SYS.DBMS_LOGMNR.no_sql_delimiter        + SYS.DBMS_LOGMNR.no_rowid_in_stmt\n"
                     + "  + SYS.DBMS_LOGMNR.dict_from_online_catalog    );\n"
                     + "   end;";
     //根据SCN 开启start_logmnr
