@@ -44,7 +44,7 @@ public class MysqlTools {
             //3.获取连接
             conn = DriverManager.getConnection(url, user, password);
             //2.预编译sql语句，返回PreparedStatement的实例
-            String sql = "select scn,querydata,flags,cas,expire,timeing from memcached_conf where cas = (select max(cas) from memcached_conf )";
+            String sql = "select scn,querydata,flags,cas,expire,timeing from memcached_conf where timeing = (select max(timeing) from memcached_conf )";
             preparedStatement = conn.prepareStatement(sql);
             //3.填充占位符
             //4.执行
