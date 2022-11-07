@@ -268,4 +268,9 @@ public static final String SQL_SELECT_DATA_SCN =
     public static boolean isCreateTemporaryTableSql(String sql) {
         return sql.contains("temporary tables");
     }
+
+    /**
+     * 关闭logminer
+     */
+    public static final String SQL_STOP_LOG_MINER = "BEGIN SYS.DBMS_LOGMNR.END_LOGMNR; end;";
 }
