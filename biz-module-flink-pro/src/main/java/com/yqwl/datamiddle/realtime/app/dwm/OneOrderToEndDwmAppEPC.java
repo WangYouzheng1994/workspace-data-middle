@@ -91,25 +91,21 @@ public class OneOrderToEndDwmAppEPC {
         //4.插入mysql
         mapBsdEpcFilterTime.addSink(JdbcSink.sink(
 
-                "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, BASE_NAME, BASE_CODE, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME )\n" +
+                "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME )\n" +
                         "VALUES\n" +
-                        "        ( ?, ?, ?, ?, ?, ? ) \n" +
+                        "        ( ?, ?,  ?, ? ) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
-                        "   CP9_OFFLINE_TIME = ? ,BASE_NAME = ?,\n" +
-                        "        BASE_CODE = ? , WAREHOUSE_CREATETIME = ? , WAREHOUSE_UPDATETIME = ?",
+                        "   CP9_OFFLINE_TIME = ? , " +
+                        "         WAREHOUSE_CREATETIME = ? , WAREHOUSE_UPDATETIME = ?",
                 (ps, epc) -> {
                     Long nowTime = System.currentTimeMillis();
                     ps.setString(1, epc.getVIN());
                     ps.setLong(2, epc.getCP9_OFFLINE_TIME());
-                    ps.setString(3, epc.getBASE_NAME());
-                    ps.setString(4, epc.getBASE_CODE());
-                    ps.setLong(5, nowTime);
+                    ps.setLong(3, nowTime);
+                    ps.setLong(4, nowTime);
+                    ps.setLong(5, epc.getCP9_OFFLINE_TIME());
                     ps.setLong(6, nowTime);
-                    ps.setLong(7, epc.getCP9_OFFLINE_TIME());
-                    ps.setString(8, epc.getBASE_NAME());
-                    ps.setString(9, epc.getBASE_CODE());
-                    ps.setLong(10, nowTime);
-                    ps.setLong(11, nowTime);
+                    ps.setLong(7, nowTime);
                 },
                 new JdbcExecutionOptions.Builder()
                         .withBatchSize(5000)

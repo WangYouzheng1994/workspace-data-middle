@@ -77,7 +77,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                .startupOptions(StartupOptions.initial())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
@@ -382,6 +382,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
             @Override
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
+                // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
                 if (StringUtils.equals(value.getTraffic_type(), "G") && "T1".equals(value.getHighwayWarehouseType()) && !StringUtils.equals(value.getCQRR(),"分拨中心")) {
                     out.collect(value);
                 }
@@ -413,19 +414,19 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " ACTUAL_OUT_TIME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), " +
                         " SHIPMENT_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ," +
                         " TRANSPORT_VEHICLE_NO          = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), " +
-                        " START_CITY_NAME               = if(START_CITY_NAME = '' , VALUES(START_CITY_NAME), START_CITY_NAME), " +
+                        " START_CITY_NAME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), " +
                         " END_CITY_NAME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), " +
                         " VDWDM                         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), " +
                         " DEALER_NAME                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), " +
                         " SETTLEMENT_Y1                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
                         " BRAND                         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " BASE_CODE                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
-                        " BASE_NAME                     = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
+                        " BASE_NAME                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) ," +
                         " VEHICLE_NUM                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM) ," +
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " SHIPMENT_G_TIME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_G_TIME), SHIPMENT_G_TIME), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ)," +
+                        " DTVSDHSJ                      = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(DTVSDHSJ), DTVSDHSJ)," +
                         " TYPE_G                        = if(TYPE_G = 0 , VALUES(TYPE_G), TYPE_G), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
@@ -581,7 +582,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " ACTUAL_OUT_TIME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), " +
                         " SHIPMENT_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ," +
                         " TRANSPORT_VEHICLE_NO          = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), " +
-                        " START_CITY_NAME               = if(START_CITY_NAME = '' , VALUES(START_CITY_NAME), START_CITY_NAME), " +
+                        " START_CITY_NAME               = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), " +
                         " END_CITY_NAME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), " +
                         " VDWDM                         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), " +
                         " DEALER_NAME                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
@@ -591,13 +592,13 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_START_PLATFORM_TIME        = VALUES(IN_START_PLATFORM_TIME), OUT_START_PLATFORM_TIME = VALUES(OUT_START_PLATFORM_TIME), " +
                         " IN_END_PLATFORM_TIME          = VALUES(IN_END_PLATFORM_TIME), UNLOAD_RAILWAY_TIME = VALUES(UNLOAD_RAILWAY_TIME),  " +
                         " BASE_CODE                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
-                        " BASE_NAME                    = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
+                        " BASE_NAME                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) ," +
                         " VEHICLE_NUM                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), " +
                         " CPZDBH                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                 = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME), " +
                         " FINAL_SITE_TIME               = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                      = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
-                        " TYPE_T                         = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T), " +
+                        " DTVSDHSJ                      = if((SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " TYPE_T                        = if(TYPE_T = 0 , VALUES(TYPE_T), TYPE_T), " +
                         " SETTLEMENT_LAST               = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST),  " +
                         " TYPE_TC                       = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
                 (ps, ootd) -> {
@@ -752,7 +753,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " ACTUAL_OUT_TIME              = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), " +
                         " SHIPMENT_TIME                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ," +
                         " TRANSPORT_VEHICLE_NO         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), " +
-                        " START_CITY_NAME              = if(START_CITY_NAME = '' , VALUES(START_CITY_NAME), START_CITY_NAME), " +
+                        " START_CITY_NAME              = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), " +
                         " END_CITY_NAME                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), " +
                         " VDWDM                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), " +
                         " DEALER_NAME                  = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), \n" +
@@ -762,12 +763,12 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " IN_END_WATERWAY_TIME         = VALUES(IN_END_WATERWAY_TIME), UNLOAD_SHIP_TIME = VALUES(UNLOAD_SHIP_TIME) ,  " +
                         " BRAND                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
                         " BASE_CODE                    = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
-                        " BASE_NAME                    = if(BASE_NAME     = '' ,  VALUES(BASE_NAME), BASE_NAME) , " +
+                        " BASE_NAME                    = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) ," +
                         " VEHICLE_NUM                  = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM), " +
                         " CPZDBH                       = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DOT_SITE_TIME                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DOT_SITE_TIME), DOT_SITE_TIME),  " +
                         " FINAL_SITE_TIME              = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) > SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                     = if((SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
+                        " DTVSDHSJ                     = if((SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_S                       = if(TYPE_S = 0 , VALUES(TYPE_S), TYPE_S), " +
                         " SETTLEMENT_LAST              = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST),   " +
                         " TYPE_TC                      = if(SETTLEMENT_LAST = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
@@ -916,10 +917,12 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_VEHICLE_NO                          = VALUES(DISTRIBUTE_VEHICLE_NO) , " +
                         " DISTRIBUTE_SHIPMENT_TIME                       = VALUES(DISTRIBUTE_SHIPMENT_TIME) , " +
                         " DISTRIBUTE_VEHICLE_NUM                         = VALUES(DISTRIBUTE_VEHICLE_NUM)," +
-                        " FINAL_SITE_TIME                                = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-                        " DTVSDHSJ                                       = if((SETTLEMENT_Y1   = '' or VALUES(SETTLEMENT_Y1)   >= SETTLEMENT_Y1 ) , VALUES(DTVSDHSJ), DTVSDHSJ), " +
-                        " TYPE_G                                         = if(TYPE_G           = 0 , VALUES(TYPE_G), TYPE_G), " +
+
                         " SETTLEMENT_LAST                                = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
+                        " FINAL_SITE_TIME                                = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
+
+                        " TYPE_G                                         = if(TYPE_G           = 0 , VALUES(TYPE_G), TYPE_G), " +
+                        " DTVSDHSJ                                       = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_TC                                        = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
 
                 (ps, ootd) -> {
