@@ -133,7 +133,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb02", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before120daysTime){
+                            if (Long.valueOf(ddjrq) >= before180daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -144,7 +144,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb01c", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
+                            if (Long.parseLong(ddjrq) >= before180daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -155,7 +155,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("base_station_data", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("SAMPLE_U_T_C");
                         if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
+                            if (Long.parseLong(ddjrq) >= before180daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
@@ -166,7 +166,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("base_station_data_epc", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("OPERATETIME");
                         if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
+                            if (Long.parseLong(ddjrq) >= before180daysTime){
                                 return jsonObj;
                             }else {
                                 return null;

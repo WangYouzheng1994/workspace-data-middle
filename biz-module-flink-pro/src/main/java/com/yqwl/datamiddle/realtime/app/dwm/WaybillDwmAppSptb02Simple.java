@@ -6,6 +6,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
@@ -42,8 +43,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppSptb02Simple {
-    //2022-06-01 00:00:00
-    private static final long START = 1654012800000L;
+    //2022-01-01 00:00:00
+    private static final long START = 1640966400000L;
     //2022-12-31 23:59:59
     private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
@@ -87,6 +88,7 @@ public class WaybillDwmAppSptb02Simple {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
+                .startupOptions(StartupOptions.latest())
                 .distributionFactorUpper(10.0d)   //针对cdc的错误算法的更改
                 .build();
 
