@@ -161,7 +161,17 @@ public class OracleSource {
             logminerConverter.setConnection(connection);
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            //如果 oracle连接异常，延迟3s后重启
+            if(e.getMessage().contains("Connection reset by peer")){
+                try {
+                    Thread.sleep(3 * 1000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+                serviceRestart(currentSinkPosition);
+            }
+            //退出
+            System.exit(0);
         }
         // 初始化Logminer
         payLoad(oracleCDCConnect);
@@ -176,7 +186,17 @@ public class OracleSource {
                 logminerConverter.setConnection(validConnection);
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
-                throw new RuntimeException(e);
+
+                if(e.getMessage().contains("Connection reset by peer")){
+                    try {
+                        Thread.sleep(3 * 1000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    serviceRestart(currentSinkPosition);
+                }
+                //退出
+                System.exit(0);
             }
             running(oracleCDCConnect);
         }
@@ -398,7 +418,7 @@ public class OracleSource {
     }
     public void executeSQL(OracleCDCConnection connecUtil,BigInteger currentStartScn,BigInteger endeScn){
         // 开始日志挖掘
-        connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endeScn, false,this.currentSinkPosition);
+        boolean startLogminerFlag = connecUtil.startOrUpdateLogMiner(connecUtil, currentStartScn, endeScn, false, this.currentSinkPosition);
         //writeTxt("开始的scn:"+currentStartScn+"--结束scn:"+endScn.getLeft(),"D://cdc/dd.txt");
 
         // 读取v$logmnr_contents 数据由线程池加载
@@ -409,7 +429,7 @@ public class OracleSource {
         // 请求日志挖掘结果logmnr_contents查看。 结果会放到 connection的logminerData中 (ResultSet)。 TODO：此操作响应快慢与数据量反比，需要用多线程异步获取结果。
         boolean selectResult = connecUtil.queryData(logMinerSelectSql,currentStartScn,this.currentSinkPosition);
         log.info("执行完日志视图");
-        if (selectResult) {
+        if (selectResult&&startLogminerFlag) {
             // jdbc请求成功
             try {
                 // 解析
@@ -429,7 +449,7 @@ public class OracleSource {
                             this.currentSinkPosition = queueData.getScn();
                             this.rs_id = queueData.getRsId();
                             //写入memcached
-                            Boolean aBoolean = MemcachedUtil.setValue(currentSinkPosition + "" + rs_id, 0, querydata+"||||"+ new Date().getTime());
+                            Boolean aBoolean = MemcachedUtil.setValue(currentSinkPosition + "" + rs_id, 0, querydata+"|||||||||||||"+ new Date().getTime());
                             //log.info("写入memcache成功："+aBoolean);
                            // writeTxt("内容："+queueData,"D://cdc/dd.txt");
 
@@ -722,7 +742,16 @@ public class OracleSource {
             logminerConverter.setConnection(connection);
         } catch (SQLException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException(e);
+            if(e.getMessage().contains("Connection reset by peer")){
+                try {
+                    Thread.sleep(3 * 1000);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+                serviceRestart(currentSinkPosition);
+            }
+            //退出
+            System.exit(0);
         }
         // String driverClass = oracleCDCConfig.getDriverClass();
         // 初始化Logminer
@@ -739,7 +768,16 @@ public class OracleSource {
                 logminerConverter.setConnection(validConnection);
             } catch (SQLException e) {
                 log.error(e.getMessage(), e);
-                throw new RuntimeException(e);
+                if(e.getMessage().contains("Connection reset by peer")){
+                    try {
+                        Thread.sleep(3 * 1000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    serviceRestart(currentSinkPosition);
+                }
+                //退出
+                System.exit(0);
             }
             running(oracleCDCConnect);
         }
@@ -795,5 +833,55 @@ public class OracleSource {
         }
         //return the valid connection
         return conn;
+    }
+    //重启逻辑
+    public void serviceRestart(BigInteger currentStartScn){
+        //根据当前得scn 重新启动程序
+        Props props = PropertiesUtil.getProps();
+        String host = props.getStr("cdc.oracle.hostname");
+        String port = props.getStr("cdc.oracle.port");
+        String tableArray = props.getStr("cdc.oracle.table.list");
+        String user = props.getStr("cdc.oracle.username");
+        String pwd = props.getStr("cdc.oracle.password");
+        String oracleServer = props.getStr("cdc.oracle.database");
+        KafkaTopicName = props.getStr("kafka.topic");
+        schema = props.getStr("cdc.oracle.schema.list");
+        String scnstr = props.getStr("cdc.scnscope");
+        String scnstrmin = props.getStr("cdc.scnscopemin");
+        List<String> sourceTableList = null;
+        startTime = props.getStr("starttime");
+        endTime = props.getStr("endtime");
+        startTimeAfter = props.getStr("startimeafter");
+        endTimeAfter = props.getStr("endtimeafter");
+        scnScope = Integer.valueOf(scnstr);
+        scnScopeMin = Integer.valueOf(scnstrmin);
+        lastScnScope = scnScope;
+        try {
+            sourceTableList = getSourceTableList();
+            //sourceTableList = new ArrayList<>();
+            //sourceTableList.add("TDS_LJ.SPTB02");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        log.info("重启启动抽取程序@@@@@@@@@@@@@@");
+        //当前死掉得scn
+        String scn = currentStartScn.toString();
+        String rs_id = "a";
+        OracleCDCConfig build = OracleCDCConfig.builder()
+                .startSCN(scn)
+                .endSCN(scn)
+                .identification(4)
+                .rs_id(" " + rs_id + " ") //空格不能删
+                .readPosition("ALL")
+                .driverClass("oracle.jdbc.OracleDriver")
+                // .table(Arrays.asList(tableArray))
+                .table(sourceTableList)
+                .username(user)
+                .password(pwd).jdbcUrl("jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=OFF)(FAILOVER=OFF)(ADDRESS=(PROTOCOL=tcp)(HOST=" +
+                        host + ")(PORT=" +
+                        port + ")))(CONNECT_DATA=(SID=" +
+                        oracleServer + ")))").build();
+        new OracleSource().reStart(build);
+
     }
 }
