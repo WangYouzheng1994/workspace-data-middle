@@ -1158,4 +1158,13 @@ public class OracleCDCConnection {
         res = String.valueOf(ts);
         return res;
     }
+    //关闭logminer
+    public void closeLogminer(OracleCDCConnection connecUtil) {
+        Connection connection = connecUtil.getConnection();
+        try {
+            connection.prepareCall(SqlUtil.END_LOGMNR);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

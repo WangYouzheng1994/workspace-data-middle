@@ -467,7 +467,9 @@ public class OracleSource {
                                 // TODO: 推送到Kafka，这里需要做Kafka推送记录了~
                             } */
                 }
-
+                //关闭logminer
+                connecUtil.closeLogminer(connecUtil);
+                log.info("关闭logminer查询");
             } catch (Exception e) {
                 //如果出错此处记录
                 //writeTxtFG("断点续传记录SCN，开始SCN="+currentStartScn+",消费SCN="+currentSinkPosition+"Identification = 4,"+"rs_id="+rs_id,"D://cdc/mysqlRecord.txt");
