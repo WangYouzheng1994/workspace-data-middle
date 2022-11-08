@@ -541,8 +541,8 @@ public class OracleCDCConnection {
      * @param endScn
      * @param autoaddLog
      */
-    public void startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog,BigInteger currentSinkPosition) {
-
+    public boolean startOrUpdateLogMiner(OracleCDCConnection connection, BigInteger startScn, BigInteger endScn, boolean autoaddLog,BigInteger currentSinkPosition) {
+        boolean returnFlag = true;
         String startSql;
         try {
             // 任务偏移量赋值
@@ -576,7 +576,12 @@ public class OracleCDCConnection {
             //writeTxtFG("断点续传记录SCN，开始SCN="+startScn+",消费SCN="+currentSinkPosition+"Identification = 2","D://cdc/mysqlRecord.txt");
             // this.CURRENT_STATE.set(STATE.FAILED);
             // this.exception = e;
+            if(e.getMessage().contains("ORA-16241")||e.getMessage().contains("ORA-01291")){
+                returnFlag = false;
+            }
             throw new RuntimeException(e);
+        }finally {
+            return  returnFlag;
         }
     }
 
@@ -1152,5 +1157,14 @@ public class OracleCDCConnection {
         long ts = date.getTime();
         res = String.valueOf(ts);
         return res;
+    }
+    //关闭logminer
+    public void closeLogminer(OracleCDCConnection connecUtil) {
+        Connection connection = connecUtil.getConnection();
+        try {
+            connection.prepareCall(SqlUtil.END_LOGMNR);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

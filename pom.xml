@@ -388,6 +388,8 @@
                 <config.group>DEFAULT_GROUP</config.group>
                 <!--Nacos服务发现地址-->
                 <discovery.server-addr>192.168.3.197:30000</discovery.server-addr>
+				<!-- log4j滚动输出日志位置 -->
+				<rollingFileRoute>/usr/local/data/logs/rollingFile.log</rollingFileRoute>
             </properties>
         </profile>
         <!-- 测试 -->
@@ -406,6 +408,8 @@
                 <config.group>DEFAULT_GROUP</config.group>
                 <!--Nacos服务发现地址-->
                 <discovery.server-addr>192.168.3.197:30000</discovery.server-addr>
+				<!-- log4j滚动输出日志位置 -->
+				<rollingFileRoute>/data/opt/jar/logs/rollingFile.log</rollingFileRoute>
             </properties>
         </profile>
         <!-- 生产 -->
@@ -424,6 +428,8 @@
                 <config.group>DEFAULT_GROUP</config.group>
                 <!--Nacos服务发现地址-->
                 <discovery.server-addr>127.0.0.1:88481</discovery.server-addr>
+				<!-- log4j滚动输出日志位置 -->
+				<rollingFileRoute>/data/opt/jar/logs/rollingFile.log</rollingFileRoute>
             </properties>
         </profile>
     </profiles>
