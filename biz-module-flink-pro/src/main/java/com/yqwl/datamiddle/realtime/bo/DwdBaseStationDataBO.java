@@ -247,6 +247,11 @@ public class DwdBaseStationDataBO {
     private String PHYSICAL_CODE;
 
     /**
+     * 站点名称 取自site_warehouse.vwlckdm 新增字段 发运仓库的站点名称
+     */
+    private String PHYSICAL_NAME;
+
+    /**
      * dim_vlms_warehouse_rs的WAREHOUSE_TYPE
      */
     private String WAREHOUSE_TYPEfDimRS;

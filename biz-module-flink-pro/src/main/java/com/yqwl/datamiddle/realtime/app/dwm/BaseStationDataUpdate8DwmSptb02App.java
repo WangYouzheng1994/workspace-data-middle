@@ -22,8 +22,22 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.kafka.common.TopicPartition;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
+
+/**
+ * @Description: 溯源更新dwdsptb02与dwmsptb02相关字段
+ *               更新的字段有:
+ *               IN_SITE_TIME 入库日期
+ *               LEAVE_SITE_TIME 出库日期
+ *               IN_WAREHOUSE_NAME 仓库名称
+ *               铁水的 8个时间物流节点字段
+ * @Author: XiaoFeng
+ * @Date: 2022/11/07
+ * @Version: V2.0
+ */
 
 @Slf4j
 public class BaseStationDataUpdate8DwmSptb02App {
@@ -33,6 +47,10 @@ public class BaseStationDataUpdate8DwmSptb02App {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 从偏移量表中读取指定的偏移量模式
+        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ODS_VLMS_SPTB02_LATEST_0701, 0);
+        offsetMap.put(topicPartition, 109000L);
 
         log.info("初始化流处理环境完成");
         //设置CK相关参数
@@ -51,6 +69,7 @@ public class BaseStationDataUpdate8DwmSptb02App {
                 .setGroupId(KafkaTopicConst.DWD_VLMS_BASE_STATION_DATA_GROUP_1)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 .build();
 
         SingleOutputStreamOperator<String> mysqlStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "BaseStationDataUpdate8DwmSptb02AppMySQL-Source").uid("BaseStationDataUpdate8DwmSptb02AppmysqlSource").name("BaseStationDataUpdate8DwmSptb02AppMysqlSource");

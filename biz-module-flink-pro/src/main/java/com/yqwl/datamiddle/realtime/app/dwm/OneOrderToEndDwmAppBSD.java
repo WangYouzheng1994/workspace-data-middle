@@ -186,14 +186,14 @@ public class OneOrderToEndDwmAppBSD {
                         " VALUES\n" +
                         " ( ?, ?, ?, ?, ?) \n" +
                         " ON DUPLICATE KEY UPDATE \n" +
-                        " IN_WAREHOUSE_NAME = VALUES(IN_WAREHOUSE_NAME) ,IN_WAREHOUSE_CODE = VALUES(IN_WAREHOUSE_CODE),\n" +
+                        " IN_WAREHOUSE_NAME = VALUES(IN_WAREHOUSE_NAME), " +
+                        " IN_WAREHOUSE_CODE = VALUES(IN_WAREHOUSE_CODE), " +
                         " IN_SITE_TIME = if(LEAVE_FACTORY_TIME < ? AND (IN_SITE_TIME = 0 OR IN_SITE_TIME > ?), VALUES(IN_SITE_TIME), IN_SITE_TIME), WAREHOUSE_UPDATETIME = VALUES(WAREHOUSE_UPDATETIME)",
                 (ps, bsd) -> {
                     Long nowTime = System.currentTimeMillis();
-
                     ps.setString(1, bsd.getVIN());
-                    if (StringUtils.isNotBlank(bsd.getIN_WAREHOUSE_NAME())){
-                        ps.setString(2, bsd.getIN_WAREHOUSE_NAME());
+                    if (StringUtils.isNotBlank(bsd.getPHYSICAL_NAME())){
+                        ps.setString(2, bsd.getPHYSICAL_NAME());
                     }else {
                         ps.setString(2, "");
                     }
