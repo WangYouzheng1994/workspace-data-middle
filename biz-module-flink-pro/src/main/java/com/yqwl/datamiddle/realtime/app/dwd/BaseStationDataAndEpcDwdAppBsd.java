@@ -65,15 +65,13 @@ public class BaseStationDataAndEpcDwdAppBsd {
 
         log.info("checkpoint设置完成");
 
-        // todo: 加字段 VWLCKDM 加V-的仓库名称字段
-
         //kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701)
                 .setGroupId(KafkaTopicConst.ODS_VLMS_BASE_STATION_DATA_LATEST_0701_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 

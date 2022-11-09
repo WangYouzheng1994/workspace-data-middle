@@ -254,8 +254,8 @@ public class WaybillDwdAppSptb02Simple {
                                     dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
                                 }
 
-                                //-----------------------------------------------此处处理是否同城字段_Start--------------------------------------------------------//
-                                /**
+                                //-----------------------------------------------此处 处理是否同城字段_Start--------------------------------------------------------//
+                                /*
                                  * 铁水的 cdhddm组成的 END_PROVINCE_CODE + END_CITY_CODE 与 其他 I.公路(vwlckdm) II.铁水(vsczt)作比较
                                  * 若相等 则为同城 1 否则为异地 2 默认为 0
                                  */
@@ -265,6 +265,7 @@ public class WaybillDwdAppSptb02Simple {
                                 String start_province_code = dwdSptb02.getSTART_PROVINCE_CODE();
                                 String end_province_code = dwdSptb02.getEND_PROVINCE_CODE();
                                 String end_city_code = dwdSptb02.getEND_CITY_CODE();
+                                //  赋值是否同城字段
                                 //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
                                 String provincesEnd = end_province_code + end_city_code;
                                 //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//

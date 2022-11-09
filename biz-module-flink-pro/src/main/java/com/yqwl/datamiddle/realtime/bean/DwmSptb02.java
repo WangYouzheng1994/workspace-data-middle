@@ -1408,14 +1408,19 @@ public class DwmSptb02 implements Serializable {
     private Long IN_END_J_TIME;
 
     /**
-     * 核实到货时间
-     */
-    private Long ACCOUNTING_TIME;
-
-    /**
      * 溯源 入库名称
      */
     private String IN_WAREHOUSE_NAME;
+
+    /**
+     * 溯源出库时间
+     */
+    private Long LEAVE_SITE_TIME;
+
+    /**
+     * 核实到货时间
+     */
+    private Long ACCOUNTING_TIME;
 
     /**
      * 溯源 入库时间

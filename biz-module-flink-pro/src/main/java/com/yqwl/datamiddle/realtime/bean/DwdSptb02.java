@@ -1234,9 +1234,9 @@ public class DwdSptb02 implements Serializable {
     private Long IN_SITE_TIME;
 
     /**
-     * 溯源入库时间
+     * 溯源出库时间
      */
-    private Long OUT_SITE_TIME;
+    private Long LEAVE_SITE_TIME;
 
     /**
      * 是否同城异地 0无 1同城 2异地

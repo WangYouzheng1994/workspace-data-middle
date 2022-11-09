@@ -35,8 +35,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppBSD {
-    // 2021-06-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
-    private static final long START = 1622476800000L;
+    // 2022-01-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
+    private static final long START = 1640966400000L;
     // 2022-12-31 23:59:59
     private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
@@ -186,14 +186,14 @@ public class OneOrderToEndDwmAppBSD {
                         " VALUES\n" +
                         " ( ?, ?, ?, ?, ?) \n" +
                         " ON DUPLICATE KEY UPDATE \n" +
-                        " IN_WAREHOUSE_NAME = VALUES(IN_WAREHOUSE_NAME) ,IN_WAREHOUSE_CODE = VALUES(IN_WAREHOUSE_CODE),\n" +
+                        " IN_WAREHOUSE_NAME = VALUES(IN_WAREHOUSE_NAME), " +
+                        " IN_WAREHOUSE_CODE = VALUES(IN_WAREHOUSE_CODE), " +
                         " IN_SITE_TIME = if(LEAVE_FACTORY_TIME < ? AND (IN_SITE_TIME = 0 OR IN_SITE_TIME > ?), VALUES(IN_SITE_TIME), IN_SITE_TIME), WAREHOUSE_UPDATETIME = VALUES(WAREHOUSE_UPDATETIME)",
                 (ps, bsd) -> {
                     Long nowTime = System.currentTimeMillis();
-
                     ps.setString(1, bsd.getVIN());
-                    if (StringUtils.isNotBlank(bsd.getIN_WAREHOUSE_NAME())){
-                        ps.setString(2, bsd.getIN_WAREHOUSE_NAME());
+                    if (StringUtils.isNotBlank(bsd.getPHYSICAL_NAME())){
+                        ps.setString(2, bsd.getPHYSICAL_NAME());
                     }else {
                         ps.setString(2, "");
                     }

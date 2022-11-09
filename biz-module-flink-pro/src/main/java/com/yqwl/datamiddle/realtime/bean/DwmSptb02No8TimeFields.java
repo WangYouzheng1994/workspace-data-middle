@@ -1385,15 +1385,19 @@ public class DwmSptb02No8TimeFields implements Serializable {
     private String BRAND_NAME;
 
     /**
-     * 核实到货时间
-     */
-    private Long ACCOUNTING_TIME;
-
-
-    /**
      * 溯源 入库名称
      */
     private String IN_WAREHOUSE_NAME;
+
+    /**
+     * 溯源出库时间
+     */
+    private Long LEAVE_SITE_TIME;
+
+    /**
+     * 核实到货时间
+     */
+    private Long ACCOUNTING_TIME;
 
 
     /**

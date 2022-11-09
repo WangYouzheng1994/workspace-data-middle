@@ -77,7 +77,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.initial())
+                .startupOptions(StartupOptions.latest())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
@@ -917,10 +917,8 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " DISTRIBUTE_VEHICLE_NO                          = VALUES(DISTRIBUTE_VEHICLE_NO) , " +
                         " DISTRIBUTE_SHIPMENT_TIME                       = VALUES(DISTRIBUTE_SHIPMENT_TIME) , " +
                         " DISTRIBUTE_VEHICLE_NUM                         = VALUES(DISTRIBUTE_VEHICLE_NUM)," +
-
                         " SETTLEMENT_LAST                                = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(SETTLEMENT_LAST), SETTLEMENT_LAST), " +
                         " FINAL_SITE_TIME                                = if(SETTLEMENT_LAST != '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(FINAL_SITE_TIME), 0), " +
-
                         " TYPE_G                                         = if(TYPE_G           = 0 , VALUES(TYPE_G), TYPE_G), " +
                         " DTVSDHSJ                                       = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(DTVSDHSJ), DTVSDHSJ), " +
                         " TYPE_TC                                        = if(SETTLEMENT_LAST  = '' or VALUES(SETTLEMENT_LAST) >= SETTLEMENT_LAST, VALUES(TYPE_TC), TYPE_TC)",
