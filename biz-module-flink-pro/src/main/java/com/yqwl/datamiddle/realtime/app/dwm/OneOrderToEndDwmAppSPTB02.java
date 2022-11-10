@@ -103,58 +103,58 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
                 }
                 if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= START && ddjrq1 <= END && flag) {
-                        OotdTransition ootdTransition = new OotdTransition();
-                        String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
-                        String vvin = dwmSptb02.getVVIN();                                      // 底盘号
-                        String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      // 车型代码
-                        String vehicle_name = dwmSptb02.getVEHICLE_NAME();                      // 车型名称
-                        Long ddjrq = dwmSptb02.getDDJRQ();                                      // 整车物流接收STD日期
-                        String cjhdh = dwmSptb02.getCJHDH();                                    // 任务单号
-                        Long dphscsj = dwmSptb02.getDPHSCSJ();                                  // 配板日期
-                        String vph = dwmSptb02.getVPH();                                        // 新P号,二次配板
-                        String cpzdbh = dwmSptb02.getCPZDBH();                                  // Y号,配板单号
-                        Long assign_time = dwmSptb02.getASSIGN_TIME();                          // 指派运输商日期
-                        String transportName = dwmSptb02.getTRANSPORT_NAME();                   // 指派承运商名称
-                        Long actual_out_time = dwmSptb02.getACTUAL_OUT_TIME();                  // 出库日期
-                        Long shipment_time = dwmSptb02.getSHIPMENT_TIME();                      // 起运日期 公路/铁路
-                        String vjsydm = dwmSptb02.getVJSYDM();                                  // 运输车号
-                        String start_city_name = dwmSptb02.getSTART_CITY_NAME();                // 始发城市
-                        String end_city_name = dwmSptb02.getEND_CITY_NAME();                    // 目的城市
-                        String vdwdm = dwmSptb02.getVDWDM();                                    // 经销商代码
-                        String dealer_name = dwmSptb02.getDEALER_NAME();                        // 经销商名称
-                        String vysfs = dwmSptb02.getVYSFS();                                    // 原始的运输方式
-                        String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      // dwm的合出来的运输方式
-                        String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      // 开始站台/港口仓库名称
-                        String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          // 到达站台/港口仓库名称
-                        Long in_start_platform_time = dwmSptb02.getIN_START_PLATFORM_TIME();    // 铁路的入开始站台时间
-                        Long out_start_platform_time = dwmSptb02.getOUT_START_PLATFORM_TIME();  // 铁路的出开始站台时间
-                        Long in_end_platform_time = dwmSptb02.getIN_END_PLATFORM_TIME();        // 铁路的入目的站台时间
-                        Long unload_railway_time = dwmSptb02.getUNLOAD_RAILWAY_TIME();          // 铁路的卸车时间
-                        Long in_start_waterway_time = dwmSptb02.getIN_START_WATERWAY_TIME();    // 水路的入开始港口时间
-                        Long end_start_waterway_time = dwmSptb02.getEND_START_WATERWAY_TIME();  // 水路的出开始港口时间
-                        Long in_end_waterway_time = dwmSptb02.getIN_END_WATERWAY_TIME();        // 水路的入目的港口时间
-                        Long unload_ship_time = dwmSptb02.getUNLOAD_SHIP_TIME();                // 水路的卸船时间
-                        String highwayWarehouseType = dwmSptb02.getHIGHWAY_WAREHOUSE_TYPE();    // 公路运单物理仓库对应的仓库类型
-                        Long warehouse_updatetime = System.currentTimeMillis();                 // 记录更新时间
-                        String host_com_code = dwmSptb02.getHOST_COM_CODE();                    // 主机公司代码
-                        String base_code = dwmSptb02.getBASE_CODE();                            // 基地代码
-                        String base_name = dwmSptb02.getBASE_NAME();                            // 基地名称
-                        ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           // 记录更新时间
-                        ootdTransition.setVVIN(vvin);                                           // vin码 先赋值
-                        String vyscdm = dwmSptb02.getVYSCDM();                                  // 运输车代码 关联 mdac33.vyscdm
-                        ootdTransition.setTraffic_type(traffic_type);                           // 运输类型
-                        ootdTransition.setHighwayWarehouseType(highwayWarehouseType);           // ootd的赋值 公路运单物理仓库对应的仓库类型
-                        Long dot_site_time = dwmSptb02.getDOT_SITE_TIME();                      // 打点到货时间
-                        Long final_site_time = dwmSptb02.getFINAL_SITE_TIME();                  // 最终到货时间 (经销商确认到货时间)
-                        Long dtvsdhsj = dwmSptb02.getDTVSDHSJ();                                // DCS到货时间 (公路TVS到货时间)
-                        // 兜底行为
-                        Long dztxcsj  = dwmSptb02.getDZTXCSJ();                                 // 中铁卸车时间  兜底
-                        Long dsjcfsj  = dwmSptb02.getDSJCFSJ();                                 // 始发站台/港口实际离场时间(实际出发时间)
-                        Long dgpsdhsj = dwmSptb02.getDGPSDHSJ();                                // 目的站台,港口 到港/到站时间
-                        Integer type_tc = dwmSptb02.getTYPE_TC();                               // 同城异地标识 1为同城 2为异地 0为默认无
-                        Long ddjrq_r3 = dwmSptb02.getDDJRQ_R3();                                // 配板下发日期 R3 sptb01c.ddjrq
-                        String brand_name = dwmSptb02.getBRAND_NAME();                          // 汽车品牌名字 mdac10.vppsm 20220826
-                        String cqrr = dwmSptb02.getCQRR();                                      // 存储区域公司 原生字段 用作识别'分拨中心'
+                    OotdTransition ootdTransition = new OotdTransition();
+                    String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
+                    String vvin = dwmSptb02.getVVIN();                                      // 底盘号
+                    String vehicle_code = dwmSptb02.getVEHICLE_CODE();                      // 车型代码
+                    String vehicle_name = dwmSptb02.getVEHICLE_NAME();                      // 车型名称
+                    Long ddjrq = dwmSptb02.getDDJRQ();                                      // 整车物流接收STD日期
+                    String cjhdh = dwmSptb02.getCJHDH();                                    // 任务单号
+                    Long dphscsj = dwmSptb02.getDPHSCSJ();                                  // 配板日期
+                    String vph = dwmSptb02.getVPH();                                        // 新P号,二次配板
+                    String cpzdbh = dwmSptb02.getCPZDBH();                                  // Y号,配板单号
+                    Long assign_time = dwmSptb02.getASSIGN_TIME();                          // 指派运输商日期
+                    String transportName = dwmSptb02.getTRANSPORT_NAME();                   // 指派承运商名称
+                    Long actual_out_time = dwmSptb02.getACTUAL_OUT_TIME();                  // 出库日期
+                    Long shipment_time = dwmSptb02.getSHIPMENT_TIME();                      // 起运日期 公路/铁路
+                    String vjsydm = dwmSptb02.getVJSYDM();                                  // 运输车号
+                    String start_city_name = dwmSptb02.getSTART_CITY_NAME();                // 始发城市
+                    String end_city_name = dwmSptb02.getEND_CITY_NAME();                    // 目的城市
+                    String vdwdm = dwmSptb02.getVDWDM();                                    // 经销商代码
+                    String dealer_name = dwmSptb02.getDEALER_NAME();                        // 经销商名称
+                    String vysfs = dwmSptb02.getVYSFS();                                    // 原始的运输方式
+                    String traffic_type = dwmSptb02.getTRAFFIC_TYPE();                      // dwm的合出来的运输方式
+                    String start_warehouse_name = dwmSptb02.getSTART_WAREHOUSE_NAME();      // 开始站台/港口仓库名称
+                    String end_warehouse_name = dwmSptb02.getEND_WAREHOUSE_NAME();          // 到达站台/港口仓库名称
+                    Long in_start_platform_time = dwmSptb02.getIN_START_PLATFORM_TIME();    // 铁路的入开始站台时间
+                    Long out_start_platform_time = dwmSptb02.getOUT_START_PLATFORM_TIME();  // 铁路的出开始站台时间
+                    Long in_end_platform_time = dwmSptb02.getIN_END_PLATFORM_TIME();        // 铁路的入目的站台时间
+                    Long unload_railway_time = dwmSptb02.getUNLOAD_RAILWAY_TIME();          // 铁路的卸车时间
+                    Long in_start_waterway_time = dwmSptb02.getIN_START_WATERWAY_TIME();    // 水路的入开始港口时间
+                    Long end_start_waterway_time = dwmSptb02.getEND_START_WATERWAY_TIME();  // 水路的出开始港口时间
+                    Long in_end_waterway_time = dwmSptb02.getIN_END_WATERWAY_TIME();        // 水路的入目的港口时间
+                    Long unload_ship_time = dwmSptb02.getUNLOAD_SHIP_TIME();                // 水路的卸船时间
+                    String highwayWarehouseType = dwmSptb02.getHIGHWAY_WAREHOUSE_TYPE();    // 公路运单物理仓库对应的仓库类型
+                    Long warehouse_updatetime = System.currentTimeMillis();                 // 记录更新时间
+                    String host_com_code = dwmSptb02.getHOST_COM_CODE();                    // 主机公司代码
+                    String base_code = dwmSptb02.getBASE_CODE();                            // 基地代码
+                    String base_name = dwmSptb02.getBASE_NAME();                            // 基地名称
+                    ootdTransition.setWAREHOUSE_UPDATETIME(warehouse_updatetime);           // 记录更新时间
+                    ootdTransition.setVVIN(vvin);                                           // vin码 先赋值
+                    String vyscdm = dwmSptb02.getVYSCDM();                                  // 运输车代码 关联 mdac33.vyscdm
+                    ootdTransition.setTraffic_type(traffic_type);                           // 运输类型
+                    ootdTransition.setHighwayWarehouseType(highwayWarehouseType);           // ootd的赋值 公路运单物理仓库对应的仓库类型
+                    Long dot_site_time = dwmSptb02.getDOT_SITE_TIME();                      // 打点到货时间
+                    Long final_site_time = dwmSptb02.getFINAL_SITE_TIME();                  // 最终到货时间 (经销商确认到货时间)
+                    Long dtvsdhsj = dwmSptb02.getDTVSDHSJ();                                // DCS到货时间 (公路TVS到货时间)
+                    // 兜底行为
+                    Long dztxcsj = dwmSptb02.getDZTXCSJ();                                 // 中铁卸车时间  兜底
+                    Long dsjcfsj = dwmSptb02.getDSJCFSJ();                                 // 始发站台/港口实际离场时间(实际出发时间)
+                    Long dgpsdhsj = dwmSptb02.getDGPSDHSJ();                                // 目的站台,港口 到港/到站时间
+                    Integer type_tc = dwmSptb02.getTYPE_TC();                               // 同城异地标识 1为同城 2为异地 0为默认无
+                    Long ddjrq_r3 = dwmSptb02.getDDJRQ_R3();                                // 配板下发日期 R3 sptb01c.ddjrq
+                    String brand_name = dwmSptb02.getBRAND_NAME();                          // 汽车品牌名字 mdac10.vppsm 20220826
+                    String cqrr = dwmSptb02.getCQRR();                                      // 存储区域公司 原生字段 用作识别'分拨中心'
 
                     if (StringUtils.isNotBlank(cjsdbh)) {
                         ootdTransition.setCJSDBH(cjsdbh);
@@ -164,91 +164,93 @@ public class OneOrderToEndDwmAppSPTB02 {
                     }
 
                     // 第一个运单的落值情况
-                    if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S") && !StringUtils.equals(cqrr, "分拨中心")) {
-                        if (StringUtils.isNotBlank(vehicle_code)) {
-                            ootdTransition.setVEHICLE_CODE(vehicle_code);
-                        }
-                        // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
-                        if (StringUtils.isNotBlank(vehicle_name)) {
-                            ootdTransition.setVEHICLE_NAME(vehicle_name);
-                        }
-                        if (StringUtils.isNotBlank(brand_name)) {
-                            ootdTransition.setBRAND_NAME(brand_name);
-                        }
-                        if (StringUtils.isNotBlank(base_code)) {
-                            ootdTransition.setBASE_CODE(base_code);
-                        }
-                        if (StringUtils.isNotBlank(base_name)) {
-                            ootdTransition.setBASE_NAME(base_name);
-                        }
-                        if (ddjrq != null) {
-                            ootdTransition.setDDJRQ(ddjrq);
-                        }
-                        if (ddjrq_r3 != null) {
-                            ootdTransition.setVEHICLE_PLATE_ISSUED_TIME_R3(ddjrq_r3);
-                        }
-                        if (StringUtils.isNotBlank(cjhdh)) {
-                            ootdTransition.setCJHDH(cjhdh);
-                        }
-                        if (dphscsj != null) {
-                            ootdTransition.setDPZRQ(dphscsj);
-                        }
-                        if (StringUtils.isNotBlank(vph)) {
-                            ootdTransition.setVPH(vph);
-                        }
-                        if (assign_time != null) {
-                            ootdTransition.setASSIGN_TIME(assign_time);
-                        }
-                        if (StringUtils.isNotBlank(transportName)) {
-                            ootdTransition.setASSIGN_NAME(transportName);
-                        }
-                        if (actual_out_time != null) {
-                            ootdTransition.setACTUAL_OUT_TIME(actual_out_time);
-                        }
-                        if (shipment_time != null) {
-                            ootdTransition.setSHIPMENT_TIME(shipment_time);
-                        }
-                        // 运输车车牌号
-                        if (StringUtils.isNotBlank(vjsydm)) {
-                            ootdTransition.setVJSYDM(vjsydm);
-                        }
-                        if (StringUtils.isNotBlank(start_city_name)) {
-                            // 改动: 为了避免删单造成的基地为空和始发城市为空的情况出现，默认就是只要是查到 基地/始发城市 为空就从当前的运单去取值 赋值，除了末端单子以外。 20221024 白
-                            ootdTransition.setSTART_CITY_NAME(start_city_name);
-                        }
-                        if (StringUtils.isNotBlank(end_city_name)) {
-                            ootdTransition.setEND_CITY_NAME(end_city_name);
-                        }
-                        // 经销商代码
-                        if (StringUtils.isNotBlank(vdwdm)) {
-                            ootdTransition.setVDWDM(vdwdm);
-                        }
-                        // 经销商名称: DWD层sptb02.vdwdm  取自 mdac22.CJXSDM 优先去经销商简称 jxsjc 如果为空,取 jxsmc
-                        if (StringUtils.isNotBlank(dealer_name)) {
-                            ootdTransition.setDEALER_NAME(dealer_name);
-                        }
-                        if (StringUtils.isNotBlank(host_com_code)) {
-                            ootdTransition.setBRAND(host_com_code);
-                        }
-                        // 轿运车乘位数 : mdac33.NCYDE 承运定额  使用sptb02.vyscdm关联 mdac33.vyscdm
-                        if (StringUtils.isNotBlank(vyscdm)) {
-                            String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
-                            JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
-                            if (mdac33 != null) {
-                                ootdTransition.setJYCCWS(mdac33.getInteger("NCYDE"));
-                            }
-                        }
-                        // Y号 (配载单号) 20220712新增字段
-                        if (StringUtils.isNotBlank(cpzdbh)) {
-                            ootdTransition.setCPZDBH(cpzdbh);
-                        }
-                        // 末端配送-DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
-                        // 在此处也更新的Dcs到货时间的原因是: 有些距离短不值得再下一个末端配送的单子的时候,但是还是会送到经销商手中,就会在S/T之间更新这个时间。
-                        if (dtvsdhsj != null && !StringUtils.equals("J", vysfs)) {
-                            ootdTransition.setDTVSDHSJ(dtvsdhsj);
-                        }
-
+                    // if (("G".equals(traffic_type) && "T1".equals(highwayWarehouseType)) || StringUtils.equalsAny(traffic_type, "T", "S") && !StringUtils.equals(cqrr, "分拨中心")) {
+                    if (StringUtils.isNotBlank(vehicle_code)) {
+                        ootdTransition.setVEHICLE_CODE(vehicle_code);
                     }
+                    // 直接从dwmsptb02获得车型名称 此前为在这一层操作查表获得的 20220713
+                    if (StringUtils.isNotBlank(vehicle_name)) {
+                        ootdTransition.setVEHICLE_NAME(vehicle_name);
+                    }
+                    if (StringUtils.isNotBlank(brand_name)) {
+                        ootdTransition.setBRAND_NAME(brand_name);
+                    }
+                    if (StringUtils.isNotBlank(base_code)) {
+                        ootdTransition.setBASE_CODE(base_code);
+                    }
+                    if (StringUtils.isNotBlank(base_name)) {
+                        ootdTransition.setBASE_NAME(base_name);
+                    }
+                    if (ddjrq != null) {
+                        ootdTransition.setDDJRQ(ddjrq);
+                    }
+                    if (ddjrq_r3 != null) {
+                        ootdTransition.setVEHICLE_PLATE_ISSUED_TIME_R3(ddjrq_r3);
+                    }
+                    if (StringUtils.isNotBlank(cjhdh)) {
+                        ootdTransition.setCJHDH(cjhdh);
+                    }
+                    if (dphscsj != null) {
+                        ootdTransition.setDPZRQ(dphscsj);
+                    }
+                    if (StringUtils.isNotBlank(vph)) {
+                        ootdTransition.setVPH(vph);
+                    }
+                    if (assign_time != null) {
+                        ootdTransition.setASSIGN_TIME(assign_time);
+                    }
+                    if (StringUtils.isNotBlank(transportName)) {
+                        ootdTransition.setASSIGN_NAME(transportName);
+                    }
+                    if (actual_out_time != null) {
+                        ootdTransition.setACTUAL_OUT_TIME(actual_out_time);
+                    }
+                    if (shipment_time != null) {
+                        ootdTransition.setSHIPMENT_TIME(shipment_time);
+                    }
+                    // 运输车车牌号
+                    if (StringUtils.isNotBlank(vjsydm)) {
+                        ootdTransition.setVJSYDM(vjsydm);
+                    }
+                    if (StringUtils.isNotBlank(start_city_name)) {
+                        // 改动: 为了避免删单造成的基地为空和始发城市为空的情况出现，默认就是只要是查到 基地/始发城市 为空就从当前的运单去取值 赋值，除了末端单子以外。 20221024 白
+                        ootdTransition.setSTART_CITY_NAME(start_city_name);
+                    }
+                    if (StringUtils.isNotBlank(end_city_name)) {
+                        ootdTransition.setEND_CITY_NAME(end_city_name);
+                    }
+                    // 经销商代码
+                    if (StringUtils.isNotBlank(vdwdm)) {
+                        ootdTransition.setVDWDM(vdwdm);
+                    }
+                    // 经销商名称: DWD层sptb02.vdwdm  取自 mdac22.CJXSDM 优先去经销商简称 jxsjc 如果为空,取 jxsmc
+                    if (StringUtils.isNotBlank(dealer_name)) {
+                        ootdTransition.setDEALER_NAME(dealer_name);
+                    }
+                    if (StringUtils.isNotBlank(host_com_code)) {
+                        ootdTransition.setBRAND(host_com_code);
+                    }
+                    // 轿运车乘位数 : mdac33.NCYDE 承运定额  使用sptb02.vyscdm关联 mdac33.vyscdm
+                    if (StringUtils.isNotBlank(vyscdm)) {
+                        String mdac33Sql = "select NCYDE from " + KafkaTopicConst.ODS_VLMS_MDAC33 + " where VYSCDM = '" + vyscdm + "' limit 1 ";
+                        JSONObject mdac33 = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_MDAC33, mdac33Sql, vyscdm);
+                        if (mdac33 != null) {
+                            ootdTransition.setJYCCWS(mdac33.getInteger("NCYDE"));
+                        }
+                    }
+                    // Y号 (配载单号) 20220712新增字段
+                    if (StringUtils.isNotBlank(cpzdbh)) {
+                        ootdTransition.setCPZDBH(cpzdbh);
+                    }
+                    // 末端配送-DCS到货时间(TVS到货时间)  在公路和末端配送时添加此字段 traffic_type=G 时 且运单类型不为J时
+                    // 在此处也更新的Dcs到货时间的原因是: 有些距离短不值得再下一个末端配送的单子的时候,但是还是会送到经销商手中,就会在S/T之间更新这个时间。
+                    if (dtvsdhsj != null && !StringUtils.equals("J", vysfs)) {
+                        ootdTransition.setDTVSDHSJ(dtvsdhsj);
+                    }
+                // } 所有的运单都会在此赋上相关的第一个运单的值,原因是因为 一单到底 移除了Y90的移库运单后,缺失了与此绑定的末端配送的VVIN码的车辆数据，导致查不到。 bugfix：#938 陈老师提出的缺失VVIN码的bug修复
+
+
+
                     // 同城异地赋值
                     if (type_tc != null) {
                         ootdTransition.setTYPE_TC(type_tc);
@@ -908,6 +910,29 @@ public class OneOrderToEndDwmAppSPTB02 {
                         " VALUES\n" +
                         "        ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?, ?, ? ,? ,?, ?, ?, ?, ?, ?, ?) \n" +
                         "        ON DUPLICATE KEY UPDATE \n" +
+                        " VEHICLE_CODE                                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_CODE), VEHICLE_CODE) ," +
+                        " VEHICLE_NAME                                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NAME), VEHICLE_NAME), " +
+                        " BRAND_NAME                                     = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND_NAME), BRAND_NAME), " +
+                        " VEHICLE_RECEIVING_TIME                         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_RECEIVING_TIME), VEHICLE_RECEIVING_TIME), " +
+                        " VEHICLE_PLATE_ISSUED_TIME_R3                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_PLATE_ISSUED_TIME_R3), VEHICLE_PLATE_ISSUED_TIME_R3), " +
+                        " TASK_NO                                        = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TASK_NO), TASK_NO), " +
+                        " PLAN_RELEASE_TIME                              = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(PLAN_RELEASE_TIME), PLAN_RELEASE_TIME), \n " +
+                        " STOWAGE_NOTE_NO                                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(STOWAGE_NOTE_NO), STOWAGE_NOTE_NO), " +
+                        " ASSIGN_TIME                                    = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ASSIGN_TIME), ASSIGN_TIME), " +
+                        " CARRIER_NAME                                   = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CARRIER_NAME), CARRIER_NAME), " +
+                        " ACTUAL_OUT_TIME                                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(ACTUAL_OUT_TIME), ACTUAL_OUT_TIME), " +
+                        " SHIPMENT_TIME                                  = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SHIPMENT_TIME), SHIPMENT_TIME) ," +
+                        " TRANSPORT_VEHICLE_NO                           = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(TRANSPORT_VEHICLE_NO), TRANSPORT_VEHICLE_NO), " +
+                        " START_CITY_NAME                                = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(START_CITY_NAME), START_CITY_NAME), " +
+                        " END_CITY_NAME                                  = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(END_CITY_NAME), END_CITY_NAME), " +
+                        " VDWDM                                          = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VDWDM), VDWDM), " +
+                        " DEALER_NAME                                    = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(DEALER_NAME), DEALER_NAME), " +
+                        " SETTLEMENT_Y1                                  = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(SETTLEMENT_Y1), SETTLEMENT_Y1)," +
+                        " BRAND                                          = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BRAND) , BRAND), " +
+                        " BASE_CODE                                      = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_CODE), BASE_CODE) ," +
+                        " BASE_NAME                                      = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(BASE_NAME), BASE_NAME) ," +
+                        " VEHICLE_NUM                                    = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(VEHICLE_NUM), VEHICLE_NUM) ," +
+                        " CPZDBH                                         = if(SETTLEMENT_Y1 = '' or VALUES(SETTLEMENT_Y1) <= SETTLEMENT_Y1, VALUES(CPZDBH), CPZDBH) ," +
                         " DISTRIBUTE_BOARD_TIME                          = VALUES(DISTRIBUTE_BOARD_TIME), " +
                         " OUT_DISTRIBUTE_TIME                            = VALUES(OUT_DISTRIBUTE_TIME), " +
                         " DISTRIBUTE_CPZDBH                              = VALUES(DISTRIBUTE_CPZDBH), " +
