@@ -3,12 +3,12 @@ package com.yqwl.datamiddle.realtime.app.dim;
 import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.ververica.cdc.connectors.oracle.OracleSource;
+import com.ververica.cdc.connectors.oracle.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.*;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
-import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
-import com.yqwl.datamiddle.realtime.util.MysqlUtil;
-import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
+import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
@@ -20,11 +20,13 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.CheckpointingMode;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.common.TopicPartition;
@@ -37,10 +39,10 @@ import java.util.concurrent.TimeUnit;
 import static org.reflections.Reflections.log;
 
 /**
- * @Description: 用于合并Mdac12与Mdac10的flink任务
+ * @Description: 用于合并Mdac12与Mdac10的flink任务 与 合并site+site表用作仓库的维表
  * @Author: XiaoFeng
  * @Date: 2022/8/25 16:21
- * @Version: V1.0
+ * @Version: V2.0
  */
 @Slf4j
 public class DimMdac1210WideApp {
@@ -60,7 +62,7 @@ public class DimMdac1210WideApp {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("consumer_kafka_ods_app"));
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("dim_mdac1210_wide_app&&dim_province_wide_app"));
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
 
@@ -183,8 +185,135 @@ public class DimMdac1210WideApp {
         String sql = MysqlUtil.getSql(DimMdac1210.class);
         dimMdac1210Wide.addSink(JdbcSink.<DimMdac1210>getSink(sql)).uid("sink->Mysql_DimMdac1210Wide").name("sink->Mysql_DimMdac1210Wide");
 
+
+        //-----------------------------------------------------DimWarehouseRSWideApp----------------------------------------------------------//
+        Props propsRs = PropertiesUtil.getProps();
+        //oracle cdc 相关配置
+        Properties propertiesRs = new Properties();
+        propertiesRs.put("database.tablename.case.insensitive", "false");
+        propertiesRs.put("log.mining.strategy", "online_catalog"); //解决归档日志数据延迟
+        propertiesRs.put("log.mining.continuous.mine", "true");   //解决归档日志数据延迟
+        propertiesRs.put("decimal.handling.mode", "string");   //解决number类数据 不能解析的方法
+        //properties.put("database.serverTimezone", "UTC");
+        //properties.put("database.serverTimezone", "Asia/Shanghai");
+        propertiesRs.put("database.url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(LOAD_BALANCE=YES)(FAILOVER=YES)(ADDRESS=(PROTOCOL=tcp)(HOST=" + props.getStr("cdc.oracle.hostname") + ")(PORT=" + props.getInt("cdc.oracle.port") + ")))(CONNECT_DATA=(SID=" + props.getStr("cdc.oracle.database") + ")))");
+        //读取oracle连接配置属性
+        SourceFunction<String> oracleSource = OracleSource.<String>builder()
+                .hostname(propsRs.getStr("cdc.oracle.hostname"))
+                .port(propsRs.getInt("cdc.oracle.port"))
+                .database(propsRs.getStr("cdc.oracle.database"))
+                .schemaList(StrUtil.getStrList(propsRs.getStr("cdc.oracle.schema.list"), ","))
+                .tableList("TDS_LJ.SITE_WAREHOUSE", "TDS_LJ.RFID_WAREHOUSE")
+                .username(propsRs.getStr("cdc.oracle.username"))
+                .password(propsRs.getStr("cdc.oracle.password"))
+                .deserializer(new CustomerDeserialization())
+                .startupOptions(StartupOptions.initial())
+                .debeziumProperties(properties)
+                .build();
+
+        // 将kafka中源数据转化成DataStream
+        SingleOutputStreamOperator<String> oracleSourceStream = env.addSource(oracleSource).uid("oracleSourceStream").name("oracleSourceStream");
+
+        //2.1.过滤出SITE_WAREHOUSE表
+        DataStream<String> filterSite = oracleSourceStream.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String mysqlDataStream) throws Exception {
+                JSONObject jo = JSON.parseObject(mysqlDataStream);
+                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SITE_WAREHOUSE")) {
+                    SiteWarehouse after = jo.getObject("after", SiteWarehouse.class);
+                    String vwlckdm = after.getVWLCKDM();
+                    if (vwlckdm != null && StringUtils.equals("CONTRAST", after.getTYPE())) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+        }).uid("filterSITE_WAREHOUSE").name("filterSITE_WAREHOUSE");
+        //2.2过滤出RFID_WAREHOUSE表
+        DataStream<String> filterRfid = oracleSourceStream.filter(new RichFilterFunction<String>() {
+            @Override
+            public boolean filter(String mysqlDataStream) throws Exception {
+                JSONObject jo = JSON.parseObject(mysqlDataStream);
+                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("RFID_WAREHOUSE")) {
+                    RfidWarehouse after = jo.getObject("after", RfidWarehouse.class);
+                    Integer id=  after.getID();
+                    if (id != null) {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+        }).uid("filterRFID_WAREHOUSE").name("filterRFID_WAREHOUSE");
+
+        //3.1 SITE_WAREHOUSE转实体类
+        SingleOutputStreamOperator<SiteWarehouse> mapSite = filterSite.map(new MapFunction<String, SiteWarehouse>() {
+            @Override
+            public SiteWarehouse map(String kafkaBsdEpcValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
+                SiteWarehouse dataSite = jsonObject.getObject("after", SiteWarehouse.class);
+                Long ts = jsonObject.getLong("ts"); //取ts作为时间戳字段
+                dataSite.setTs(ts);
+                return dataSite;
+            }
+        }).uid("transitionSiteWarehouse").name("transitionSiteWarehouse");
+        //3.2 RFID_WAREHOUSE转实体类
+        SingleOutputStreamOperator<RfidWarehouse> mapRfid = filterRfid.map(new MapFunction<String, RfidWarehouse>() {
+            @Override
+            public RfidWarehouse map(String kafkaBsdEpcValue) throws Exception {
+                JSONObject jsonObject = JSON.parseObject(kafkaBsdEpcValue);
+                RfidWarehouse dataRfid = jsonObject.getObject("after", RfidWarehouse.class);
+                Long ts = jsonObject.getLong("ts"); //取ts作为时间戳字段
+                dataRfid.setTs(ts);
+                return dataRfid;
+            }
+        }).uid("transitionRfidWarehouse").name("transitionRfidWarehouse");
+
+        //4.指定事件时间字段
+        //SITE_WAREHOUSE指定事件时间
+        SingleOutputStreamOperator<SiteWarehouse> siteWithTs = mapSite.assignTimestampsAndWatermarks(
+                WatermarkStrategy.<SiteWarehouse>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                        .withTimestampAssigner(new SerializableTimestampAssigner<SiteWarehouse>() {
+                            @Override
+                            public long extractTimestamp(SiteWarehouse siteWarehouse, long recordTimestamp) {
+                                return siteWarehouse.getTs();
+                            }
+                        })
+        ).uid("SiteWarehouseTsDS").name("SiteWarehouseTsDS");
+        //RFID_WAREHOUSE指定事件时间
+        SingleOutputStreamOperator<RfidWarehouse> RfidWithTs = mapRfid.assignTimestampsAndWatermarks(
+                WatermarkStrategy.<RfidWarehouse>forBoundedOutOfOrderness(Duration.ofSeconds(5))
+                        .withTimestampAssigner(new SerializableTimestampAssigner<RfidWarehouse>() {
+                            @Override
+                            public long extractTimestamp(RfidWarehouse siteWarehouse, long recordTimestamp) {
+                                return siteWarehouse.getTs();
+                            }
+                        })
+        ).uid("RfidWarehouseTsDS").name("RfidWarehouseTsDS");
+
+        //5.分组指定关联key
+        // SITE_WAREHOUSE,RFID_WAREHOUSE 按照wareHouseCode字段分组
+        KeyedStream<SiteWarehouse, String> siteWarehouseStringKeyedStream = siteWithTs.keyBy(SiteWarehouse::getWAREHOUSE_CODE);
+        KeyedStream<RfidWarehouse, String> rfidWarehouseStringKeyedStream = RfidWithTs.keyBy(RfidWarehouse::getWAREHOUSE_CODE);
+
+        //6.进行表拓宽 俩表用wareHouseCode进行关联
+        SingleOutputStreamOperator<DimWarehouseRS> rsWide = siteWarehouseStringKeyedStream
+                .intervalJoin(rfidWarehouseStringKeyedStream)
+                .between(Time.seconds(-5), Time.seconds(5))
+                .process(new ProcessJoinFunction<SiteWarehouse, RfidWarehouse, DimWarehouseRS>() {
+                    @Override
+                    public void processElement(SiteWarehouse left, RfidWarehouse right, ProcessJoinFunction<SiteWarehouse, RfidWarehouse, DimWarehouseRS>.Context ctx, Collector<DimWarehouseRS> out) throws Exception {
+                        out.collect(new DimWarehouseRS(right, left));
+                    }
+                }).uid("rsWide").name("rsWide");
+
+        //===================================sink mysql=======================================================//
+        String sqlrsWide = MysqlUtil.getSql(DimWarehouseRS.class);
+        rsWide.addSink(JdbcSink.<DimWarehouseRS>getSink(sqlrsWide)).uid("Insert_Mysql_DimWarehouseRS").name("Insert_Mysql_DimWarehouseRS");
+
         try {
-            env.execute("Kafka_Mdac12+Mdac10=>MysqlMdac1210");
+            env.execute("Kafka_Mdac12+Mdac10=>MysqlMdac1210-&&-Oracle_site+rfid=>Insert_Mysql_DimWarehouseRS");
         } catch (Exception e) {
             log.error("stream invoke error", e);
         }
