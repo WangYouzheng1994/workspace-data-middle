@@ -27,8 +27,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
+import org.apache.kafka.common.TopicPartition;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +45,11 @@ import static org.reflections.Reflections.log;
 @Slf4j
 public class DimMdac1210WideApp {
     public static void main(String[] args) {
+        // 从偏移量表中读取指定的偏移量模式
+        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ODS_VLMS_MDAC12, 0);
+        offsetMap.put(topicPartition, 9666968L);
+
         //1.创建环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
@@ -53,6 +60,7 @@ public class DimMdac1210WideApp {
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
         //系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
+        ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("consumer_kafka_ods_app"));
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
 
@@ -75,6 +83,7 @@ public class DimMdac1210WideApp {
                 .setGroupId(KafkaTopicConst.ODS_VLMS_MDAC12_GROUP)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
+                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
                 .build();
 
         // kafka source1 mdac10
@@ -134,7 +143,7 @@ public class DimMdac1210WideApp {
 
         // 4.1指定Mdac12的事件时间字段
         SingleOutputStreamOperator<Mdac12> mdac12WithTs = mdac12MapBean.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<Mdac12>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                WatermarkStrategy.<Mdac12>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Mdac12>() {
                             @Override
                             public long extractTimestamp(Mdac12 mdac12, long recordTimestamp) {
@@ -144,7 +153,7 @@ public class DimMdac1210WideApp {
         ).uid("DimMdac1210WideAppFilterMdac12TsDs").name("DimMdac1210WideAppFilterMdac12TsDs");
         // 4.2指定Mdac12的事件时间字段
         SingleOutputStreamOperator<Mdac10> mdac10WithTs = mdac10MapBean.assignTimestampsAndWatermarks(
-                WatermarkStrategy.<Mdac10>forBoundedOutOfOrderness(Duration.ofMinutes(5))
+                WatermarkStrategy.<Mdac10>forBoundedOutOfOrderness(Duration.ofSeconds(5))
                         .withTimestampAssigner(new SerializableTimestampAssigner<Mdac10>() {
                             @Override
                             public long extractTimestamp(Mdac10 mdac10, long recordTimestamp) {
@@ -164,7 +173,7 @@ public class DimMdac1210WideApp {
          */
         SingleOutputStreamOperator<DimMdac1210> dimMdac1210Wide = mdac12ObjectKeyedStream
                 .intervalJoin(mdac10ObjectKeyedStream)
-                .between(Time.minutes(-10), Time.minutes(10))
+                .between(Time.seconds(-10), Time.seconds(10))
                 .process(new ProcessJoinFunction<Mdac12, Mdac10, DimMdac1210>() {
                     @Override
                     public void processElement(Mdac12 mdac12, Mdac10 mdac10, ProcessJoinFunction<Mdac12, Mdac10, DimMdac1210>.Context ctx, Collector<DimMdac1210> out) throws Exception {
@@ -172,10 +181,10 @@ public class DimMdac1210WideApp {
                     }
                 }).uid("DimMdac1210WideAppFilterMdac10Wide").name("DimMdac1210WideAppFilterMdac10Wide");
         String sql = MysqlUtil.getSql(DimMdac1210.class);
-        dimMdac1210Wide.addSink(JdbcSink.<DimMdac1210>getSink(sql)).uid("sink-warehouse_rs").name("sink-warehouse_rs");
+        dimMdac1210Wide.addSink(JdbcSink.<DimMdac1210>getSink(sql)).uid("sink->Mysql_DimMdac1210Wide").name("sink->Mysql_DimMdac1210Wide");
 
         try {
-            env.execute("KafkaSinkMysql");
+            env.execute("Kafka_Mdac12+Mdac10=>MysqlMdac1210");
         } catch (Exception e) {
             log.error("stream invoke error", e);
         }
