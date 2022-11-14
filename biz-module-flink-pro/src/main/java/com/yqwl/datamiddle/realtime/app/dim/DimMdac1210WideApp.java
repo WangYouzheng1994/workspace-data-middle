@@ -184,7 +184,7 @@ public class DimMdac1210WideApp {
         dimMdac1210Wide.addSink(JdbcSink.<DimMdac1210>getSink(sql)).uid("sink->Mysql_DimMdac1210Wide").name("sink->Mysql_DimMdac1210Wide");
 
         try {
-            env.execute("KafkaSinkMysql");
+            env.execute("Kafka_Mdac12+Mdac10=>MysqlMdac1210");
         } catch (Exception e) {
             log.error("stream invoke error", e);
         }
