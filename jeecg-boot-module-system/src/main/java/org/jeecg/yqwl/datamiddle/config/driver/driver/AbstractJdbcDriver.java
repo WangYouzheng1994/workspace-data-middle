@@ -66,13 +66,18 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
         ds.setDriverClassName(getDriverClass());
         ds.setUsername(config.getUsername());
         ds.setPassword(config.getPassword());
-        ds.setValidationQuery("select 1");
-        ds.setTestWhileIdle(true);
-        ds.setBreakAfterAcquireFailure(true);
-        ds.setFailFast(true);
-        ds.setInitialSize(1);
-        ds.setMaxActive(8);
-        ds.setMinIdle(5);
+        if("oracle".equals(config.getType().toLowerCase())){
+            ds.setValidationQuery("SELECT 1 FROM DUAL");
+        }else{
+            ds.setValidationQuery("select 1");
+            ds.setTestWhileIdle(true);
+            ds.setBreakAfterAcquireFailure(true);
+            ds.setFailFast(true);
+            ds.setInitialSize(1);
+            ds.setMaxActive(8);
+            ds.setMinIdle(5);
+        }
+
     }
 
     @Override
