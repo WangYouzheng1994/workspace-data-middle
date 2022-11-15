@@ -1,2 +1,3 @@
 org.jeecg.yqwl.datamiddle.config.driver.driver.mysql.MySqlDriver
 org.jeecg.yqwl.datamiddle.config.driver.driver.clickHouse.ClickHouseDriver
+org.jeecg.yqwl.datamiddle.config.driver.driver.oracle.OracleDriver

@@ -36,7 +36,7 @@ public class DataBaseServiceImpl  extends ServiceImpl<DatasourceConfigMapper, Da
         DatasourceConfig datasourceConfig = getById(id);
         checkNull(datasourceConfig, "该数据源不存在！");
         Driver driver = Driver.build(getDriver(datasourceConfig));
-        List<Schema> schemasAndTables = driver.getSchemasAndTables();
+        List<Schema> schemasAndTables = driver.getSchemasAndTables(driver.getType());
         try {
             driver.close();
         } catch (Exception e) {

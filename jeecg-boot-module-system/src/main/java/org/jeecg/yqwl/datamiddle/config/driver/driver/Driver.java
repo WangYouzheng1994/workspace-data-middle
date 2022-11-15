@@ -127,11 +127,11 @@ public  interface Driver extends AutoCloseable  {
 
     boolean canHandle(String type);
 
-    List<Schema> getSchemasAndTables();
+    List<Schema> getSchemasAndTables(String Type);
 
     List<Column> listColumns(String schemaName, String tableName);
 
-    List<Schema> listSchemas();
+    List<Schema> listSchemas(String type);
 
     Table getTable(String schemaName, String tableName);
 
