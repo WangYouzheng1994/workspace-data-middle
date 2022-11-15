@@ -54,7 +54,7 @@ public class DimProvinceWideApp {
 
         // 获取执行环境:
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
+        env.setParallelism(1);
 
       /*  CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(10000);
