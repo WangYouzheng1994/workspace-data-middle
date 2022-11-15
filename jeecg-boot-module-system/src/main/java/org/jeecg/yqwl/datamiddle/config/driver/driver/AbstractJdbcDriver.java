@@ -133,7 +133,7 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
     }
 
     @Override
-    public List<Schema> listSchemas() {
+    public List<Schema> listSchemas(String type) {
         List<Schema> schemas = new ArrayList<>();
         PreparedStatement preparedStatement = null;
         ResultSet results = null;
@@ -143,7 +143,21 @@ public abstract class AbstractJdbcDriver extends AbstractDriver {
             results = preparedStatement.executeQuery();
             while (results.next()) {
                 String schemaName = results.getString(getDBQuery().schemaName());
+
                 if (StringUtils.isNotEmpty(schemaName)) {
+                    //排除默认数据库表
+                    if("Oracle".equals(type)){
+                        if("system".equals(schemaName.toLowerCase())
+                                ||"sys".equals(schemaName.toLowerCase())
+                                ||"sysman".equals(schemaName.toLowerCase())
+                                ||"dbsnmp".equals(schemaName.toLowerCase())){
+                            continue;
+                        }
+                    }else if("ClickHouse".equals(type)){
+                         if("system".equals(schemaName.toLowerCase())){
+                             continue;
+                         }
+                    }
                     Schema schema = new Schema(schemaName);
                     schemas.add(schema);
                 }
