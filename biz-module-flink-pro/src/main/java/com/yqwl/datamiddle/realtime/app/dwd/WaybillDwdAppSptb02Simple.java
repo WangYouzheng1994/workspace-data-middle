@@ -354,7 +354,7 @@ public class WaybillDwdAppSptb02Simple {
                     }
                 }
             }
-        }).setParallelism(4).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
+        }).setParallelism(1).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
