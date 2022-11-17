@@ -37,9 +37,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 消费mysql的 dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段成 dwm_vlms_sptb02表
- * @Author: muqing
+ * @Author: muqing&XiaoFeng
  * @Date: 2022/05/06
- * @Version: V1.0
+ * @Version: V1.1
  */
 @Slf4j
 public class WaybillDwmAppSptb02Simple {
@@ -205,8 +205,8 @@ public class WaybillDwmAppSptb02Simple {
                                 if (outSiteTime != null) {
                                     Date outSiteDate = new Date(outSiteTime);
                                     // 格式化时间
-                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                    String formatDate = formatter.format(outSiteDate);
+                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                    String formatDate = formatter.format(outSiteDate) + " 23:59:59";
                                     DateTime parse = DateUtil.parse(formatDate);
                                     DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
                                     dwmSptb02.setTHEORY_SHIPMENT_TIME(newStepTime.getTime());
