@@ -481,6 +481,14 @@ public class WaybillDwmAppSptb02Simple {
                         //    istc = 'YES' OR VYSFS = 'G';
                         if (Objects.nonNull(dwmSptb02.getDBZDHSJ_DZ()) && !dwmSptb02.getDBZDHSJ_DZ().equals(0L)){
                             Long theorySiteTime = dwmSptb02.getDBZDHSJ_DZ();
+                            //将日期转为今天的 23:59:59
+                            // todo: 抽出方法类
+                            Date outDate = new Date(theorySiteTime);
+                            // 格式化时间
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                            String formatDate = formatter.format(outDate) + " 23:59:59";
+                            DateTime parse = DateUtil.parse(formatDate);
+                            theorySiteTime = parse.getTime();
                             //处理佛山水运
                             // CQWH : 长春0431  成都028  佛山0757  青岛0532  天津022
                             if ("S".equals(dwmSptb02.getTRAFFIC_TYPE()) && "0757".equals(dwmSptb02.getCQWH())){
@@ -490,16 +498,6 @@ public class WaybillDwmAppSptb02Simple {
                                     //2.2天 = 190080000 ms
                                     theorySiteTime = Long.parseLong(ddjrqConfig.getString("DDJRQ")) + theorySiteTime + 190080000L;
                                 }
-                            }
-                            //处理同城或者公路计划
-                            if ("G".equals(dwmSptb02.getTRAFFIC_TYPE()) || Integer.valueOf(1).equals(dwmSptb02.getTYPE_TC())){
-                                //将日期转为今天的 23:59:59
-                                Date outDate = new Date(dwmSptb02.getDBZDHSJ_DZ());
-                                // 格式化时间
-                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                                String formatDate = formatter.format(outDate) + " 23:59:59";
-                                DateTime parse = DateUtil.parse(formatDate);
-                                theorySiteTime = parse.getTime();
                             }
                             dwmSptb02.setTHEORY_SITE_TIME(theorySiteTime);
                         }
@@ -586,10 +584,10 @@ public class WaybillDwmAppSptb02Simple {
                         else if (Objects.nonNull(typeTc) && typeTc == 1 && (dxxdhrq - sdsj < 0)) {
                             dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(dxxdhrq, dwmSptb02.getDTVSDHSJ()));
                         }
-                        //兜底
-                        else {
-                            dwmSptb02.setACCOUNTING_TIME(currentTime);
-                        }
+                        //兜底  ACCOUNTING_TIME不设置为当前时间
+                        // else {
+                        //     dwmSptb02.setACCOUNTING_TIME(currentTime);
+                        // }
 
                         dwmSptb02.setWAREHOUSE_UPDATETIME(currentTime);
 
