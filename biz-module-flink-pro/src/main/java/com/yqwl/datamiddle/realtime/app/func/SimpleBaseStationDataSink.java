@@ -3,6 +3,7 @@ package com.yqwl.datamiddle.realtime.app.func;
 import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationData;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.DbUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,6 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
  */
 @Slf4j
 public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStationData> {
-    // 2021-06-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
-    private static final long START = 1622476800000L;
-    // 2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     // 入库标识
     private static final String IN_STORE = "InStock";
     // 出库标识
@@ -39,7 +36,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
         String vwlckdm = "";
         Long sample_u_t_c = data.getSAMPLE_U_T_C();
         String physical_name = data.getPHYSICAL_NAME();
-        if (sample_u_t_c >= START && sample_u_t_c <= END) {
+        if (sample_u_t_c >= TimeConst.DATE_2020_12_01 && sample_u_t_c <= TimeConst.DATE_2023_11_28) {
             if (StringUtils.isNotBlank(data.getVIN())) {
                 StringBuilder sb = new StringBuilder();
                 //=============================================更新dwd_sptb02溯源入库出库时间==============================================//
