@@ -53,6 +53,8 @@ public class WaybillDwmAppSptb02Simple {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
@@ -593,13 +595,13 @@ public class WaybillDwmAppSptb02Simple {
                         out.collect(bean);
                     }
                 }
-            }                                                                                                                 // 算子不合并
             }
-        }).setParallelism(1).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process").disableChaining();
+            }
+        }).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");
