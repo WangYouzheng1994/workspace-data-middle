@@ -7,6 +7,7 @@ import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +34,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppSPTB02 {
-
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
-
     public static void main(String[] args) throws Exception {
         // Configuration configuration1 = new Configuration();
         // flink parallelism=16 savepoint state
@@ -102,7 +97,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         flag = false;
                     }
                 }
-                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= START && ddjrq1 <= END && flag) {
+                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= TimeConst.DATE_2020_12_01 && ddjrq1 <= TimeConst.DATE_2023_11_28 && flag) {
                     OotdTransition ootdTransition = new OotdTransition();
                     String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
                     String vvin = dwmSptb02.getVVIN();                                      // 底盘号

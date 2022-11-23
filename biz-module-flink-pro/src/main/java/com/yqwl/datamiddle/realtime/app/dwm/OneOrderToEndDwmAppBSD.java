@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.yqwl.datamiddle.realtime.app.func.SimpleBsdSinkOOTD;
 import com.yqwl.datamiddle.realtime.bo.DwdBaseStationDataBO;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +36,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppBSD {
-    // 2022-01-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
-    private static final long START = 1640966400000L;
-    // 2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -84,7 +81,7 @@ public class OneOrderToEndDwmAppBSD {
         SingleOutputStreamOperator<DwdBaseStationDataBO> mapBsdFilterTime = mapBsd.process(new ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>() {
             @Override
             public void processElement(DwdBaseStationDataBO value, ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>.Context ctx, Collector<DwdBaseStationDataBO> out) throws Exception {
-                if (value.getSAMPLE_U_T_C() >= START && value.getSAMPLE_U_T_C() <= END && StringUtils.isNotBlank(value.getIN_WAREHOUSE_CODE())) {
+                if (value.getSAMPLE_U_T_C() >= TimeConst.DATE_2020_12_01 && value.getSAMPLE_U_T_C() <= TimeConst.DATE_2023_11_28 && StringUtils.isNotBlank(value.getIN_WAREHOUSE_CODE())) {
                     out.collect(value);
                 }
             }

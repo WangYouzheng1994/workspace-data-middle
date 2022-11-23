@@ -11,6 +11,7 @@ import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,10 +44,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppSptb02Simple {
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
@@ -103,7 +100,7 @@ public class WaybillDwmAppSptb02Simple {
                 // DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 Long ddjrq = dwmSptb02.getDDJRQ();
-                if (ddjrq != null && ddjrq >= START && ddjrq <= END) {
+                if (ddjrq != null && ddjrq >= TimeConst.DATE_2020_12_01 && ddjrq <= TimeConst.DATE_2023_11_28) {
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {

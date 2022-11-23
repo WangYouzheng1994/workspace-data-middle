@@ -31,12 +31,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwmAppClickHouseSptb02 {
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
-
-
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

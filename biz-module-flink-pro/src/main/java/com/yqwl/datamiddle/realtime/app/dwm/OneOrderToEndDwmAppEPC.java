@@ -4,6 +4,7 @@ import cn.hutool.setting.dialect.Props;
 import com.alibaba.fastjson2.JSON;
 import com.yqwl.datamiddle.realtime.bean.DwdBaseStationDataEpc;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.PropertiesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -31,10 +32,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppEPC {
-    // 2021-06-01 00:00:00  设置此时间的原因为sptb02的ddjrq为7月1日与base_station_data表的时间有出入，故选取半年前的时间来兜底
-    private static final long START = 1622476800000L;
-    // 2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         //1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -82,7 +79,7 @@ public class OneOrderToEndDwmAppEPC {
             @Override
             public void processElement(DwdBaseStationDataEpc value, ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>.Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
                 Long cp9_offline_time = value.getCP9_OFFLINE_TIME();
-                if (cp9_offline_time !=null && value.getCP9_OFFLINE_TIME() >= START && value.getCP9_OFFLINE_TIME() <= END){
+                if (cp9_offline_time !=null && value.getCP9_OFFLINE_TIME() >= TimeConst.DATE_2020_12_01 && value.getCP9_OFFLINE_TIME() <= TimeConst.DATE_2023_11_28){
                         out.collect(value);
                 }
             }

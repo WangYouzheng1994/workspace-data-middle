@@ -8,6 +8,7 @@ import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.beanmapper.Sptb02Mapper;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
@@ -41,10 +42,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwdAppSptb02Simple {
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
@@ -96,7 +93,7 @@ public class WaybillDwdAppSptb02Simple {
                 String cjsdbh = sptb02.getCJSDBH();
                 if (StringUtils.isNotBlank(cjsdbh)) {
                     Long ddjrq = sptb02.getDDJRQ();
-                    if (ddjrq >= START && ddjrq <= END) {
+                    if (ddjrq >= TimeConst.DATE_2020_12_01 && ddjrq <= TimeConst.DATE_2023_11_28) {
                         // 处理实体类 将数据copy到dwdSptb02
                         DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
                         //  2.   将 dwd->dwmsptb02是否为同城的判断逻辑提在这里
@@ -354,7 +351,7 @@ public class WaybillDwdAppSptb02Simple {
                     }
                 }
             }
-        }).setParallelism(1).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
+        }).setParallelism(2).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {

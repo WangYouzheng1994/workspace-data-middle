@@ -36,13 +36,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class BaseStationDataAndEpcDwdAppBsd {
-    //2021-06-01 00:00:00
-    private static final long START = 1622476800000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
-    private static final String BASE_STATION_DATA = "BASE_STATION_DATA";
-    private static final String BASE_STATION_DATA_EPC = "BASE_STATION_DATA_EPC";
-
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
