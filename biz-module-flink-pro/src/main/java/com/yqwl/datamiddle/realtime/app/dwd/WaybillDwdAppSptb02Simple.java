@@ -52,6 +52,8 @@ public class WaybillDwdAppSptb02Simple {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
 
         // ====================================checkpoint配置===============================================//
@@ -351,7 +353,7 @@ public class WaybillDwdAppSptb02Simple {
                     }
                 }
             }
-        }).setParallelism(2).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
+        }).setParallelism(1).uid("WaybillDwdAppSptb02SimpleDataDwdProcess").name("WaybillDwdAppSptb02SimpleDataDwdProcess");
 
         //===================================sink kafka=======================================================//
         SingleOutputStreamOperator<String> dwdSptb02Json = dataDwdProcess.map(new MapFunction<DwdSptb02, String>() {
