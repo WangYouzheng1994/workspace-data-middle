@@ -130,7 +130,7 @@ public class ConsumerKafkaODSApp {
                     if (StringUtils.equals("sptb02", lowerTableName)){
                         String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
                         if (ddjrq !=null){
-                            if (Long.valueOf(ddjrq) >= before120daysTime){
+                            if (Long.parseLong(ddjrq) >= before120daysTime){
                                 return jsonObj;
                             }else {
                                 return null;
