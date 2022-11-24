@@ -229,27 +229,27 @@ public class WaybillDwdAppSptb02Simple {
                             if (StringUtils.isNotEmpty(vysfs)) {
                                 // 1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
                                 // ('J','TD','SD','G')='G'
-                                if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
+                                if ("J".equals(vysfs) || "TD".equals(vysfs) || "SD".equals(vysfs) || "G".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("G");
                                     // 运输方式 适配 lc_spec_config
                                     dwdSptb02.setTRANS_MODE_CODE("1");
                                 }
                                 // (''L1'','T') ='T'
-                                if (vysfs.equals("L1") || vysfs.equals("T")) {
+                                if ("L1".equals(vysfs) || "T".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("T");
                                     dwdSptb02.setTRANS_MODE_CODE("2");
                                 }
                                 // ('S') ='S'
-                                if (vysfs.equals("S")) {
+                                if ("S".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("S");
                                     dwdSptb02.setTRANS_MODE_CODE("3");
                                 }
                                 // 2.处理 起运时间
                                 // 公路取sptb02.dtvscfsj，铁水取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
-                                if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
+                                if (("J".equals(vysfs) || "TD".equals(vysfs) || "SD".equals(vysfs) || "G".equals(vysfs)) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
                                     dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                                 }
-                                if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDSJCFSJ())) {
+                                if (("L1".equals(vysfs) || "T".equals(vysfs) || "S".equals(vysfs)) && Objects.nonNull(sptb02.getDSJCFSJ())) {
                                     dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
                                 }
 

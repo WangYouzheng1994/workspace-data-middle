@@ -14,7 +14,7 @@ import org.apache.flink.configuration.Configuration;
  */
 public class BackStationUtilCp9 extends RichMapFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc> {
 
-        // 声明Map类型的状态后端
+
         private transient MapState<String, Long> myMapState;
 
         @Override
@@ -29,8 +29,10 @@ public class BackStationUtilCp9 extends RichMapFunction<DwdBaseStationDataEpc, D
              * 1.当前状态后端的状态为Map类型,key为String,也就是汽车的Vin码,value为vin码所对应的数据,vin所对应的操作时间
              * 2.每次流到了到了这里,就会调用这里的map:
              */
-            String vin = dwdBaseStationDataEpc.getVIN();                    //车架号
-            Long nowOperatetime = dwdBaseStationDataEpc.getOPERATETIME();   //操作时间
+            // 车架号
+            String vin = dwdBaseStationDataEpc.getVIN();
+            // 操作时间
+            Long nowOperatetime = dwdBaseStationDataEpc.getOPERATETIME();
             // 1):判断状态后端有无当前数据的vin码的key所对应的对象,没有就添加上
             if (myMapState.get(vin) == null) {
                 myMapState.put(vin, nowOperatetime);

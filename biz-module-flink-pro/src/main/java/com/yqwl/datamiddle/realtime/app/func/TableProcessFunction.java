@@ -151,7 +151,7 @@ public class TableProcessFunction extends ProcessFunction<JSONObject, JSONObject
         String type = jsonObj.getString("type");
         JSONObject dataJsonObj = jsonObj.getJSONObject("data");
         //如果是使用 Maxwell 的初始化功能，那么 type 类型为 bootstrap-insert,我们这里也标记为 insert，方便后续处理
-        if (type.equals("bootstrap-insert")) {
+        if ("bootstrap-insert".equals(type)) {
             type = "insert";
             jsonObj.put("type", type);
         }

@@ -32,17 +32,17 @@ public class KafkaTopicConst {
     //oracle cdc 统一进入topic
     public static final String CDC_VLMS_UNITE_ORACLE = "cdc_vlms_unite_oracle";
     public static final String CDC_VLMS_UNITE_ORACLE_ALL_0712 = "cdc_vlms_unite_oracle_all_0712";
-    public static final String CDC_VLMS_UNITE_ORACLE_Latest_0804 = "cdc_vlms_unite_oracle_Latest_0804";
+    public static final String CDC_VLMS_UNITE_ORACLE_LATEST_0804 = "cdc_vlms_unite_oracle_Latest_0804";
     public static final String ORACLE_CDC1108 = "oraclecdc1108";
     public static final String ORACLE_CDC1110 = "oraclecdc1110";
     public static final String ORACLE_CDC1108_GROUP = "oraclecdc1108_group";
     public static final String ORACLE_CDC1110_GROUP = "oraclecdc1110_group";
-    public static final String CDC_VLMS_UNITE_ORACLE_Latest_1031 = "cdc_vlms_unite_oracle_Latest_1031";
+    public static final String CDC_VLMS_UNITE_ORACLE_LATEST_1031 = "cdc_vlms_unite_oracle_Latest_1031";
     public static final String CDC_VLMS_UNITE_ORACLE_LCKCS_MDAC12 = "lckcs_mdac12";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP = "cdc_vlms_unite_oracle_group";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP_ALL_0712 = "cdc_vlms_unite_oracle_group_all_0712";
-    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804 = "cdc_vlms_unite_oracle_Latest_0804";
-    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_Latest_1031 = "cdc_vlms_unite_oracle_Latest_1031";
+    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_LATEST_0804 = "cdc_vlms_unite_oracle_Latest_0804";
+    public static final String CDC_VLMS_UNITE_ORACLE_GROUP_LATEST_1031 = "cdc_vlms_unite_oracle_Latest_1031";
     public static final String CDC_VLMS_UNITE_ORACLE_GROUP_LCKCS_MDAC12 = "cdc_vlms_unite_oracle_Latest_1031";
     //source 表sysc07 cdc kafka topic name
     public static final String ODS_VLMS_SPTB02 = "ods_vlms_sptb02";
@@ -115,7 +115,7 @@ public class KafkaTopicConst {
 
     //dwm topic
     public static final String DWM_VLMS_SPTB02 = "dwm_vlms_sptb02";
-    public static final String DWM_VLMS_SPTB02Test = "dwm_vlms_sptb02Test";
+    public static final String DWM_VLMS_SPTB02TEST = "dwm_vlms_sptb02Test";
     public static final String DWM_VLMS_SPTB02_TEST1 = "dwm_vlms_sptb02_test1";
 
     public static final String DWM_VLMS_ONE_ORDER_TO_END ="dwm_vlms_one_order_to_end";

@@ -39,7 +39,7 @@ public class FilterConsumerKafka {
         Long before60daysTime = System.currentTimeMillis()-5184000000L;
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
-        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804, 0);
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ORACLE_CDC1110, 0);
         offsetMap.put(topicPartition, 500L);
 
 
@@ -77,8 +77,8 @@ public class FilterConsumerKafka {
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSourceBuild = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
-                .setTopics(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804)
-                .setGroupId(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_GROUP_Latest_0804)
+                .setTopics(KafkaTopicConst.ORACLE_CDC1110)
+                .setGroupId(KafkaTopicConst.ORACLE_CDC1110)
                 .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1

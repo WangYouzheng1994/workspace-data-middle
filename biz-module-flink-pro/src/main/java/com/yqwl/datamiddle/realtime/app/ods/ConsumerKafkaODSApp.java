@@ -61,7 +61,7 @@ public class ConsumerKafkaODSApp {
         Long before180daysTime = System.currentTimeMillis() - TimeConst.BEFORE_180_DAYS;
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
-        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804, 0);
+        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ORACLE_CDC1110, 0);
         offsetMap.put(topicPartition, 500L);
 
         //====================================stream env配置===============================================//

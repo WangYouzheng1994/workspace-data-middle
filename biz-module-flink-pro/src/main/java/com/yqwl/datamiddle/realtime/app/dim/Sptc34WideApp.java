@@ -55,7 +55,7 @@ public class Sptc34WideApp {
         ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint");
         // 系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
 
 
         Props props = PropertiesUtil.getProps();
@@ -89,11 +89,11 @@ public class Sptc34WideApp {
                 Long aLong = Long.valueOf(tsStr);
                 // 获取数据类型
                 String typeStr = JsonPartUtil.getTypeStr(value);
-                if ( typeStr.equals("insert") ) {
+                if ( "insert".equals(typeStr) ) {
 
                     // 获取当前的时间戳 到毫秒级 并添加到sptc34Wide表中的创建时间
                     sptc34Wide.setWAREHOUSE_CREATETIME(aLong);
-                }else if ( typeStr.equals("update") ) {
+                }else if ( "update".equals(typeStr) ) {
                     // 获取当前的时间戳 到毫秒级  并添加到sptc34Wide表的更新时间中
                     sptc34Wide.setWAREHOUSE_UPDATETIME(aLong);
                 }

@@ -62,7 +62,7 @@ public class DimProvinceWideApp {
         ck.setCheckpointStorage("hdfs://192.168.3.95:8020/demo/cdc/checkpoint/kafka20");
         //系统异常退出或人为 Cancel 掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);*/
-        System.setProperty("HADOOP_USER_NAME", "root");
+        System.setProperty("HADOOP_USER_NAME", "yunding");
 
         Props props = PropertiesUtil.getProps();
 
@@ -106,7 +106,7 @@ public class DimProvinceWideApp {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SYSC07")) {
+                if ("TDS_LJ".equals(jo.getString("database")) && "SYSC07".equals(jo.getString("tableName"))) {
                     Sysc07 after = jo.getObject("after", Sysc07.class);
                     String cdqdm = after.getCDQDM();
                     if (cdqdm != null) {
@@ -122,7 +122,7 @@ public class DimProvinceWideApp {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SYSC08")) {
+                if ("TDS_LJ".equals(jo.getString("database")) && "SYSC08".equals(jo.getString("tableName"))) {
                     return true;
                 }
                 return false;
@@ -134,7 +134,7 @@ public class DimProvinceWideApp {
             @Override
             public boolean filter(String s) throws Exception {
                 JSONObject jo = JSON.parseObject(s);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("MDAC01")) {
+                if ("TDS_LJ".equals(jo.getString("database")) && "MDAC01".equals(jo.getString("tableName"))) {
                     return true;
                 }
                 return false;
