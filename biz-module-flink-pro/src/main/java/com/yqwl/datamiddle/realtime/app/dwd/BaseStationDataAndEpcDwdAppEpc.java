@@ -90,7 +90,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 DwdBaseStationDataEpc dataBsdEpc = JSON.parseObject(after, DwdBaseStationDataEpc.class);
                 //车架号和操作时间不能为空
                 if (StringUtils.isNotBlank(dataBsdEpc.getVIN()) && dataBsdEpc.getOPERATETIME() > 0) {
-                    /**
+                    /*
                      * 得到cp,取前四位,转基地名称:
                      *                        '0431',
                      *                        '长春基地',

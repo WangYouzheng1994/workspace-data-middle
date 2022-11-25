@@ -40,7 +40,7 @@ public class SimpleBaseStationDataSink<T> extends RichSinkFunction<DwdBaseStatio
             if (StringUtils.isNotBlank(data.getVIN())) {
                 StringBuilder sb = new StringBuilder();
                 //=============================================更新dwd_sptb02溯源入库出库时间==============================================//
-                /**
+                /*
                  *  更新 溯源 出库日期
                  * -- 溯源出库时间的逻辑是：
                  *   base_station_data sd

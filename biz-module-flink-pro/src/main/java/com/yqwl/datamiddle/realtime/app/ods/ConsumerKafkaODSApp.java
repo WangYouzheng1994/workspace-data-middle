@@ -180,9 +180,11 @@ public class ConsumerKafkaODSApp {
                 return null;
             }
         }).uid("ConsumerKafkaODSAppJsonStream").name("ConsumerKafkaODSAppJsonStream");
-        // jsonStream.print("json转化map输出:");
-        // 动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
-        // 定义输出到mysql的侧输出流标签
+
+        /*
+         *  动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
+         *  定义输出到mysql的侧输出流标签
+         */
         OutputTag<JSONObject> mysqlTag = new OutputTag<JSONObject>(TableProcess.SINK_TYPE_MYSQL) {
         };
 
@@ -200,7 +202,7 @@ public class ConsumerKafkaODSApp {
                         log.info("kafka序列化");
                     }
 
-                    /**
+                    /*
                      * @param jsonObj 传递给这个生产者的源数据 即flink的流数据
                      * @param timestamp
                      * @return
@@ -233,15 +235,15 @@ public class ConsumerKafkaODSApp {
                 if (CollectionUtils.isNotEmpty(listTotal)) {
                     Map<String, List<JSONObject>> map = new HashMap<>();
                     for (JSONObject element : elements) {
-                        //获取目标表
+                        // 获取目标表
                         String sinkTable = element.getString("sink_table");
                         if (map.containsKey(sinkTable)) {
                             List<JSONObject> list = map.get(sinkTable);
-                            //取出真实数据
+                            // 取出真实数据
                             list.add(JsonPartUtil.getAfterObj(element));
                         } else {
                             List<JSONObject> list = new ArrayList<>();
-                            //取出真实数据
+                            // 取出真实数据
                             list.add(JsonPartUtil.getAfterObj(element));
                             map.put(sinkTable, list);
                         }

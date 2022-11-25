@@ -45,14 +45,14 @@ public class OneOrderToEndDwmAppEPC {
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
         ck.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        //系统异常退出或人为Cancel掉，不删除checkpoint数据
+        // 系统异常退出或人为Cancel掉，不删除checkpoint数据
         ck.setExternalizedCheckpointCleanup(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         System.setProperty("HADOOP_USER_NAME", "yunding");
 
         // 设置checkpoint点二级目录位置
         ck.setCheckpointStorage(PropertiesUtil.getCheckpointStr("oote_dwm_epc"));
         // 设置savepoint点二级目录位置
-        //env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oote_dwm_epc"));
+        //  env.setDefaultSavepointDirectory(PropertiesUtil.getSavePointStr("oote_dwm_epc"));
         log.info("checkpoint设置完成");
 
         //kafka消费源相关参数配置
@@ -64,12 +64,12 @@ public class OneOrderToEndDwmAppEPC {
                 .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppEPCMysqlSource").uid("OneOrderToEndDwmAppEPCMysqlSourceStream").name("OneOrderToEndDwmAppEPCMysqlSourceStream");
 
         //==============================================dwd_base_station_data_epc处理 START====================================================================//
 
-        //3.转实体类 BASE_STATION_DATA_EPC
+        // 3.转实体类 BASE_STATION_DATA_EPC
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpc = mysqlSource.map(new MapFunction<String, DwdBaseStationDataEpc>() {
             @Override
             public DwdBaseStationDataEpc map(String json) throws Exception {
@@ -80,14 +80,14 @@ public class OneOrderToEndDwmAppEPC {
         SingleOutputStreamOperator<DwdBaseStationDataEpc> mapBsdEpcFilterTime = mapBsdEpc.process(new ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>() {
             @Override
             public void processElement(DwdBaseStationDataEpc value, ProcessFunction<DwdBaseStationDataEpc, DwdBaseStationDataEpc>.Context ctx, Collector<DwdBaseStationDataEpc> out) throws Exception {
-                Long cp9_offline_time = value.getCP9_OFFLINE_TIME();
-                if (cp9_offline_time !=null && value.getCP9_OFFLINE_TIME() >= TimeConst.DATE_2020_12_01 && value.getCP9_OFFLINE_TIME() <= TimeConst.DATE_2023_11_28){
+                Long cp9OfflineTime = value.getCP9_OFFLINE_TIME();
+                if (cp9OfflineTime !=null && value.getCP9_OFFLINE_TIME() >= TimeConst.DATE_2020_12_01 && value.getCP9_OFFLINE_TIME() <= TimeConst.DATE_2023_11_28){
                         out.collect(value);
                 }
             }
         }).uid("OneOrderToEndDwmAppEpcFilter2022Time").name("OneOrderToEndDwmAppEpcFilter2022Time");
 
-        //4.插入mysql
+        // 4.插入mysql
         mapBsdEpcFilterTime.addSink(JdbcSink.sink(
 
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, CP9_OFFLINE_TIME, WAREHOUSE_CREATETIME, WAREHOUSE_UPDATETIME )\n" +

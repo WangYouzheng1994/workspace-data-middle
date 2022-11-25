@@ -62,7 +62,7 @@ public class WaybillDwmAppClickhouseOOTD {
                 .port(props.getInt("cdc.mysql.port"))
                 .databaseList(StrUtil.getStrList(props.getStr("cdc.mysql.database.list"), ","))
                 .tableList("data_flink.dwm_vlms_one_order_to_end")
-//                .tableList("data_middle_flink.dwm_vlms_one_order_to_end")
+                // .tableList("data_middle_flink.dwm_vlms_one_order_to_end")
                 .username(props.getStr("cdc.mysql.username"))
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
@@ -71,11 +71,11 @@ public class WaybillDwmAppClickhouseOOTD {
                 .distributionFactorUpper(10.0d)  // 针对cdc的错误算法的更改
                 .serverId("5413-5416")
                 .build();
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "WaybillDwmAppOOTDMysqlSource").uid("WaybillDwmAppOOTDMysqlSource").name("WaybillDwmAppOOTDMysqlSource");
 
 
-        //3.转实体类 BASE_STATION_DATA_EPC
+        // 3.转实体类 BASE_STATION_DATA_EPC
         SingleOutputStreamOperator<DwmOneOrderToEnd> mapBsdEpc = mysqlSource.map(new MapFunction<String, DwmOneOrderToEnd>() {
             @Override
             public DwmOneOrderToEnd map(String kafkaBsdEpcValue) throws Exception {
@@ -84,7 +84,7 @@ public class WaybillDwmAppClickhouseOOTD {
             }
         }).uid("WaybillDwmAppOOTDTnsitionDwmOneOrderToEnd").name("WaybillDwmAppOOTDTnsitionDwmOneOrderToEnd");
         //====================================sink clickhouse===============================================//
-//        组装sql
+        // 组装sql
         StringBuffer sql = new StringBuffer();
         sql.append("insert into ").append(KafkaTopicConst.DWM_VLMS_ONE_ORDER_TO_END).append(" values ").append(StrUtil.getValueSql(DwmOneOrderToEnd.class));
         mapBsdEpc.addSink(ClickHouseUtil.<DwmOneOrderToEnd>getSink(sql.toString())).setParallelism(1).uid("WaybillDwmAppOOTD_Sink-clickhouse").name("WaybillDwmAppOOTD_Sink-clickhouse");

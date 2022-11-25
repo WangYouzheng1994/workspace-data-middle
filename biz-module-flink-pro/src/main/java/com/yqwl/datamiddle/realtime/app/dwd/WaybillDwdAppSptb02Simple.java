@@ -133,7 +133,7 @@ public class WaybillDwdAppSptb02Simple {
                         // 8.处理 基地代码 适配 lc_spec_config
                         String cqwh = sptb02.getCQWH();
                         if (Objects.nonNull(cqwh)) {
-                            /**
+                            /*
                              * 0431、 -> 1  长春基地
                              * 022、  -> 5  天津基地
                              * 027、
@@ -154,7 +154,7 @@ public class WaybillDwdAppSptb02Simple {
                             }
                         }
                         // 9.处理 主机公司代码
-                        /**
+                        /*
                          * 主机公司代码 适配 lc_spec_config
                          *   1  一汽大众
                          *   2  一汽红旗
@@ -193,7 +193,7 @@ public class WaybillDwdAppSptb02Simple {
                             dwdSptb02.setACTUAL_OUT_TIME(sptb02.getDCKRQ());
                         }
                         //========================直接查询sql==================================//
-                        /**
+                        /*
                          *  处理 物理仓库信息 省区代码 市县代码
                          *  inner join sptc34 b on a.vwlckdm = b.vwlckdm
                          *  inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
@@ -208,7 +208,7 @@ public class WaybillDwdAppSptb02Simple {
                                 dwdSptb02.setSTART_CITY_CODE(odsVlmsSptc34.getString("VSXDM"));
                             }
                         }
-                        /**
+                        /*
                          *  处理 经销商到货地 省区代码 市县代码
                          *  inner join mdac32 e on a.cdhddm = e.cdhddm
                          *  inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
@@ -280,7 +280,7 @@ public class WaybillDwdAppSptb02Simple {
                                 //-----------------------------------------------此处处理是否同城字段_End--------------------------------------------------------//
                             }
 
-                        /**
+                        /*
                          *  处理 发车站台 对应的仓库代码 仓库名称
                          *  from sptb02 a
                          *  inner join sptb02d1 b         on a.cjsdbh = b.cjsdbh
@@ -305,7 +305,7 @@ public class WaybillDwdAppSptb02Simple {
                             }
 
                         }
-                        /**
+                        /*
                          *  处理 收车站台 对应的仓库代码 仓库名称
                          *  from sptb02 a
                          *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
@@ -329,7 +329,7 @@ public class WaybillDwdAppSptb02Simple {
                                 }
                             }
                         }
-                        /**
+                        /*
                          *  处理 公路单的对应的物理仓库代码对应的类型
                          *  left join site_warehouse c    on a.vfczt = c.vwlckdm
                          */

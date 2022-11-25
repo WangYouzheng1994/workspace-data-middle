@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OneOrderToEndDwmAppBSD {
     public static void main(String[] args) throws Exception {
-        //1.创建环境  Flink 流式处理环境
+        // 1.创建环境  Flink 流式处理环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
@@ -53,7 +53,7 @@ public class OneOrderToEndDwmAppBSD {
         System.setProperty("HADOOP_USER_NAME", "yunding");
         log.info("checkpoint设置完成");
 
-        //kafka消费源相关参数配置
+        // kafka消费源相关参数配置
         Props props = PropertiesUtil.getProps();
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
                 .setBootstrapServers(props.getStr("kafka.hostname"))
@@ -66,7 +66,7 @@ public class OneOrderToEndDwmAppBSD {
         SingleOutputStreamOperator<String> mysqlSource = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppBSDMysqlSource").uid("OneOrderToEndDwmAppBSDMysqlSourceStream").name("OneOrderToEndDwmAppBSDMysqlSourceStream");
         //==============================================dwd_base_station_data处理 START==========================================================================//
 
-        /**
+        /*
          * 改造思路:
          * 1. 新增扩充dim_vlms_warehouse_rs和dwm_vlms_sptb02表的字段 作为后续判断的依据
          * 2. 根据不同的算子去按条件赋值
@@ -93,26 +93,26 @@ public class OneOrderToEndDwmAppBSD {
         SingleOutputStreamOperator<DwdBaseStationDataBO> mapBsdFilterInWarehouseTypeAndTrafficType = mapBsdFilterTime.process(new ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>() {
             @Override
             public void processElement(DwdBaseStationDataBO dwdBaseStationDataBO, ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>.Context ctx, Collector<DwdBaseStationDataBO> out) throws Exception {
-                String in_warehouse_code = dwdBaseStationDataBO.getIN_WAREHOUSE_CODE();
-                String operate_type = dwdBaseStationDataBO.getOPERATE_TYPE();
+                String inWarehouseCode = dwdBaseStationDataBO.getIN_WAREHOUSE_CODE();
+                String operateType = dwdBaseStationDataBO.getOPERATE_TYPE();
                 String vin = dwdBaseStationDataBO.getVIN();
-                Long sample_u_t_c = dwdBaseStationDataBO.getSAMPLE_U_T_C();
-                if (StringUtils.isNotBlank(in_warehouse_code) && StringUtils.isNotBlank(vin) && sample_u_t_c != null) {
-                    String getWAREHOUSE_TYPEOfDimRsSql = "SELECT WAREHOUSE_TYPE FROM "+ KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS+ " WHERE WAREHOUSE_CODE = '" + in_warehouse_code + "' limit 1 ";
-                    JSONObject wareHouseTypeOfDimRsJson = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, getWAREHOUSE_TYPEOfDimRsSql, in_warehouse_code);
+                Long sampleUTC = dwdBaseStationDataBO.getSAMPLE_U_T_C();
+                if (StringUtils.isNotBlank(inWarehouseCode) && StringUtils.isNotBlank(vin) && sampleUTC != null) {
+                    String getWarehouseTypeOfDimRsSql = "SELECT WAREHOUSE_TYPE FROM "+ KafkaTopicConst.DIM_VLMS_WAREHOUSE_RS+ " WHERE WAREHOUSE_CODE = '" + inWarehouseCode + "' limit 1 ";
+                    JSONObject wareHouseTypeOfDimRsJson = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, getWarehouseTypeOfDimRsSql, inWarehouseCode);
                     // 这里的判断是给后续的两个插入sql的前提  (I: 更新入库日期,入库仓库名称,入库仓库代码,更新更新时间 只需要这一个判断条件)
                     if (wareHouseTypeOfDimRsJson != null) {
-                        String warehouse_type = wareHouseTypeOfDimRsJson.getString("WAREHOUSE_TYPE");
-                        dwdBaseStationDataBO.setWAREHOUSE_TYPEfDimRS(warehouse_type);
+                        String warehouseType = wareHouseTypeOfDimRsJson.getString("WAREHOUSE_TYPE");
+                        dwdBaseStationDataBO.setWAREHOUSE_TYPEfDimRS(warehouseType);
                         // 更新末端配送入库时间的字段赋值的判断前提 II: operate_type=InStock && TRAFFIC_TYPE = 'G' && WAREHOUSE_TYPE = 'T2'
-                        if (StringUtils.equals(operate_type, "InStock")){
-                            String getTRAFFIC_TYPEOfSPTB02SQL = "SELECT TRAFFIC_TYPE FROM "+ KafkaTopicConst.DWM_VLMS_SPTB02 + " WHERE VVIN = '" + vin + "' AND TRAFFIC_TYPE ='G' limit 1 ";
-                            JSONObject trafficTypeOfDimRsJson = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, getTRAFFIC_TYPEOfSPTB02SQL, vin);
+                        if (StringUtils.equals(operateType, "InStock")){
+                            String getWarehouseTypeOfSPTB02SQL = "SELECT TRAFFIC_TYPE FROM "+ KafkaTopicConst.DWM_VLMS_SPTB02 + " WHERE VVIN = '" + vin + "' AND TRAFFIC_TYPE ='G' limit 1 ";
+                            JSONObject trafficTypeOfDimRsJson = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB02D1, getWarehouseTypeOfSPTB02SQL, vin);
                             // 有值就是TRAFFIC_TYPE = 'G',是符合条件的
                             if (trafficTypeOfDimRsJson != null){
                                 // 然后再去dim_vlms_warehouse_rs里面查询是否符合它的条件 反正最后匹配的时候是看一个条件去赋值,只要最后这个有值,就说明前面的条件匹配
-                                String traffic_type = trafficTypeOfDimRsJson.getString("TRAFFIC_TYPE");
-                                dwdBaseStationDataBO.setTRAFFIC_TYPEOfSPTB02(traffic_type);
+                                String trafficType = trafficTypeOfDimRsJson.getString("TRAFFIC_TYPE");
+                                dwdBaseStationDataBO.setTRAFFIC_TYPEOfSPTB02(trafficType);
                             }
                         }
                     }
@@ -125,9 +125,9 @@ public class OneOrderToEndDwmAppBSD {
         SingleOutputStreamOperator<DwdBaseStationDataBO> mapBsdFilterOperateTypeAndShopNo = mapBsdFilterInWarehouseTypeAndTrafficType.process(new ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>() {
             @Override
             public void processElement(DwdBaseStationDataBO dwdBaseStationDataBO, ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>.Context ctx, Collector<DwdBaseStationDataBO> out) throws Exception {
-                String operate_type = dwdBaseStationDataBO.getOPERATE_TYPE();
-                String shop_no = dwdBaseStationDataBO.getSHOP_NO();
-                if (StringUtils.equals(operate_type, "OutStock") && (StringUtils.equals(shop_no, "DZCP901") || StringUtils.equals(shop_no, "DZCP9"))) {
+                String operateType = dwdBaseStationDataBO.getOPERATE_TYPE();
+                String shopNo = dwdBaseStationDataBO.getSHOP_NO();
+                if (StringUtils.equals(operateType, "OutStock") && (StringUtils.equals(shopNo, "DZCP901") || StringUtils.equals(shopNo, "DZCP9"))) {
                         out.collect(dwdBaseStationDataBO);
                 }
             }
@@ -153,21 +153,21 @@ public class OneOrderToEndDwmAppBSD {
                         .build(),
                 PropertiesUtil.getMysqlJDBCConnection())).uid("OneOrderToEndMysqlInsertLeaveFactoryTime").name("OneOrderToEndMysqlInsertLeaveFactoryTime");
 
-        /**
+        /*
          * 由上面那个算子分化出其他的算子公用
          *  I:更新入库日期,入库仓库名称,入库仓库代码,更新更新时间字段所需要的赋值
-         *  * UPDATE dwm_vlms_one_order_to_end e
-         *  * JOIN dim_vlms_warehouse_rs a ON a.WAREHOUSE_CODE = 'JL002'
-         *  * SET
-         *  * e.IN_WAREHOUSE_NAME = '东山站台',
-         *  * e.IN_WAREHOUSE_CODE = 'JL002',
-         *  * e.IN_SITE_TIME = 1656297798000,
-         *  * e.WAREHOUSE_UPDATETIME = 1660198918944
-         *  * WHERE
-         *  * 	e.VIN = 'LFV3A28W0N3351195'
-         *  * 	AND e.LEAVE_FACTORY_TIME < 1656297798000 AND a.WAREHOUSE_TYPE = 'T1' AND ( e.IN_SITE_TIME > 1656297798000
-         *  * 		OR e.IN_SITE_TIME = 0
-         *  * 	);
+         *   UPDATE dwm_vlms_one_order_to_end e
+         *   JOIN dim_vlms_warehouse_rs a ON a.WAREHOUSE_CODE = 'JL002'
+         *   SET
+         *   e.IN_WAREHOUSE_NAME = '东山站台',
+         *   e.IN_WAREHOUSE_CODE = 'JL002',
+         *   e.IN_SITE_TIME = 1656297798000,
+         *   e.WAREHOUSE_UPDATETIME = 1660198918944
+         *   WHERE
+         *   	e.VIN = 'LFV3A28W0N3351195'
+         *   	AND e.LEAVE_FACTORY_TIME < 1656297798000 AND a.WAREHOUSE_TYPE = 'T1' AND ( e.IN_SITE_TIME > 1656297798000
+         *   		OR e.IN_SITE_TIME = 0
+         *   	);
          */
         // 5. 给 I 筛选条件赋值
         SingleOutputStreamOperator<DwdBaseStationDataBO> mapBsdFilterWarehouseType = mapBsdFilterInWarehouseTypeAndTrafficType.process(new ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>() {
@@ -179,6 +179,7 @@ public class OneOrderToEndDwmAppBSD {
                 }
             }
         }).uid("OneOrderToEndDwmAppWarehouseTypeFields").name("OneOrderToEndDwmAppWarehouseTypeFields");
+
         // 5.1: 给 I 插入sql  更新入库日期,入库仓库名称,入库仓库代码,更新更新时间字段
         mapBsdFilterWarehouseType.addSink(JdbcSink.sink(
                 "INSERT INTO dwm_vlms_one_order_to_end (VIN, IN_WAREHOUSE_NAME, IN_WAREHOUSE_CODE, IN_SITE_TIME, WAREHOUSE_UPDATETIME) " +
@@ -210,7 +211,8 @@ public class OneOrderToEndDwmAppBSD {
                         .build(),
                 PropertiesUtil.getMysqlJDBCConnection())).uid("OneOrderToEndMysqlInsertInSiteTime").name("OneOrderToEndMysqlInsertInSiteTime");
 
-        /** II:更新末端配送入库时间的字段赋值
+        /*
+         * II:更新末端配送入库时间的字段赋值
          * UPDATE dwm_vlms_one_order_to_end e
          * JOIN dim_vlms_warehouse_rs a ON a.WAREHOUSE_CODE = 'JL002'
          * JOIN dwm_vlms_sptb02 s ON e.VIN = s.VVIN
@@ -230,10 +232,10 @@ public class OneOrderToEndDwmAppBSD {
         SingleOutputStreamOperator<DwdBaseStationDataBO> mapBsdFilterWarehouseTypeAndTrafficType = mapBsdFilterInWarehouseTypeAndTrafficType.process(new ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>() {
             @Override
             public void processElement(DwdBaseStationDataBO dwdBaseStationDataBO, ProcessFunction<DwdBaseStationDataBO, DwdBaseStationDataBO>.Context ctx, Collector<DwdBaseStationDataBO> out) throws Exception {
-                String warehouse_type = dwdBaseStationDataBO.getWAREHOUSE_TYPE();
-                String traffic_typeOfSPTB02 = dwdBaseStationDataBO.getTRAFFIC_TYPEOfSPTB02();
-                String operate_type = dwdBaseStationDataBO.getOPERATE_TYPE();
-                if (StringUtils.equals(warehouse_type,"T2") && StringUtils.equals(traffic_typeOfSPTB02,"G") && StringUtils.equals(operate_type, "InStock")) {
+                String warehouseType = dwdBaseStationDataBO.getWAREHOUSE_TYPE();
+                String trafficTypeOfSPTB02 = dwdBaseStationDataBO.getTRAFFIC_TYPEOfSPTB02();
+                String operateType = dwdBaseStationDataBO.getOPERATE_TYPE();
+                if (StringUtils.equals(warehouseType,"T2") && StringUtils.equals(trafficTypeOfSPTB02,"G") && StringUtils.equals(operateType, "InStock")) {
                         out.collect(dwdBaseStationDataBO);
                 }
             }
