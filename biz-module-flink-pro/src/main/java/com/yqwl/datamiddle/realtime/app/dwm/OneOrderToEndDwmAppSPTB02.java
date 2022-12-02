@@ -72,7 +72,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                // .startupOptions(StartupOptions.latest())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
@@ -379,8 +379,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
             @Override
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
-                // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
-                if (StringUtils.equals(value.getTraffic_type(), "G") && "T1".equals(value.getHighwayWarehouseType()) && !StringUtils.equals(value.getCQRR(),"分拨中心")) {
+                if (StringUtils.equals(value.getTraffic_type(), "G")  && !StringUtils.equals(value.getCQRR(),"分拨中心")) {
                     out.collect(value);
                 }
             }
@@ -886,7 +885,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterEndG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
             @Override
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
-                if (StringUtils.equals(value.getTraffic_type(), "G") && "T2".equals(value.getHighwayWarehouseType()) || StringUtils.equals(value.getCQRR(),"分拨中心")) {
+                if (StringUtils.equals(value.getTraffic_type(), "G")  && StringUtils.equals(value.getCQRR(),"分拨中心")) {
                     out.collect(value);
                 }
             }
