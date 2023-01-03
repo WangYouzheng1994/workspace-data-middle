@@ -74,7 +74,7 @@ public class TimestampConverter implements CustomConverter<SchemaBuilder, Relati
         this.strTimeFormat = props.getProperty("format.time", DEFAULT_TIME_FORMAT);
         this.simpleTimeFormatter = new SimpleDateFormat(this.strTimeFormat);
 
-        this.debug = props.getProperty("debug", "false").equals("true");
+        this.debug = "true".equals(props.getProperty("debug", "false"));
 
         this.simpleDatetimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         this.simpleTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));

@@ -7,6 +7,7 @@ import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.OotdTransition;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +34,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class OneOrderToEndDwmAppSPTB02 {
-
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
-
     public static void main(String[] args) throws Exception {
         // Configuration configuration1 = new Configuration();
         // flink parallelism=16 savepoint state
@@ -77,7 +72,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                 .password(props.getStr("cdc.mysql.password"))
                 .deserializer(new CustomerDeserialization()) // converts SourceRecord to JSON String
                 .debeziumProperties(properties)
-                .startupOptions(StartupOptions.latest())
+                // .startupOptions(StartupOptions.latest())
                 .distributionFactorUpper(10.0d)   // 针对cdc的错误算法的更改
                 .serverId("5409-5412")
                 .build();
@@ -102,7 +97,7 @@ public class OneOrderToEndDwmAppSPTB02 {
                         flag = false;
                     }
                 }
-                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= START && ddjrq1 <= END && flag) {
+                if (Objects.nonNull(ddjrq1) && ddjrq1 > 0 && ddjrq1 >= TimeConst.DATE_2020_12_01 && ddjrq1 <= TimeConst.DATE_2023_11_28 && flag) {
                     OotdTransition ootdTransition = new OotdTransition();
                     String cjsdbh = dwmSptb02.getCJSDBH();                                  // 结算单编号
                     String vvin = dwmSptb02.getVVIN();                                      // 底盘号
@@ -384,8 +379,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
             @Override
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
-                // 库房类型（基地库：T1  分拨中心库:T2  港口  T3  站台  T4）
-                if (StringUtils.equals(value.getTraffic_type(), "G") && "T1".equals(value.getHighwayWarehouseType()) && !StringUtils.equals(value.getCQRR(),"分拨中心")) {
+                if (StringUtils.equals(value.getTraffic_type(), "G")  && !StringUtils.equals(value.getCQRR(),"分拨中心")) {
                     out.collect(value);
                 }
             }
@@ -891,7 +885,7 @@ public class OneOrderToEndDwmAppSPTB02 {
         SingleOutputStreamOperator<OotdTransition> oneOrderToEndDwmAppSPTB02FilterEndG = oneOrderToEndUpdateProcess.process(new ProcessFunction<OotdTransition, OotdTransition>() {
             @Override
             public void processElement(OotdTransition value, ProcessFunction<OotdTransition, OotdTransition>.Context ctx, Collector<OotdTransition> out) throws Exception {
-                if (StringUtils.equals(value.getTraffic_type(), "G") && "T2".equals(value.getHighwayWarehouseType()) || StringUtils.equals(value.getCQRR(),"分拨中心")) {
+                if (StringUtils.equals(value.getTraffic_type(), "G")  && StringUtils.equals(value.getCQRR(),"分拨中心")) {
                     out.collect(value);
                 }
             }

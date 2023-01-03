@@ -43,6 +43,8 @@ public class BaseStationDataAndEpcDwdAppEpc {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
 
         //====================================checkpoint配置===============================================//
@@ -88,7 +90,7 @@ public class BaseStationDataAndEpcDwdAppEpc {
                 DwdBaseStationDataEpc dataBsdEpc = JSON.parseObject(after, DwdBaseStationDataEpc.class);
                 //车架号和操作时间不能为空
                 if (StringUtils.isNotBlank(dataBsdEpc.getVIN()) && dataBsdEpc.getOPERATETIME() > 0) {
-                    /**
+                    /*
                      * 得到cp,取前四位,转基地名称:
                      *                        '0431',
                      *                        '长春基地',

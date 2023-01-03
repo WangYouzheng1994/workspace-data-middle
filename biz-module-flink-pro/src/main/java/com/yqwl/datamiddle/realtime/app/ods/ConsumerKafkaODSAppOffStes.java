@@ -41,28 +41,32 @@ import org.eclipse.jetty.util.StringUtil;
 
 import javax.annotation.Nullable;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description: 消费kafka下topic名称为:cdc_vlms_unite_oracle中的数据，定时查询 table_process配置表中数据，将数据分流进kafka或mysql中
+ * @Description: 此消费者用于指定Topic的偏移量去消费,消费到指定的偏移量即停止
+ *               消费kafka下topic名称为:cdc_vlms_unite_oracle中的数据，定时查询 table_process配置表中数据，将数据分流进kafka或mysql中
+ *
  * @Author: muqing
  * @Date: 2022/05/06
  * @Version: V1.0
  */
 @Slf4j
-public class ConsumerKafkaODSApp {
+@Deprecated
+public class ConsumerKafkaODSAppOffStes {
 
     public static void main(String[] args) throws Exception {
-        Long before30daysTime  = System.currentTimeMillis() - TimeConst.BEFORE_30_DAYS;
-        Long before60daysTime  = System.currentTimeMillis() - TimeConst.BEFORE_60_DAYS;
-        Long before90daysTime  = System.currentTimeMillis() - TimeConst.BEFORE_90_DAYS;
-        Long before120daysTime = System.currentTimeMillis() - TimeConst.BEFORE_120_DAYS;
-        Long before180daysTime = System.currentTimeMillis() - TimeConst.BEFORE_180_DAYS;
         // 从偏移量表中读取指定的偏移量模式
-        HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
-        TopicPartition topicPartition = new TopicPartition(KafkaTopicConst.ORACLE_CDC1110, 0);
-        offsetMap.put(topicPartition, 500L);
+        HashMap<TopicPartition, Long> offsetMapStart = new HashMap<>();
+        HashMap<TopicPartition, Long> offsetMapEnd = new HashMap<>();
+        TopicPartition topicPartitionStart = new TopicPartition(KafkaTopicConst.ORACLE_CDC1108, 0);
+        TopicPartition topicPartitionEnd = new TopicPartition(KafkaTopicConst.ORACLE_CDC1108, 0);
+        offsetMapStart.put(topicPartitionStart, 41110L);
+        offsetMapEnd.put(topicPartitionEnd, 77630L);
 
         //====================================stream env配置===============================================//
         // Flink 流式处理环境
@@ -102,10 +106,9 @@ public class ConsumerKafkaODSApp {
                 .setBootstrapServers(props.getStr("kafka.hostname"))
                 .setTopics(KafkaTopicConst.ORACLE_CDC1108)
                 .setGroupId(KafkaTopicConst.ORACLE_CDC1108_GROUP)
-                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
-                // .setStartingOffsets(OffsetsInitializer.offsets(offsetMap)) // 指定起始偏移量 60 6-1
-                // .setBounded(OffsetsInitializer.offsets(offsetMap)) // 终止 60 6-1
+                .setStartingOffsets(OffsetsInitializer.offsets(offsetMapStart)) // 指定起始偏移量 60 6-1
+                .setBounded(OffsetsInitializer.offsets(offsetMapEnd))           // 终止 60 6-1
                 .build();
         // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> jsonDataStr = env.fromSource(kafkaSourceBuild, WatermarkStrategy.noWatermarks(), "kafka-consumer")
@@ -118,73 +121,12 @@ public class ConsumerKafkaODSApp {
         DataStream<JSONObject> jsonStream = jsonDataStr.map(new MapFunction<String, JSONObject>() {
             @Override
             public JSONObject map(String json) throws Exception {
-                JSONObject jsonObj = JSON.parseObject(json);
-                // 获取cdc进入kafka的时间
-                String tsStr = JsonPartUtil.getTsStr(jsonObj);
-                String tableName = JsonPartUtil.getTableNameStr(jsonObj);
-                if (StringUtil.isNotBlank(tableName)) {
-                    // 将表名置为小写
-                    String lowerTableName = StringUtils.toRootLowerCase(tableName);
-                    // 将SPTB02、SPTB01C、BASE_STATION_DATA、BASE_STATION_DATE_EPC变为只抽取最近一个月的数据
-                    // 1.先开始筛选SPTB02表的数据
-                    if (StringUtils.equals("sptb02", lowerTableName)){
-                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
-                        if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
-                                return jsonObj;
-                            }else {
-                                return null;
-                            }
-                        }
-                    }
-                    // 2.筛选SPTB01C表的数据
-                    if (StringUtils.equals("sptb01c", lowerTableName)){
-                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("DDJRQ");
-                        if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
-                                return jsonObj;
-                            }else {
-                                return null;
-                            }
-                        }
-                    }
-                    // 3.筛选Bsd的数据
-                    if (StringUtils.equals("base_station_data", lowerTableName)){
-                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("SAMPLE_U_T_C");
-                        if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
-                                return jsonObj;
-                            }else {
-                                return null;
-                            }
-                        }
-                    }
-                    // 4.筛选EPC的数据
-                    if (StringUtils.equals("base_station_data_epc", lowerTableName)){
-                        String ddjrq = JsonPartUtil.getAfterObj(jsonObj).getString("OPERATETIME");
-                        if (ddjrq !=null){
-                            if (Long.parseLong(ddjrq) >= before120daysTime){
-                                return jsonObj;
-                            }else {
-                                return null;
-                            }
-                        }
-                    }
-                    // 获取after数据
-                    JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                    afterObj.put("WAREHOUSE_CREATETIME", tsStr);
-                    afterObj.put("WAREHOUSE_UPDATETIME", tsStr);
-                    jsonObj.put("after", afterObj);
-                    return jsonObj;
-                }
-                return null;
+                return JSON.parseObject(json);
             }
         }).uid("ConsumerKafkaODSAppJsonStream").name("ConsumerKafkaODSAppJsonStream");
-
-        /*
-         *  动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
-         *  定义输出到mysql的侧输出流标签
-         */
+        // jsonStream.print("json转化map输出:");
+        // 动态分流事实表放到主流，写回到kafka的DWD层；如果维度表不用处理通过侧输出流，写入到mysql
+        // 定义输出到mysql的侧输出流标签
         OutputTag<JSONObject> mysqlTag = new OutputTag<JSONObject>(TableProcess.SINK_TYPE_MYSQL) {
         };
 
@@ -202,7 +144,7 @@ public class ConsumerKafkaODSApp {
                         log.info("kafka序列化");
                     }
 
-                    /*
+                    /**
                      * @param jsonObj 传递给这个生产者的源数据 即flink的流数据
                      * @param timestamp
                      * @return
@@ -235,15 +177,15 @@ public class ConsumerKafkaODSApp {
                 if (CollectionUtils.isNotEmpty(listTotal)) {
                     Map<String, List<JSONObject>> map = new HashMap<>();
                     for (JSONObject element : elements) {
-                        // 获取目标表
+                        //获取目标表
                         String sinkTable = element.getString("sink_table");
                         if (map.containsKey(sinkTable)) {
                             List<JSONObject> list = map.get(sinkTable);
-                            // 取出真实数据
+                            //取出真实数据
                             list.add(JsonPartUtil.getAfterObj(element));
                         } else {
                             List<JSONObject> list = new ArrayList<>();
-                            // 取出真实数据
+                            //取出真实数据
                             list.add(JsonPartUtil.getAfterObj(element));
                             map.put(sinkTable, list);
                         }

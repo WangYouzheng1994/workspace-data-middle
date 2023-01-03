@@ -69,7 +69,7 @@ public class DimSink extends RichSinkFunction<JSONObject> {
 
 
             // 如果当前做的是更新操作，需要将Redis中缓存的数据清除掉
-            if (jsonObj.getString("type").equals("update")) {
+            if ("update".equals(jsonObj.getString("type"))) {
                 DimUtil.deleteCached(tableName, dataJsonObj.getString("id"));
             }
         }

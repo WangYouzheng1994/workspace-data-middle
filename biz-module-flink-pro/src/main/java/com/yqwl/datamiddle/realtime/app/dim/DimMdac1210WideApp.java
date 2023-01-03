@@ -219,7 +219,7 @@ public class DimMdac1210WideApp {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("SITE_WAREHOUSE")) {
+                if ("TDS_LJ".equals(jo.getString("database")) && "SITE_WAREHOUSE".equals(jo.getString("tableName"))) {
                     SiteWarehouse after = jo.getObject("after", SiteWarehouse.class);
                     String vwlckdm = after.getVWLCKDM();
                     if (vwlckdm != null && StringUtils.equals("CONTRAST", after.getTYPE())) {
@@ -235,7 +235,7 @@ public class DimMdac1210WideApp {
             @Override
             public boolean filter(String mysqlDataStream) throws Exception {
                 JSONObject jo = JSON.parseObject(mysqlDataStream);
-                if (jo.getString("database").equals("TDS_LJ") && jo.getString("tableName").equals("RFID_WAREHOUSE")) {
+                if ("TDS_LJ".equals(jo.getString("database")) && "RFID_WAREHOUSE".equals(jo.getString("tableName"))) {
                     RfidWarehouse after = jo.getObject("after", RfidWarehouse.class);
                     Integer id=  after.getID();
                     if (id != null) {

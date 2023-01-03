@@ -8,6 +8,7 @@ import com.yqwl.datamiddle.realtime.bean.DwdSptb02;
 import com.yqwl.datamiddle.realtime.bean.Sptb02;
 import com.yqwl.datamiddle.realtime.beanmapper.Sptb02Mapper;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.JsonPartUtil;
 import com.yqwl.datamiddle.realtime.util.KafkaUtil;
 import com.yqwl.datamiddle.realtime.util.MysqlUtil;
@@ -41,10 +42,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class WaybillDwdAppSptb02Simple {
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
@@ -55,6 +52,8 @@ public class WaybillDwdAppSptb02Simple {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
 
         // ====================================checkpoint配置===============================================//
@@ -96,7 +95,7 @@ public class WaybillDwdAppSptb02Simple {
                 String cjsdbh = sptb02.getCJSDBH();
                 if (StringUtils.isNotBlank(cjsdbh)) {
                     Long ddjrq = sptb02.getDDJRQ();
-                    if (ddjrq >= START && ddjrq <= END) {
+                    if (ddjrq >= TimeConst.DATE_2020_12_01 && ddjrq <= TimeConst.DATE_2023_11_28) {
                         // 处理实体类 将数据copy到dwdSptb02
                         DwdSptb02 dwdSptb02 = Sptb02Mapper.INSTANCT.conver(sptb02);
                         //  2.   将 dwd->dwmsptb02是否为同城的判断逻辑提在这里
@@ -134,7 +133,7 @@ public class WaybillDwdAppSptb02Simple {
                         // 8.处理 基地代码 适配 lc_spec_config
                         String cqwh = sptb02.getCQWH();
                         if (Objects.nonNull(cqwh)) {
-                            /**
+                            /*
                              * 0431、 -> 1  长春基地
                              * 022、  -> 5  天津基地
                              * 027、
@@ -155,7 +154,7 @@ public class WaybillDwdAppSptb02Simple {
                             }
                         }
                         // 9.处理 主机公司代码
-                        /**
+                        /*
                          * 主机公司代码 适配 lc_spec_config
                          *   1  一汽大众
                          *   2  一汽红旗
@@ -194,7 +193,7 @@ public class WaybillDwdAppSptb02Simple {
                             dwdSptb02.setACTUAL_OUT_TIME(sptb02.getDCKRQ());
                         }
                         //========================直接查询sql==================================//
-                        /**
+                        /*
                          *  处理 物理仓库信息 省区代码 市县代码
                          *  inner join sptc34 b on a.vwlckdm = b.vwlckdm
                          *  inner join v_sys_sysc07sysc08 v1 on b.vsqdm = v1.csqdm and b.vsxdm = v1.csxdm
@@ -209,7 +208,7 @@ public class WaybillDwdAppSptb02Simple {
                                 dwdSptb02.setSTART_CITY_CODE(odsVlmsSptc34.getString("VSXDM"));
                             }
                         }
-                        /**
+                        /*
                          *  处理 经销商到货地 省区代码 市县代码
                          *  inner join mdac32 e on a.cdhddm = e.cdhddm
                          *  inner join v_sys_sysc07sysc08 v2 on e.csqdm = v2.csqdm and e.csxdm = v2.csxdm
@@ -230,27 +229,27 @@ public class WaybillDwdAppSptb02Simple {
                             if (StringUtils.isNotEmpty(vysfs)) {
                                 // 1.处理 运输方式 ('J','TD','SD','G')='G'   (''L1'','T') ='T'    ('S') ='S'
                                 // ('J','TD','SD','G')='G'
-                                if (vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) {
+                                if ("J".equals(vysfs) || "TD".equals(vysfs) || "SD".equals(vysfs) || "G".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("G");
                                     // 运输方式 适配 lc_spec_config
                                     dwdSptb02.setTRANS_MODE_CODE("1");
                                 }
                                 // (''L1'','T') ='T'
-                                if (vysfs.equals("L1") || vysfs.equals("T")) {
+                                if ("L1".equals(vysfs) || "T".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("T");
                                     dwdSptb02.setTRANS_MODE_CODE("2");
                                 }
                                 // ('S') ='S'
-                                if (vysfs.equals("S")) {
+                                if ("S".equals(vysfs)) {
                                     dwdSptb02.setTRAFFIC_TYPE("S");
                                     dwdSptb02.setTRANS_MODE_CODE("3");
                                 }
                                 // 2.处理 起运时间
                                 // 公路取sptb02.dtvscfsj，铁水取sptb02取DSJCFSJ(实际离长时间)的值，实际起运时间， 实际出发时间
-                                if ((vysfs.equals("J") || vysfs.equals("TD") || vysfs.equals("SD") || vysfs.equals("G")) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
+                                if (("J".equals(vysfs) || "TD".equals(vysfs) || "SD".equals(vysfs) || "G".equals(vysfs)) && Objects.nonNull(sptb02.getDTVSCFSJ())) {
                                     dwdSptb02.setSHIPMENT_TIME(sptb02.getDTVSCFSJ());
                                 }
-                                if ((vysfs.equals("L1") || vysfs.equals("T") || vysfs.equals("S")) && Objects.nonNull(sptb02.getDSJCFSJ())) {
+                                if (("L1".equals(vysfs) || "T".equals(vysfs) || "S".equals(vysfs)) && Objects.nonNull(sptb02.getDSJCFSJ())) {
                                     dwdSptb02.setSHIPMENT_TIME(sptb02.getDSJCFSJ());
                                 }
 
@@ -281,7 +280,7 @@ public class WaybillDwdAppSptb02Simple {
                                 //-----------------------------------------------此处处理是否同城字段_End--------------------------------------------------------//
                             }
 
-                        /**
+                        /*
                          *  处理 发车站台 对应的仓库代码 仓库名称
                          *  from sptb02 a
                          *  inner join sptb02d1 b         on a.cjsdbh = b.cjsdbh
@@ -306,7 +305,7 @@ public class WaybillDwdAppSptb02Simple {
                             }
 
                         }
-                        /**
+                        /*
                          *  处理 收车站台 对应的仓库代码 仓库名称
                          *  from sptb02 a
                          *  inner join sptb02d1 b    on a.cjsdbh = b.cjsdbh
@@ -330,7 +329,7 @@ public class WaybillDwdAppSptb02Simple {
                                 }
                             }
                         }
-                        /**
+                        /*
                          *  处理 公路单的对应的物理仓库代码对应的类型
                          *  left join site_warehouse c    on a.vfczt = c.vwlckdm
                          */

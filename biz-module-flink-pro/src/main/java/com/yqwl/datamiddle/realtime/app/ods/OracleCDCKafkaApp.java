@@ -135,8 +135,8 @@ public class OracleCDCKafkaApp {
         //获取kafka生产者
         FlinkKafkaProducer<String> sinkKafka = KafkaUtil.getKafkaProductBySchema(
                 props.getStr("kafka.hostname"),
-                KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804,
-                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.CDC_VLMS_UNITE_ORACLE_Latest_0804));
+                KafkaTopicConst.ORACLE_CDC1110,
+                KafkaUtil.getKafkaSerializationSchema(KafkaTopicConst.ORACLE_CDC1110));
 
         // 输出到kafka
         oracleSourceStream.addSink(sinkKafka).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");

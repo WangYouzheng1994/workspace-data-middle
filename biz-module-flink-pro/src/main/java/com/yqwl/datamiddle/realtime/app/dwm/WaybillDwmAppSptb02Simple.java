@@ -11,6 +11,7 @@ import com.yqwl.datamiddle.realtime.app.func.JdbcSink;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02;
 import com.yqwl.datamiddle.realtime.bean.DwmSptb02No8TimeFields;
 import com.yqwl.datamiddle.realtime.common.KafkaTopicConst;
+import com.yqwl.datamiddle.realtime.common.TimeConst;
 import com.yqwl.datamiddle.realtime.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,16 +38,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: 消费mysql的 dwd_vlms_sptb02的数据，异步查询维表，拓宽新的字段成 dwm_vlms_sptb02表
- * @Author: muqing
+ * @Author: muqing&XiaoFeng
  * @Date: 2022/05/06
- * @Version: V1.0
+ * @Version: V1.1
  */
 @Slf4j
 public class WaybillDwmAppSptb02Simple {
-    //2022-01-01 00:00:00
-    private static final long START = 1640966400000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
     public static void main(String[] args) throws Exception {
         // 从偏移量表中读取指定的偏移量模式
         HashMap<TopicPartition, Long> offsetMap = new HashMap<>();
@@ -56,6 +53,8 @@ public class WaybillDwmAppSptb02Simple {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
@@ -92,18 +91,18 @@ public class WaybillDwmAppSptb02Simple {
                 .distributionFactorUpper(10.0d)   //针对cdc的错误算法的更改
                 .build();
 
-        //1.将mysql中的源数据转化成 DataStream
+        // 1.将mysql中的源数据转化成 DataStream
         SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "OneOrderToEndDwmAppSPTB02MysqlSource").uid("OneOrderToEndDwmAppSPTB02MysqlSourceStream").name("OneOrderToEndDwmAppSPTB02MysqlSourceStream");
 
         SingleOutputStreamOperator<DwmSptb02No8TimeFields> dwmSptb02Process = mysqlSourceStream.process(new ProcessFunction<String, DwmSptb02No8TimeFields>() {
             @Override
             public void processElement(String value, Context ctx, Collector<DwmSptb02No8TimeFields> out) throws Exception {
-                //获取真实数据
+                // 获取真实数据
                 DwmSptb02No8TimeFields dwmSptb02 = JsonPartUtil.getAfterObj(value, DwmSptb02No8TimeFields.class);
                 // DwmSptb02No8TimeFields dwmSptb02 = JSON.parseObject(value, DwmSptb02No8TimeFields.class);
                 String cjsdbhSource = dwmSptb02.getCJSDBH();
                 Long ddjrq = dwmSptb02.getDDJRQ();
-                if (ddjrq != null && ddjrq >= START && ddjrq <= END) {
+                if (ddjrq != null && ddjrq >= TimeConst.DATE_2020_12_01 && ddjrq <= TimeConst.DATE_2023_11_28) {
                 //------------------------------------增加排除vvin码的选择---------------------------------------------//
                 // 按照sptb02的cjsdbh去sptb02d1查vin码
                 if (StringUtils.isNotBlank(cjsdbhSource) ) {
@@ -124,7 +123,7 @@ public class WaybillDwmAppSptb02Simple {
                             String vehicle_code = sptb02d1.getString("CCPDM");
                             dwmSptb02.setVEHICLE_CODE(vehicle_code);
                             if (StringUtils.isNotBlank(vehicle_code)) {
-                                /**
+                                /*
                                  * 1.按照车型代码获取车型名称
                                  * 按照车型代码去关联mdac12 获得 CCXDL
                                  *  SELECT CCXDL FROM ods_vlms_mdac12 WHERE CCPDM = '4F80NL 4Z4ZMC 1909';
@@ -135,7 +134,7 @@ public class WaybillDwmAppSptb02Simple {
                                     dwmSptb02.setVEHICLE_NAME(mdac12.getString("VCPMC"));
                                     dwmSptb02.setCCXDL(mdac12.getString("CCXDL"));
                                 }
-                                /**
+                                /*
                                  * select b.vvin,d.vppsm
                                  * from sptb02 a
                                  * inner join sptb02d1 b on a.cjsdbh=b.cjsdbh
@@ -156,16 +155,14 @@ public class WaybillDwmAppSptb02Simple {
 
 
 
-                        /**
-                         //理论起运时间 和 理论出库时间
-                         //关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
-                         // 获取车架号 VVIN 从mysql中获取
+                        /*
+                         * 理论起运时间 和 理论出库时间
+                         * 关联ods_vlms_lc_spec_config 获取 STANDARD_HOURS 标准时长
+                         * 获取车架号 VVIN 从mysql中获取
                          * 查询 ods_vlms_lc_spec_config
                          * 过滤条件：
                          * 主机公司代码 CZJGSDM
-                         *
                          * BASE_CODE(转换保存代码)  ->   CQWH 区位号(基地代码)
-                         *
                          * TRANS_MODE_CODE       -> 运输方式
                          */
                         String hostComCode = dwmSptb02.getHOST_COM_CODE();
@@ -173,10 +170,10 @@ public class WaybillDwmAppSptb02Simple {
                         String transModeCode = dwmSptb02.getTRANS_MODE_CODE();
                         log.info("theoryShipmentTimeDS阶段获取到的查询条件值:{}, {}, {}", hostComCode, baseCode, transModeCode);
                         if (StringUtils.isNotBlank(hostComCode) && StringUtils.isNotBlank(baseCode) && StringUtils.isNotBlank(transModeCode)) {
-                            //SPEC_CODE 指标代码 0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
+                            // SPEC_CODE 指标代码 0：倒运及时率 1：计划指派及时率 2：出库及时率 3：运输指派及时率 4：运输商起运及时率 5：运输商监控到货及时率 6：运输商核实到货及时率
                             String shipmentSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
                                     "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '4' limit 1 ";
-                            //2022-09-19 新增--理论出库时间
+                            // 2022-09-19 新增--理论出库时间
                             String outSpecConfigSql = "select STANDARD_HOURS, START_CAL_NODE_CODE from " + KafkaTopicConst.ODS_VLMS_LC_SPEC_CONFIG + " where " +
                                     "HOST_COM_CODE = '" + hostComCode + "' and BASE_CODE = '" + baseCode + "' and TRANS_MODE_CODE = '" + transModeCode + "' AND STATUS = '1' AND SPEC_CODE = '2' limit 1 ";
 
@@ -190,7 +187,7 @@ public class WaybillDwmAppSptb02Simple {
                                 String hours = specConfig.getString("STANDARD_HOURS");
                                 //获取前置节点代码
                                 String nodeCode = specConfig.getString("START_CAL_NODE_CODE").trim();
-                                /**
+                                /*
                                  * DZJDJRQ 主机厂计划下达时间       公路
                                  * DCKRQ    出库时间              铁路
                                  * SYRKSJ   溯源系统入港扫描时间    水运
@@ -205,8 +202,8 @@ public class WaybillDwmAppSptb02Simple {
                                 if (outSiteTime != null) {
                                     Date outSiteDate = new Date(outSiteTime);
                                     // 格式化时间
-                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                    String formatDate = formatter.format(outSiteDate);
+                                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                                    String formatDate = formatter.format(outSiteDate) + " 23:59:59";
                                     DateTime parse = DateUtil.parse(formatDate);
                                     DateTime newStepTime = DateUtil.offsetHour(parse, Integer.parseInt(hours));
                                     dwmSptb02.setTHEORY_SHIPMENT_TIME(newStepTime.getTime());
@@ -220,7 +217,7 @@ public class WaybillDwmAppSptb02Simple {
                                 String hours = outSpecConfig.getString("STANDARD_HOURS");
                                 // 获取前置节点代码
                                 String nodeCode = outSpecConfig.getString("START_CAL_NODE_CODE").trim();
-                                /**
+                                /*
                                  * DZJDJRQ     主机厂计划下达时间       一汽大众
                                  * DYSSZPSJ    运输商指派时间       其他主机厂
                                  */
@@ -243,7 +240,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理主机公司名称
                          * 关联sptc61 c1 on a.CZJGSDM = c1.cid，取c1.cjc
                          */
@@ -257,7 +254,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理发车基地名称
                          * 关联sptc62 c2 on a.cqwh = c2.cid，取c2.cname
                          */
@@ -272,7 +269,7 @@ public class WaybillDwmAppSptb02Simple {
                         }
 
 
-                        /**
+                        /*
                          * 处理发运仓库名称
                          * 关联sptc34 b on a.vwlckdm = b.vwlckdm， 取b.vwlckmc
                          */
@@ -286,7 +283,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理收发车站台
                          */
                         String sptb02VSCZT = dwmSptb02.getVSCZT();
@@ -306,7 +303,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理 运输商名称
                          * nvl(y.vcydjc,y.vcydmc) 运输商,
                          * inner join mdac52 y on a.cyssdm = y.ccyddm
@@ -325,7 +322,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理经销商名称
                          * nvl(j.vjxsjc,j.vjxsmc) vscdwmc
                          * left join mdac22 j on a.vdwdm = j.cjxsdm
@@ -343,7 +340,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 处理 起货地 物理仓库代码  省区 县区名称
                          * 关联合并后的维表 dim_vlms_provinces
                          *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
@@ -356,8 +353,11 @@ public class WaybillDwmAppSptb02Simple {
                         String vysfs = dwmSptb02.getVYSFS();
                         log.info("provincesSptc34DS阶段异步查询获取的查询省编码值:{}, 市县编码值:{}", startProvinceCode, startCityCode);
                         if (StringUtils.equalsAny(vysfs,"SD","TD") && StringUtils.isNotBlank(vsczt)){
-                            // 新增SD,TD线路的始发地城市 修改为按照 收车站台去取值 "也就是说 TD，SD运输方式的计划 得用 vsczt 去匹配始发城市" -白 10月10日 11:48
-                            // 注:SD,TD无始发省区名称
+                            /*
+                             *  新增SD,TD线路的始发地城市 修改为按照 收车站台去取值 "也就是说 TD，SD运输方式的计划 得用 vsczt 去匹配始发城市" -白 10月10日 11:48
+                             *  注:SD,TD无始发省区名称
+                             */
+
                                 String sptc34SqlOfSDTD = "select VWLCKMC from " + KafkaTopicConst.ODS_VLMS_SPTC34 + " where VWLCKDM = '" + vsczt + "' limit 1 ";
                                 JSONObject odsVlmsSptc34OfSDTD = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTC34SDTD, sptc34SqlOfSDTD, vsczt);
                                 if (odsVlmsSptc34OfSDTD != null) {
@@ -374,7 +374,8 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /** 发车站台的相关字段赋值
+                        /*
+                         *  发车站台的相关字段赋值
                          *  处理 vfczt的 VFCZT_PROVINCE_CODE  VFCZT_CITY_CODE 给这俩字段赋值
                          *  inner join sptc34 b on a.vwlckdm = b.VFCZT
                          */
@@ -391,7 +392,8 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /** 收车站台的相关字段赋值
+                        /*
+                         *  收车站台的相关字段赋值
                          *  处理 vsczt的 VSCZT_PROVINCE_CODE  VSCZT_CITY_CODE 给这俩字段赋值
                          *  inner join sptc34 b on a.vwlckdm = b.VSCZT
                          */
@@ -407,7 +409,7 @@ public class WaybillDwmAppSptb02Simple {
                                 dwmSptb02.setVSCZT_CITY_CODE(VSCZT_CITY_CODE_34);
                             }
                         }
-                        /**
+                        /*
                          * 处理 到货地  省区 县区名称
                          * 关联合并后的维表 dim_vlms_provinces
                          *   inner join sptc34 b on a.vwlckdm = b.vwlckdm
@@ -428,7 +430,7 @@ public class WaybillDwmAppSptb02Simple {
                                 dwmSptb02.setEND_CITY_NAME(province.getString("vsxmc"));
                             }
 
-                            /**
+                            /*
                              * 铁水的 cdhddm组成的 END_PROVINCE_CODE + END_CITY_CODE 与 其他 I.公路(vwlckdm) II.铁水(vsczt)作比较
                              * 若相等 则为同城 1 否则为异地 2 默认为 0
                              */
@@ -436,16 +438,7 @@ public class WaybillDwmAppSptb02Simple {
                             String traffic_type = dwmSptb02.getTRAFFIC_TYPE();
                             //  获取到货地的省区市县所在地代码 用作和其他公铁水比较
                             String provincesEnd = endProvinceCode + endCityCode;
-/*                             //------------------开始比较: 公 START_PROVINCE_CODE + START_CITY_CODE && traffic_type = 'G' ---------------------------------------------//
-                            if (StringUtils.isNotBlank(startProvinceCode) && StringUtils.isNotBlank(startCityCode) && StringUtils.equals("G", traffic_type)) {
-                                // 公路的省市县代码
-                                String provincesG = startProvinceCode + startCityCode;
-                                if (StringUtils.equals(provincesEnd, provincesG)) {
-                                    dwmSptb02.setTYPE_TC(1);
-                                } else {
-                                    dwmSptb02.setTYPE_TC(2);
-                                }
-                            } */
+
                             //-----------------开始比较: 铁 VSCZT_PROVINCE_CODE + VSCZT_CITY_CODE && traffic_type = 'T' ----------------------------------------------------------//
                             String vsczt_province_code = dwmSptb02.getVSCZT_PROVINCE_CODE();
                             String vsczt_city_code = dwmSptb02.getVSCZT_CITY_CODE();
@@ -470,19 +463,29 @@ public class WaybillDwmAppSptb02Simple {
 
 
                         // ======================= 理论到货时间 ==================================//
-                        // 一般取  sptb02表的DBZDHSJ_DZ
-                        // 佛山水运系统理论到货时间按照以下逻辑单独处理
-                        // update LC_VW_DH_RECORD a set a.dlldhsj_xt = a.dzjdjrq + 2.2 + (select b.nbzwlsj_dz FROM sptb02 b where b.cjsdbh = a.cjsdbh)
-                        // where a.vysfs = 'S' and a.vlj = '佛山基地';
-                        //同城或者公路计划系统理论到货时间按照以下逻辑单独处理
-                        //   update LC_VW_DH_RECORD
-                        //    set  DLLDHSJ_XT = trunc(DLLDHSJ_XT,'dd')+1-1/(24*60*60)
-                        //    WHERE
-                        //    istc = 'YES' OR VYSFS = 'G';
+                        /*
+                         *  一般取  sptb02表的DBZDHSJ_DZ
+                         *  佛山水运系统理论到货时间按照以下逻辑单独处理
+                         *  update LC_VW_DH_RECORD a set a.dlldhsj_xt = a.dzjdjrq + 2.2 + (select b.nbzwlsj_dz FROM sptb02 b where b.cjsdbh = a.cjsdbh)
+                         *  where a.vysfs = 'S' and a.vlj = '佛山基地';
+                         *  同城或者公路计划系统理论到货时间按照以下逻辑单独处理
+                         *    update LC_VW_DH_RECORD
+                         *     set  DLLDHSJ_XT = trunc(DLLDHSJ_XT,'dd')+1-1/(24*60*60)
+                         *     WHERE
+                         *     istc = 'YES' OR VYSFS = 'G';
+                         */
+
                         if (Objects.nonNull(dwmSptb02.getDBZDHSJ_DZ()) && !dwmSptb02.getDBZDHSJ_DZ().equals(0L)){
                             Long theorySiteTime = dwmSptb02.getDBZDHSJ_DZ();
-                            //处理佛山水运
-                            // CQWH : 长春0431  成都028  佛山0757  青岛0532  天津022
+                            // 将日期转为今天的 23:59:59
+                            // todo: 抽出方法类
+                            Date outDate = new Date(theorySiteTime);
+                            // 格式化时间
+                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                            String formatDate = formatter.format(outDate) + " 23:59:59";
+                            DateTime parse = DateUtil.parse(formatDate);
+                            theorySiteTime = parse.getTime();
+                            //处理佛山水运 CQWH : 长春0431  成都028  佛山0757  青岛0532  天津022
                             if ("S".equals(dwmSptb02.getTRAFFIC_TYPE()) && "0757".equals(dwmSptb02.getCQWH())){
                                 String ddjrqSql = "select DDJRQ from " + KafkaTopicConst.ODS_VLMS_SPTB01C +  " where CPCDBH = '" + dwmSptb02.getCPCDBH() + "' limit 1 ";
                                 JSONObject ddjrqConfig = MysqlUtil.querySingle(KafkaTopicConst.ODS_VLMS_SPTB01C + "-ddjrq", ddjrqSql, dwmSptb02.getCPCDBH());
@@ -490,16 +493,6 @@ public class WaybillDwmAppSptb02Simple {
                                     //2.2天 = 190080000 ms
                                     theorySiteTime = Long.parseLong(ddjrqConfig.getString("DDJRQ")) + theorySiteTime + 190080000L;
                                 }
-                            }
-                            //处理同城或者公路计划
-                            if ("G".equals(dwmSptb02.getTRAFFIC_TYPE()) || Integer.valueOf(1).equals(dwmSptb02.getTYPE_TC())){
-                                //将日期转为今天的 23:59:59
-                                Date outDate = new Date(dwmSptb02.getDBZDHSJ_DZ());
-                                // 格式化时间
-                                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                                String formatDate = formatter.format(outDate) + " 23:59:59";
-                                DateTime parse = DateUtil.parse(formatDate);
-                                theorySiteTime = parse.getTime();
                             }
                             dwmSptb02.setTHEORY_SITE_TIME(theorySiteTime);
                         }
@@ -514,7 +507,7 @@ public class WaybillDwmAppSptb02Simple {
                             }
                         }
 
-                        /**
+                        /*
                          * 逻辑处理核实到货时间
                          * 核实到货时间取值比较复杂，具体要参考PKC_FAWL_VW_DH存储过程54-63行的逻辑
                          *  case
@@ -586,10 +579,10 @@ public class WaybillDwmAppSptb02Simple {
                         else if (Objects.nonNull(typeTc) && typeTc == 1 && (dxxdhrq - sdsj < 0)) {
                             dwmSptb02.setACCOUNTING_TIME(DateTimeUtil.getLeastDate(dxxdhrq, dwmSptb02.getDTVSDHSJ()));
                         }
-                        //兜底
-                        else {
-                            dwmSptb02.setACCOUNTING_TIME(currentTime);
-                        }
+                        //兜底  ACCOUNTING_TIME不设置为当前时间
+                        // else {
+                        //     dwmSptb02.setACCOUNTING_TIME(currentTime);
+                        // }
 
                         dwmSptb02.setWAREHOUSE_UPDATETIME(currentTime);
 
@@ -598,13 +591,13 @@ public class WaybillDwmAppSptb02Simple {
                         out.collect(bean);
                     }
                 }
-            }                                                                                                                 // 算子不合并
             }
-        }).setParallelism(1).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process").disableChaining();
+            }
+        }).uid("WaybillDwmAppSptb02SimpleDwmSptb02Process").name("WaybillDwmAppSptb02SimpleDwmSptb02Process");
 
         //====================================sink mysql===============================================//
         String sql = MysqlUtil.getOnDuplicateKeySql(DwmSptb02No8TimeFields.class);
-        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).setParallelism(1).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
+        dwmSptb02Process.addSink(JdbcSink.<DwmSptb02No8TimeFields>getSink(sql)).uid("WaybillDwmAppSptb02Simple_SinkMysql").name("WaybillDwmAppSptb02Simple_SinkMysql");
 
         log.info("将处理完的数据保存到clickhouse中");
         env.execute("Kafka:DwdSptb02->DwmSptb02(mysql & kafka)");

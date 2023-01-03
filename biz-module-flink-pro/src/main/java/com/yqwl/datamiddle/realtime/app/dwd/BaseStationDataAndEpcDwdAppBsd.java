@@ -36,19 +36,14 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class BaseStationDataAndEpcDwdAppBsd {
-    //2021-06-01 00:00:00
-    private static final long START = 1622476800000L;
-    //2022-12-31 23:59:59
-    private static final long END = 1672502399000L;
-    private static final String BASE_STATION_DATA = "BASE_STATION_DATA";
-    private static final String BASE_STATION_DATA_EPC = "BASE_STATION_DATA_EPC";
-
     public static void main(String[] args) throws Exception {
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(10, TimeUnit.SECONDS)));
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
         log.info("初始化流处理环境完成");
 
         //====================================checkpoint配置===============================================//
@@ -77,35 +72,6 @@ public class BaseStationDataAndEpcDwdAppBsd {
 
         // 将kafka中源数据转化成DataStream
         SingleOutputStreamOperator<String> oracleSourceStream = env.fromSource(kafkaSource,WatermarkStrategy.noWatermarks(),"BaseStationDataAndEpcDwdAppBsdods_bsd-kafka").uid("BaseStationDataAndEpcDwdAppBsdoracleSourceStream").name("BaseStationDataAndEpcDwdAppBsdoracleSourceStream");
-        // oracleSourceStream.print("source 输出：");
-        //过滤 大于 2021-06-01 00:00:00的数据
-       /*  SingleOutputStreamOperator<String> dataAndEpcFilter = oracleSourceStream.filter(new FilterFunction<String>() {
-            @Override
-            public boolean filter(String json) throws Exception {
-                //要转换的时间格式
-                JSONObject jsonObj = JSON.parseObject(json);
-                JSONObject afterObj = JsonPartUtil.getAfterObj(jsonObj);
-                String tableNameStr = JsonPartUtil.getTableNameStr(jsonObj);
-
-                if (BASE_STATION_DATA.equals(tableNameStr)) {
-                    //获取上报完成时间
-                    String sample_u_t_c = afterObj.getString("SAMPLE_U_T_C");
-                    if (StringUtils.isNotEmpty(sample_u_t_c)) {
-                        long cutSampleTime = Long.parseLong(sample_u_t_c) / 1000;
-                        if (cutSampleTime >= START && cutSampleTime <= END) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        return false;
-                         }}
-                return true;
-            }
-        }).uid("BaseStationDataAndEpcDwdAppBsddataAndEpcFilter").name("BaseStationDataAndEpcDwdAppBsddataAndEpcFilter");
-       */
-
-
         //vesion1.3 一源到底 kafka->kafka && mysql
         SingleOutputStreamOperator<DwdBaseStationData> dwmProcess = oracleSourceStream.process(new ProcessFunction<String, DwdBaseStationData>() {
             @Override
