@@ -26,6 +26,7 @@ import static org.reflections.Reflections.log;
  * @Date: 2022/9/7 19:48
  * @Version: V1.0
  */
+@Deprecated
 public class FilterConsumerKafka {
     public static void main(String[] args) throws Exception {
         // 1661788800000 2022.8.30 -
