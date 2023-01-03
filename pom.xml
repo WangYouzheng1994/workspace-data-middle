@@ -429,7 +429,7 @@
                 <!--Nacos服务发现地址-->
                 <discovery.server-addr>127.0.0.1:88481</discovery.server-addr>
 				<!-- log4j滚动输出日志位置 -->
-				<rollingFileRoute>/data/opt/jar/logs/rollingFile.log</rollingFileRoute>
+				<rollingFileRoute>/data/opt/jar/cdclogs/rollingFile.log</rollingFileRoute>
             </properties>
         </profile>
     </profiles>
