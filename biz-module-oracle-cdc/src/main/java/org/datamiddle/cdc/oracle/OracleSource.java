@@ -449,7 +449,7 @@ public class OracleSource {
                             this.currentSinkPosition = queueData.getScn();
                             this.rs_id = queueData.getRsId();
                             //写入memcached
-                            Boolean aBoolean = MemcachedUtil.setValue(currentSinkPosition + "" + rs_id, 0, new Date().getTime()+"|"+querydata);
+                            //Boolean aBoolean = MemcachedUtil.setValue(currentSinkPosition + "" + rs_id, 0, new Date().getTime()+"|"+querydata);
                             //log.info("写入memcache成功："+aBoolean);
                            // writeTxt("内容："+queueData,"D://cdc/dd.txt");
 
