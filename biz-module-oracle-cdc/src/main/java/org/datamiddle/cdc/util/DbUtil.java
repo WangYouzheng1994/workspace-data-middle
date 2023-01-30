@@ -326,14 +326,17 @@ public class DbUtil {
      */
     private static DruidDataSource createDruidDataSource() throws SQLException {
         DruidDataSource druidDataSource = new DruidDataSource();
-        //Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
+        // Props props = PropertiesUtil.getProps(PropertiesUtil.ACTIVE_TYPE);
         druidDataSource.setUrl(PropertiesUtil.getPropsStr("mysql.url"));
         druidDataSource.setUsername(PropertiesUtil.getPropsStr("mysql.username"));
         druidDataSource.setPassword(PropertiesUtil.getPropsStr("mysql.password"));
 
         /*----下面的具体配置参数自己根据项目情况进行调整----*/
+        // 连接池最大活跃的连接数
         druidDataSource.setMaxActive(1500);
+        // 初始化连接池时创建的连接数
         druidDataSource.setInitialSize(50);
+        // 连接池最小空闲的连接数
         druidDataSource.setMinIdle(1);
         druidDataSource.setMaxWait(60000);
 
