@@ -39,9 +39,9 @@ import java.util.concurrent.TimeUnit;
 import static org.reflections.Reflections.log;
 
 /**
- * @Description: 用于合并Mdac12与Mdac10的flink任务 与 合并site+site表用作仓库的维表
+ * @Description: 用于合并Mdac12与Mdac10的flink任务 与 合并site+rfid表用作仓库的维表
  * @Author: XiaoFeng
- * @Date: 2022/8/25 16:21
+ * @Date: 2022/11/14 16:21
  * @Version: V2.0
  */
 @Slf4j
