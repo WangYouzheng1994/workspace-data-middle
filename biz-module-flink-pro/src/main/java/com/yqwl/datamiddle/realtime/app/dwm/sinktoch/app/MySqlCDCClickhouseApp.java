@@ -59,6 +59,8 @@ public class MySqlCDCClickhouseApp {
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, org.apache.flink.api.common.time.Time.of(30, TimeUnit.SECONDS)));
         // 设置并行度为1
         env.setParallelism(1);
+        // 算子不合并
+        env.disableOperatorChaining();
 
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
@@ -122,10 +124,10 @@ public class MySqlCDCClickhouseApp {
 
                 if (CollectionUtils.isNotEmpty(valusList)) {
                     out.collect(valusList);
-                    log.info("目前窗口中的数据数量: {}", valusList.size());
+                    log.warn("目前窗口中的数据数量: {}", valusList.size());
                 }
             }
-        }).uid("mysqlCdcToChwindow").name("mysqlCdcToChwindow");
+        }).uid("mysqlCdcToChWindow-10S").name("mysqlCdcToChWindow-10S");
         // windowCollect.print("mysql结果数据输出:");
         // 输出到clickhouse
         // mysqlSourceStream.addSink(new DimBatchSink()).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
