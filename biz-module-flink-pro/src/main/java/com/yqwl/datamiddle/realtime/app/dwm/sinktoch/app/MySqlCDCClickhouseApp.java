@@ -116,6 +116,7 @@ public class MySqlCDCClickhouseApp {
                 ArrayList<String> strings = Lists.newArrayList(values);
                 if (CollectionUtils.isNotEmpty(strings)) {
                     out.collect(strings);
+                    log.warn("20000一次");
                 }
             }
         }).uid("mysqlCdcToClickHouseCountWindow-20000L").name("mysqlCdcToClickHouseCountWindow-20000L");
