@@ -18,6 +18,8 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTime
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class MySqlCDCClickhouseApp {
+    public static Logger LOG = LoggerFactory.getLogger(MySqlCDCClickhouseApp.class);
 
     /**
      * 获取当前上下文环境下 数仓中的分流到clickhouse的表名，用以MySqlCDC抽取。
@@ -108,7 +111,7 @@ public class MySqlCDCClickhouseApp {
 
         // 定义水位线---聚合数据，ch批量写吞吐更高
         // SingleOutputStreamOperator<String> jsonStreamOperator = mysqlSourceStream.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(10L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
+        SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
 
             /**
              * Evaluates the window and outputs none or several elements.
@@ -125,6 +128,7 @@ public class MySqlCDCClickhouseApp {
                 if (CollectionUtils.isNotEmpty(valusList)) {
                     out.collect(valusList);
                     log.warn("目前窗口中的数据数量: {}", valusList.size());
+                    LOG.info("info______________________info_______________________info");
                 }
             }
         }).uid("mysqlCdcToChWindow-10S").name("mysqlCdcToChWindow-10S");
