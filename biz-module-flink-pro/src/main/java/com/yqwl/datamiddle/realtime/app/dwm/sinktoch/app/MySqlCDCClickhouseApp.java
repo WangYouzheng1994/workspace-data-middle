@@ -14,9 +14,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +62,9 @@ public class MySqlCDCClickhouseApp {
         env.setParallelism(1);
         // 算子不合并
         env.disableOperatorChaining();
-
+        // env.setStateBackend(new EmbeddedRocksDBStateBackend());
+        // env.getCheckpointConfig().setCheckpointStorage("file:///checkpoint-dir");
+        // env.getCheckpointConfig().setCheckpointStorage(new FileSystemCheckpointStorage("file:///checkpoint-dir"));
         //====================================checkpoint配置===============================================//
         CheckpointConfig ck = env.getCheckpointConfig();
         ck.setCheckpointInterval(300000);
@@ -109,18 +109,33 @@ public class MySqlCDCClickhouseApp {
         log.info("checkpoint设置完成");
         SingleOutputStreamOperator<String> mysqlSourceStream = env.fromSource(mySqlSource, WatermarkStrategy.forMonotonousTimestamps(), "MySqlCDCClickhouseApp").uid("MySqlCDCClickhouseApp").name("MySqlCDCClickhouseApp");
 
+        // 使用计数窗口去触发 20000一次
+        SingleOutputStreamOperator<List<String>> outputStreamOperator = mysqlSourceStream.countWindowAll(20000L).apply(new AllWindowFunction<String, List<String>, GlobalWindow>() {
+            @Override
+            public void apply(GlobalWindow window, Iterable<String> values, Collector<List<String>> out) throws Exception {
+                ArrayList<String> strings = Lists.newArrayList(values);
+                if (CollectionUtils.isNotEmpty(strings)) {
+                    out.collect(strings);
+                }
+            }
+        }).uid("mysqlCdcToClickHouseCountWindow-20000L").name("mysqlCdcToClickHouseCountWindow-20000L");
+
+
+
+
+
         // 定义水位线---聚合数据，ch批量写吞吐更高
         // SingleOutputStreamOperator<String> jsonStreamOperator = mysqlSourceStream.assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
-        SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
+/*         SingleOutputStreamOperator<List<String>> windowCollect = mysqlSourceStream.windowAll(TumblingProcessingTimeWindows.of(Time.seconds(5L))).apply(new AllWindowFunction<String, List<String>, TimeWindow>() {
 
-            /**
+             *//**
              * Evaluates the window and outputs none or several elements.
              *
              * @param window The window that is being evaluated.
              * @param values The elements in the window being evaluated.
              * @param out    A collector for emitting elements.
              * @throws Exception The function may throw exceptions to fail the program and trigger recovery.
-             */
+             *//*
             @Override
             public void apply(TimeWindow window, Iterable<String> values, Collector<List<String>> out) throws Exception {
                 List<String> valusList = Lists.newArrayList(values);
@@ -131,11 +146,11 @@ public class MySqlCDCClickhouseApp {
                     LOG.info("info______________________info_______________________info");
                 }
             }
-        }).uid("mysqlCdcToChWindow-10S").name("mysqlCdcToChWindow-10S");
+        }).uid("mysqlCdcToChWindow-10S").name("mysqlCdcToChWindow-10S"); */
         // windowCollect.print("mysql结果数据输出:");
         // 输出到clickhouse
         // mysqlSourceStream.addSink(new DimBatchSink()).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
-        windowCollect.addSink(new MySqlDynamicCHSink());
+        outputStreamOperator.addSink(new MySqlDynamicCHSink()).uid("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle").name("OracleCDCKafkaAppSink-Kafka-cdc_vlms_unite_oracle");
         log.info("add sink kafka设置完成");
         env.execute("cdc:数仓自身的mysql到clickhouse");
         log.info("oracle-cdc-kafka job开始执行");
