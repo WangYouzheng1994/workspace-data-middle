@@ -135,10 +135,10 @@ public class MySqlDynamicCHSink extends RichSinkFunction<List<String>> {
      * @return
      */
     private List<Object> getValueListToBean(JSONObject afterData, Class clzz) {
-        log.info("展示: {}",afterData);
+        // log.info("展示: {}",afterData);
         String name = clzz.getName();
         Field[] declaredFields = clzz.getDeclaredFields();
-        log.info("展示:{}",name);
+        // log.info("展示:{}",name);
         List<Object> newList = new ArrayList<>();
             Object objBean = JSONObject.parseObject(afterData.toString(), clzz);
             for (Field declaredField : declaredFields) {
