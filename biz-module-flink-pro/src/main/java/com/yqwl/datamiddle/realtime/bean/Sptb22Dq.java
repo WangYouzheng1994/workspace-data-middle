@@ -1,5 +1,6 @@
 package com.yqwl.datamiddle.realtime.bean;
 
+import com.yqwl.datamiddle.realtime.enums.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,9 +16,10 @@ import java.math.BigDecimal;
  * @since 2022-05-18
  */
 @Data
+@TableName("ods_vlms_sptb22_dq")
 @EqualsAndHashCode(callSuper = false)
 public class Sptb22Dq implements Serializable {
-    private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 1L;
 
     private Integer ID;
 
